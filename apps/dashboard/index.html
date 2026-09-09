@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Brayano AI — Centre de pilotage</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div id="login-screen" class="auth-screen">
+      <div class="auth-card">
+        <div class="auth-brand">brayano<span class="brand-accent">.</span></div>
+        <p id="auth-title" class="auth-subtitle">Connexion à l'espace de pilotage</p>
+
+        <form id="login-form" class="auth-form" method="post" action="javascript:void(0)">
+          <label>
+            <span>Adresse email</span>
+            <input id="login-email" type="email" placeholder="admin@brayano.ai" required />
+          </label>
+          <label>
+            <span>Mot de passe</span>
+            <input id="login-password" type="password" placeholder="••••••••" required />
+          </label>
+          <button type="submit" class="primary auth-submit">Se connecter</button>
+        </form>
+
+        <form id="register-form" class="auth-form hidden" method="post" action="javascript:void(0)">
+          <label>
+            <span>Nom complet</span>
+            <input id="register-name" type="text" placeholder="Jean Dupont" required />
+          </label>
+          <label>
+            <span>Nom de l'entreprise</span>
+            <input id="register-company" type="text" placeholder="Mon entreprise" required />
+          </label>
+          <label>
+            <span>Adresse email</span>
+            <input id="register-email" type="email" placeholder="jean@entreprise.fr" required />
+          </label>
+          <label>
+            <span>Mot de passe</span>
+            <input id="register-password" type="password" placeholder="Minimum 8 caractères" required minlength="8" />
+          </label>
+          <button type="submit" class="primary auth-submit">Créer mon espace</button>
+        </form>
+
+        <p class="auth-hint">
+          <span id="auth-mode-hint">Identifiants par défaut : admin@brayano.ai / brayano123</span>
+        </p>
+        <button id="toggle-auth-mode" type="button" class="text-button">Créer un compte</button>
+      </div>
+    </div>
+
+    <div class="app-shell hidden">
+      <aside class="sidebar">
+        <a class="brand" href="#">
+          <span class="brand-mark">✦</span>
+          <span>brayano<span class="brand-accent">.</span></span>
+        </a>
+        <div class="workspace-label">ESPACE DE TRAVAIL</div>
+        <label class="org-picker">
+          <span id="org-initial">B</span>
+          <select id="org-select" aria-label="Choisir une entreprise"></select>
+          <span class="chevron">⌄</span>
+        </label>
+        <nav class="nav">
+          <button class="nav-item active" data-view="overview"><span>⌂</span> Vue d'ensemble</button>
+          <button class="nav-item" data-view="inbox"><span>◫</span> Conversations <b id="nav-count">0</b></button>
+          <button class="nav-item" data-view="agent"><span>✧</span> Agent IA</button>
+          <button class="nav-item" data-view="whatsapp"><span>◉</span> WhatsApp</button>
+        </nav>
+        <div class="sidebar-bottom">
+          <button class="nav-item"><span>⚙</span> Paramètres</button>
+          <div class="user-card"><span class="avatar">AD</span><div><strong>Administrateur</strong><small>Compte principal</small></div><span class="more">···</span></div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div class="breadcrumb">Centre de pilotage <span>/</span> <strong id="current-org">Brayano</strong></div>
+          <div class="top-actions"><span class="live-dot"></span> Système opérationnel <button class="icon-button" aria-label="Notifications">♢<i></i></button></div>
+        </header>
+
+        <section id="overview-view" class="view">
+          <div class="page-heading"><div><p class="eyebrow">MERCREDI 09 SEPTEMBRE 2026</p><h1>Bonjour, bienvenue 👋</h1><p class="muted">Voici ce qui se passe dans votre espace aujourd'hui.</p></div></div>
+          <div class="status-banner"><span class="status-icon">✦</span><div><strong>Votre agent est prêt à échanger.</strong><p>Il répond automatiquement aux messages reçus sur WhatsApp.</p></div><button class="text-button" data-view-target="agent">Configurer l'agent <span>→</span></button></div>
+          <div class="metrics">
+            <article class="metric-card"><span class="metric-icon violet">◫</span><div><small>CONVERSATIONS ACTIVES</small><strong id="metric-active">—</strong><span class="trend positive">↑ En temps réel</span></div></article>
+            <article class="metric-card"><span class="metric-icon green">↗</span><div><small>MESSAGES TRAITÉS</small><strong id="metric-messages">—</strong><span class="trend positive">↑ Aujourd'hui</span></div></article>
+            <article class="metric-card"><span class="metric-icon orange">◉</span><div><small>STATUT WHATSAPP</small><strong id="metric-whatsapp">—</strong><span id="metric-phone" class="trend">Connexion requise</span></div></article>
+          </div>
+          <div class="content-grid"><section class="panel"><div class="panel-heading"><div><h2>Conversations récentes</h2><p class="muted">Les derniers échanges avec vos contacts</p></div><button class="ghost-button" data-view-target="inbox">Voir tout →</button></div><div id="recent-conversations" class="conversation-list"><div class="empty-state">Chargement des conversations...</div></div></section>
+            <section class="panel quick-panel"><div class="panel-heading"><div><h2>Actions rapides</h2><p class="muted">Gérez votre espace en quelques clics</p></div></div><button class="quick-action" data-view-target="whatsapp"><span class="quick-icon green-bg">◉</span><div><strong>Connecter WhatsApp</strong><small>Liez le numéro de votre entreprise</small></div><span>→</span></button><button class="quick-action" data-view-target="agent"><span class="quick-icon violet-bg">✧</span><div><strong>Personnaliser l'agent</strong><small>Adaptez ses réponses à votre activité</small></div><span>→</span></button><button class="quick-action" data-view-target="inbox"><span class="quick-icon orange-bg">▣</span><div><strong>Ouvrir la boîte de réception</strong><small>Répondez aux demandes importantes</small></div><span>→</span></button></section></div>
+        </section>
+
+        <section id="inbox-view" class="view hidden"><div class="page-heading"><div><p class="eyebrow">RELATION CLIENT</p><h1>Boîte de réception</h1><p class="muted">Suivez et reprenez la main sur vos conversations.</p></div><span class="pill"><i></i> Synchronisation active</span></div><div class="inbox-layout"><section class="panel inbox-panel"><div class="inbox-toolbar"><strong id="inbox-total">Conversations</strong><button class="ghost-button">Toutes⌄</button></div><div id="all-conversations" class="conversation-list"></div></section><section id="conversation-detail" class="panel detail-panel"><div class="empty-state">Sélectionnez une conversation pour afficher les messages.</div></section></div></section>
+
+        <section id="agent-view" class="view hidden"><div class="page-heading"><div><p class="eyebrow">INTELLIGENCE ARTIFICIELLE</p><h1>Votre agent IA</h1><p class="muted">Donnez à votre assistant le contexte nécessaire pour bien répondre.</p></div><button class="primary" id="save-agent">Enregistrer les modifications</button></div><form id="agent-form" class="panel settings-form"><label>Nom de l'agent<input id="agent-name" required /></label><label>Informations sur votre activité<textarea id="business-info" rows="5" placeholder="Présentez votre entreprise, vos offres et vos horaires..."></textarea></label><label>Instructions de l'agent<textarea id="system-prompt" rows="6" required></textarea></label><label>Message d'accueil<textarea id="welcome-message" rows="3"></textarea></label></form></section>
+
+        <section id="whatsapp-view" class="view hidden"><div class="page-heading"><div><p class="eyebrow">CANAL DE MESSAGERIE</p><h1>Connexion WhatsApp</h1><p class="muted">Connectez le numéro de votre entreprise pour activer l'agent.</p></div></div><div class="whatsapp-grid"><section class="panel connect-card"><div class="connection-illustration">◉</div><h2 id="wa-title">WhatsApp déconnecté</h2><p id="wa-description" class="muted">Lancez la connexion puis scannez le QR code depuis WhatsApp &gt; Appareils liés.</p><button class="primary" id="connect-wa">Connecter le numéro</button><button class="text-button hidden" id="disconnect-wa">Déconnecter ce numéro</button></section><section class="panel qr-card"><div class="panel-heading"><div><h2>Code de connexion</h2><p class="muted">Le code se rafraîchit automatiquement.</p></div><span id="qr-status" class="pill warning">En attente</span></div><div id="qr-container" class="qr-placeholder"><span>◫</span><p>Le QR code apparaîtra ici</p></div></section></div></section>
+      </main>
+    </div>
+    <div id="toast" class="toast"></div>
+    <script src="./app.js"></script>
+  </body>
+</html>
