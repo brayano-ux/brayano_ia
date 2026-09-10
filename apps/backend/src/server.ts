@@ -7,6 +7,7 @@ import { healthRoute } from "./routes/health.route.js";
 import { organizationsRoute } from "./routes/organizations.route.js";
 import { whatsappRoute } from "./routes/whatsapp.route.js";
 import { AppError } from "./shared/errors.js";
+import { restoreWhatsAppConnections } from "./whatsapp/whatsapp.registry.js";
 
 async function buildServer() {
   const app = Fastify({
@@ -81,6 +82,8 @@ async function buildServer() {
   await app.register(aiSettingsRoute);
   await app.register(whatsappRoute);
   await app.register(conversationsRoute);
+
+  await restoreWhatsAppConnections();
 
   return app;
 }

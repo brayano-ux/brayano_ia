@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import path from "node:path";
 import { getOrCreateAiSettings } from "../ai/ai-settings.service.js";
 import { getAiOrchestrator } from "../ai/ai.factory.js";
@@ -22,6 +23,11 @@ import type {
 const providers = new Map<string, WhatsAppProvider>();
 const connectionAttempts = new Map<string, Promise<void>>();
 
+const resolvedAuthDir = path.resolve(env.WHATSAPP_AUTH_DIR);
+if (!fs.existsSync(resolvedAuthDir)) {
+  fs.mkdirSync(resolvedAuthDir, { recursive: true });
+}
+
 async function getOrCreateAccount(organizationId: string) {
   const existing = await prisma.whatsAppAccount.findFirst({ where: { organizationId } });
   if (existing) return existing;
@@ -35,7 +41,11 @@ function getOrCreateProvider(organizationId: string): WhatsAppProvider {
   const existing = providers.get(organizationId);
   if (existing) return existing;
 
-  const authDir = path.join(env.WHATSAPP_AUTH_DIR, organizationId);
+  const authDir = path.join(resolvedAuthDir, organizationId);
+  if (!fs.existsSync(authDir)) {
+    fs.mkdirSync(authDir, { recursive: true });
+  }
+
   const instance = new BaileysWhatsAppProvider(authDir);
   providers.set(organizationId, instance);
 
@@ -114,6 +124,21 @@ export async function disconnectWhatsAppAccount(organizationId: string): Promise
   const provider = providers.get(organizationId);
   if (!provider) return;
   await provider.disconnect();
+}
+
+export async function restoreWhatsAppConnections(): Promise<void> {
+  const accounts = await prisma.whatsAppAccount.findMany({
+    where: { status: { not: "DISCONNECTED" } },
+    select: { organizationId: true },
+  });
+
+  for (const account of accounts) {
+    try {
+      await connectWhatsAppAccount(account.organizationId);
+    } catch (error) {
+      console.error(`❌ [startup] Échec de reconnexion WhatsApp pour org ${account.organizationId}:`, error);
+    }
+  }
 }
 
 export function getWhatsAppAccountStatus(organizationId: string): WhatsAppConnectionStatus {

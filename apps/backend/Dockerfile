@@ -4,6 +4,9 @@ WORKDIR /app
 
 ARG DATABASE_URL
 ENV DATABASE_URL=$DATABASE_URL
+ENV WHATSAPP_AUTH_DIR=/data/wa-session
+
+RUN mkdir -p /data/wa-session
 
 COPY package*.json ./
 

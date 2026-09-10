@@ -2,10 +2,14 @@ services:
   - type: web
     name: brayano-ai-backend
     runtime: docker
-    plan: free
+    plan: pro
     autoDeploy: true
     dockerfilePath: ./apps/backend/Dockerfile
     dockerContext: ./apps/backend
+    disk:
+      name: wa-session
+      mountPath: /data
+      sizeGB: 10
     envVars:
       - key: NODE_ENV
         value: production
@@ -18,4 +22,4 @@ services:
       - key: GEMINI_API_KEY
         sync: false
       - key: WHATSAPP_AUTH_DIR
-        value: ./wa-session
+        value: /data/wa-session
