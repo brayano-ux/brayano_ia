@@ -1,4 +1,4 @@
-const API = localStorage.getItem("brayano_api") || "http://localhost:3000";
+const API = localStorage.getItem("brayano_api") || "https://brayano-ia-4.onrender.com";
 let orgId = localStorage.getItem("brayano_org");
 let conversations = [];
 const $ = (selector) => document.querySelector(selector);
