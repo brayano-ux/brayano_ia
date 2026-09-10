@@ -8,13 +8,13 @@
  *
  * 🟢 You can import this file directly.
  */
-export type * from './models/Organization.ts'
-export type * from './models/AiSettings.ts'
-export type * from './models/User.ts'
-export type * from './models/Session.ts'
-export type * from './models/WhatsAppAccount.ts'
-export type * from './models/Contact.ts'
-export type * from './models/Conversation.ts'
-export type * from './models/AiRun.ts'
-export type * from './models/Message.ts'
-export type * from './commonInputTypes.ts'
+export type * from './models/Organization.js'
+export type * from './models/AiSettings.js'
+export type * from './models/User.js'
+export type * from './models/Session.js'
+export type * from './models/WhatsAppAccount.js'
+export type * from './models/Contact.js'
+export type * from './models/Conversation.js'
+export type * from './models/AiRun.js'
+export type * from './models/Message.js'
+export type * from './commonInputTypes.js'
