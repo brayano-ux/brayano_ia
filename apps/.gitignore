@@ -1,0 +1,11 @@
+cd C:\Users\PC\Documents\brayano-ai
+
+@"
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+wa-session/
+*.log
+"@ | Set-Content .gitignore
