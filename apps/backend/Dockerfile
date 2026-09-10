@@ -7,7 +7,7 @@ ENV DATABASE_URL=$DATABASE_URL
 
 COPY package*.json ./
 
-RUN npm ci
+RUN npm install
 
 COPY . .
 
