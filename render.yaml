@@ -11,3 +11,11 @@ services:
         value: production
       - key: PORT
         value: "3000"
+      - key: DATABASE_URL
+        sync: false
+      - key: APP_URL
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: WHATSAPP_AUTH_DIR
+        value: ./wa-session
