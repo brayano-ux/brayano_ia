@@ -20,8 +20,18 @@ export type ConversationModel = runtime.Types.Result.DefaultSelection<Prisma.$Co
 
 export type AggregateConversation = {
   _count: ConversationCountAggregateOutputType | null
+  _avg: ConversationAvgAggregateOutputType | null
+  _sum: ConversationSumAggregateOutputType | null
   _min: ConversationMinAggregateOutputType | null
   _max: ConversationMaxAggregateOutputType | null
+}
+
+export type ConversationAvgAggregateOutputType = {
+  leadScore: number | null
+}
+
+export type ConversationSumAggregateOutputType = {
+  leadScore: number | null
 }
 
 export type ConversationMinAggregateOutputType = {
@@ -30,6 +40,8 @@ export type ConversationMinAggregateOutputType = {
   contactId: string | null
   aiEnabled: boolean | null
   status: $Enums.ConversationStatus | null
+  qualificationStatus: $Enums.QualificationStatus | null
+  leadScore: number | null
   summary: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -41,6 +53,8 @@ export type ConversationMaxAggregateOutputType = {
   contactId: string | null
   aiEnabled: boolean | null
   status: $Enums.ConversationStatus | null
+  qualificationStatus: $Enums.QualificationStatus | null
+  leadScore: number | null
   summary: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -52,6 +66,9 @@ export type ConversationCountAggregateOutputType = {
   contactId: number
   aiEnabled: number
   status: number
+  qualificationStatus: number
+  leadScore: number
+  leadData: number
   summary: number
   createdAt: number
   updatedAt: number
@@ -59,12 +76,22 @@ export type ConversationCountAggregateOutputType = {
 }
 
 
+export type ConversationAvgAggregateInputType = {
+  leadScore?: true
+}
+
+export type ConversationSumAggregateInputType = {
+  leadScore?: true
+}
+
 export type ConversationMinAggregateInputType = {
   id?: true
   organizationId?: true
   contactId?: true
   aiEnabled?: true
   status?: true
+  qualificationStatus?: true
+  leadScore?: true
   summary?: true
   createdAt?: true
   updatedAt?: true
@@ -76,6 +103,8 @@ export type ConversationMaxAggregateInputType = {
   contactId?: true
   aiEnabled?: true
   status?: true
+  qualificationStatus?: true
+  leadScore?: true
   summary?: true
   createdAt?: true
   updatedAt?: true
@@ -87,6 +116,9 @@ export type ConversationCountAggregateInputType = {
   contactId?: true
   aiEnabled?: true
   status?: true
+  qualificationStatus?: true
+  leadScore?: true
+  leadData?: true
   summary?: true
   createdAt?: true
   updatedAt?: true
@@ -131,6 +163,18 @@ export type ConversationAggregateArgs<ExtArgs extends runtime.Types.Extensions.I
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: ConversationAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: ConversationSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: ConversationMinAggregateInputType
@@ -161,6 +205,8 @@ export type ConversationGroupByArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   _count?: ConversationCountAggregateInputType | true
+  _avg?: ConversationAvgAggregateInputType
+  _sum?: ConversationSumAggregateInputType
   _min?: ConversationMinAggregateInputType
   _max?: ConversationMaxAggregateInputType
 }
@@ -171,10 +217,15 @@ export type ConversationGroupByOutputType = {
   contactId: string
   aiEnabled: boolean
   status: $Enums.ConversationStatus
+  qualificationStatus: $Enums.QualificationStatus
+  leadScore: number | null
+  leadData: runtime.JsonValue | null
   summary: string | null
   createdAt: Date
   updatedAt: Date
   _count: ConversationCountAggregateOutputType | null
+  _avg: ConversationAvgAggregateOutputType | null
+  _sum: ConversationSumAggregateOutputType | null
   _min: ConversationMinAggregateOutputType | null
   _max: ConversationMaxAggregateOutputType | null
 }
@@ -203,6 +254,9 @@ export type ConversationWhereInput = {
   contactId?: Prisma.StringFilter<"Conversation"> | string
   aiEnabled?: Prisma.BoolFilter<"Conversation"> | boolean
   status?: Prisma.EnumConversationStatusFilter<"Conversation"> | $Enums.ConversationStatus
+  qualificationStatus?: Prisma.EnumQualificationStatusFilter<"Conversation"> | $Enums.QualificationStatus
+  leadScore?: Prisma.IntNullableFilter<"Conversation"> | number | null
+  leadData?: Prisma.JsonNullableFilter<"Conversation">
   summary?: Prisma.StringNullableFilter<"Conversation"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Conversation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Conversation"> | Date | string
@@ -218,6 +272,9 @@ export type ConversationOrderByWithRelationInput = {
   contactId?: Prisma.SortOrder
   aiEnabled?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  qualificationStatus?: Prisma.SortOrder
+  leadScore?: Prisma.SortOrderInput | Prisma.SortOrder
+  leadData?: Prisma.SortOrderInput | Prisma.SortOrder
   summary?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -236,6 +293,9 @@ export type ConversationWhereUniqueInput = Prisma.AtLeast<{
   contactId?: Prisma.StringFilter<"Conversation"> | string
   aiEnabled?: Prisma.BoolFilter<"Conversation"> | boolean
   status?: Prisma.EnumConversationStatusFilter<"Conversation"> | $Enums.ConversationStatus
+  qualificationStatus?: Prisma.EnumQualificationStatusFilter<"Conversation"> | $Enums.QualificationStatus
+  leadScore?: Prisma.IntNullableFilter<"Conversation"> | number | null
+  leadData?: Prisma.JsonNullableFilter<"Conversation">
   summary?: Prisma.StringNullableFilter<"Conversation"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Conversation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Conversation"> | Date | string
@@ -251,12 +311,17 @@ export type ConversationOrderByWithAggregationInput = {
   contactId?: Prisma.SortOrder
   aiEnabled?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  qualificationStatus?: Prisma.SortOrder
+  leadScore?: Prisma.SortOrderInput | Prisma.SortOrder
+  leadData?: Prisma.SortOrderInput | Prisma.SortOrder
   summary?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ConversationCountOrderByAggregateInput
+  _avg?: Prisma.ConversationAvgOrderByAggregateInput
   _max?: Prisma.ConversationMaxOrderByAggregateInput
   _min?: Prisma.ConversationMinOrderByAggregateInput
+  _sum?: Prisma.ConversationSumOrderByAggregateInput
 }
 
 export type ConversationScalarWhereWithAggregatesInput = {
@@ -268,6 +333,9 @@ export type ConversationScalarWhereWithAggregatesInput = {
   contactId?: Prisma.StringWithAggregatesFilter<"Conversation"> | string
   aiEnabled?: Prisma.BoolWithAggregatesFilter<"Conversation"> | boolean
   status?: Prisma.EnumConversationStatusWithAggregatesFilter<"Conversation"> | $Enums.ConversationStatus
+  qualificationStatus?: Prisma.EnumQualificationStatusWithAggregatesFilter<"Conversation"> | $Enums.QualificationStatus
+  leadScore?: Prisma.IntNullableWithAggregatesFilter<"Conversation"> | number | null
+  leadData?: Prisma.JsonNullableWithAggregatesFilter<"Conversation">
   summary?: Prisma.StringNullableWithAggregatesFilter<"Conversation"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Conversation"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Conversation"> | Date | string
@@ -277,6 +345,9 @@ export type ConversationCreateInput = {
   id?: string
   aiEnabled?: boolean
   status?: $Enums.ConversationStatus
+  qualificationStatus?: $Enums.QualificationStatus
+  leadScore?: number | null
+  leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -292,6 +363,9 @@ export type ConversationUncheckedCreateInput = {
   contactId: string
   aiEnabled?: boolean
   status?: $Enums.ConversationStatus
+  qualificationStatus?: $Enums.QualificationStatus
+  leadScore?: number | null
+  leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -303,6 +377,9 @@ export type ConversationUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   aiEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumConversationStatusFieldUpdateOperationsInput | $Enums.ConversationStatus
+  qualificationStatus?: Prisma.EnumQualificationStatusFieldUpdateOperationsInput | $Enums.QualificationStatus
+  leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -318,6 +395,9 @@ export type ConversationUncheckedUpdateInput = {
   contactId?: Prisma.StringFieldUpdateOperationsInput | string
   aiEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumConversationStatusFieldUpdateOperationsInput | $Enums.ConversationStatus
+  qualificationStatus?: Prisma.EnumQualificationStatusFieldUpdateOperationsInput | $Enums.QualificationStatus
+  leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -331,6 +411,9 @@ export type ConversationCreateManyInput = {
   contactId: string
   aiEnabled?: boolean
   status?: $Enums.ConversationStatus
+  qualificationStatus?: $Enums.QualificationStatus
+  leadScore?: number | null
+  leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -340,6 +423,9 @@ export type ConversationUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   aiEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumConversationStatusFieldUpdateOperationsInput | $Enums.ConversationStatus
+  qualificationStatus?: Prisma.EnumQualificationStatusFieldUpdateOperationsInput | $Enums.QualificationStatus
+  leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -351,6 +437,9 @@ export type ConversationUncheckedUpdateManyInput = {
   contactId?: Prisma.StringFieldUpdateOperationsInput | string
   aiEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumConversationStatusFieldUpdateOperationsInput | $Enums.ConversationStatus
+  qualificationStatus?: Prisma.EnumQualificationStatusFieldUpdateOperationsInput | $Enums.QualificationStatus
+  leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -372,9 +461,16 @@ export type ConversationCountOrderByAggregateInput = {
   contactId?: Prisma.SortOrder
   aiEnabled?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  qualificationStatus?: Prisma.SortOrder
+  leadScore?: Prisma.SortOrder
+  leadData?: Prisma.SortOrder
   summary?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type ConversationAvgOrderByAggregateInput = {
+  leadScore?: Prisma.SortOrder
 }
 
 export type ConversationMaxOrderByAggregateInput = {
@@ -383,6 +479,8 @@ export type ConversationMaxOrderByAggregateInput = {
   contactId?: Prisma.SortOrder
   aiEnabled?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  qualificationStatus?: Prisma.SortOrder
+  leadScore?: Prisma.SortOrder
   summary?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -394,9 +492,15 @@ export type ConversationMinOrderByAggregateInput = {
   contactId?: Prisma.SortOrder
   aiEnabled?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  qualificationStatus?: Prisma.SortOrder
+  leadScore?: Prisma.SortOrder
   summary?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type ConversationSumOrderByAggregateInput = {
+  leadScore?: Prisma.SortOrder
 }
 
 export type ConversationScalarRelationFilter = {
@@ -496,6 +600,18 @@ export type EnumConversationStatusFieldUpdateOperationsInput = {
   set?: $Enums.ConversationStatus
 }
 
+export type EnumQualificationStatusFieldUpdateOperationsInput = {
+  set?: $Enums.QualificationStatus
+}
+
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
 export type ConversationCreateNestedOneWithoutAiRunsInput = {
   create?: Prisma.XOR<Prisma.ConversationCreateWithoutAiRunsInput, Prisma.ConversationUncheckedCreateWithoutAiRunsInput>
   connectOrCreate?: Prisma.ConversationCreateOrConnectWithoutAiRunsInput
@@ -528,6 +644,9 @@ export type ConversationCreateWithoutOrganizationInput = {
   id?: string
   aiEnabled?: boolean
   status?: $Enums.ConversationStatus
+  qualificationStatus?: $Enums.QualificationStatus
+  leadScore?: number | null
+  leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -541,6 +660,9 @@ export type ConversationUncheckedCreateWithoutOrganizationInput = {
   contactId: string
   aiEnabled?: boolean
   status?: $Enums.ConversationStatus
+  qualificationStatus?: $Enums.QualificationStatus
+  leadScore?: number | null
+  leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -583,6 +705,9 @@ export type ConversationScalarWhereInput = {
   contactId?: Prisma.StringFilter<"Conversation"> | string
   aiEnabled?: Prisma.BoolFilter<"Conversation"> | boolean
   status?: Prisma.EnumConversationStatusFilter<"Conversation"> | $Enums.ConversationStatus
+  qualificationStatus?: Prisma.EnumQualificationStatusFilter<"Conversation"> | $Enums.QualificationStatus
+  leadScore?: Prisma.IntNullableFilter<"Conversation"> | number | null
+  leadData?: Prisma.JsonNullableFilter<"Conversation">
   summary?: Prisma.StringNullableFilter<"Conversation"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Conversation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Conversation"> | Date | string
@@ -592,6 +717,9 @@ export type ConversationCreateWithoutContactInput = {
   id?: string
   aiEnabled?: boolean
   status?: $Enums.ConversationStatus
+  qualificationStatus?: $Enums.QualificationStatus
+  leadScore?: number | null
+  leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -605,6 +733,9 @@ export type ConversationUncheckedCreateWithoutContactInput = {
   organizationId: string
   aiEnabled?: boolean
   status?: $Enums.ConversationStatus
+  qualificationStatus?: $Enums.QualificationStatus
+  leadScore?: number | null
+  leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -642,6 +773,9 @@ export type ConversationCreateWithoutAiRunsInput = {
   id?: string
   aiEnabled?: boolean
   status?: $Enums.ConversationStatus
+  qualificationStatus?: $Enums.QualificationStatus
+  leadScore?: number | null
+  leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -656,6 +790,9 @@ export type ConversationUncheckedCreateWithoutAiRunsInput = {
   contactId: string
   aiEnabled?: boolean
   status?: $Enums.ConversationStatus
+  qualificationStatus?: $Enums.QualificationStatus
+  leadScore?: number | null
+  leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -682,6 +819,9 @@ export type ConversationUpdateWithoutAiRunsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   aiEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumConversationStatusFieldUpdateOperationsInput | $Enums.ConversationStatus
+  qualificationStatus?: Prisma.EnumQualificationStatusFieldUpdateOperationsInput | $Enums.QualificationStatus
+  leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -696,6 +836,9 @@ export type ConversationUncheckedUpdateWithoutAiRunsInput = {
   contactId?: Prisma.StringFieldUpdateOperationsInput | string
   aiEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumConversationStatusFieldUpdateOperationsInput | $Enums.ConversationStatus
+  qualificationStatus?: Prisma.EnumQualificationStatusFieldUpdateOperationsInput | $Enums.QualificationStatus
+  leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -706,6 +849,9 @@ export type ConversationCreateWithoutMessagesInput = {
   id?: string
   aiEnabled?: boolean
   status?: $Enums.ConversationStatus
+  qualificationStatus?: $Enums.QualificationStatus
+  leadScore?: number | null
+  leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -720,6 +866,9 @@ export type ConversationUncheckedCreateWithoutMessagesInput = {
   contactId: string
   aiEnabled?: boolean
   status?: $Enums.ConversationStatus
+  qualificationStatus?: $Enums.QualificationStatus
+  leadScore?: number | null
+  leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -746,6 +895,9 @@ export type ConversationUpdateWithoutMessagesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   aiEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumConversationStatusFieldUpdateOperationsInput | $Enums.ConversationStatus
+  qualificationStatus?: Prisma.EnumQualificationStatusFieldUpdateOperationsInput | $Enums.QualificationStatus
+  leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -760,6 +912,9 @@ export type ConversationUncheckedUpdateWithoutMessagesInput = {
   contactId?: Prisma.StringFieldUpdateOperationsInput | string
   aiEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumConversationStatusFieldUpdateOperationsInput | $Enums.ConversationStatus
+  qualificationStatus?: Prisma.EnumQualificationStatusFieldUpdateOperationsInput | $Enums.QualificationStatus
+  leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -771,6 +926,9 @@ export type ConversationCreateManyOrganizationInput = {
   contactId: string
   aiEnabled?: boolean
   status?: $Enums.ConversationStatus
+  qualificationStatus?: $Enums.QualificationStatus
+  leadScore?: number | null
+  leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -780,6 +938,9 @@ export type ConversationUpdateWithoutOrganizationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   aiEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumConversationStatusFieldUpdateOperationsInput | $Enums.ConversationStatus
+  qualificationStatus?: Prisma.EnumQualificationStatusFieldUpdateOperationsInput | $Enums.QualificationStatus
+  leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -793,6 +954,9 @@ export type ConversationUncheckedUpdateWithoutOrganizationInput = {
   contactId?: Prisma.StringFieldUpdateOperationsInput | string
   aiEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumConversationStatusFieldUpdateOperationsInput | $Enums.ConversationStatus
+  qualificationStatus?: Prisma.EnumQualificationStatusFieldUpdateOperationsInput | $Enums.QualificationStatus
+  leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -805,6 +969,9 @@ export type ConversationUncheckedUpdateManyWithoutOrganizationInput = {
   contactId?: Prisma.StringFieldUpdateOperationsInput | string
   aiEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumConversationStatusFieldUpdateOperationsInput | $Enums.ConversationStatus
+  qualificationStatus?: Prisma.EnumQualificationStatusFieldUpdateOperationsInput | $Enums.QualificationStatus
+  leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -815,6 +982,9 @@ export type ConversationCreateManyContactInput = {
   organizationId: string
   aiEnabled?: boolean
   status?: $Enums.ConversationStatus
+  qualificationStatus?: $Enums.QualificationStatus
+  leadScore?: number | null
+  leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -824,6 +994,9 @@ export type ConversationUpdateWithoutContactInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   aiEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumConversationStatusFieldUpdateOperationsInput | $Enums.ConversationStatus
+  qualificationStatus?: Prisma.EnumQualificationStatusFieldUpdateOperationsInput | $Enums.QualificationStatus
+  leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -837,6 +1010,9 @@ export type ConversationUncheckedUpdateWithoutContactInput = {
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   aiEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumConversationStatusFieldUpdateOperationsInput | $Enums.ConversationStatus
+  qualificationStatus?: Prisma.EnumQualificationStatusFieldUpdateOperationsInput | $Enums.QualificationStatus
+  leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -849,6 +1025,9 @@ export type ConversationUncheckedUpdateManyWithoutContactInput = {
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   aiEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumConversationStatusFieldUpdateOperationsInput | $Enums.ConversationStatus
+  qualificationStatus?: Prisma.EnumQualificationStatusFieldUpdateOperationsInput | $Enums.QualificationStatus
+  leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -900,6 +1079,9 @@ export type ConversationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   contactId?: boolean
   aiEnabled?: boolean
   status?: boolean
+  qualificationStatus?: boolean
+  leadScore?: boolean
+  leadData?: boolean
   summary?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -916,6 +1098,9 @@ export type ConversationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   contactId?: boolean
   aiEnabled?: boolean
   status?: boolean
+  qualificationStatus?: boolean
+  leadScore?: boolean
+  leadData?: boolean
   summary?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -929,6 +1114,9 @@ export type ConversationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   contactId?: boolean
   aiEnabled?: boolean
   status?: boolean
+  qualificationStatus?: boolean
+  leadScore?: boolean
+  leadData?: boolean
   summary?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -942,12 +1130,15 @@ export type ConversationSelectScalar = {
   contactId?: boolean
   aiEnabled?: boolean
   status?: boolean
+  qualificationStatus?: boolean
+  leadScore?: boolean
+  leadData?: boolean
   summary?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ConversationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "contactId" | "aiEnabled" | "status" | "summary" | "createdAt" | "updatedAt", ExtArgs["result"]["conversation"]>
+export type ConversationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "contactId" | "aiEnabled" | "status" | "qualificationStatus" | "leadScore" | "leadData" | "summary" | "createdAt" | "updatedAt", ExtArgs["result"]["conversation"]>
 export type ConversationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   contact?: boolean | Prisma.ContactDefaultArgs<ExtArgs>
@@ -978,6 +1169,9 @@ export type $ConversationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     contactId: string
     aiEnabled: boolean
     status: $Enums.ConversationStatus
+    qualificationStatus: $Enums.QualificationStatus
+    leadScore: number | null
+    leadData: runtime.JsonValue | null
     summary: string | null
     createdAt: Date
     updatedAt: Date
@@ -1413,6 +1607,9 @@ export interface ConversationFieldRefs {
   readonly contactId: Prisma.FieldRef<"Conversation", 'String'>
   readonly aiEnabled: Prisma.FieldRef<"Conversation", 'Boolean'>
   readonly status: Prisma.FieldRef<"Conversation", 'ConversationStatus'>
+  readonly qualificationStatus: Prisma.FieldRef<"Conversation", 'QualificationStatus'>
+  readonly leadScore: Prisma.FieldRef<"Conversation", 'Int'>
+  readonly leadData: Prisma.FieldRef<"Conversation", 'Json'>
   readonly summary: Prisma.FieldRef<"Conversation", 'String'>
   readonly createdAt: Prisma.FieldRef<"Conversation", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Conversation", 'DateTime'>

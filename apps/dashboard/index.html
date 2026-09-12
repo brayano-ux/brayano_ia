@@ -1115,13 +1115,13 @@
     <!-- AUTH SCREEN -->
     <div id="login-screen" class="auth-screen">
       <div class="auth-card">
-        <div class="auth-brand">brayano<span class="brand-accent">.</span></div>
+        <div class="auth-brand">brayano Ai<span class="brand-accent">.</span></div>
         <p id="auth-title" class="auth-subtitle">Connexion à l'espace de pilotage</p>
 
         <form id="login-form" class="auth-form" method="post" action="javascript:void(0)">
           <label>
             <span>Adresse email</span>
-            <input id="login-email" type="email" placeholder="admin@brayano.ai" required />
+            <input id="login-email" type="email" placeholder="a@brayano.ai" required />
           </label>
           <label>
             <span>Mot de passe</span>
@@ -1133,7 +1133,7 @@
         <form id="register-form" class="auth-form hidden" method="post" action="javascript:void(0)">
           <label>
             <span>Nom complet</span>
-            <input id="register-name" type="text" placeholder="Jean Dupont" required />
+            <input id="register-name" type="text" placeholder="Brayano" required />
           </label>
           <label>
             <span>Nom de l'entreprise</span>
@@ -1151,7 +1151,7 @@
         </form>
 
         <p class="auth-hint">
-          <span id="auth-mode-hint">Identifiants par défaut : admin@brayano.ai / brayano123</span>
+          <span id="auth-mode-hint">Accédez à votre espace de pilotage</span>
         </p>
         <button id="toggle-auth-mode" type="button" class="text-button">Créer un compte</button>
       </div>
@@ -1352,6 +1352,14 @@
             <label>
               Message d'accueil
               <textarea id="welcome-message" rows="3"></textarea>
+            </label>
+            <label>
+              Temps de réponse de l'agent IA
+              <select id="response-delay-seconds">
+                <option value="5">5 secondes</option>
+                <option value="7">7 secondes</option>
+                <option value="10">10 secondes</option>
+              </select>
             </label>
           </form>
         </section>

@@ -24,14 +24,15 @@ model Organization {
 }
 
 model AiSettings {
-  id             String   @id @default(uuid())
-  organizationId String   @unique @map("organization_id")
-  agentName      String   @default("Assistant") @map("agent_name")
-  businessInfo   String?  @map("business_info")
-  systemPrompt   String   @map("system_prompt")
-  welcomeMessage String?  @map("welcome_message")
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+  id                  String   @id @default(uuid())
+  organizationId      String   @unique @map("organization_id")
+  agentName           String   @default("Assistant") @map("agent_name")
+  businessInfo        String?  @map("business_info")
+  systemPrompt        String   @map("system_prompt")
+  welcomeMessage      String?  @map("welcome_message")
+  responseDelaySeconds Int      @default(5) @map("response_delay_seconds")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
 
   organization Organization @relation(fields: [organizationId], references: [id])
 
@@ -115,7 +116,14 @@ model Contact {
 
 enum ConversationStatus {
   OPEN
+  HUMAN_HANDOFF
   CLOSED
+}
+
+enum QualificationStatus {
+  NOT_QUALIFIED
+  QUALIFYING
+  QUALIFIED
 }
 
 model Conversation {
@@ -124,6 +132,9 @@ model Conversation {
   contactId      String             @map("contact_id")
   aiEnabled      Boolean            @default(true) @map("ai_enabled")
   status         ConversationStatus @default(OPEN)
+  qualificationStatus QualificationStatus @default(NOT_QUALIFIED) @map("qualification_status")
+  leadScore      Int?               @map("lead_score")
+  leadData       Json?              @map("lead_data")
   summary        String?
   createdAt      DateTime           @default(now()) @map("created_at")
   updatedAt      DateTime           @updatedAt @map("updated_at")

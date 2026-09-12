@@ -15,6 +15,8 @@ const FALLBACK_REPLY: AIReply = {
   confidence: 0,
   needsHuman: true,
   leadScore: 0,
+  qualificationStatus: "qualifying",
+  nextAction: "handoff",
   leadData: {},
 };
 

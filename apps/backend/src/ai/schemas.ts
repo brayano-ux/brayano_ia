@@ -12,6 +12,8 @@ export const aiReplySchema = z.object({
   confidence: z.number().min(0).max(1),
   needsHuman: z.boolean(),
   leadScore: z.number().min(0).max(100),
+  qualificationStatus: z.enum(["not_qualified", "qualifying", "qualified"]),
+  nextAction: z.enum(["continue", "handoff", "stop"]),
   leadData: z.record(z.string(), z.unknown()).default({}),
 });
 

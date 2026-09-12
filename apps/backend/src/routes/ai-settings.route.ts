@@ -11,6 +11,7 @@ const updateAiSettingsSchema = z.object({
   businessInfo: z.string().optional(),
   systemPrompt: z.string().min(1).optional(),
   welcomeMessage: z.string().optional(),
+  responseDelaySeconds: z.union([z.literal(5), z.literal(7), z.literal(10)]).optional(),
 });
 
 export async function aiSettingsRoute(app: FastifyInstance) {
@@ -32,12 +33,14 @@ export async function aiSettingsRoute(app: FastifyInstance) {
       businessInfo?: string | undefined;
       systemPrompt?: string | undefined;
       welcomeMessage?: string | undefined;
+      responseDelaySeconds?: number | undefined;
     } = {};
 
     if (parsed.data.agentName !== undefined) settingsInput.agentName = parsed.data.agentName;
     if (parsed.data.businessInfo !== undefined) settingsInput.businessInfo = parsed.data.businessInfo;
     if (parsed.data.systemPrompt !== undefined) settingsInput.systemPrompt = parsed.data.systemPrompt;
     if (parsed.data.welcomeMessage !== undefined) settingsInput.welcomeMessage = parsed.data.welcomeMessage;
+    if (parsed.data.responseDelaySeconds !== undefined) settingsInput.responseDelaySeconds = parsed.data.responseDelaySeconds;
 
     const settings = await updateAiSettings(orgId, settingsInput);
     return { settings };

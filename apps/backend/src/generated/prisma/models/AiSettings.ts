@@ -20,8 +20,18 @@ export type AiSettingsModel = runtime.Types.Result.DefaultSelection<Prisma.$AiSe
 
 export type AggregateAiSettings = {
   _count: AiSettingsCountAggregateOutputType | null
+  _avg: AiSettingsAvgAggregateOutputType | null
+  _sum: AiSettingsSumAggregateOutputType | null
   _min: AiSettingsMinAggregateOutputType | null
   _max: AiSettingsMaxAggregateOutputType | null
+}
+
+export type AiSettingsAvgAggregateOutputType = {
+  responseDelaySeconds: number | null
+}
+
+export type AiSettingsSumAggregateOutputType = {
+  responseDelaySeconds: number | null
 }
 
 export type AiSettingsMinAggregateOutputType = {
@@ -31,6 +41,7 @@ export type AiSettingsMinAggregateOutputType = {
   businessInfo: string | null
   systemPrompt: string | null
   welcomeMessage: string | null
+  responseDelaySeconds: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -42,6 +53,7 @@ export type AiSettingsMaxAggregateOutputType = {
   businessInfo: string | null
   systemPrompt: string | null
   welcomeMessage: string | null
+  responseDelaySeconds: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -53,11 +65,20 @@ export type AiSettingsCountAggregateOutputType = {
   businessInfo: number
   systemPrompt: number
   welcomeMessage: number
+  responseDelaySeconds: number
   createdAt: number
   updatedAt: number
   _all: number
 }
 
+
+export type AiSettingsAvgAggregateInputType = {
+  responseDelaySeconds?: true
+}
+
+export type AiSettingsSumAggregateInputType = {
+  responseDelaySeconds?: true
+}
 
 export type AiSettingsMinAggregateInputType = {
   id?: true
@@ -66,6 +87,7 @@ export type AiSettingsMinAggregateInputType = {
   businessInfo?: true
   systemPrompt?: true
   welcomeMessage?: true
+  responseDelaySeconds?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -77,6 +99,7 @@ export type AiSettingsMaxAggregateInputType = {
   businessInfo?: true
   systemPrompt?: true
   welcomeMessage?: true
+  responseDelaySeconds?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -88,6 +111,7 @@ export type AiSettingsCountAggregateInputType = {
   businessInfo?: true
   systemPrompt?: true
   welcomeMessage?: true
+  responseDelaySeconds?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -131,6 +155,18 @@ export type AiSettingsAggregateArgs<ExtArgs extends runtime.Types.Extensions.Int
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: AiSettingsAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: AiSettingsSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: AiSettingsMinAggregateInputType
@@ -161,6 +197,8 @@ export type AiSettingsGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   _count?: AiSettingsCountAggregateInputType | true
+  _avg?: AiSettingsAvgAggregateInputType
+  _sum?: AiSettingsSumAggregateInputType
   _min?: AiSettingsMinAggregateInputType
   _max?: AiSettingsMaxAggregateInputType
 }
@@ -172,9 +210,12 @@ export type AiSettingsGroupByOutputType = {
   businessInfo: string | null
   systemPrompt: string
   welcomeMessage: string | null
+  responseDelaySeconds: number
   createdAt: Date
   updatedAt: Date
   _count: AiSettingsCountAggregateOutputType | null
+  _avg: AiSettingsAvgAggregateOutputType | null
+  _sum: AiSettingsSumAggregateOutputType | null
   _min: AiSettingsMinAggregateOutputType | null
   _max: AiSettingsMaxAggregateOutputType | null
 }
@@ -204,6 +245,7 @@ export type AiSettingsWhereInput = {
   businessInfo?: Prisma.StringNullableFilter<"AiSettings"> | string | null
   systemPrompt?: Prisma.StringFilter<"AiSettings"> | string
   welcomeMessage?: Prisma.StringNullableFilter<"AiSettings"> | string | null
+  responseDelaySeconds?: Prisma.IntFilter<"AiSettings"> | number
   createdAt?: Prisma.DateTimeFilter<"AiSettings"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AiSettings"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
@@ -216,6 +258,7 @@ export type AiSettingsOrderByWithRelationInput = {
   businessInfo?: Prisma.SortOrderInput | Prisma.SortOrder
   systemPrompt?: Prisma.SortOrder
   welcomeMessage?: Prisma.SortOrderInput | Prisma.SortOrder
+  responseDelaySeconds?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   organization?: Prisma.OrganizationOrderByWithRelationInput
@@ -231,6 +274,7 @@ export type AiSettingsWhereUniqueInput = Prisma.AtLeast<{
   businessInfo?: Prisma.StringNullableFilter<"AiSettings"> | string | null
   systemPrompt?: Prisma.StringFilter<"AiSettings"> | string
   welcomeMessage?: Prisma.StringNullableFilter<"AiSettings"> | string | null
+  responseDelaySeconds?: Prisma.IntFilter<"AiSettings"> | number
   createdAt?: Prisma.DateTimeFilter<"AiSettings"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AiSettings"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
@@ -243,11 +287,14 @@ export type AiSettingsOrderByWithAggregationInput = {
   businessInfo?: Prisma.SortOrderInput | Prisma.SortOrder
   systemPrompt?: Prisma.SortOrder
   welcomeMessage?: Prisma.SortOrderInput | Prisma.SortOrder
+  responseDelaySeconds?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.AiSettingsCountOrderByAggregateInput
+  _avg?: Prisma.AiSettingsAvgOrderByAggregateInput
   _max?: Prisma.AiSettingsMaxOrderByAggregateInput
   _min?: Prisma.AiSettingsMinOrderByAggregateInput
+  _sum?: Prisma.AiSettingsSumOrderByAggregateInput
 }
 
 export type AiSettingsScalarWhereWithAggregatesInput = {
@@ -260,6 +307,7 @@ export type AiSettingsScalarWhereWithAggregatesInput = {
   businessInfo?: Prisma.StringNullableWithAggregatesFilter<"AiSettings"> | string | null
   systemPrompt?: Prisma.StringWithAggregatesFilter<"AiSettings"> | string
   welcomeMessage?: Prisma.StringNullableWithAggregatesFilter<"AiSettings"> | string | null
+  responseDelaySeconds?: Prisma.IntWithAggregatesFilter<"AiSettings"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"AiSettings"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"AiSettings"> | Date | string
 }
@@ -270,6 +318,7 @@ export type AiSettingsCreateInput = {
   businessInfo?: string | null
   systemPrompt: string
   welcomeMessage?: string | null
+  responseDelaySeconds?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutAiSettingsInput
@@ -282,6 +331,7 @@ export type AiSettingsUncheckedCreateInput = {
   businessInfo?: string | null
   systemPrompt: string
   welcomeMessage?: string | null
+  responseDelaySeconds?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -292,6 +342,7 @@ export type AiSettingsUpdateInput = {
   businessInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   systemPrompt?: Prisma.StringFieldUpdateOperationsInput | string
   welcomeMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responseDelaySeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutAiSettingsNestedInput
@@ -304,6 +355,7 @@ export type AiSettingsUncheckedUpdateInput = {
   businessInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   systemPrompt?: Prisma.StringFieldUpdateOperationsInput | string
   welcomeMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responseDelaySeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -315,6 +367,7 @@ export type AiSettingsCreateManyInput = {
   businessInfo?: string | null
   systemPrompt: string
   welcomeMessage?: string | null
+  responseDelaySeconds?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -325,6 +378,7 @@ export type AiSettingsUpdateManyMutationInput = {
   businessInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   systemPrompt?: Prisma.StringFieldUpdateOperationsInput | string
   welcomeMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responseDelaySeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -336,6 +390,7 @@ export type AiSettingsUncheckedUpdateManyInput = {
   businessInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   systemPrompt?: Prisma.StringFieldUpdateOperationsInput | string
   welcomeMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responseDelaySeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -352,8 +407,13 @@ export type AiSettingsCountOrderByAggregateInput = {
   businessInfo?: Prisma.SortOrder
   systemPrompt?: Prisma.SortOrder
   welcomeMessage?: Prisma.SortOrder
+  responseDelaySeconds?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type AiSettingsAvgOrderByAggregateInput = {
+  responseDelaySeconds?: Prisma.SortOrder
 }
 
 export type AiSettingsMaxOrderByAggregateInput = {
@@ -363,6 +423,7 @@ export type AiSettingsMaxOrderByAggregateInput = {
   businessInfo?: Prisma.SortOrder
   systemPrompt?: Prisma.SortOrder
   welcomeMessage?: Prisma.SortOrder
+  responseDelaySeconds?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -374,8 +435,13 @@ export type AiSettingsMinOrderByAggregateInput = {
   businessInfo?: Prisma.SortOrder
   systemPrompt?: Prisma.SortOrder
   welcomeMessage?: Prisma.SortOrder
+  responseDelaySeconds?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type AiSettingsSumOrderByAggregateInput = {
+  responseDelaySeconds?: Prisma.SortOrder
 }
 
 export type AiSettingsCreateNestedOneWithoutOrganizationInput = {
@@ -414,12 +480,21 @@ export type NullableStringFieldUpdateOperationsInput = {
   set?: string | null
 }
 
+export type IntFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
 export type AiSettingsCreateWithoutOrganizationInput = {
   id?: string
   agentName?: string
   businessInfo?: string | null
   systemPrompt: string
   welcomeMessage?: string | null
+  responseDelaySeconds?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -430,6 +505,7 @@ export type AiSettingsUncheckedCreateWithoutOrganizationInput = {
   businessInfo?: string | null
   systemPrompt: string
   welcomeMessage?: string | null
+  responseDelaySeconds?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -456,6 +532,7 @@ export type AiSettingsUpdateWithoutOrganizationInput = {
   businessInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   systemPrompt?: Prisma.StringFieldUpdateOperationsInput | string
   welcomeMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responseDelaySeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -466,6 +543,7 @@ export type AiSettingsUncheckedUpdateWithoutOrganizationInput = {
   businessInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   systemPrompt?: Prisma.StringFieldUpdateOperationsInput | string
   welcomeMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  responseDelaySeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -479,6 +557,7 @@ export type AiSettingsSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   businessInfo?: boolean
   systemPrompt?: boolean
   welcomeMessage?: boolean
+  responseDelaySeconds?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -491,6 +570,7 @@ export type AiSettingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   businessInfo?: boolean
   systemPrompt?: boolean
   welcomeMessage?: boolean
+  responseDelaySeconds?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -503,6 +583,7 @@ export type AiSettingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   businessInfo?: boolean
   systemPrompt?: boolean
   welcomeMessage?: boolean
+  responseDelaySeconds?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -515,11 +596,12 @@ export type AiSettingsSelectScalar = {
   businessInfo?: boolean
   systemPrompt?: boolean
   welcomeMessage?: boolean
+  responseDelaySeconds?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type AiSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "agentName" | "businessInfo" | "systemPrompt" | "welcomeMessage" | "createdAt" | "updatedAt", ExtArgs["result"]["aiSettings"]>
+export type AiSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "agentName" | "businessInfo" | "systemPrompt" | "welcomeMessage" | "responseDelaySeconds" | "createdAt" | "updatedAt", ExtArgs["result"]["aiSettings"]>
 export type AiSettingsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
 }
@@ -542,6 +624,7 @@ export type $AiSettingsPayload<ExtArgs extends runtime.Types.Extensions.Internal
     businessInfo: string | null
     systemPrompt: string
     welcomeMessage: string | null
+    responseDelaySeconds: number
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["aiSettings"]>
@@ -974,6 +1057,7 @@ export interface AiSettingsFieldRefs {
   readonly businessInfo: Prisma.FieldRef<"AiSettings", 'String'>
   readonly systemPrompt: Prisma.FieldRef<"AiSettings", 'String'>
   readonly welcomeMessage: Prisma.FieldRef<"AiSettings", 'String'>
+  readonly responseDelaySeconds: Prisma.FieldRef<"AiSettings", 'Int'>
   readonly createdAt: Prisma.FieldRef<"AiSettings", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"AiSettings", 'DateTime'>
 }

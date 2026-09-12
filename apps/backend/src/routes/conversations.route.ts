@@ -56,6 +56,7 @@ export async function conversationsRoute(app: FastifyInstance) {
       text: parsed.data.text,
       author: "HUMAN",
     });
+    await setConversationAiEnabled(id, false);
 
     return { message };
   });

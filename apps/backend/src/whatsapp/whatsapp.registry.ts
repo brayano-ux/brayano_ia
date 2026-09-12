@@ -8,6 +8,9 @@ import {
   getRecentHistoryForAi,
   recordInboundMessage,
   recordOutboundMessage,
+  setConversationAiEnabled,
+  shouldReactivateAiAfterHandoff,
+  updateConversationQualification,
 } from "../conversations/conversations.service.js";
 import { prisma } from "../database/client.js";
 import { BaileysWhatsAppProvider } from "./baileys.provider.js";
@@ -74,15 +77,47 @@ function getOrCreateProvider(organizationId: string): WhatsAppProvider {
         text: message.text,
       });
 
-      if (!conversation.aiEnabled) {
+      const shouldReactivateAi =
+        conversation.status === "HUMAN_HANDOFF" &&
+        conversation.aiEnabled === false &&
+        shouldReactivateAiAfterHandoff(conversation.updatedAt);
+
+      if (shouldReactivateAi) {
+        const reactivated = await setConversationAiEnabled(conversation.id, true);
+        console.log(
+          `🔄 [org:${organizationId}] IA réactivée après 24h de handoff pour conversation ${conversation.id}`,
+        );
+        conversation.aiEnabled = reactivated.aiEnabled;
+        conversation.status = reactivated.status;
+      }
+
+      if (!conversation.aiEnabled || conversation.status === "HUMAN_HANDOFF" || conversation.status === "CLOSED") {
         console.log(`⏸️  [org:${organizationId}] IA désactivée, en attente d'un humain.`);
         return;
       }
 
       const settings = await getOrCreateAiSettings(organizationId);
+      const responseDelayMs = (settings.responseDelaySeconds ?? 5) * 1000;
+      if (responseDelayMs > 0) {
+        await new Promise((resolve) => setTimeout(resolve, responseDelayMs));
+      }
+
       const systemPrompt = buildSystemPrompt(settings);
       const history = await getRecentHistoryForAi(conversation.id);
       const aiReply = await getAiOrchestrator().getReply(conversation.id, systemPrompt, history);
+
+      const handoff = aiReply.needsHuman || aiReply.nextAction === "handoff";
+      const stop = aiReply.nextAction === "stop";
+      await updateConversationQualification(conversation.id, {
+        qualificationStatus: aiReply.qualificationStatus.toUpperCase() as
+          | "NOT_QUALIFIED"
+          | "QUALIFYING"
+          | "QUALIFIED",
+        leadScore: aiReply.leadScore,
+        leadData: JSON.parse(JSON.stringify(aiReply.leadData)),
+        status: handoff ? "HUMAN_HANDOFF" : stop ? "CLOSED" : "OPEN",
+        aiEnabled: !handoff && !stop,
+      });
 
       await instance.sendMessage(message.fromJid, aiReply.reply);
       await recordOutboundMessage({

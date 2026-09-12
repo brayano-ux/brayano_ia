@@ -1,5 +1,6 @@
 import { findOrCreateContact } from "../contacts/contacts.service.js";
 import { prisma } from "../database/client.js";
+import type { Prisma } from "../generated/prisma/client.js";
 import type {
   RecordInboundMessageInput,
   RecordOutboundMessageInput,
@@ -68,10 +69,45 @@ export async function listConversations(organizationId: string) {
   });
 }
 
+export function shouldReactivateAiAfterHandoff(lastHandoffAt: Date | string): boolean {
+  const handoffAt = new Date(lastHandoffAt);
+  const now = new Date();
+  const twentyFourHoursMs = 24 * 60 * 60 * 1000;
+
+  return now.getTime() - handoffAt.getTime() >= twentyFourHoursMs;
+}
+
 export async function setConversationAiEnabled(conversationId: string, aiEnabled: boolean) {
   return prisma.conversation.update({
     where: { id: conversationId },
-    data: { aiEnabled },
+    data: {
+      aiEnabled,
+      ...(aiEnabled
+        ? { status: "OPEN" as const }
+        : { status: "HUMAN_HANDOFF" as const }),
+    },
+  });
+}
+
+export async function updateConversationQualification(
+  conversationId: string,
+  input: {
+    qualificationStatus: "NOT_QUALIFIED" | "QUALIFYING" | "QUALIFIED";
+    leadScore: number;
+    leadData: Prisma.InputJsonValue;
+    status: "OPEN" | "HUMAN_HANDOFF" | "CLOSED";
+    aiEnabled: boolean;
+  },
+) {
+  return prisma.conversation.update({
+    where: { id: conversationId },
+    data: {
+      qualificationStatus: input.qualificationStatus,
+      leadScore: input.leadScore,
+      leadData: input.leadData,
+      status: input.status,
+      aiEnabled: input.aiEnabled,
+    },
   });
 }
 

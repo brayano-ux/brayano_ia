@@ -28,10 +28,20 @@ export type WhatsAppAccountStatus = (typeof WhatsAppAccountStatus)[keyof typeof 
 
 export const ConversationStatus = {
   OPEN: 'OPEN',
+  HUMAN_HANDOFF: 'HUMAN_HANDOFF',
   CLOSED: 'CLOSED'
 } as const
 
 export type ConversationStatus = (typeof ConversationStatus)[keyof typeof ConversationStatus]
+
+
+export const QualificationStatus = {
+  NOT_QUALIFIED: 'NOT_QUALIFIED',
+  QUALIFYING: 'QUALIFYING',
+  QUALIFIED: 'QUALIFIED'
+} as const
+
+export type QualificationStatus = (typeof QualificationStatus)[keyof typeof QualificationStatus]
 
 
 export const MessageDirection = {
