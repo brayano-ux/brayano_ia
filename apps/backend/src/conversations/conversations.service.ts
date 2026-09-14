@@ -6,11 +6,37 @@ import type {
   RecordOutboundMessageInput,
 } from "./conversations.types.js";
 
+type ConversationForRouting = {
+  status: "OPEN" | "HUMAN_HANDOFF" | "CLOSED";
+};
+
+/**
+ * Un contact = un fil. Après un takeover, on ne doit pas recréer une
+ * conversation OPEN (sinon l'IA reprend immédiatement).
+ * S'il existe déjà un doublon (bug précédent), on privilégie le handoff.
+ */
+export function selectActiveConversation<T extends ConversationForRouting>(
+  conversations: T[],
+): T | null {
+  if (conversations.length === 0) return null;
+
+  const handoff = conversations.find((conversation) => conversation.status === "HUMAN_HANDOFF");
+  if (handoff) return handoff;
+
+  const open = conversations.find((conversation) => conversation.status === "OPEN");
+  if (open) return open;
+
+  return conversations[0] ?? null;
+}
+
 async function findOrCreateConversation(organizationId: string, contactId: string) {
-  const existing = await prisma.conversation.findFirst({
-    where: { organizationId, contactId, status: "OPEN" },
+  const existing = await prisma.conversation.findMany({
+    where: { organizationId, contactId },
+    orderBy: { updatedAt: "desc" },
   });
-  if (existing) return existing;
+
+  const active = selectActiveConversation(existing);
+  if (active) return active;
 
   return prisma.conversation.create({
     data: { organizationId, contactId },

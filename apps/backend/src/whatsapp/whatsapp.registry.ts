@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { getOrCreateAiSettings } from "../ai/ai-settings.service.js";
+import { getOrCreateAiSettings, resolveResponseDelaySeconds } from "../ai/ai-settings.service.js";
 import { getAiOrchestrator } from "../ai/ai.factory.js";
 import { buildSystemPrompt } from "../ai/prompt.js";
 import { env } from "../config/env.js";
@@ -72,6 +72,8 @@ function getOrCreateProvider(organizationId: string): WhatsAppProvider {
 
       if (isDuplicate) return;
 
+      const replyStartedAt = Date.now();
+
       console.log(`📩 [org:${organizationId}] Message enregistré :`, {
         from: message.fromJid,
         text: message.text,
@@ -114,6 +116,7 @@ function getOrCreateProvider(organizationId: string): WhatsAppProvider {
         aiEnabled: !handoff && !stop,
       });
 
+      await waitForConfiguredDelay(replyStartedAt, settings.responseDelaySeconds);
       await instance.sendMessage(message.fromJid, aiReply.reply);
       await recordOutboundMessage({
         conversationId: conversation.id,
@@ -132,6 +135,12 @@ function getOrCreateProvider(organizationId: string): WhatsAppProvider {
   });
 
   return instance;
+}
+
+function waitForConfiguredDelay(startedAt: number, delaySeconds: unknown) {
+  const remainingMs = resolveResponseDelaySeconds(delaySeconds) * 1000 - (Date.now() - startedAt);
+  if (remainingMs <= 0) return Promise.resolve();
+  return new Promise((resolve) => setTimeout(resolve, remainingMs));
 }
 
 export async function connectWhatsAppAccount(organizationId: string): Promise<void> {

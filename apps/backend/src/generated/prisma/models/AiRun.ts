@@ -469,14 +469,6 @@ export type AiRunUncheckedUpdateManyWithoutConversationNestedInput = {
   deleteMany?: Prisma.AiRunScalarWhereInput | Prisma.AiRunScalarWhereInput[]
 }
 
-export type IntFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type AiRunCreateWithoutConversationInput = {
   id?: string
   provider: string

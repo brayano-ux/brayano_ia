@@ -1,4 +1,23 @@
-const API = window.API_BASE_URL || localStorage.getItem("brayano_api") || "https://brayano-ia-5.onrender.com";
+function resolveLocalApiBase() {
+  const fallback = "http://localhost:3000";
+  const candidates = [window.API_BASE_URL, localStorage.getItem("brayano_api"), fallback];
+
+  for (const value of candidates) {
+    if (!value) continue;
+    try {
+      const url = new URL(value);
+      if (url.hostname === "localhost" || url.hostname === "127.0.0.1") {
+        return value.replace(/\/$/, "");
+      }
+    } catch {
+      /* ignore invalid stored URLs */
+    }
+  }
+
+  return fallback;
+}
+
+const API = resolveLocalApiBase();
 let orgId = localStorage.getItem("brayano_org");
 let conversations = [];
 const $ = (selector) => document.querySelector(selector);
@@ -183,7 +202,7 @@ async function api(path, options = {}) {
 }
 function initials(name = "?") { return name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase(); }
 function formatTime(date) { return new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit" }).format(new Date(date)); }
-function setView(view) { document.querySelectorAll(".view").forEach((item) => item.classList.toggle("hidden", item.id !== `${view}-view`)); document.querySelectorAll(".nav-item[data-view]").forEach((item) => item.classList.toggle("active", item.dataset.view === view)); if (view === "inbox") renderInbox(); if (view === "agent") loadSettings(); if (view === "whatsapp") loadWhatsApp(); }
+function setView(view) { document.querySelectorAll(".view").forEach((item) => item.classList.toggle("hidden", item.id !== `${view}-view`)); document.querySelectorAll(".nav-item[data-view]").forEach((item) => item.classList.toggle("active", item.dataset.view === view)); if (view === "inbox") renderInbox(); if (view === "agent") loadSettings(); if (view === "settings") loadDelaySettings(); if (view === "whatsapp") loadWhatsApp(); }
 async function loadOrganizations() {
   const data = await api("/organizations");
   const select = $("#org-select");
@@ -241,12 +260,39 @@ async function reply(event, id) { event.preventDefault(); const input = event.ta
 async function toggleAi(id, enabled) { try { await api(`/organizations/${orgId}/conversations/${id}/ai/${enabled ? "disable" : "enable"}`, { method: "POST" }); showToast(enabled ? "IA désactivée" : "IA réactivée"); await refresh(); await openConversation(id); } catch (error) { showToast(error.message); } }
 async function loadSettings() { try { const { settings } = await api(`/organizations/${orgId}/ai-settings`); $("#agent-name").value = settings.agentName || ""; $("#business-info").value = settings.businessInfo || ""; $("#system-prompt").value = settings.systemPrompt || ""; $("#welcome-message").value = settings.welcomeMessage || ""; } catch (error) { showToast(error.message); } }
 async function saveSettings(event) { event.preventDefault(); try { await api(`/organizations/${orgId}/ai-settings`, { method: "PUT", body: JSON.stringify({ agentName: $("#agent-name").value, businessInfo: $("#business-info").value, systemPrompt: $("#system-prompt").value, welcomeMessage: $("#welcome-message").value }) }); showToast("Configuration enregistrée"); } catch (error) { showToast(error.message); } }
+async function loadDelaySettings() {
+  try {
+    const { settings } = await api(`/organizations/${orgId}/ai-settings`);
+    const delay = [3, 5, 7].includes(settings.responseDelaySeconds) ? settings.responseDelaySeconds : 3;
+    const option = document.querySelector(`input[name="response-delay"][value="${delay}"]`);
+    if (option) option.checked = true;
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+async function saveDelaySettings(event) {
+  event.preventDefault();
+  const selected = document.querySelector('input[name="response-delay"]:checked');
+  const responseDelaySeconds = Number(selected?.value || 3);
+  try {
+    await api(`/organizations/${orgId}/ai-settings`, {
+      method: "PUT",
+      body: JSON.stringify({ responseDelaySeconds }),
+    });
+    showToast(`Délai enregistré : ${responseDelaySeconds} secondes`);
+  } catch (error) {
+    showToast(error.message);
+  }
+}
 async function loadWhatsApp() { try { const { status } = await api(`/organizations/${orgId}/whatsapp/status`); const connected = status === "CONNECTED"; $("#wa-title").textContent = connected ? "WhatsApp connecté" : status === "QR_PENDING" ? "Scannez le QR code" : "WhatsApp déconnecté"; $("#qr-status").textContent = connected ? "Connecté" : status === "QR_PENDING" ? "QR disponible" : "En attente"; $("#qr-status").className = `pill ${connected ? "" : "warning"}`; $("#disconnect-wa").classList.toggle("hidden", !connected); if (status === "QR_PENDING") { const result = await api(`/organizations/${orgId}/whatsapp/qr`); $("#qr-container").innerHTML = `<img src="${result.qr}" alt="QR code WhatsApp" style="width:230px;height:230px" />`; } else if (!connected) { $("#qr-container").innerHTML = ""; } } catch (error) { showToast(error.message); } }
 async function waitForWhatsAppStatus() { const deadline = Date.now() + 30000; while (Date.now() < deadline) { try { const { status } = await api(`/organizations/${orgId}/whatsapp/status`); if (status === "QR_PENDING" || status === "CONNECTED") { await loadWhatsApp(); return; } } catch (error) { /* ignore transient polling errors */ } await new Promise((resolve) => setTimeout(resolve, 2000)); } await loadWhatsApp(); }
 async function connectWhatsApp() { try { $("#connect-wa").disabled = true; await api(`/organizations/${orgId}/whatsapp/connect`, { method: "POST" }); showToast("Connexion WhatsApp initiée"); await waitForWhatsAppStatus(); } catch (error) { showToast(error.message); } finally { $("#connect-wa").disabled = false; } }
 async function disconnectWhatsApp() { try { await api(`/organizations/${orgId}/whatsapp/disconnect`, { method: "POST" }); showToast("Numéro déconnecté"); loadWhatsApp(); } catch (error) { showToast(error.message); } }
 document.querySelectorAll("[data-view], [data-view-target]").forEach((element) => element.onclick = () => setView(element.dataset.view || element.dataset.viewTarget));
-$("#agent-form").onsubmit = saveSettings; $("#save-agent").onclick = () => $("#agent-form").requestSubmit();
+$("#agent-form").onsubmit = saveSettings;
+$("#save-agent").onclick = () => $("#agent-form").requestSubmit();
+$("#delay-form").onsubmit = saveDelaySettings;
+$("#save-settings").onclick = () => $("#delay-form").requestSubmit();
 
 const logoutButton = document.createElement("button");
 logoutButton.className = "nav-item";

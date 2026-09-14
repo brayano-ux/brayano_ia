@@ -935,6 +935,47 @@
         box-shadow: 0 0 0 4px var(--violet-glow);
       }
 
+      .delay-options {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .delay-option {
+        position: relative;
+        cursor: pointer;
+      }
+
+      .delay-option input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .delay-option span {
+        display: grid;
+        gap: 4px;
+        padding: 16px 12px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-md);
+        background: var(--paper);
+        text-align: center;
+        font-weight: 700;
+        color: var(--ink);
+        transition: var(--transition);
+      }
+
+      .delay-option small {
+        font-weight: 500;
+        color: var(--muted);
+      }
+
+      .delay-option input:checked + span {
+        border-color: var(--violet);
+        background: var(--violet-light);
+        box-shadow: 0 0 0 4px var(--violet-glow);
+      }
+
       /* === WHATSAPP VIEW === */
       .whatsapp-grid {
         display: grid;
@@ -1182,7 +1223,7 @@
         </nav>
 
         <div class="sidebar-bottom">
-          <button class="nav-item"><span>⚙</span> Paramètres</button>
+          <button class="nav-item" data-view="settings"><span>⚙</span> Paramètres</button>
           <div class="user-card">
             <span class="avatar">AD</span>
             <div>
@@ -1356,6 +1397,38 @@
           </form>
         </section>
 
+        <!-- VIEW: SETTINGS -->
+        <section id="settings-view" class="view hidden">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">CONFIGURATION</p>
+              <h1>Paramètres</h1>
+              <p class="muted">Ajustez le délai avant que l'agent n'envoie sa réponse WhatsApp.</p>
+            </div>
+            <button class="primary" id="save-settings">Enregistrer</button>
+          </div>
+          <form id="delay-form" class="panel settings-form">
+            <div>
+              <label>Délai de réponse de l'IA</label>
+              <p class="muted" style="margin: 8px 0 14px">Un délai plus long rend les réponses moins robotiques et réduit le risque de restriction WhatsApp. Valeur par défaut : 3 secondes.</p>
+              <div class="delay-options">
+                <label class="delay-option">
+                  <input type="radio" name="response-delay" value="3" checked />
+                  <span>3 s<small>Par défaut</small></span>
+                </label>
+                <label class="delay-option">
+                  <input type="radio" name="response-delay" value="5" />
+                  <span>5 s<small>Modéré</small></span>
+                </label>
+                <label class="delay-option">
+                  <input type="radio" name="response-delay" value="7" />
+                  <span>7 s<small>Plus prudent</small></span>
+                </label>
+              </div>
+            </div>
+          </form>
+        </section>
+
         <!-- VIEW: WHATSAPP -->
         <section id="whatsapp-view" class="view hidden">
           <div class="page-heading">
@@ -1394,7 +1467,7 @@
     <div id="toast" class="toast"></div>
 
     <script>
-      window.API_BASE_URL = "https://brayano-ia-5.onrender.com";
+      window.API_BASE_URL = "http://localhost:3000";
 
       // Gestion mobile de la sidebar
       document.addEventListener("DOMContentLoaded", () => {

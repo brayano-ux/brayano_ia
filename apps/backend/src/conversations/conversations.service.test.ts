@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
-import { shouldReactivateAiAfterHandoff } from "./conversations.service.js";
+import { selectActiveConversation, shouldReactivateAiAfterHandoff } from "./conversations.service.js";
 
 describe("shouldReactivateAiAfterHandoff", () => {
   beforeEach(() => {
@@ -21,5 +21,22 @@ describe("shouldReactivateAiAfterHandoff", () => {
     const recentDate = new Date("2026-01-09T13:30:00.000Z");
 
     expect(shouldReactivateAiAfterHandoff(recentDate)).toBe(false);
+  });
+});
+
+describe("selectActiveConversation", () => {
+  it("keeps the handoff thread even if a newer OPEN duplicate exists", () => {
+    const selected = selectActiveConversation([
+      { id: "open-duplicate", status: "OPEN" as const },
+      { id: "handoff", status: "HUMAN_HANDOFF" as const },
+    ]);
+
+    expect(selected?.id).toBe("handoff");
+  });
+
+  it("reuses an OPEN conversation when there is no handoff", () => {
+    const selected = selectActiveConversation([{ id: "open", status: "OPEN" as const }]);
+
+    expect(selected?.id).toBe("open");
   });
 });
