@@ -97,11 +97,6 @@ function getOrCreateProvider(organizationId: string): WhatsAppProvider {
       }
 
       const settings = await getOrCreateAiSettings(organizationId);
-      const responseDelayMs = (settings.responseDelaySeconds ?? 5) * 1000;
-      if (responseDelayMs > 0) {
-        await new Promise((resolve) => setTimeout(resolve, responseDelayMs));
-      }
-
       const systemPrompt = buildSystemPrompt(settings);
       const history = await getRecentHistoryForAi(conversation.id);
       const aiReply = await getAiOrchestrator().getReply(conversation.id, systemPrompt, history);

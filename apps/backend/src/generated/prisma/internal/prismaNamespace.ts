@@ -1147,7 +1147,6 @@ export const AiSettingsScalarFieldEnum = {
   businessInfo: 'businessInfo',
   systemPrompt: 'systemPrompt',
   welcomeMessage: 'welcomeMessage',
-  responseDelaySeconds: 'responseDelaySeconds',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1328,20 +1327,6 @@ export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
 
 
 /**
- * Reference to a field of type 'Int'
- */
-export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
-    
-
-
-/**
- * Reference to a field of type 'Int[]'
- */
-export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
-    
-
-
-/**
  * Reference to a field of type 'UserRole'
  */
 export type EnumUserRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UserRole'>
@@ -1401,6 +1386,20 @@ export type EnumQualificationStatusFieldRefInput<$PrismaModel> = FieldRefInputTy
  * Reference to a field of type 'QualificationStatus[]'
  */
 export type ListEnumQualificationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QualificationStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Int'
+ */
+export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
+    
+
+
+/**
+ * Reference to a field of type 'Int[]'
+ */
+export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
     
 
 

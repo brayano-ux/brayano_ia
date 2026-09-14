@@ -39,26 +39,4 @@ describe("authRoute", () => {
     });
   });
 
-  it("stores the configured AI response delay", async () => {
-    const org = await prisma.organization.create({ data: { name: "Org test delay" } });
-    await prisma.aiSettings.create({
-      data: {
-        organizationId: org.id,
-        agentName: "Assistant test",
-        systemPrompt: "Réponds simplement.",
-      },
-    });
-
-    const app = Fastify();
-    await app.register(aiSettingsRoute);
-
-    const response = await app.inject({
-      method: "PUT",
-      url: `/organizations/${org.id}/ai-settings`,
-      payload: { responseDelaySeconds: 7 },
-    });
-
-    expect(response.statusCode).toBe(200);
-    expect(response.json().settings.responseDelaySeconds).toBe(7);
-  });
 });
