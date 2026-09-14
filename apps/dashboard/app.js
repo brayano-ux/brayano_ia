@@ -1,23 +1,4 @@
-function resolveLocalApiBase() {
-  const fallback = "http://localhost:3000";
-  const candidates = [window.API_BASE_URL, localStorage.getItem("brayano_api"), fallback];
-
-  for (const value of candidates) {
-    if (!value) continue;
-    try {
-      const url = new URL(value);
-      if (url.hostname === "localhost" || url.hostname === "127.0.0.1") {
-        return value.replace(/\/$/, "");
-      }
-    } catch {
-      /* ignore invalid stored URLs */
-    }
-  }
-
-  return fallback;
-}
-
-const API = resolveLocalApiBase();
+const API = window.API_BASE_URL || localStorage.getItem("brayano_api") || "https://brayano-ia-5.onrender.com";
 let orgId = localStorage.getItem("brayano_org");
 let conversations = [];
 const $ = (selector) => document.querySelector(selector);
