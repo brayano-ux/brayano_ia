@@ -1,6 +1,7 @@
 import { Boom } from "@hapi/boom";
 import makeWASocket, {
   DisconnectReason,
+  downloadMediaMessage,
   fetchLatestBaileysVersion,
   useMultiFileAuthState,
   type WASocket,
@@ -66,7 +67,7 @@ export class BaileysWhatsAppProvider implements WhatsAppProvider {
       }
     });
 
-    this.socket.ev.on("messages.upsert", ({ messages }) => {
+    this.socket.ev.on("messages.upsert", async ({ messages }) => {
       for (const msg of messages) {
         if (msg.key.fromMe || !msg.message) continue;
 
@@ -90,10 +91,34 @@ export class BaileysWhatsAppProvider implements WhatsAppProvider {
           msg.message.viewOnceMessageV2?.message ??
           msg.message;
 
-        const text =
+        let text =
           unwrapped.conversation ??
           unwrapped.extendedTextMessage?.text ??
           null;
+
+        const audioMessage = unwrapped.audioMessage;
+        let audio: IncomingWhatsAppMessage["audio"];
+        if (!text && audioMessage) {
+          try {
+            const media = await downloadMediaMessage(
+              msg,
+              "buffer",
+              {},
+              {
+                logger,
+                reuploadRequest: this.socket!.updateMediaMessage,
+              },
+            );
+            audio = {
+              data: media as Buffer,
+              mimeType: audioMessage.mimetype || "audio/ogg",
+            };
+            text = "[Audio à transcrire]";
+          } catch (error) {
+            console.error("❌ Impossible de télécharger l'audio WhatsApp :", error);
+            continue;
+          }
+        }
 
         // Phase 3 : texte uniquement. Les autres types (image, audio, ...)
         // sont ignorés ici et seront traités explicitement en Phase 4+.
@@ -104,6 +129,7 @@ export class BaileysWhatsAppProvider implements WhatsAppProvider {
           fromJid: remoteJid,
           text,
           timestamp: new Date(Number(msg.messageTimestamp) * 1000),
+          ...(audio ? { audio } : {}),
         };
 
         for (const handler of this.messageHandlers) {

@@ -13,6 +13,11 @@ export interface AIRawResult {
   latencyMs: number;
 }
 
+export interface AIAudioInput {
+  data: Buffer;
+  mimeType: string;
+}
+
 /**
  * Contrat stable entre l'orchestrateur et le fournisseur LLM concret.
  * Aucune autre partie de l'application ne doit importer un SDK LLM
@@ -21,4 +26,5 @@ export interface AIRawResult {
 export interface AIProvider {
   readonly name: string;
   generateResponse(input: AIRequestInput): Promise<AIRawResult>;
+  transcribeAudio(input: AIAudioInput): Promise<string>;
 }

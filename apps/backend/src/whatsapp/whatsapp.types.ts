@@ -5,6 +5,10 @@ export interface IncomingWhatsAppMessage {
   fromJid: string;
   text: string;
   timestamp: Date;
+  audio?: {
+    data: Buffer;
+    mimeType: string;
+  };
 }
 
 export interface ConnectionUpdatePayload {

@@ -1,6 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 import { env } from "../../config/env.js";
-import type { AIProvider, AIRawResult, AIRequestInput } from "../ai.types.js";
+import type { AIAudioInput, AIProvider, AIRawResult, AIRequestInput } from "../ai.types.js";
 
 export class GeminiProvider implements AIProvider {
   readonly name = "gemini";
@@ -31,5 +31,20 @@ export class GeminiProvider implements AIProvider {
       rawText: response.text ?? "",
       latencyMs: Date.now() - start,
     };
+  }
+
+  async transcribeAudio(input: AIAudioInput): Promise<string> {
+    const response = await this.client.models.generateContent({
+      model: env.GEMINI_MODEL,
+      contents: [{
+        role: "user",
+        parts: [
+          { inlineData: { data: input.data.toString("base64"), mimeType: input.mimeType } },
+          { text: "Transcris fidèlement cet audio en français. Retourne uniquement le texte transcrit, sans commentaire ni formatage." },
+        ],
+      }],
+    });
+
+    return response.text?.trim() ?? "";
   }
 }

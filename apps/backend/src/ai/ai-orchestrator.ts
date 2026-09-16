@@ -1,6 +1,6 @@
 import { env } from "../config/env.js";
 import { logAiRun } from "./ai-runs.service.js";
-import type { AIChatMessage, AIProvider } from "./ai.types.js";
+import type { AIAudioInput, AIChatMessage, AIProvider } from "./ai.types.js";
 import { aiReplySchema, type AIReply } from "./schemas.js";
 
 /**
@@ -60,6 +60,10 @@ export class AiOrchestrator {
     });
 
     return parsed ?? FALLBACK_REPLY;
+  }
+
+  async transcribeAudio(input: AIAudioInput): Promise<string> {
+    return this.provider.transcribeAudio(input);
   }
 
   private parseAndValidate(rawText: string): AIReply | null {

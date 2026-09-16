@@ -63,6 +63,15 @@ function getOrCreateProvider(organizationId: string): WhatsAppProvider {
 
   instance.onMessage(async (message: IncomingWhatsAppMessage) => {
     try {
+      if (message.audio) {
+        const transcription = await getAiOrchestrator().transcribeAudio(message.audio);
+        if (!transcription) {
+          console.warn(`[org:${organizationId}] Audio reçu sans transcription exploitable.`);
+          return;
+        }
+        message.text = `[Transcription audio] ${transcription}`;
+      }
+
       const { conversation, isDuplicate } = await recordInboundMessage({
         organizationId,
         fromJid: message.fromJid,
