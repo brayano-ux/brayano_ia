@@ -9,7 +9,7 @@ const envSchema = z.object({
   APP_URL: z.string().url(),
   DATABASE_URL: z.string().min(1, "DATABASE_URL est requis"),
   WHATSAPP_AUTH_DIR: z.string().default("./wa-session"),
-  LLM_PROVIDER: z.enum(["gemini", "mistral"]).default("mistral"),
+  LLM_PROVIDER: z.enum(["gemini", "mistral"]).default("gemini"),
   GEMINI_API_KEY: z.string().optional(),
   GEMINI_MODEL: z.string().default("gemini-2.5-flash"),
   MISTRAL_API_KEY: z.string().optional(),
