@@ -11,7 +11,7 @@ const envSchema = z.object({
   WHATSAPP_AUTH_DIR: z.string().default("./wa-session"),
   LLM_PROVIDER: z.enum(["gemini", "mistral"]).default("gemini"),
   GEMINI_API_KEY: z.string().optional(),
-  GEMINI_MODEL: z.string().default("gemini-2.5-flash"),
+  GEMINI_MODEL: z.string().default("gemini-3.6-flash"),
   MISTRAL_API_KEY: z.string().optional(),
   MISTRAL_MODEL: z.string().default("mistral-small-latest"),
   AI_AGENT_NAME: z.string().default("l'assistant Brayano AI"),

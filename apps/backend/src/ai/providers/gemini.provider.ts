@@ -17,7 +17,7 @@ export class GeminiProvider implements AIProvider {
   async generateResponse(input: AIRequestInput): Promise<AIRawResult> {
     const start = Date.now();
 
-    const model = env.GEMINI_MODEL ?? "gemini-2.5-flash";
+    const model = env.GEMINI_MODEL ?? "gemini-3.6-flash";
 
     const contents = input.history.map((message) => ({
       role: message.role === "assistant" ? "model" : "user",
@@ -40,7 +40,7 @@ export class GeminiProvider implements AIProvider {
   }
 
   async transcribeAudio(input: AIAudioInput): Promise<string> {
-    const model = env.GEMINI_MODEL ?? "gemini-2.5-flash";
+    const model = env.GEMINI_MODEL ?? "gemini-3.6-flash";
 
     const response = await this.client.models.generateContent({
       model,
