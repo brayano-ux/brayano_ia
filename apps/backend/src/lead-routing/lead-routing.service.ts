@@ -272,7 +272,9 @@ export async function resolveRoutingForLead(organizationId: string, city?: strin
   const normalizedCity = normalizeCityName(city ?? null);
 
   if (!normalizedCity) {
-    return { routed: false, routeType: "none", reason: "Ville absente ou non identifiable." };
+    const outcome = { routed: false, routeType: "none", reason: "Ville absente ou non identifiable." };
+    console.log(`[route:${organizationId}] Ville non identifiable pour le routage`, { rawCity: city, normalizedCity, outcome });
+    return outcome;
   }
 
   const locations = await getOrganizationRoutingTargets(organizationId);
@@ -280,7 +282,7 @@ export async function resolveRoutingForLead(organizationId: string, city?: strin
 
   if (exactMatch?.responsible?.[0]) {
     const responsible = exactMatch.responsible[0];
-    return {
+    const outcome = {
       routed: true,
       routeType: "location",
       locationId: exactMatch.id,
@@ -288,21 +290,48 @@ export async function resolveRoutingForLead(organizationId: string, city?: strin
       responsibleWhatsapp: responsible.whatsappNumber ?? undefined,
       reason: `Location détectée pour ${normalizedCity}`,
     };
+    console.log(`[route:${organizationId}] Responsable trouvé par ville`, {
+      rawCity: city,
+      normalizedCity,
+      locationId: exactMatch.id,
+      locationName: exactMatch.name,
+      responsibleId: responsible.id,
+      responsibleName: responsible.name,
+      responsibleWhatsapp: responsible.whatsappNumber,
+      outcome,
+    });
+    return outcome;
   }
 
   const settings = await getRoutingSettings(organizationId);
   if (settings?.fallbackResponsible?.whatsappNumber || settings?.fallbackWhatsApp) {
     const fallbackPhone = settings.fallbackResponsible?.whatsappNumber ?? settings.fallbackWhatsApp ?? "";
-    return {
+    const outcome = {
       routed: true,
       routeType: "fallback",
       ...(settings.fallbackResponsible?.id ? { responsibleId: settings.fallbackResponsible.id } : {}),
       responsibleWhatsapp: fallbackPhone,
       reason: `Fallback configuré pour ${normalizedCity}`,
     };
+    console.log(`[route:${organizationId}] Fallback utilisé pour le routage`, {
+      rawCity: city,
+      normalizedCity,
+      fallbackResponsibleId: settings.fallbackResponsible?.id,
+      fallbackResponsibleName: settings.fallbackResponsible?.name,
+      fallbackWhatsApp: settings.fallbackWhatsApp,
+      outcome,
+    });
+    return outcome;
   }
 
-  return { routed: false, routeType: "none", reason: `Aucune localisation correspondante pour ${normalizedCity}` };
+  const outcome = { routed: false, routeType: "none", reason: `Aucune localisation correspondante pour ${normalizedCity}` };
+  console.log(`[route:${organizationId}] Aucune route trouvée pour la ville`, {
+    rawCity: city,
+    normalizedCity,
+    locationsCount: locations.length,
+    outcome,
+  });
+  return outcome;
 }
 
 export async function registerQualifiedLead(input: {
@@ -413,7 +442,22 @@ export async function registerQualifiedLead(input: {
 
   try {
     const { sendWhatsAppMessageForOrg } = await import("../whatsapp/whatsapp.registry.js");
+    console.log(`[route:${input.organizationId}] Envoi notification au responsable`, {
+      city: lead.city,
+      routeType: routingResult.routeType,
+      responsibleId: routingResult.responsibleId,
+      responsibleWhatsapp: routingResult.responsibleWhatsapp,
+      leadId: lead.id,
+      leadName: lead.contactName,
+    });
     await sendWhatsAppMessageForOrg(input.organizationId, routingResult.responsibleWhatsapp, notificationMessage);
+    console.log(`[route:${input.organizationId}] Notification envoyée au responsable`, {
+      city: lead.city,
+      routeType: routingResult.routeType,
+      responsibleId: routingResult.responsibleId,
+      responsibleWhatsapp: routingResult.responsibleWhatsapp,
+      leadId: lead.id,
+    });
 
     const updatedLead = await prisma.prospectLead.update({
       where: { id: lead.id },
