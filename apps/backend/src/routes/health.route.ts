@@ -2,6 +2,11 @@ import type { FastifyInstance } from "fastify";
 import { pingDatabase } from "../database/client.js";
 
 export async function healthRoute(app: FastifyInstance) {
+  app.get("/", async () => ({
+    status: "ok",
+    timestamp: new Date().toISOString(),
+  }));
+
   app.get("/health", async () => {
     return {
       status: "ok",

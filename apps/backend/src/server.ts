@@ -68,7 +68,7 @@ async function buildServer() {
       return;
     }
 
-    const isPublicRoute = request.url === "/login" || request.url === "/register" || request.url.startsWith("/health");
+    const isPublicRoute = request.url === "/" || request.url === "/login" || request.url === "/register" || request.url.startsWith("/health");
     if (isPublicRoute) {
       return;
     }
