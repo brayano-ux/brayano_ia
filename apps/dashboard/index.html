@@ -878,6 +878,84 @@
         letter-spacing: -0.01em;
       }
 
+      .routing-settings {
+        margin-top: 24px;
+      }
+
+      .routing-forms {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+      }
+
+      .routing-form,
+      .routing-fallback,
+      .routing-list-panel {
+        padding: 20px;
+        background: var(--paper);
+        border: 1px solid var(--line);
+      }
+
+      .routing-form h3,
+      .routing-fallback h3,
+      .routing-list-panel h3 {
+        margin-top: 0;
+      }
+
+      .routing-form label,
+      .routing-fallback label {
+        display: grid;
+        gap: 7px;
+        margin-top: 14px;
+      }
+
+      .routing-form input,
+      .routing-form select,
+      .routing-fallback input,
+      .routing-fallback select {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .routing-form .primary,
+      .routing-fallback .primary {
+        width: 100%;
+      }
+
+      .routing-fallback,
+      .routing-list-panel {
+        margin-top: 20px;
+      }
+
+      .routing-item {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+        gap: 16px;
+        padding: 14px 0;
+        border-top: 1px solid var(--line-subtle);
+      }
+
+      .routing-item:first-child {
+        border-top: 0;
+        padding-top: 0;
+      }
+
+      .routing-item strong,
+      .routing-item small {
+        display: block;
+        overflow-wrap: anywhere;
+      }
+
+      .routing-item small {
+        margin-top: 4px;
+        color: var(--muted);
+      }
+
+      .routing-item ul {
+        margin: 0;
+        padding-left: 18px;
+        overflow-wrap: anywhere;
+      }
+
       /* Conversations list */
       .conversation-list {
         display: grid;
@@ -1525,6 +1603,35 @@
         .page-heading .primary {
           width: 100%;
         }
+
+        .routing-settings {
+          padding: 18px;
+        }
+
+        .routing-settings h2 {
+          margin-bottom: 16px !important;
+        }
+
+        .routing-forms {
+          grid-template-columns: 1fr;
+          gap: 14px;
+        }
+
+        .routing-form,
+        .routing-fallback,
+        .routing-list-panel {
+          padding: 16px;
+        }
+
+        .routing-fallback,
+        .routing-list-panel {
+          margin-top: 14px;
+        }
+
+        .routing-item {
+          grid-template-columns: 1fr;
+          gap: 8px;
+        }
       }
     </style>
   </head>
@@ -1841,10 +1948,10 @@
             </div>
           </form>
 
-          <div class="panel settings-form" style="margin-top: 24px;">
+          <div class="panel settings-form routing-settings">
             <h2 style="margin: 0 0 20px;">Zones et responsables</h2>
-            <div class="content-grid" style="grid-template-columns: 1fr 1fr; gap: 20px;">
-              <form id="location-form" class="panel" style="padding: 20px; background: #fff; border: 1px solid var(--line);">
+            <div class="content-grid routing-forms">
+              <form id="location-form" class="panel routing-form">
                 <h3 style="margin-top: 0;">Ajouter une zone</h3>
                 <label>
                   Nom de la zone
@@ -1861,7 +1968,7 @@
                 <button type="submit" class="primary" style="margin-top: 10px;">Enregistrer la zone</button>
               </form>
 
-              <form id="responsible-form" class="panel" style="padding: 20px; background: #fff; border: 1px solid var(--line);">
+              <form id="responsible-form" class="panel routing-form">
                 <h3 style="margin-top: 0;">Ajouter un responsable</h3>
                 <label>
                   Zone
@@ -1879,7 +1986,7 @@
               </form>
             </div>
 
-            <form id="fallback-form" class="panel" style="margin-top: 20px; padding: 20px; background: #fff; border: 1px solid var(--line);">
+            <form id="fallback-form" class="panel routing-fallback">
               <h3 style="margin-top: 0;">Fallback global</h3>
               <label>
                 Responsable de fallback
@@ -1892,7 +1999,7 @@
               <button type="submit" class="primary" style="margin-top: 10px;">Enregistrer le fallback</button>
             </form>
 
-            <div class="panel" style="margin-top: 20px; padding: 20px; background: #fff; border: 1px solid var(--line);">
+            <div class="panel routing-list-panel">
               <h3 style="margin-top: 0;">Zones configurées</h3>
               <div id="routing-locations-list"></div>
             </div>
