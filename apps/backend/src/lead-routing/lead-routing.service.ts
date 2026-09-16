@@ -272,7 +272,7 @@ export async function resolveRoutingForLead(organizationId: string, city?: strin
   const normalizedCity = normalizeCityName(city ?? null);
 
   if (!normalizedCity) {
-    const outcome = { routed: false, routeType: "none", reason: "Ville absente ou non identifiable." };
+    const outcome: LeadRoutingOutcome = { routed: false, routeType: "none", reason: "Ville absente ou non identifiable." };
     console.log(`[route:${organizationId}] Ville non identifiable pour le routage`, { rawCity: city, normalizedCity, outcome });
     return outcome;
   }
@@ -282,7 +282,7 @@ export async function resolveRoutingForLead(organizationId: string, city?: strin
 
   if (exactMatch?.responsible?.[0]) {
     const responsible = exactMatch.responsible[0];
-    const outcome = {
+    const outcome: LeadRoutingOutcome = {
       routed: true,
       routeType: "location",
       locationId: exactMatch.id,
@@ -306,7 +306,7 @@ export async function resolveRoutingForLead(organizationId: string, city?: strin
   const settings = await getRoutingSettings(organizationId);
   if (settings?.fallbackResponsible?.whatsappNumber || settings?.fallbackWhatsApp) {
     const fallbackPhone = settings.fallbackResponsible?.whatsappNumber ?? settings.fallbackWhatsApp ?? "";
-    const outcome = {
+    const outcome: LeadRoutingOutcome = {
       routed: true,
       routeType: "fallback",
       ...(settings.fallbackResponsible?.id ? { responsibleId: settings.fallbackResponsible.id } : {}),
@@ -324,7 +324,7 @@ export async function resolveRoutingForLead(organizationId: string, city?: strin
     return outcome;
   }
 
-  const outcome = { routed: false, routeType: "none", reason: `Aucune localisation correspondante pour ${normalizedCity}` };
+  const outcome: LeadRoutingOutcome = { routed: false, routeType: "none", reason: `Aucune localisation correspondante pour ${normalizedCity}` };
   console.log(`[route:${organizationId}] Aucune route trouvée pour la ville`, {
     rawCity: city,
     normalizedCity,
