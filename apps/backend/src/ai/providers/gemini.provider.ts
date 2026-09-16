@@ -7,11 +7,17 @@ export class GeminiProvider implements AIProvider {
   private readonly client: GoogleGenAI;
 
   constructor() {
+    if (!env.GEMINI_API_KEY) {
+      throw new Error("GEMINI_API_KEY est requis pour utiliser le provider Gemini.");
+    }
+
     this.client = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY });
   }
 
   async generateResponse(input: AIRequestInput): Promise<AIRawResult> {
     const start = Date.now();
+
+    const model = env.GEMINI_MODEL ?? "gemini-2.5-flash";
 
     const contents = input.history.map((message) => ({
       role: message.role === "assistant" ? "model" : "user",
@@ -19,7 +25,7 @@ export class GeminiProvider implements AIProvider {
     }));
 
     const response = await this.client.models.generateContent({
-      model: env.GEMINI_MODEL,
+      model,
       contents,
       config: {
         systemInstruction: input.systemPrompt,
@@ -34,8 +40,10 @@ export class GeminiProvider implements AIProvider {
   }
 
   async transcribeAudio(input: AIAudioInput): Promise<string> {
+    const model = env.GEMINI_MODEL ?? "gemini-2.5-flash";
+
     const response = await this.client.models.generateContent({
-      model: env.GEMINI_MODEL,
+      model,
       contents: [{
         role: "user",
         parts: [

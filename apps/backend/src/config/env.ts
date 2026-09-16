@@ -9,15 +9,33 @@ const envSchema = z.object({
   APP_URL: z.string().url(),
   DATABASE_URL: z.string().min(1, "DATABASE_URL est requis"),
   WHATSAPP_AUTH_DIR: z.string().default("./wa-session"),
-  LLM_PROVIDER: z.enum(["gemini"]).default("gemini"),
-  GEMINI_API_KEY: z.string().min(1, "GEMINI_API_KEY est requis"),
+  LLM_PROVIDER: z.enum(["gemini", "mistral"]).default("mistral"),
+  GEMINI_API_KEY: z.string().optional(),
   GEMINI_MODEL: z.string().default("gemini-2.5-flash"),
+  MISTRAL_API_KEY: z.string().optional(),
+  MISTRAL_MODEL: z.string().default("mistral-small-latest"),
   AI_AGENT_NAME: z.string().default("l'assistant Brayano AI"),
   AI_SYSTEM_PROMPT: z
     .string()
     .default(
       "Ton rôle est d'accueillir les visiteurs, répondre à leurs questions générales, et collecter leur nom et leur besoin.",
     ),
+}).superRefine((env, ctx) => {
+  if (env.LLM_PROVIDER === "gemini" && !env.GEMINI_API_KEY) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["GEMINI_API_KEY"],
+      message: "GEMINI_API_KEY est requis lorsque LLM_PROVIDER=gemini",
+    });
+  }
+
+  if (env.LLM_PROVIDER === "mistral" && !env.MISTRAL_API_KEY) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["MISTRAL_API_KEY"],
+      message: "MISTRAL_API_KEY est requis lorsque LLM_PROVIDER=mistral",
+    });
+  }
 });
 
 export type Env = z.infer<typeof envSchema>;

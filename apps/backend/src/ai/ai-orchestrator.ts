@@ -40,7 +40,7 @@ export class AiOrchestrator {
       await logAiRun({
         conversationId,
         provider: this.provider.name,
-        model: env.GEMINI_MODEL,
+        model: env.LLM_PROVIDER === "gemini" ? env.GEMINI_MODEL : env.MISTRAL_MODEL,
         latencyMs: 0,
         rawResponse: String(error),
         isValid: false,
@@ -53,7 +53,7 @@ export class AiOrchestrator {
     await logAiRun({
       conversationId,
       provider: this.provider.name,
-      model: env.GEMINI_MODEL,
+      model: env.LLM_PROVIDER === "gemini" ? env.GEMINI_MODEL : env.MISTRAL_MODEL,
       latencyMs,
       rawResponse: rawText,
       isValid: parsed !== null,
