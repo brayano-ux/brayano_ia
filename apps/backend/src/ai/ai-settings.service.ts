@@ -1,5 +1,6 @@
 import { env } from "../config/env.js";
 import { prisma } from "../database/client.js";
+import { NotFoundError } from "../shared/errors.js";
 
 export const RESPONSE_DELAY_OPTIONS = [3, 5, 7, 60, 120] as const;
 export const DEFAULT_RESPONSE_DELAY_SECONDS = 3;
@@ -27,6 +28,11 @@ export function resolveResponseDelaySeconds(value: unknown): ResponseDelaySecond
  * créés avec des valeurs par défaut génériques à la première demande.
  */
 export async function getOrCreateAiSettings(organizationId: string) {
+  const organization = await prisma.organization.findUnique({ where: { id: organizationId }, select: { id: true } });
+  if (!organization) {
+    throw new NotFoundError("Entreprise introuvable.");
+  }
+
   const existing = await prisma.aiSettings.findUnique({ where: { organizationId } });
   if (existing) return existing;
 
@@ -41,6 +47,11 @@ export async function getOrCreateAiSettings(organizationId: string) {
 }
 
 export async function updateAiSettings(organizationId: string, input: AiSettingsInput) {
+  const organization = await prisma.organization.findUnique({ where: { id: organizationId }, select: { id: true } });
+  if (!organization) {
+    throw new NotFoundError("Entreprise introuvable.");
+  }
+
   const updatePayload = {
     ...(input.agentName !== undefined ? { agentName: input.agentName } : {}),
     ...(input.systemPrompt !== undefined ? { systemPrompt: input.systemPrompt } : {}),

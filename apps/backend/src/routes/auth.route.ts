@@ -100,7 +100,7 @@ export async function getSessionFromToken(token: string | null) {
         email: true,
         organizationId: true,
         expiresAt: true,
-        user: { select: { email: true } },
+        user: { select: { email: true, organizationId: true } },
       },
     });
 
@@ -110,7 +110,11 @@ export async function getSessionFromToken(token: string | null) {
       return null;
     }
 
-    return { email: session.email, organizationId: session.organizationId ?? undefined };
+    const organizationId = session.organizationId === FALLBACK_ORGANIZATION_ID
+      ? session.user.organizationId
+      : session.organizationId ?? session.user.organizationId;
+
+    return { email: session.email, organizationId };
   });
 }
 
