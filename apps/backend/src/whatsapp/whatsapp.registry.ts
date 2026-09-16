@@ -113,16 +113,19 @@ function getOrCreateProvider(organizationId: string): WhatsAppProvider {
       const history = await getRecentHistoryForAi(conversation.id);
       const aiReply = await getAiOrchestrator().getReply(conversation.id, systemPrompt, history);
 
-      const qualificationFields = Array.isArray(settings.qualificationFields)
+      const configuredQualificationFields = Array.isArray(settings.qualificationFields)
         ? settings.qualificationFields.filter((field): field is string => typeof field === "string")
         : [];
-      const hasConfiguredQualification = qualificationFields.length > 0;
+      const qualificationFields = configuredQualificationFields.length
+        ? configuredQualificationFields
+        : ["name", "city", "need"];
+      const hasConfiguredQualification = configuredQualificationFields.length > 0;
       const hasRequiredData = qualificationFields.every((field) => {
         const value = aiReply.leadData[field];
         return typeof value === "string" && value.trim().length > 0;
       });
-      const handoff = aiReply.needsHuman || (hasRequiredData && aiReply.nextAction === "handoff");
-      const stop = aiReply.nextAction === "stop" && (!hasConfiguredQualification || hasRequiredData);
+      const handoff = hasRequiredData && (aiReply.needsHuman || aiReply.nextAction === "handoff");
+      const stop = aiReply.nextAction === "stop" && hasRequiredData;
       const qualificationStatus = hasConfiguredQualification && !hasRequiredData && aiReply.qualificationStatus === "qualified"
         ? "QUALIFYING"
         : aiReply.qualificationStatus.toUpperCase();
