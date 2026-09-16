@@ -22,20 +22,38 @@ async function buildServer() {
     ["application/json", "application/x-www-form-urlencoded"],
     { parseAs: "string" },
     (request, body, done) => {
-      if (typeof body !== "string" || body.trim() === "") {
+      if (typeof body !== "string") {
+        done(null, {});
+        return;
+      }
+
+      const rawBody = body.trim();
+      if (rawBody === "") {
         done(null, {});
         return;
       }
 
       try {
         if (request.headers["content-type"]?.includes("application/x-www-form-urlencoded")) {
-          done(null, Object.fromEntries(new URLSearchParams(body)));
+          done(null, Object.fromEntries(new URLSearchParams(rawBody)));
           return;
         }
 
-        done(null, JSON.parse(body));
+        const parsed = JSON.parse(rawBody);
+        done(null, parsed);
       } catch (error) {
-        done(error as Error);
+        const fallback = rawBody.startsWith('"') && rawBody.endsWith('"') ? rawBody.slice(1, -1) : rawBody;
+
+        if (fallback !== rawBody) {
+          try {
+            done(null, JSON.parse(fallback));
+            return;
+          } catch {
+            // fall through to a controlled 400 from the route validation layer
+          }
+        }
+
+        done(null, rawBody);
       }
     },
   );
