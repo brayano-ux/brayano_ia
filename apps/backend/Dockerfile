@@ -2,8 +2,7 @@ FROM node:22-alpine
 
 WORKDIR /app
 
-ARG DATABASE_URL
-ENV DATABASE_URL=$DATABASE_URL
+ENV DATABASE_URL=postgresql://build:build@localhost:5432/build
 ENV WHATSAPP_AUTH_DIR=/data/wa-session
 
 RUN mkdir -p /data/wa-session

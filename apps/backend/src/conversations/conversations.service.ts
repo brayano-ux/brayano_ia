@@ -90,7 +90,10 @@ export async function recordOutboundMessage(input: RecordOutboundMessageInput) {
 export async function listConversations(organizationId: string) {
   return prisma.conversation.findMany({
     where: { organizationId },
-    include: { contact: true },
+    include: {
+      contact: true,
+      messages: { orderBy: { createdAt: "asc" } },
+    },
     orderBy: { updatedAt: "desc" },
   });
 }

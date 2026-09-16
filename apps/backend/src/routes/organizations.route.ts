@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { ValidationError } from "../shared/errors.js";
+import { requireAuth } from "./auth.route.js";
 import {
   createOrganization,
   listOrganizations,
@@ -21,8 +22,14 @@ export async function organizationsRoute(app: FastifyInstance) {
     return { organization };
   });
 
-  app.get("/organizations", async () => {
-    const organizations = await listOrganizations();
+  app.get("/organizations", async (request, reply) => {
+    const session = await requireAuth(request.headers.authorization);
+    if (!session?.organizationId) {
+      reply.code(401);
+      return { message: "Non autorisé." };
+    }
+
+    const organizations = await listOrganizations(session.organizationId);
     return { organizations };
   });
 }

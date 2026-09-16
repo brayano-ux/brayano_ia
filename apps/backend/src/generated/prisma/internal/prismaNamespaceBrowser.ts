@@ -59,7 +59,11 @@ export const ModelName = {
   Contact: 'Contact',
   Conversation: 'Conversation',
   AiRun: 'AiRun',
-  Message: 'Message'
+  Message: 'Message',
+  Location: 'Location',
+  Responsible: 'Responsible',
+  OrganizationRoutingSettings: 'OrganizationRoutingSettings',
+  ProspectLead: 'ProspectLead'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -95,6 +99,7 @@ export const AiSettingsScalarFieldEnum = {
   businessInfo: 'businessInfo',
   systemPrompt: 'systemPrompt',
   welcomeMessage: 'welcomeMessage',
+  qualificationFields: 'qualificationFields',
   responseDelaySeconds: 'responseDelaySeconds',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -200,6 +205,75 @@ export const MessageScalarFieldEnum = {
 export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeof MessageScalarFieldEnum]
 
 
+export const LocationScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  name: 'name',
+  city: 'city',
+  recipientWhatsApp: 'recipientWhatsApp',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LocationScalarFieldEnum = (typeof LocationScalarFieldEnum)[keyof typeof LocationScalarFieldEnum]
+
+
+export const ResponsibleScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  locationId: 'locationId',
+  name: 'name',
+  whatsappNumber: 'whatsappNumber',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ResponsibleScalarFieldEnum = (typeof ResponsibleScalarFieldEnum)[keyof typeof ResponsibleScalarFieldEnum]
+
+
+export const OrganizationRoutingSettingsScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  fallbackResponsibleId: 'fallbackResponsibleId',
+  fallbackWhatsApp: 'fallbackWhatsApp',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type OrganizationRoutingSettingsScalarFieldEnum = (typeof OrganizationRoutingSettingsScalarFieldEnum)[keyof typeof OrganizationRoutingSettingsScalarFieldEnum]
+
+
+export const ProspectLeadScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  conversationId: 'conversationId',
+  locationId: 'locationId',
+  responsibleId: 'responsibleId',
+  contactName: 'contactName',
+  whatsappNumber: 'whatsappNumber',
+  city: 'city',
+  need: 'need',
+  budget: 'budget',
+  product: 'product',
+  urgency: 'urgency',
+  status: 'status',
+  consentStatus: 'consentStatus',
+  routeStatus: 'routeStatus',
+  routedAt: 'routedAt',
+  isRouted: 'isRouted',
+  leadScore: 'leadScore',
+  leadData: 'leadData',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProspectLeadScalarFieldEnum = (typeof ProspectLeadScalarFieldEnum)[keyof typeof ProspectLeadScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -224,14 +298,6 @@ export const QueryMode = {
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
 
 
-export const NullsOrder = {
-  first: 'first',
-  last: 'last'
-} as const
-
-export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
-
-
 export const JsonNullValueFilter = {
   DbNull: DbNull,
   JsonNull: JsonNull,
@@ -239,4 +305,12 @@ export const JsonNullValueFilter = {
 } as const
 
 export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
+
+
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 

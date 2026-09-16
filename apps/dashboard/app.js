@@ -1,8 +1,37 @@
-const API = window.API_BASE_URL || localStorage.getItem("brayano_api") || "https://brayano-ia-5.onrender.com";
+const API = window.API_BASE_URL || localStorage.getItem("brayano_api") || "http://localhost:3000";
 let orgId = localStorage.getItem("brayano_org");
 let conversations = [];
+let commercialMetrics = [];
+let currentOrganizationName = "Brayano";
 const $ = (selector) => document.querySelector(selector);
 const showToast = (message) => { const toast = $("#toast"); toast.textContent = message; toast.classList.add("show"); setTimeout(() => toast.classList.remove("show"), 2800); };
+
+function updateRealtimeHeader() {
+  const dateLabel = document.getElementById("overview-date");
+  const greetingLabel = document.getElementById("company-greeting");
+  const orgName = $("#org-select")?.selectedOptions?.[0]?.textContent || currentOrganizationName || "Entreprise";
+
+  if (dateLabel) {
+    const now = new Date();
+    const formattedDate = new Intl.DateTimeFormat("fr-FR", {
+      weekday: "long",
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    }).format(now);
+    const formattedTime = new Intl.DateTimeFormat("fr-FR", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    }).format(now);
+    dateLabel.textContent = `${formattedDate.toUpperCase()} • ${formattedTime}`;
+  }
+
+  if (greetingLabel) {
+    greetingLabel.textContent = orgName || "Bienvenue";
+  }
+}
 
 function getSession() {
   try {
@@ -183,7 +212,82 @@ async function api(path, options = {}) {
 }
 function initials(name = "?") { return name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase(); }
 function formatTime(date) { return new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit" }).format(new Date(date)); }
-function setView(view) { document.querySelectorAll(".view").forEach((item) => item.classList.toggle("hidden", item.id !== `${view}-view`)); document.querySelectorAll(".nav-item[data-view]").forEach((item) => item.classList.toggle("active", item.dataset.view === view)); if (view === "inbox") renderInbox(); if (view === "agent") loadSettings(); if (view === "settings") loadDelaySettings(); if (view === "whatsapp") loadWhatsApp(); }
+function setView(view) { document.querySelectorAll(".view").forEach((item) => item.classList.toggle("hidden", item.id !== `${view}-view`)); document.querySelectorAll(".nav-item[data-view]").forEach((item) => item.classList.toggle("active", item.dataset.view === view)); if (view === "inbox") renderInbox(); if (view === "agent") loadSettings(); if (view === "settings") { loadDelaySettings(); loadRoutingConfig(); } if (view === "whatsapp") loadWhatsApp(); }
+
+function getDateWindow(days) {
+  if (days === "all") return null;
+  const end = new Date();
+  const start = new Date();
+  start.setDate(end.getDate() - (days === "today" ? 0 : days === "7d" ? 6 : 29));
+  start.setHours(0, 0, 0, 0);
+  end.setHours(23, 59, 59, 999);
+  return { start, end };
+}
+
+function countMessagesForPeriod(metric, period) {
+  if (period === "all") return metric.totalMessages;
+
+  const window = getDateWindow(period);
+  if (!window) return metric.totalMessages;
+
+  const relevantDays = metric.messagesByDay.filter(({ day }) => {
+    const value = new Date(`${day}T00:00:00`);
+    return value >= window.start && value <= window.end;
+  });
+
+  return relevantDays.reduce((sum, item) => sum + item.count, 0);
+}
+
+function renderCommercialMetrics() {
+  const list = $("#commercial-metrics-list");
+  if (!list) return;
+
+  const period = $("#commercial-period")?.value || "today";
+  const sortedMetrics = [...commercialMetrics]
+    .map((entry) => ({
+      ...entry,
+      visibleCount: countMessagesForPeriod(entry, period),
+    }))
+    .sort((a, b) => b.visibleCount - a.visibleCount);
+
+  if (!sortedMetrics.length) {
+    list.innerHTML = '<div class="empty-state">Aucun commercial configuré pour le moment.</div>';
+    return;
+  }
+
+  list.innerHTML = sortedMetrics.map((entry) => {
+    const badgeTone = entry.visibleCount > 0 ? "positive" : "neutral";
+    const latestEntry = entry.messagesByDay[0];
+    const latestDay = latestEntry ? new Date(`${latestEntry.day}T00:00:00`).toLocaleDateString("fr-FR", { day: "2-digit", month: "short" }) : "Aucun";
+    return `
+      <div class="commercial-item">
+        <div class="commercial-head">
+          <div class="commercial-avatar">${initials(entry.name)}</div>
+          <div>
+            <strong>${entry.name}</strong>
+            <small>${entry.locationName}</small>
+          </div>
+        </div>
+        <div class="commercial-stats">
+          <span class="metric-count ${badgeTone}">${entry.visibleCount}</span>
+          <span class="commercial-label">messages</span>
+        </div>
+        <div class="commercial-meta">Dernier message : ${latestDay}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+async function loadCommercialMetrics() {
+  try {
+    const { commercialMetrics: metrics = [] } = await api(`/organizations/${orgId}/routing/commercial-metrics`);
+    commercialMetrics = metrics;
+    renderCommercialMetrics();
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 async function loadOrganizations() {
   const data = await api("/organizations");
   const select = $("#org-select");
@@ -215,13 +319,17 @@ async function loadOrganizations() {
   }
 
   orgId = visibleOrganizations.some((org) => org.id === availableOrgId) ? availableOrgId : visibleOrganizations[0].id;
+  currentOrganizationName = visibleOrganizations.find((org) => org.id === orgId)?.name || visibleOrganizations[0].name || "Brayano";
   localStorage.setItem("brayano_org", orgId);
   select.value = orgId;
   select.onchange = () => {
     orgId = select.value;
+    currentOrganizationName = organizations.find((org) => org.id === orgId)?.name || "Brayano";
     localStorage.setItem("brayano_org", orgId);
+    updateRealtimeHeader();
     refresh();
   };
+  updateRealtimeHeader();
   refresh();
 }
 function getConversationStatusLabel(item) {
@@ -231,7 +339,33 @@ function getConversationStatusLabel(item) {
   return "Actif";
 }
 
-async function refresh() { const org = $("#org-select").selectedOptions[0]?.textContent || "Brayano"; $("#current-org").textContent = org; $("#org-initial").textContent = org[0]?.toUpperCase() || "B"; try { const [list, status] = await Promise.all([api(`/organizations/${orgId}/conversations`), api(`/organizations/${orgId}/whatsapp/status`)]); conversations = list.conversations || []; $("#metric-active").textContent = conversations.filter((item) => item.status === "OPEN" && item.aiEnabled).length; $("#metric-messages").textContent = conversations.reduce((count, item) => count + (item.messages?.length || 0), 0); updateWhatsAppMetric(status.status); renderRecent(); $("#nav-count").textContent = conversations.filter((item) => item.status === "OPEN" && item.aiEnabled).length; } catch (error) { showToast(error.message); } }
+async function refresh() {
+  const org = $("#org-select").selectedOptions[0]?.textContent || "Brayano";
+  $("#current-org").textContent = org;
+  $("#org-initial").textContent = org[0]?.toUpperCase() || "B";
+  updateRealtimeHeader();
+
+  try {
+    const [list, status, metrics] = await Promise.all([
+      api(`/organizations/${orgId}/conversations`),
+      api(`/organizations/${orgId}/whatsapp/status`),
+      api(`/organizations/${orgId}/routing/commercial-metrics`),
+    ]);
+
+    conversations = list.conversations || [];
+    commercialMetrics = metrics.commercialMetrics || [];
+
+    const activeConversationCount = conversations.filter((item) => item.status !== "CLOSED").length;
+    $("#metric-active").textContent = activeConversationCount;
+    $("#metric-messages").textContent = conversations.reduce((count, item) => count + (item.messages?.length || 0), 0);
+    updateWhatsAppMetric(status.status);
+    renderCommercialMetrics();
+    renderRecent();
+    $("#nav-count").textContent = activeConversationCount;
+  } catch (error) {
+    showToast(error.message);
+  }
+}
 function updateWhatsAppMetric(status) { const connected = status === "CONNECTED"; $("#metric-whatsapp").textContent = connected ? "Connecté" : "Déconnecté"; $("#metric-whatsapp").style.color = connected ? "var(--green)" : "var(--orange)"; $("#metric-phone").textContent = connected ? "Numéro opérationnel" : "Connexion requise"; }
 function conversationMarkup(item) { const name = item.contact?.displayName || item.contact?.whatsappJid || "Contact"; const last = item.messages?.[item.messages.length - 1]; const statusLabel = getConversationStatusLabel(item); return `<div class="conversation-row" data-id="${item.id}"><span class="contact-avatar">${initials(name)}</span><div class="conversation-main"><strong>${name}</strong><p>${last?.content || "Aucun message"}</p></div><div class="conversation-meta">${last ? formatTime(last.createdAt) : ""}<span class="unread">${statusLabel}</span></div></div>`; }
 function renderRecent() { const target = $("#recent-conversations"); target.innerHTML = conversations.length ? conversations.slice(0, 4).map(conversationMarkup).join("") : '<div class="empty-state">Aucune conversation pour le moment.</div>'; target.querySelectorAll(".conversation-row").forEach((row) => row.onclick = () => openConversation(row.dataset.id)); }
@@ -239,12 +373,12 @@ function renderInbox() { $("#inbox-total").textContent = `${conversations.length
 async function openConversation(id) { try { const data = await api(`/organizations/${orgId}/conversations/${id}`); const conversation = data.conversation; const name = conversation.contact?.displayName || conversation.contact?.whatsappJid || "Contact"; const statusLabel = conversation.status === "CLOSED" ? "Conversation fermée" : conversation.status === "HUMAN_HANDOFF" ? "En attente d'un humain" : conversation.aiEnabled ? "Agent IA actif" : "Prise en main humaine"; $("#conversation-detail").innerHTML = `<div class="panel-heading"><div><h2>${name}</h2><p class="muted">${statusLabel}</p></div><button class="ghost-button" id="toggle-ai">${conversation.aiEnabled ? "Désactiver l'IA" : "Réactiver l'IA"}</button></div><div class="messages">${(conversation.messages || []).map((message) => `<div style="padding:10px 13px;margin:8px 0;max-width:75%;border-radius:10px;background:${message.author === "CONTACT" ? "#f3f4f8" : "#f0edff"};margin-left:${message.author === "CONTACT" ? "0" : "auto"};font-size:12px">${message.content}</div>`).join("")}</div><form id="reply-form" style="display:flex;gap:8px;margin-top:22px"><input required placeholder="Écrire une réponse..." style="flex:1;border:1px solid var(--line);border-radius:8px;padding:11px" /><button class="primary">Envoyer</button></form>`; $("#toggle-ai").onclick = () => toggleAi(id, conversation.aiEnabled); $("#reply-form").onsubmit = (event) => reply(event, id); } catch (error) { showToast(error.message); } }
 async function reply(event, id) { event.preventDefault(); const input = event.target.querySelector("input"); try { await api(`/organizations/${orgId}/conversations/${id}/reply`, { method: "POST", body: JSON.stringify({ text: input.value }) }); input.value = ""; showToast("Réponse envoyée"); await refresh(); await openConversation(id); } catch (error) { showToast(error.message); } }
 async function toggleAi(id, enabled) { try { await api(`/organizations/${orgId}/conversations/${id}/ai/${enabled ? "disable" : "enable"}`, { method: "POST" }); showToast(enabled ? "IA désactivée" : "IA réactivée"); await refresh(); await openConversation(id); } catch (error) { showToast(error.message); } }
-async function loadSettings() { try { const { settings } = await api(`/organizations/${orgId}/ai-settings`); $("#agent-name").value = settings.agentName || ""; $("#business-info").value = settings.businessInfo || ""; $("#system-prompt").value = settings.systemPrompt || ""; $("#welcome-message").value = settings.welcomeMessage || ""; } catch (error) { showToast(error.message); } }
-async function saveSettings(event) { event.preventDefault(); try { await api(`/organizations/${orgId}/ai-settings`, { method: "PUT", body: JSON.stringify({ agentName: $("#agent-name").value, businessInfo: $("#business-info").value, systemPrompt: $("#system-prompt").value, welcomeMessage: $("#welcome-message").value }) }); showToast("Configuration enregistrée"); } catch (error) { showToast(error.message); } }
+async function loadSettings() { try { const { settings } = await api(`/organizations/${orgId}/ai-settings`); $("#agent-name").value = settings.agentName || ""; $("#business-info").value = settings.businessInfo || ""; $("#system-prompt").value = settings.systemPrompt || ""; $("#welcome-message").value = settings.welcomeMessage || ""; document.querySelectorAll('input[name="qualification-field"]').forEach((input) => { input.checked = (settings.qualificationFields || []).includes(input.value); }); } catch (error) { showToast(error.message); } }
+async function saveSettings(event) { event.preventDefault(); try { const qualificationFields = [...document.querySelectorAll('input[name="qualification-field"]:checked')].map((input) => input.value); await api(`/organizations/${orgId}/ai-settings`, { method: "PUT", body: JSON.stringify({ agentName: $("#agent-name").value, businessInfo: $("#business-info").value, systemPrompt: $("#system-prompt").value, welcomeMessage: $("#welcome-message").value, qualificationFields }) }); showToast("Configuration enregistrée"); } catch (error) { showToast(error.message); } }
 async function loadDelaySettings() {
   try {
     const { settings } = await api(`/organizations/${orgId}/ai-settings`);
-    const delay = [3, 5, 7].includes(settings.responseDelaySeconds) ? settings.responseDelaySeconds : 3;
+    const delay = [3, 5, 7, 60, 120].includes(settings.responseDelaySeconds) ? settings.responseDelaySeconds : 3;
     const option = document.querySelector(`input[name="response-delay"][value="${delay}"]`);
     if (option) option.checked = true;
   } catch (error) {
@@ -260,25 +394,155 @@ async function saveDelaySettings(event) {
       method: "PUT",
       body: JSON.stringify({ responseDelaySeconds }),
     });
-    showToast(`Délai enregistré : ${responseDelaySeconds} secondes`);
+    showToast(`Délai enregistré : ${responseDelaySeconds >= 60 ? `${responseDelaySeconds / 60} minute(s)` : `${responseDelaySeconds} secondes`}`);
   } catch (error) {
     showToast(error.message);
   }
 }
+
+async function loadRoutingConfig() {
+  try {
+    const { locations = [], settings = null } = await api(`/organizations/${orgId}/routing`);
+    const list = $("#routing-locations-list");
+    const locationSelect = $("#responsible-location");
+    const fallbackSelect = $("#fallback-responsible");
+
+    if (!list) return;
+
+    if (locationSelect) {
+      locationSelect.innerHTML = locations.length
+        ? locations.map((location) => `<option value="${location.id}">${location.name} — ${location.city}</option>`).join("")
+        : '<option value="">Aucune zone disponible</option>';
+    }
+
+    if (!locations.length) {
+      list.innerHTML = '<div class="empty-state">Aucune zone configurée pour le moment.</div>';
+    } else {
+      list.innerHTML = locations.map((location) => {
+        const responsible = (location.responsible || []).map((person) => `<li>${person.name} — ${person.whatsappNumber}</li>`).join("") || "<li>Aucun responsable</li>";
+        return `
+          <div class="routing-item">
+            <div>
+              <strong>${location.name}</strong>
+              <small>${location.city}</small>
+            </div>
+            <ul>${responsible}</ul>
+          </div>
+        `;
+      }).join("");
+    }
+
+    if (fallbackSelect) {
+      fallbackSelect.innerHTML = '<option value="">Aucun responsable</option>' +
+        locations.flatMap((location) => location.responsible || []).map((person) => `<option value="${person.id}">${person.name} — ${location.name}</option>`).join("");
+      fallbackSelect.value = settings?.fallbackResponsibleId || "";
+    }
+
+    const fallbackInput = $("#fallback-whatsapp");
+    if (fallbackInput) fallbackInput.value = settings?.fallbackWhatsApp || "";
+  } catch (error) {
+    showToast(error.message || "Impossible de charger la configuration de routage.");
+  }
+}
+
+async function saveLocationConfig(event) {
+  event.preventDefault();
+  const payload = {
+    name: $("#location-name").value,
+    city: $("#location-city").value,
+    recipientWhatsApp: $("#location-recipient-whatsapp").value,
+    active: true,
+  };
+
+  try {
+    await api(`/organizations/${orgId}/locations`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    $("#location-form").reset();
+    showToast("Zone enregistrée.");
+    loadRoutingConfig();
+  } catch (error) {
+    showToast(error.message || "Impossible d'enregistrer la zone.");
+  }
+}
+
+async function saveResponsibleConfig(event) {
+  event.preventDefault();
+  const payload = {
+    locationId: $("#responsible-location").value,
+    name: $("#responsible-name").value,
+    whatsappNumber: $("#responsible-whatsapp").value,
+    active: true,
+  };
+
+  try {
+    await api(`/organizations/${orgId}/responsibles`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    $("#responsible-form").reset();
+    showToast("Responsable enregistré.");
+    loadRoutingConfig();
+  } catch (error) {
+    showToast(error.message || "Impossible d'enregistrer le responsable.");
+  }
+}
+
+async function saveFallbackConfig(event) {
+  event.preventDefault();
+  const payload = {
+    fallbackResponsibleId: $("#fallback-responsible").value || null,
+    fallbackWhatsApp: $("#fallback-whatsapp").value || null,
+    active: true,
+  };
+
+  try {
+    await api(`/organizations/${orgId}/routing/fallback`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
+    showToast("Fallback enregistré.");
+    loadRoutingConfig();
+  } catch (error) {
+    showToast(error.message || "Impossible d'enregistrer le fallback.");
+  }
+}
+
 async function loadWhatsApp() { try { const { status } = await api(`/organizations/${orgId}/whatsapp/status`); const connected = status === "CONNECTED"; $("#wa-title").textContent = connected ? "WhatsApp connecté" : status === "QR_PENDING" ? "Scannez le QR code" : "WhatsApp déconnecté"; $("#qr-status").textContent = connected ? "Connecté" : status === "QR_PENDING" ? "QR disponible" : "En attente"; $("#qr-status").className = `pill ${connected ? "" : "warning"}`; $("#disconnect-wa").classList.toggle("hidden", !connected); if (status === "QR_PENDING") { const result = await api(`/organizations/${orgId}/whatsapp/qr`); $("#qr-container").innerHTML = `<img src="${result.qr}" alt="QR code WhatsApp" style="width:230px;height:230px" />`; } else if (!connected) { $("#qr-container").innerHTML = ""; } } catch (error) { showToast(error.message); } }
 async function waitForWhatsAppStatus() { const deadline = Date.now() + 30000; while (Date.now() < deadline) { try { const { status } = await api(`/organizations/${orgId}/whatsapp/status`); if (status === "QR_PENDING" || status === "CONNECTED") { await loadWhatsApp(); return; } } catch (error) { /* ignore transient polling errors */ } await new Promise((resolve) => setTimeout(resolve, 2000)); } await loadWhatsApp(); }
 async function connectWhatsApp() { try { $("#connect-wa").disabled = true; await api(`/organizations/${orgId}/whatsapp/connect`, { method: "POST" }); showToast("Connexion WhatsApp initiée"); await waitForWhatsAppStatus(); } catch (error) { showToast(error.message); } finally { $("#connect-wa").disabled = false; } }
-async function disconnectWhatsApp() { try { await api(`/organizations/${orgId}/whatsapp/disconnect`, { method: "POST" }); showToast("Numéro déconnecté"); loadWhatsApp(); } catch (error) { showToast(error.message); } }
+async function disconnectWhatsApp() {
+  const confirmed = window.confirm("Voulez-vous vraiment déconnecter ce numéro WhatsApp ?");
+  if (!confirmed) return;
+
+  try {
+    await api(`/organizations/${orgId}/whatsapp/disconnect`, { method: "POST" });
+    showToast("Numéro déconnecté");
+    loadWhatsApp();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
 document.querySelectorAll("[data-view], [data-view-target]").forEach((element) => element.onclick = () => setView(element.dataset.view || element.dataset.viewTarget));
 $("#agent-form").onsubmit = saveSettings;
 $("#save-agent").onclick = () => $("#agent-form").requestSubmit();
 $("#delay-form").onsubmit = saveDelaySettings;
 $("#save-settings").onclick = () => $("#delay-form").requestSubmit();
+$("#location-form").onsubmit = saveLocationConfig;
+$("#responsible-form").onsubmit = saveResponsibleConfig;
+$("#fallback-form").onsubmit = saveFallbackConfig;
 
 const logoutButton = document.createElement("button");
 logoutButton.className = "nav-item";
 logoutButton.innerHTML = "<span>⇠</span> Se déconnecter";
-logoutButton.onclick = logoutUser;
+logoutButton.onclick = () => {
+  const confirmed = window.confirm("Voulez-vous vraiment vous déconnecter ?");
+  if (confirmed) {
+    logoutUser();
+  }
+};
 const sidebarBottom = $(".sidebar-bottom");
 sidebarBottom.appendChild(logoutButton);
 
@@ -288,5 +552,8 @@ if (newOrgButton) {
     logoutUser("register");
   };
 }
+
+$("#commercial-period")?.addEventListener("change", renderCommercialMetrics);
+setInterval(updateRealtimeHeader, 1000);
 
 initAuthFlow();

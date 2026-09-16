@@ -13,6 +13,7 @@ import {
   updateConversationQualification,
 } from "../conversations/conversations.service.js";
 import { prisma } from "../database/client.js";
+import { registerQualifiedLead } from "../lead-routing/lead-routing.service.js";
 import { BaileysWhatsAppProvider } from "./baileys.provider.js";
 import type {
   IncomingWhatsAppMessage,
@@ -103,10 +104,21 @@ function getOrCreateProvider(organizationId: string): WhatsAppProvider {
       const history = await getRecentHistoryForAi(conversation.id);
       const aiReply = await getAiOrchestrator().getReply(conversation.id, systemPrompt, history);
 
-      const handoff = aiReply.needsHuman || aiReply.nextAction === "handoff";
-      const stop = aiReply.nextAction === "stop";
+      const qualificationFields = Array.isArray(settings.qualificationFields)
+        ? settings.qualificationFields.filter((field): field is string => typeof field === "string")
+        : [];
+      const hasConfiguredQualification = qualificationFields.length > 0;
+      const hasRequiredData = qualificationFields.every((field) => {
+        const value = aiReply.leadData[field];
+        return typeof value === "string" && value.trim().length > 0;
+      });
+      const handoff = aiReply.needsHuman || (hasRequiredData && aiReply.nextAction === "handoff");
+      const stop = aiReply.nextAction === "stop" && (!hasConfiguredQualification || hasRequiredData);
+      const qualificationStatus = hasConfiguredQualification && !hasRequiredData && aiReply.qualificationStatus === "qualified"
+        ? "QUALIFYING"
+        : aiReply.qualificationStatus.toUpperCase();
       await updateConversationQualification(conversation.id, {
-        qualificationStatus: aiReply.qualificationStatus.toUpperCase() as
+        qualificationStatus: qualificationStatus as
           | "NOT_QUALIFIED"
           | "QUALIFYING"
           | "QUALIFIED",
@@ -115,6 +127,18 @@ function getOrCreateProvider(organizationId: string): WhatsAppProvider {
         status: handoff ? "HUMAN_HANDOFF" : stop ? "CLOSED" : "OPEN",
         aiEnabled: !handoff && !stop,
       });
+
+      const hasLeadData = Object.keys(aiReply.leadData).length > 0;
+      const shouldRegisterLead = hasLeadData || aiReply.qualificationStatus === "qualified" || aiReply.leadScore >= 70;
+      if (shouldRegisterLead && (!hasConfiguredQualification || hasRequiredData)) {
+        await registerQualifiedLead({
+          organizationId,
+          conversationId: conversation.id,
+          leadData: aiReply.leadData,
+          leadScore: aiReply.leadScore,
+          requiredFields: qualificationFields,
+        });
+      }
 
       await waitForConfiguredDelay(replyStartedAt, settings.responseDelaySeconds);
       await instance.sendMessage(message.fromJid, aiReply.reply);
@@ -149,6 +173,11 @@ export async function connectWhatsAppAccount(organizationId: string): Promise<vo
     return currentAttempt;
   }
 
+  const existingProvider = providers.get(organizationId);
+  if (existingProvider?.getStatus() === "DISCONNECTED") {
+    providers.delete(organizationId);
+  }
+
   const attempt = getOrCreateProvider(organizationId)
     .connect()
     .finally(() => {
@@ -161,18 +190,30 @@ export async function connectWhatsAppAccount(organizationId: string): Promise<vo
 export async function disconnectWhatsAppAccount(organizationId: string): Promise<void> {
   connectionAttempts.delete(organizationId);
   const provider = providers.get(organizationId);
-  if (!provider) return;
-  await provider.disconnect();
+
+  try {
+    if (provider) {
+      await provider.disconnect();
+    }
+  } finally {
+    providers.delete(organizationId);
+    fs.rmSync(path.join(resolvedAuthDir, organizationId), { recursive: true, force: true });
+  }
 }
 
 export async function restoreWhatsAppConnections(): Promise<void> {
   const accounts = await prisma.whatsAppAccount.findMany({
-    where: { status: { not: "DISCONNECTED" } },
-    select: { organizationId: true },
+    select: { organizationId: true, status: true },
   });
 
   for (const account of accounts) {
+    const authDir = path.join(resolvedAuthDir, account.organizationId);
+    const hasPersistedSession = fs.existsSync(authDir) && fs.readdirSync(authDir).length > 0;
+    const shouldRestore = account.status !== "DISCONNECTED" || hasPersistedSession;
+    if (!shouldRestore) continue;
+
     try {
+      console.log(`🔄 [startup] Restauration de la session WhatsApp pour org ${account.organizationId}`);
       await connectWhatsAppAccount(account.organizationId);
     } catch (error) {
       console.error(`❌ [startup] Échec de reconnexion WhatsApp pour org ${account.organizationId}:`, error);
@@ -197,5 +238,9 @@ export async function sendWhatsAppMessageForOrg(
   if (!provider) {
     throw new Error("Ce compte WhatsApp n'est pas connecté pour cette entreprise.");
   }
-  await provider.sendMessage(jid, text);
+
+  const recipientJid = jid.includes("@")
+    ? jid
+    : `${jid.replace(/\D/g, "")}@s.whatsapp.net`;
+  await provider.sendMessage(recipientJid, text);
 }

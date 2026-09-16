@@ -14,25 +14,30 @@ model Organization {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  users            User[]
-  whatsappAccounts WhatsAppAccount[]
-  contacts         Contact[]
-  conversations    Conversation[]
-  aiSettings       AiSettings?
+  users             User[]
+  whatsappAccounts  WhatsAppAccount[]
+  contacts          Contact[]
+  conversations     Conversation[]
+  aiSettings        AiSettings?
+  locations         Location[]
+  responsibleAgents Responsible[]
+  routingSettings   OrganizationRoutingSettings?
+  prospectLeads     ProspectLead[]
 
   @@map("organizations")
 }
 
 model AiSettings {
-  id                  String   @id @default(uuid())
-  organizationId      String   @unique @map("organization_id")
-  agentName           String   @default("Assistant") @map("agent_name")
-  businessInfo        String?  @map("business_info")
-  systemPrompt        String   @map("system_prompt")
-  welcomeMessage      String?  @map("welcome_message")
-  responseDelaySeconds Int     @default(3) @map("response_delay_seconds")
-  createdAt           DateTime @default(now()) @map("created_at")
-  updatedAt           DateTime @updatedAt @map("updated_at")
+  id                   String   @id @default(uuid())
+  organizationId       String   @unique @map("organization_id")
+  agentName            String   @default("Assistant") @map("agent_name")
+  businessInfo         String?  @map("business_info")
+  systemPrompt         String   @map("system_prompt")
+  welcomeMessage       String?  @map("welcome_message")
+  qualificationFields  Json?    @map("qualification_fields")
+  responseDelaySeconds Int      @default(3) @map("response_delay_seconds")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
 
   organization Organization @relation(fields: [organizationId], references: [id])
 
@@ -62,14 +67,14 @@ model User {
 }
 
 model Session {
-  id           String    @id @default(uuid())
-  userId       String    @map("user_id")
-  tokenHash    String    @unique @map("token_hash")
-  email        String
-  organizationId String?  @map("organization_id")
-  expiresAt    DateTime? @map("expires_at")
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
+  id             String    @id @default(uuid())
+  userId         String    @map("user_id")
+  tokenHash      String    @unique @map("token_hash")
+  email          String
+  organizationId String?   @map("organization_id")
+  expiresAt      DateTime? @map("expires_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -127,22 +132,23 @@ enum QualificationStatus {
 }
 
 model Conversation {
-  id             String             @id @default(uuid())
-  organizationId String             @map("organization_id")
-  contactId      String             @map("contact_id")
-  aiEnabled      Boolean            @default(true) @map("ai_enabled")
-  status         ConversationStatus @default(OPEN)
+  id                  String              @id @default(uuid())
+  organizationId      String              @map("organization_id")
+  contactId           String              @map("contact_id")
+  aiEnabled           Boolean             @default(true) @map("ai_enabled")
+  status              ConversationStatus  @default(OPEN)
   qualificationStatus QualificationStatus @default(NOT_QUALIFIED) @map("qualification_status")
-  leadScore      Int?               @map("lead_score")
-  leadData       Json?              @map("lead_data")
-  summary        String?
-  createdAt      DateTime           @default(now()) @map("created_at")
-  updatedAt      DateTime           @updatedAt @map("updated_at")
+  leadScore           Int?                @map("lead_score")
+  leadData            Json?               @map("lead_data")
+  summary             String?
+  createdAt           DateTime            @default(now()) @map("created_at")
+  updatedAt           DateTime            @updatedAt @map("updated_at")
 
-  organization Organization @relation(fields: [organizationId], references: [id])
-  contact      Contact      @relation(fields: [contactId], references: [id])
-  messages     Message[]
-  aiRuns       AiRun[]
+  organization  Organization   @relation(fields: [organizationId], references: [id])
+  contact       Contact        @relation(fields: [contactId], references: [id])
+  messages      Message[]
+  aiRuns        AiRun[]
+  prospectLeads ProspectLead[]
 
   @@index([organizationId])
   @@index([contactId])
@@ -200,4 +206,115 @@ model Message {
   @@unique([externalId])
   @@index([conversationId])
   @@map("messages")
+}
+
+model Location {
+  id                String   @id @default(uuid())
+  organizationId    String   @map("organization_id")
+  name              String
+  city              String
+  recipientWhatsApp String?  @map("recipient_whatsapp")
+  active            Boolean  @default(true)
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  organization Organization   @relation(fields: [organizationId], references: [id])
+  responsible  Responsible[]
+  leads        ProspectLead[]
+
+  @@index([organizationId])
+  @@index([organizationId, city])
+  @@map("locations")
+}
+
+model Responsible {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  locationId     String   @map("location_id")
+  name           String
+  whatsappNumber String   @map("whatsapp_number")
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organization     Organization                  @relation(fields: [organizationId], references: [id])
+  location         Location                      @relation(fields: [locationId], references: [id])
+  leads            ProspectLead[]
+  fallbackSettings OrganizationRoutingSettings[] @relation("FallbackResponsible")
+
+  @@index([organizationId])
+  @@index([locationId])
+  @@map("responsibles")
+}
+
+model OrganizationRoutingSettings {
+  id                    String   @id @default(uuid())
+  organizationId        String   @unique @map("organization_id")
+  fallbackResponsibleId String?  @map("fallback_responsible_id")
+  fallbackWhatsApp      String?  @map("fallback_whatsapp")
+  active                Boolean  @default(true)
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  organization        Organization @relation(fields: [organizationId], references: [id])
+  fallbackResponsible Responsible? @relation("FallbackResponsible", fields: [fallbackResponsibleId], references: [id])
+
+  @@map("organization_routing_settings")
+}
+
+enum ProspectLeadStatus {
+  NEW
+  QUALIFYING
+  QUALIFIED
+  ROUTED
+  CONTACTED
+  CONVERTED
+  LOST
+}
+
+enum ProspectConsentStatus {
+  UNKNOWN
+  GRANTED
+  REFUSED
+}
+
+enum ProspectRoutingStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+model ProspectLead {
+  id             String                @id @default(uuid())
+  organizationId String                @map("organization_id")
+  conversationId String?               @map("conversation_id")
+  locationId     String?               @map("location_id")
+  responsibleId  String?               @map("responsible_id")
+  contactName    String?               @map("contact_name")
+  whatsappNumber String                @map("whatsapp_number")
+  city           String?
+  need           String?
+  budget         String?
+  product        String?
+  urgency        String?
+  status         ProspectLeadStatus    @default(NEW)
+  consentStatus  ProspectConsentStatus @default(UNKNOWN) @map("consent_status")
+  routeStatus    ProspectRoutingStatus @default(PENDING) @map("route_status")
+  routedAt       DateTime?             @map("routed_at")
+  isRouted       Boolean               @default(false) @map("is_routed")
+  leadScore      Int                   @default(0) @map("lead_score")
+  leadData       Json?                 @map("lead_data")
+  notes          String?
+  createdAt      DateTime              @default(now()) @map("created_at")
+  updatedAt      DateTime              @updatedAt @map("updated_at")
+
+  organization Organization  @relation(fields: [organizationId], references: [id])
+  conversation Conversation? @relation(fields: [conversationId], references: [id])
+  location     Location?     @relation(fields: [locationId], references: [id])
+  responsible  Responsible?  @relation(fields: [responsibleId], references: [id])
+
+  @@index([organizationId])
+  @@index([whatsappNumber])
+  @@index([organizationId, status])
+  @@map("prospect_leads")
 }

@@ -2,8 +2,7 @@ FROM node:22-alpine
 
 WORKDIR /app
 
-ARG DATABASE_URL
-ENV DATABASE_URL=$DATABASE_URL
+ENV DATABASE_URL=postgresql://build:build@localhost:5432/build
 
 COPY apps/backend/package*.json ./
 

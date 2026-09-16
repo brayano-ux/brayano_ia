@@ -65,6 +65,7 @@ export type AiSettingsCountAggregateOutputType = {
   businessInfo: number
   systemPrompt: number
   welcomeMessage: number
+  qualificationFields: number
   responseDelaySeconds: number
   createdAt: number
   updatedAt: number
@@ -111,6 +112,7 @@ export type AiSettingsCountAggregateInputType = {
   businessInfo?: true
   systemPrompt?: true
   welcomeMessage?: true
+  qualificationFields?: true
   responseDelaySeconds?: true
   createdAt?: true
   updatedAt?: true
@@ -210,6 +212,7 @@ export type AiSettingsGroupByOutputType = {
   businessInfo: string | null
   systemPrompt: string
   welcomeMessage: string | null
+  qualificationFields: runtime.JsonValue | null
   responseDelaySeconds: number
   createdAt: Date
   updatedAt: Date
@@ -245,6 +248,7 @@ export type AiSettingsWhereInput = {
   businessInfo?: Prisma.StringNullableFilter<"AiSettings"> | string | null
   systemPrompt?: Prisma.StringFilter<"AiSettings"> | string
   welcomeMessage?: Prisma.StringNullableFilter<"AiSettings"> | string | null
+  qualificationFields?: Prisma.JsonNullableFilter<"AiSettings">
   responseDelaySeconds?: Prisma.IntFilter<"AiSettings"> | number
   createdAt?: Prisma.DateTimeFilter<"AiSettings"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AiSettings"> | Date | string
@@ -258,6 +262,7 @@ export type AiSettingsOrderByWithRelationInput = {
   businessInfo?: Prisma.SortOrderInput | Prisma.SortOrder
   systemPrompt?: Prisma.SortOrder
   welcomeMessage?: Prisma.SortOrderInput | Prisma.SortOrder
+  qualificationFields?: Prisma.SortOrderInput | Prisma.SortOrder
   responseDelaySeconds?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -274,6 +279,7 @@ export type AiSettingsWhereUniqueInput = Prisma.AtLeast<{
   businessInfo?: Prisma.StringNullableFilter<"AiSettings"> | string | null
   systemPrompt?: Prisma.StringFilter<"AiSettings"> | string
   welcomeMessage?: Prisma.StringNullableFilter<"AiSettings"> | string | null
+  qualificationFields?: Prisma.JsonNullableFilter<"AiSettings">
   responseDelaySeconds?: Prisma.IntFilter<"AiSettings"> | number
   createdAt?: Prisma.DateTimeFilter<"AiSettings"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AiSettings"> | Date | string
@@ -287,6 +293,7 @@ export type AiSettingsOrderByWithAggregationInput = {
   businessInfo?: Prisma.SortOrderInput | Prisma.SortOrder
   systemPrompt?: Prisma.SortOrder
   welcomeMessage?: Prisma.SortOrderInput | Prisma.SortOrder
+  qualificationFields?: Prisma.SortOrderInput | Prisma.SortOrder
   responseDelaySeconds?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -307,6 +314,7 @@ export type AiSettingsScalarWhereWithAggregatesInput = {
   businessInfo?: Prisma.StringNullableWithAggregatesFilter<"AiSettings"> | string | null
   systemPrompt?: Prisma.StringWithAggregatesFilter<"AiSettings"> | string
   welcomeMessage?: Prisma.StringNullableWithAggregatesFilter<"AiSettings"> | string | null
+  qualificationFields?: Prisma.JsonNullableWithAggregatesFilter<"AiSettings">
   responseDelaySeconds?: Prisma.IntWithAggregatesFilter<"AiSettings"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"AiSettings"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"AiSettings"> | Date | string
@@ -318,6 +326,7 @@ export type AiSettingsCreateInput = {
   businessInfo?: string | null
   systemPrompt: string
   welcomeMessage?: string | null
+  qualificationFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   responseDelaySeconds?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -331,6 +340,7 @@ export type AiSettingsUncheckedCreateInput = {
   businessInfo?: string | null
   systemPrompt: string
   welcomeMessage?: string | null
+  qualificationFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   responseDelaySeconds?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -342,6 +352,7 @@ export type AiSettingsUpdateInput = {
   businessInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   systemPrompt?: Prisma.StringFieldUpdateOperationsInput | string
   welcomeMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qualificationFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   responseDelaySeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -355,6 +366,7 @@ export type AiSettingsUncheckedUpdateInput = {
   businessInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   systemPrompt?: Prisma.StringFieldUpdateOperationsInput | string
   welcomeMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qualificationFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   responseDelaySeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -367,6 +379,7 @@ export type AiSettingsCreateManyInput = {
   businessInfo?: string | null
   systemPrompt: string
   welcomeMessage?: string | null
+  qualificationFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   responseDelaySeconds?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -378,6 +391,7 @@ export type AiSettingsUpdateManyMutationInput = {
   businessInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   systemPrompt?: Prisma.StringFieldUpdateOperationsInput | string
   welcomeMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qualificationFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   responseDelaySeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -390,6 +404,7 @@ export type AiSettingsUncheckedUpdateManyInput = {
   businessInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   systemPrompt?: Prisma.StringFieldUpdateOperationsInput | string
   welcomeMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qualificationFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   responseDelaySeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -407,6 +422,7 @@ export type AiSettingsCountOrderByAggregateInput = {
   businessInfo?: Prisma.SortOrder
   systemPrompt?: Prisma.SortOrder
   welcomeMessage?: Prisma.SortOrder
+  qualificationFields?: Prisma.SortOrder
   responseDelaySeconds?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -494,6 +510,7 @@ export type AiSettingsCreateWithoutOrganizationInput = {
   businessInfo?: string | null
   systemPrompt: string
   welcomeMessage?: string | null
+  qualificationFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   responseDelaySeconds?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -505,6 +522,7 @@ export type AiSettingsUncheckedCreateWithoutOrganizationInput = {
   businessInfo?: string | null
   systemPrompt: string
   welcomeMessage?: string | null
+  qualificationFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   responseDelaySeconds?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -532,6 +550,7 @@ export type AiSettingsUpdateWithoutOrganizationInput = {
   businessInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   systemPrompt?: Prisma.StringFieldUpdateOperationsInput | string
   welcomeMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qualificationFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   responseDelaySeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -543,6 +562,7 @@ export type AiSettingsUncheckedUpdateWithoutOrganizationInput = {
   businessInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   systemPrompt?: Prisma.StringFieldUpdateOperationsInput | string
   welcomeMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qualificationFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   responseDelaySeconds?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -557,6 +577,7 @@ export type AiSettingsSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   businessInfo?: boolean
   systemPrompt?: boolean
   welcomeMessage?: boolean
+  qualificationFields?: boolean
   responseDelaySeconds?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -570,6 +591,7 @@ export type AiSettingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   businessInfo?: boolean
   systemPrompt?: boolean
   welcomeMessage?: boolean
+  qualificationFields?: boolean
   responseDelaySeconds?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -583,6 +605,7 @@ export type AiSettingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   businessInfo?: boolean
   systemPrompt?: boolean
   welcomeMessage?: boolean
+  qualificationFields?: boolean
   responseDelaySeconds?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -596,12 +619,13 @@ export type AiSettingsSelectScalar = {
   businessInfo?: boolean
   systemPrompt?: boolean
   welcomeMessage?: boolean
+  qualificationFields?: boolean
   responseDelaySeconds?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type AiSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "agentName" | "businessInfo" | "systemPrompt" | "welcomeMessage" | "responseDelaySeconds" | "createdAt" | "updatedAt", ExtArgs["result"]["aiSettings"]>
+export type AiSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "agentName" | "businessInfo" | "systemPrompt" | "welcomeMessage" | "qualificationFields" | "responseDelaySeconds" | "createdAt" | "updatedAt", ExtArgs["result"]["aiSettings"]>
 export type AiSettingsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
 }
@@ -624,6 +648,7 @@ export type $AiSettingsPayload<ExtArgs extends runtime.Types.Extensions.Internal
     businessInfo: string | null
     systemPrompt: string
     welcomeMessage: string | null
+    qualificationFields: runtime.JsonValue | null
     responseDelaySeconds: number
     createdAt: Date
     updatedAt: Date
@@ -1057,6 +1082,7 @@ export interface AiSettingsFieldRefs {
   readonly businessInfo: Prisma.FieldRef<"AiSettings", 'String'>
   readonly systemPrompt: Prisma.FieldRef<"AiSettings", 'String'>
   readonly welcomeMessage: Prisma.FieldRef<"AiSettings", 'String'>
+  readonly qualificationFields: Prisma.FieldRef<"AiSettings", 'Json'>
   readonly responseDelaySeconds: Prisma.FieldRef<"AiSettings", 'Int'>
   readonly createdAt: Prisma.FieldRef<"AiSettings", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"AiSettings", 'DateTime'>

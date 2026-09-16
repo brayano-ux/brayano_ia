@@ -405,7 +405,11 @@ export const ModelName = {
   Contact: 'Contact',
   Conversation: 'Conversation',
   AiRun: 'AiRun',
-  Message: 'Message'
+  Message: 'Message',
+  Location: 'Location',
+  Responsible: 'Responsible',
+  OrganizationRoutingSettings: 'OrganizationRoutingSettings',
+  ProspectLead: 'ProspectLead'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -421,7 +425,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "organization" | "aiSettings" | "user" | "session" | "whatsAppAccount" | "contact" | "conversation" | "aiRun" | "message"
+    modelProps: "organization" | "aiSettings" | "user" | "session" | "whatsAppAccount" | "contact" | "conversation" | "aiRun" | "message" | "location" | "responsible" | "organizationRoutingSettings" | "prospectLead"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1091,6 +1095,302 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Location: {
+      payload: Prisma.$LocationPayload<ExtArgs>
+      fields: Prisma.LocationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LocationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LocationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LocationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LocationPayload>
+        }
+        findFirst: {
+          args: Prisma.LocationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LocationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LocationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LocationPayload>
+        }
+        findMany: {
+          args: Prisma.LocationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LocationPayload>[]
+        }
+        create: {
+          args: Prisma.LocationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LocationPayload>
+        }
+        createMany: {
+          args: Prisma.LocationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LocationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LocationPayload>[]
+        }
+        delete: {
+          args: Prisma.LocationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LocationPayload>
+        }
+        update: {
+          args: Prisma.LocationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LocationPayload>
+        }
+        deleteMany: {
+          args: Prisma.LocationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LocationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LocationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LocationPayload>[]
+        }
+        upsert: {
+          args: Prisma.LocationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LocationPayload>
+        }
+        aggregate: {
+          args: Prisma.LocationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLocation>
+        }
+        groupBy: {
+          args: Prisma.LocationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LocationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LocationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LocationCountAggregateOutputType> | number
+        }
+      }
+    }
+    Responsible: {
+      payload: Prisma.$ResponsiblePayload<ExtArgs>
+      fields: Prisma.ResponsibleFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ResponsibleFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResponsiblePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ResponsibleFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResponsiblePayload>
+        }
+        findFirst: {
+          args: Prisma.ResponsibleFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResponsiblePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ResponsibleFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResponsiblePayload>
+        }
+        findMany: {
+          args: Prisma.ResponsibleFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResponsiblePayload>[]
+        }
+        create: {
+          args: Prisma.ResponsibleCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResponsiblePayload>
+        }
+        createMany: {
+          args: Prisma.ResponsibleCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ResponsibleCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResponsiblePayload>[]
+        }
+        delete: {
+          args: Prisma.ResponsibleDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResponsiblePayload>
+        }
+        update: {
+          args: Prisma.ResponsibleUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResponsiblePayload>
+        }
+        deleteMany: {
+          args: Prisma.ResponsibleDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ResponsibleUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ResponsibleUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResponsiblePayload>[]
+        }
+        upsert: {
+          args: Prisma.ResponsibleUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ResponsiblePayload>
+        }
+        aggregate: {
+          args: Prisma.ResponsibleAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateResponsible>
+        }
+        groupBy: {
+          args: Prisma.ResponsibleGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ResponsibleGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ResponsibleCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ResponsibleCountAggregateOutputType> | number
+        }
+      }
+    }
+    OrganizationRoutingSettings: {
+      payload: Prisma.$OrganizationRoutingSettingsPayload<ExtArgs>
+      fields: Prisma.OrganizationRoutingSettingsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.OrganizationRoutingSettingsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrganizationRoutingSettingsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.OrganizationRoutingSettingsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrganizationRoutingSettingsPayload>
+        }
+        findFirst: {
+          args: Prisma.OrganizationRoutingSettingsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrganizationRoutingSettingsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.OrganizationRoutingSettingsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrganizationRoutingSettingsPayload>
+        }
+        findMany: {
+          args: Prisma.OrganizationRoutingSettingsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrganizationRoutingSettingsPayload>[]
+        }
+        create: {
+          args: Prisma.OrganizationRoutingSettingsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrganizationRoutingSettingsPayload>
+        }
+        createMany: {
+          args: Prisma.OrganizationRoutingSettingsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.OrganizationRoutingSettingsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrganizationRoutingSettingsPayload>[]
+        }
+        delete: {
+          args: Prisma.OrganizationRoutingSettingsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrganizationRoutingSettingsPayload>
+        }
+        update: {
+          args: Prisma.OrganizationRoutingSettingsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrganizationRoutingSettingsPayload>
+        }
+        deleteMany: {
+          args: Prisma.OrganizationRoutingSettingsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.OrganizationRoutingSettingsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.OrganizationRoutingSettingsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrganizationRoutingSettingsPayload>[]
+        }
+        upsert: {
+          args: Prisma.OrganizationRoutingSettingsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrganizationRoutingSettingsPayload>
+        }
+        aggregate: {
+          args: Prisma.OrganizationRoutingSettingsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateOrganizationRoutingSettings>
+        }
+        groupBy: {
+          args: Prisma.OrganizationRoutingSettingsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OrganizationRoutingSettingsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.OrganizationRoutingSettingsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OrganizationRoutingSettingsCountAggregateOutputType> | number
+        }
+      }
+    }
+    ProspectLead: {
+      payload: Prisma.$ProspectLeadPayload<ExtArgs>
+      fields: Prisma.ProspectLeadFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ProspectLeadFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProspectLeadPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ProspectLeadFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProspectLeadPayload>
+        }
+        findFirst: {
+          args: Prisma.ProspectLeadFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProspectLeadPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ProspectLeadFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProspectLeadPayload>
+        }
+        findMany: {
+          args: Prisma.ProspectLeadFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProspectLeadPayload>[]
+        }
+        create: {
+          args: Prisma.ProspectLeadCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProspectLeadPayload>
+        }
+        createMany: {
+          args: Prisma.ProspectLeadCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ProspectLeadCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProspectLeadPayload>[]
+        }
+        delete: {
+          args: Prisma.ProspectLeadDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProspectLeadPayload>
+        }
+        update: {
+          args: Prisma.ProspectLeadUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProspectLeadPayload>
+        }
+        deleteMany: {
+          args: Prisma.ProspectLeadDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ProspectLeadUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ProspectLeadUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProspectLeadPayload>[]
+        }
+        upsert: {
+          args: Prisma.ProspectLeadUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProspectLeadPayload>
+        }
+        aggregate: {
+          args: Prisma.ProspectLeadAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateProspectLead>
+        }
+        groupBy: {
+          args: Prisma.ProspectLeadGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProspectLeadGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ProspectLeadCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProspectLeadCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1147,6 +1447,7 @@ export const AiSettingsScalarFieldEnum = {
   businessInfo: 'businessInfo',
   systemPrompt: 'systemPrompt',
   welcomeMessage: 'welcomeMessage',
+  qualificationFields: 'qualificationFields',
   responseDelaySeconds: 'responseDelaySeconds',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -1252,6 +1553,75 @@ export const MessageScalarFieldEnum = {
 export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeof MessageScalarFieldEnum]
 
 
+export const LocationScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  name: 'name',
+  city: 'city',
+  recipientWhatsApp: 'recipientWhatsApp',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LocationScalarFieldEnum = (typeof LocationScalarFieldEnum)[keyof typeof LocationScalarFieldEnum]
+
+
+export const ResponsibleScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  locationId: 'locationId',
+  name: 'name',
+  whatsappNumber: 'whatsappNumber',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ResponsibleScalarFieldEnum = (typeof ResponsibleScalarFieldEnum)[keyof typeof ResponsibleScalarFieldEnum]
+
+
+export const OrganizationRoutingSettingsScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  fallbackResponsibleId: 'fallbackResponsibleId',
+  fallbackWhatsApp: 'fallbackWhatsApp',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type OrganizationRoutingSettingsScalarFieldEnum = (typeof OrganizationRoutingSettingsScalarFieldEnum)[keyof typeof OrganizationRoutingSettingsScalarFieldEnum]
+
+
+export const ProspectLeadScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  conversationId: 'conversationId',
+  locationId: 'locationId',
+  responsibleId: 'responsibleId',
+  contactName: 'contactName',
+  whatsappNumber: 'whatsappNumber',
+  city: 'city',
+  need: 'need',
+  budget: 'budget',
+  product: 'product',
+  urgency: 'urgency',
+  status: 'status',
+  consentStatus: 'consentStatus',
+  routeStatus: 'routeStatus',
+  routedAt: 'routedAt',
+  isRouted: 'isRouted',
+  leadScore: 'leadScore',
+  leadData: 'leadData',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProspectLeadScalarFieldEnum = (typeof ProspectLeadScalarFieldEnum)[keyof typeof ProspectLeadScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1276,14 +1646,6 @@ export const QueryMode = {
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
 
 
-export const NullsOrder = {
-  first: 'first',
-  last: 'last'
-} as const
-
-export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
-
-
 export const JsonNullValueFilter = {
   DbNull: DbNull,
   JsonNull: JsonNull,
@@ -1291,6 +1653,14 @@ export const JsonNullValueFilter = {
 } as const
 
 export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
+
+
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 
 
 
@@ -1324,6 +1694,20 @@ export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel
  * Reference to a field of type 'DateTime[]'
  */
 export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -1405,20 +1789,6 @@ export type ListEnumQualificationStatusFieldRefInput<$PrismaModel> = FieldRefInp
 
 
 /**
- * Reference to a field of type 'Json'
- */
-export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
-    
-
-
-/**
- * Reference to a field of type 'QueryMode'
- */
-export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
-    
-
-
-/**
  * Reference to a field of type 'MessageDirection'
  */
 export type EnumMessageDirectionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MessageDirection'>
@@ -1457,6 +1827,48 @@ export type EnumMessageTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$Pris
  * Reference to a field of type 'MessageType[]'
  */
 export type ListEnumMessageTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MessageType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'ProspectLeadStatus'
+ */
+export type EnumProspectLeadStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProspectLeadStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'ProspectLeadStatus[]'
+ */
+export type ListEnumProspectLeadStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProspectLeadStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'ProspectConsentStatus'
+ */
+export type EnumProspectConsentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProspectConsentStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'ProspectConsentStatus[]'
+ */
+export type ListEnumProspectConsentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProspectConsentStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'ProspectRoutingStatus'
+ */
+export type EnumProspectRoutingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProspectRoutingStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'ProspectRoutingStatus[]'
+ */
+export type ListEnumProspectRoutingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProspectRoutingStatus[]'>
     
 
 
@@ -1633,6 +2045,10 @@ export type GlobalOmitConfig = {
   conversation?: Prisma.ConversationOmit
   aiRun?: Prisma.AiRunOmit
   message?: Prisma.MessageOmit
+  location?: Prisma.LocationOmit
+  responsible?: Prisma.ResponsibleOmit
+  organizationRoutingSettings?: Prisma.OrganizationRoutingSettingsOmit
+  prospectLead?: Prisma.ProspectLeadOmit
 }
 
 /* Types for Logging */

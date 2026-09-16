@@ -106,5 +106,8 @@ src/
 └── server.ts
 ```
 
-## Statut de la phase
-Multi-tenant activé en avance de phase : chaque entreprise créée via `POST /organizations` a son propre compte WhatsApp (session Baileys isolée), sa propre base de connaissances (`ai_settings`), et ses conversations totalement isolées. Pas encore d'authentification (Phase 9) — n'importe qui connaissant un `organizationId` peut l'utiliser pour l'instant, à garder en tête avant tout déploiement public.
+## Livraison
+
+Le backend utilise une authentification par session et isole les données par organisation. Les sessions WhatsApp sont stockées dans `WHATSAPP_AUTH_DIR` et restaurées automatiquement au démarrage lorsqu'elles existent encore.
+
+En production, utilise `npm run db:migrate:deploy` uniquement après avoir vérifié l'état de la base avec `npx prisma migrate status`. Ne lance jamais `prisma migrate reset` sur la base d'un client.

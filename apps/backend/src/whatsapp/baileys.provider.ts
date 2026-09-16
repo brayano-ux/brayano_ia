@@ -70,7 +70,7 @@ export class BaileysWhatsAppProvider implements WhatsAppProvider {
       for (const msg of messages) {
         if (msg.key.fromMe || !msg.message) continue;
 
-        const remoteJid = msg.key.remoteJid;
+        const remoteJid = msg.key.remoteJidAlt ?? msg.key.remoteJid;
         // On ignore les statuts WhatsApp (stories) et les groupes : le MVP
         // ne gère que les conversations 1:1 (Phase 0). Les groupes pourront
         // être supportés explicitement plus tard.

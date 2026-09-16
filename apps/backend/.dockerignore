@@ -1,0 +1,12 @@
+node_modules
+dist
+wa-session
+.env
+.env.*
+!.env.example
+*.log
+.git
+.vscode
+.agents
+.claude
+.windsurf

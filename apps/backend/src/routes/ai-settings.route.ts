@@ -11,7 +11,8 @@ const updateAiSettingsSchema = z.object({
   businessInfo: z.string().optional(),
   systemPrompt: z.string().min(1).optional(),
   welcomeMessage: z.string().optional(),
-  responseDelaySeconds: z.union([z.literal(3), z.literal(5), z.literal(7)]).optional(),
+  qualificationFields: z.array(z.enum(["name", "city", "need", "budget", "product", "urgency"])).optional(),
+  responseDelaySeconds: z.union([z.literal(3), z.literal(5), z.literal(7), z.literal(60), z.literal(120)]).optional(),
 });
 
 export async function aiSettingsRoute(app: FastifyInstance) {
@@ -33,13 +34,15 @@ export async function aiSettingsRoute(app: FastifyInstance) {
       businessInfo?: string | undefined;
       systemPrompt?: string | undefined;
       welcomeMessage?: string | undefined;
-      responseDelaySeconds?: 3 | 5 | 7 | undefined;
+      qualificationFields?: string[] | undefined;
+      responseDelaySeconds?: 3 | 5 | 7 | 60 | 120 | undefined;
     } = {};
 
     if (parsed.data.agentName !== undefined) settingsInput.agentName = parsed.data.agentName;
     if (parsed.data.businessInfo !== undefined) settingsInput.businessInfo = parsed.data.businessInfo;
     if (parsed.data.systemPrompt !== undefined) settingsInput.systemPrompt = parsed.data.systemPrompt;
     if (parsed.data.welcomeMessage !== undefined) settingsInput.welcomeMessage = parsed.data.welcomeMessage;
+    if (parsed.data.qualificationFields !== undefined) settingsInput.qualificationFields = parsed.data.qualificationFields;
     if (parsed.data.responseDelaySeconds !== undefined) {
       settingsInput.responseDelaySeconds = parsed.data.responseDelaySeconds;
     }

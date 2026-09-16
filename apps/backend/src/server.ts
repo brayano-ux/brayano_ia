@@ -5,6 +5,7 @@ import { authRoute, requireAuth } from "./routes/auth.route.js";
 import { conversationsRoute } from "./routes/conversations.route.js";
 import { healthRoute } from "./routes/health.route.js";
 import { organizationsRoute } from "./routes/organizations.route.js";
+import { routingRoute } from "./lead-routing/lead-routing.route.js";
 import { whatsappRoute } from "./routes/whatsapp.route.js";
 import { AppError } from "./shared/errors.js";
 import { restoreWhatsAppConnections } from "./whatsapp/whatsapp.registry.js";
@@ -57,6 +58,13 @@ async function buildServer() {
     const session = await requireAuth(request.headers.authorization);
     if (!session) {
       reply.code(401).send({ message: "Non autorisé." });
+      return;
+    }
+
+    const organizationMatch = /^\/organizations\/([^/?]+)/.exec(request.url);
+    if (organizationMatch && session.organizationId !== organizationMatch[1]) {
+      reply.code(403).send({ message: "Accès interdit à cette entreprise." });
+      return;
     }
   });
 
@@ -80,10 +88,15 @@ async function buildServer() {
   await app.register(authRoute);
   await app.register(organizationsRoute);
   await app.register(aiSettingsRoute);
+  await app.register(routingRoute);
   await app.register(whatsappRoute);
   await app.register(conversationsRoute);
 
-  await restoreWhatsAppConnections();
+  try {
+    await restoreWhatsAppConnections();
+  } catch (error) {
+    app.log.error(error, "Restauration WhatsApp ignorée au démarrage");
+  }
 
   return app;
 }

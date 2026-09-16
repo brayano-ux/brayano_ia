@@ -52,11 +52,11 @@ export async function whatsappRoute(app: FastifyInstance) {
 
   app.post("/organizations/:orgId/whatsapp/connect", async (request) => {
     const { orgId } = request.params as { orgId: string };
-    // Ne bloque pas la requête HTTP le temps que la connexion s'établisse.
-    connectWhatsAppAccount(orgId).catch((error) => {
-      app.log.error(error, `Échec de connexion WhatsApp pour l'organisation ${orgId}`);
-    });
-    return { message: "Connexion WhatsApp initiée." };
+    await connectWhatsAppAccount(orgId);
+    return {
+      message: "Connexion WhatsApp initiée.",
+      status: getWhatsAppAccountStatus(orgId),
+    };
   });
 
   app.post("/organizations/:orgId/whatsapp/disconnect", async (request) => {

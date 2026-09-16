@@ -62,3 +62,23 @@ export type AiRun = Prisma.AiRunModel
  * 
  */
 export type Message = Prisma.MessageModel
+/**
+ * Model Location
+ * 
+ */
+export type Location = Prisma.LocationModel
+/**
+ * Model Responsible
+ * 
+ */
+export type Responsible = Prisma.ResponsibleModel
+/**
+ * Model OrganizationRoutingSettings
+ * 
+ */
+export type OrganizationRoutingSettings = Prisma.OrganizationRoutingSettingsModel
+/**
+ * Model ProspectLead
+ * 
+ */
+export type ProspectLead = Prisma.ProspectLeadModel

@@ -71,3 +71,34 @@ export const MessageType = {
 } as const
 
 export type MessageType = (typeof MessageType)[keyof typeof MessageType]
+
+
+export const ProspectLeadStatus = {
+  NEW: 'NEW',
+  QUALIFYING: 'QUALIFYING',
+  QUALIFIED: 'QUALIFIED',
+  ROUTED: 'ROUTED',
+  CONTACTED: 'CONTACTED',
+  CONVERTED: 'CONVERTED',
+  LOST: 'LOST'
+} as const
+
+export type ProspectLeadStatus = (typeof ProspectLeadStatus)[keyof typeof ProspectLeadStatus]
+
+
+export const ProspectConsentStatus = {
+  UNKNOWN: 'UNKNOWN',
+  GRANTED: 'GRANTED',
+  REFUSED: 'REFUSED'
+} as const
+
+export type ProspectConsentStatus = (typeof ProspectConsentStatus)[keyof typeof ProspectConsentStatus]
+
+
+export const ProspectRoutingStatus = {
+  PENDING: 'PENDING',
+  SENT: 'SENT',
+  FAILED: 'FAILED'
+} as const
+
+export type ProspectRoutingStatus = (typeof ProspectRoutingStatus)[keyof typeof ProspectRoutingStatus]
