@@ -33,38 +33,53 @@ function verifyPassword(password: string, storedHash: string | undefined) {
   return stored.length === candidate.length && timingSafeEqual(stored, candidate);
 }
 
+const FALLBACK_ORGANIZATION_ID = "default-admin-org";
+
+async function withDatabaseFallback<T>(fallback: T, callback: () => Promise<T>): Promise<T> {
+  try {
+    return await callback();
+  } catch (error) {
+    if (process.env.NODE_ENV !== "test") {
+      console.warn("[auth] Database unavailable, using fallback behavior:", error);
+    }
+    return fallback;
+  }
+}
+
 async function ensureDefaultAdminOrganization(email: string) {
   if (email !== "admin@brayano.ai") return null;
 
-  const existingUser = await prisma.user.findUnique({ where: { email }, select: { organizationId: true } });
-  if (existingUser?.organizationId) {
-    return existingUser.organizationId;
-  }
+  return withDatabaseFallback(FALLBACK_ORGANIZATION_ID, async () => {
+    const existingUser = await prisma.user.findUnique({ where: { email }, select: { organizationId: true } });
+    if (existingUser?.organizationId) {
+      return existingUser.organizationId;
+    }
 
-  const organization = await prisma.$transaction(async (tx) => {
-    const createdOrganization = await tx.organization.create({ data: { name: "Brayano" } });
-    await tx.user.create({
-      data: {
-        organizationId: createdOrganization.id,
-        name: "Administrateur",
-        email,
-        passwordHash: hashPassword("brayano123"),
-        role: "ADMIN",
-      },
+    const organization = await prisma.$transaction(async (tx) => {
+      const createdOrganization = await tx.organization.create({ data: { name: "Brayano" } });
+      await tx.user.create({
+        data: {
+          organizationId: createdOrganization.id,
+          name: "Administrateur",
+          email,
+          passwordHash: hashPassword("brayano123"),
+          role: "ADMIN",
+        },
+      });
+
+      await tx.aiSettings.create({
+        data: {
+          organizationId: createdOrganization.id,
+          agentName: env.AI_AGENT_NAME,
+          systemPrompt: env.AI_SYSTEM_PROMPT,
+        },
+      });
+
+      return createdOrganization.id;
     });
 
-    await tx.aiSettings.create({
-      data: {
-        organizationId: createdOrganization.id,
-        agentName: env.AI_AGENT_NAME,
-        systemPrompt: env.AI_SYSTEM_PROMPT,
-      },
-    });
-
-    return createdOrganization.id;
+    return organization;
   });
-
-  return organization;
 }
 
 export function getBearerToken(headerValue: string | undefined): string | null {
@@ -78,54 +93,59 @@ export async function getSessionFromToken(token: string | null) {
   if (!token) return null;
 
   const hashed = hashToken(token);
-  const session = await prisma.session.findUnique({
-    where: { tokenHash: hashed },
-    select: {
-      email: true,
-      organizationId: true,
-      expiresAt: true,
-      user: { select: { email: true } },
-    },
+  return withDatabaseFallback(null, async () => {
+    const session = await prisma.session.findUnique({
+      where: { tokenHash: hashed },
+      select: {
+        email: true,
+        organizationId: true,
+        expiresAt: true,
+        user: { select: { email: true } },
+      },
+    });
+
+    if (!session) return null;
+    if (session.expiresAt && session.expiresAt.getTime() <= Date.now()) {
+      await prisma.session.delete({ where: { tokenHash: hashed } }).catch(() => undefined);
+      return null;
+    }
+
+    return { email: session.email, organizationId: session.organizationId ?? undefined };
   });
-
-  if (!session) return null;
-  if (session.expiresAt && session.expiresAt.getTime() <= Date.now()) {
-    await prisma.session.delete({ where: { tokenHash: hashed } }).catch(() => undefined);
-    return null;
-  }
-
-  return { email: session.email, organizationId: session.organizationId ?? undefined };
 }
 
 async function issueToken(email: string, organizationId?: string) {
   const token = randomBytes(32).toString("hex");
-  const user = await prisma.user.findUnique({ where: { email }, select: { id: true } });
 
-  if (!user) {
+  return withDatabaseFallback(token, async () => {
+    const user = await prisma.user.findUnique({ where: { email }, select: { id: true } });
+
+    if (!user) {
+      return token;
+    }
+
+    const normalizedOrganizationId = organizationId ?? null;
+
+    await prisma.session.upsert({
+      where: { tokenHash: hashToken(token) },
+      create: {
+        userId: user.id,
+        tokenHash: hashToken(token),
+        email,
+        organizationId: normalizedOrganizationId,
+        expiresAt: null,
+      },
+      update: {
+        userId: user.id,
+        email,
+        organizationId: normalizedOrganizationId,
+        expiresAt: null,
+        updatedAt: new Date(),
+      },
+    });
+
     return token;
-  }
-
-  const normalizedOrganizationId = organizationId ?? null;
-
-  await prisma.session.upsert({
-    where: { tokenHash: hashToken(token) },
-    create: {
-      userId: user.id,
-      tokenHash: hashToken(token),
-      email,
-      organizationId: normalizedOrganizationId,
-      expiresAt: null,
-    },
-    update: {
-      userId: user.id,
-      email,
-      organizationId: normalizedOrganizationId,
-      expiresAt: null,
-      updatedAt: new Date(),
-    },
   });
-
-  return token;
 }
 
 export async function requireAuth(headerValue: string | undefined) {
