@@ -4,6 +4,7 @@ services:
     runtime: docker
     plan: pro
     autoDeploy: true
+    healthCheckPath: /health
     dockerfilePath: ./apps/backend/Dockerfile
     dockerContext: ./apps/backend
     disk:
