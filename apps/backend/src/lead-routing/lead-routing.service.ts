@@ -196,61 +196,30 @@ export async function getCommercialMetrics(organizationId: string) {
     return [];
   }
 
-  const conversations = await prisma.conversation.findMany({
-    where: { organizationId },
-    include: {
-      messages: {
-        where: { direction: "INBOUND" },
-        orderBy: { createdAt: "asc" },
-      },
-    },
-  });
-
   const byResponsible = new Map<string, { total: number; byDay: Record<string, number> }>();
   for (const responsible of responsibles) {
     byResponsible.set(responsible.id, { total: 0, byDay: {} });
   }
 
   const leadAssignments = await prisma.prospectLead.findMany({
-    where: { organizationId, responsibleId: { not: null } },
-    select: { responsibleId: true, conversationId: true, createdAt: true },
+    where: {
+      organizationId,
+      responsibleId: { not: null },
+      status: "ROUTED",
+      isRouted: true,
+      routedAt: { not: null },
+    },
+    select: { responsibleId: true, routedAt: true },
   });
 
-  const responsibleConversationMap = new Map<string, string[]>();
-
   for (const assignment of leadAssignments) {
-    if (!assignment.responsibleId || !assignment.conversationId) continue;
-    const current = responsibleConversationMap.get(assignment.responsibleId) ?? [];
-    current.push(assignment.conversationId);
-    responsibleConversationMap.set(assignment.responsibleId, current);
-  }
+    if (!assignment.responsibleId || !assignment.routedAt) continue;
+    const stats = byResponsible.get(assignment.responsibleId);
+    if (!stats) continue;
 
-  const activeConversations = conversations.filter((conversation) => conversation.messages.length > 0);
-
-  for (const conversation of activeConversations) {
-    const inboundMessages = conversation.messages;
-    if (!inboundMessages.length) continue;
-
-    const relatedResponsibleIds = [...responsibleConversationMap.entries()]
-      .filter(([, ids]) => ids.includes(conversation.id))
-      .map(([responsibleId]) => responsibleId);
-
-    const targets = relatedResponsibleIds
-      .map((id) => responsibles.find((responsible) => responsible.id === id))
-      .filter(Boolean) as typeof responsibles;
-    if (!targets.length) continue;
-
-    const countPerResponsible = Math.max(1, Math.floor(inboundMessages.length / Math.max(1, targets.length)));
-    const remainder = inboundMessages.length % Math.max(1, targets.length);
-
-    for (const [index, responsible] of targets.entries()) {
-      const stats = byResponsible.get(responsible.id) ?? { total: 0, byDay: {} };
-      const day = inboundMessages[0]?.createdAt ? new Date(inboundMessages[0].createdAt).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
-      const amount = countPerResponsible + (index < remainder ? 1 : 0);
-      stats.total += amount;
-      stats.byDay[day] = (stats.byDay[day] ?? 0) + amount;
-      byResponsible.set(responsible.id, stats);
-    }
+    const day = new Date(assignment.routedAt).toISOString().slice(0, 10);
+    stats.total += 1;
+    stats.byDay[day] = (stats.byDay[day] ?? 0) + 1;
   }
 
   return responsibles.map((responsible) => {
