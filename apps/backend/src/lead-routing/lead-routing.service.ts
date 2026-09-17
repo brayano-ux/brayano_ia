@@ -388,7 +388,8 @@ export async function registerQualifiedLead(input: {
     return lead;
   }
 
-  const routingResult = await resolveRoutingForLead(input.organizationId, lead.city ?? undefined);
+  const routingValue = lead.city ?? readLeadValue("quartier", "neighborhood", "district");
+  const routingResult = await resolveRoutingForLead(input.organizationId, routingValue);
   if (!routingResult.routed || !routingResult.responsibleWhatsapp) {
     await prisma.prospectLead.update({
       where: { id: lead.id },
