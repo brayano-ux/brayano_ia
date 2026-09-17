@@ -9,11 +9,13 @@ const envSchema = z.object({
   APP_URL: z.string().url(),
   DATABASE_URL: z.string().min(1, "DATABASE_URL est requis"),
   WHATSAPP_AUTH_DIR: z.string().default("./wa-session"),
-  LLM_PROVIDER: z.enum(["gemini", "mistral"]).default("gemini"),
+  LLM_PROVIDER: z.enum(["gemini", "mistral", "openrouter"]).default("gemini"),
   GEMINI_API_KEY: z.string().optional(),
   GEMINI_MODEL: z.string().default("gemini-3.6-flash"),
   MISTRAL_API_KEY: z.string().optional(),
   MISTRAL_MODEL: z.string().default("mistral-small-latest"),
+  OPENROUTER_API_KEY: z.string().optional(),
+  OPENROUTER_MODEL: z.string().default("openai/gpt-4o-mini"),
   AI_AGENT_NAME: z.string().default("l'assistant Brayano AI"),
   AI_SYSTEM_PROMPT: z
     .string()
@@ -34,6 +36,14 @@ const envSchema = z.object({
       code: z.ZodIssueCode.custom,
       path: ["MISTRAL_API_KEY"],
       message: "MISTRAL_API_KEY est requis lorsque LLM_PROVIDER=mistral",
+    });
+  }
+
+  if (env.LLM_PROVIDER === "openrouter" && !env.OPENROUTER_API_KEY) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["OPENROUTER_API_KEY"],
+      message: "OPENROUTER_API_KEY est requis lorsque LLM_PROVIDER=openrouter",
     });
   }
 });

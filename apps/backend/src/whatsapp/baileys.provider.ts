@@ -1,4 +1,5 @@
 import { Boom } from "@hapi/boom";
+import fs from "node:fs";
 import makeWASocket, {
   DisconnectReason,
   downloadMediaMessage,
@@ -59,10 +60,17 @@ export class BaileysWhatsAppProvider implements WhatsAppProvider {
           ?.statusCode;
         const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
 
+        this.qrDataUrl = null;
         this.setStatus("DISCONNECTED");
 
         if (shouldReconnect) {
           await this.connect();
+        } else {
+          // WhatsApp a invalidé les identifiants persistés (déconnexion depuis
+          // le téléphone). Un prochain clic sur « Connecter » doit générer un
+          // nouveau QR au lieu de recharger cette session invalide.
+          fs.rmSync(this.authDir, { recursive: true, force: true });
+          fs.mkdirSync(this.authDir, { recursive: true });
         }
       }
     });

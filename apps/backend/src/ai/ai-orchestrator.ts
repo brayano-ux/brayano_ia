@@ -21,7 +21,10 @@ const FALLBACK_REPLY: AIReply = {
 };
 
 export class AiOrchestrator {
-  constructor(private readonly provider: AIProvider) {}
+  constructor(
+    private readonly provider: AIProvider,
+    private readonly fallbackProvider?: AIProvider,
+  ) {}
 
   async getReply(
     conversationId: string,
@@ -31,29 +34,37 @@ export class AiOrchestrator {
     let rawText = "";
     let latencyMs = 0;
 
+    let parsed: AIReply | null = null;
+    let providerName = this.provider.name;
+
     try {
       const result = await this.provider.generateResponse({ systemPrompt, history });
       rawText = result.rawText;
       latencyMs = result.latencyMs;
+      parsed = this.parseAndValidate(rawText);
     } catch (error) {
-      console.error("❌ Échec d'appel au fournisseur IA :", error);
-      await logAiRun({
-        conversationId,
-        provider: this.provider.name,
-        model: env.LLM_PROVIDER === "gemini" ? env.GEMINI_MODEL : env.MISTRAL_MODEL,
-        latencyMs: 0,
-        rawResponse: String(error),
-        isValid: false,
-      });
-      return FALLBACK_REPLY;
+      console.error(`❌ Échec du fournisseur IA principal (${this.provider.name}) :`, error);
+      rawText = String(error);
     }
 
-    const parsed = this.parseAndValidate(rawText);
+    if (!parsed && this.fallbackProvider) {
+      try {
+        const result = await this.fallbackProvider.generateResponse({ systemPrompt, history });
+        rawText = result.rawText;
+        latencyMs = result.latencyMs;
+        parsed = this.parseAndValidate(rawText);
+        providerName = this.fallbackProvider.name;
+        console.warn(`⚠️ Réponse obtenue avec le fournisseur de secours (${providerName}).`);
+      } catch (error) {
+        console.error(`❌ Échec du fournisseur IA de secours (${this.fallbackProvider.name}) :`, error);
+        rawText = String(error);
+      }
+    }
 
     await logAiRun({
       conversationId,
-      provider: this.provider.name,
-      model: env.LLM_PROVIDER === "gemini" ? env.GEMINI_MODEL : env.MISTRAL_MODEL,
+      provider: providerName,
+      model: providerName === "gemini" ? env.GEMINI_MODEL : providerName === "openrouter" ? env.OPENROUTER_MODEL : env.MISTRAL_MODEL,
       latencyMs,
       rawResponse: rawText,
       isValid: parsed !== null,
