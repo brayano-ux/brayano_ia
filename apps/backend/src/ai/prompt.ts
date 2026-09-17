@@ -93,7 +93,7 @@ comment lui répondrait-il de manière simple, naturelle et utile ?"
 La réponse doit être :
 
 - naturelle ;
-- courte lorsque possible ;
+-  Bien courte lorsque possible ;
 - contextualisée ;
 - chaleureuse sans être artificielle ;
 - adaptée au Cameroun ;

@@ -57,6 +57,16 @@ export type AiSettings = Prisma.AiSettingsModel
  */
 export type User = Prisma.UserModel
 /**
+ * Model AllowedEmail
+ * 
+ */
+export type AllowedEmail = Prisma.AllowedEmailModel
+/**
+ * Model SignupVerification
+ * 
+ */
+export type SignupVerification = Prisma.SignupVerificationModel
+/**
  * Model Session
  * 
  */

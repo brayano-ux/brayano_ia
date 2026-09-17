@@ -16,6 +16,11 @@ const envSchema = z.object({
   MISTRAL_MODEL: z.string().default("mistral-small-latest"),
   OPENROUTER_API_KEY: z.string().optional(),
   OPENROUTER_MODEL: z.string().default("openai/gpt-4o-mini"),
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.coerce.number().int().positive().default(587),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASSWORD: z.string().optional(),
+  SMTP_FROM: z.string().email().optional(),
   AI_AGENT_NAME: z.string().default("l'assistant Brayano AI"),
   AI_SYSTEM_PROMPT: z
     .string()

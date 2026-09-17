@@ -11,6 +11,8 @@
 export type * from './models/Organization.js'
 export type * from './models/AiSettings.js'
 export type * from './models/User.js'
+export type * from './models/AllowedEmail.js'
+export type * from './models/SignupVerification.js'
 export type * from './models/Session.js'
 export type * from './models/WhatsAppAccount.js'
 export type * from './models/Contact.js'

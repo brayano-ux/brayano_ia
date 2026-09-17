@@ -54,6 +54,8 @@ export const ModelName = {
   Organization: 'Organization',
   AiSettings: 'AiSettings',
   User: 'User',
+  AllowedEmail: 'AllowedEmail',
+  SignupVerification: 'SignupVerification',
   Session: 'Session',
   WhatsAppAccount: 'WhatsAppAccount',
   Contact: 'Contact',
@@ -120,6 +122,33 @@ export const UserScalarFieldEnum = {
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const AllowedEmailScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  createdAt: 'createdAt'
+} as const
+
+export type AllowedEmailScalarFieldEnum = (typeof AllowedEmailScalarFieldEnum)[keyof typeof AllowedEmailScalarFieldEnum]
+
+
+export const SignupVerificationScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  name: 'name',
+  companyName: 'companyName',
+  passwordHash: 'passwordHash',
+  codeHash: 'codeHash',
+  expiresAt: 'expiresAt',
+  lastSentAt: 'lastSentAt',
+  attempts: 'attempts',
+  verifiedAt: 'verifiedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SignupVerificationScalarFieldEnum = (typeof SignupVerificationScalarFieldEnum)[keyof typeof SignupVerificationScalarFieldEnum]
 
 
 export const SessionScalarFieldEnum = {

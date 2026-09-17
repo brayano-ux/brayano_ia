@@ -4,6 +4,7 @@ let orgId = localStorage.getItem("brayano_org");
 let conversations = [];
 let commercialMetrics = [];
 let currentOrganizationName = "Brayano";
+let pendingRegistrationEmail = "";
 const $ = (selector) => document.querySelector(selector);
 const showToast = (message) => { const toast = $("#toast"); toast.textContent = message; toast.classList.add("show"); setTimeout(() => toast.classList.remove("show"), 2800); };
 
@@ -78,6 +79,7 @@ function logoutUser(mode = "login") {
   $("#register-company").value = "";
   $("#register-email").value = "";
   $("#register-password").value = "";
+  $("#register-verification-code").value = "";
   showAuthMode(mode);
 }
 
@@ -89,6 +91,7 @@ function showDashboard() {
 function showAuthMode(mode) {
   const loginForm = $("#login-form");
   const registerForm = $("#register-form");
+  const verificationForm = $("#register-verification-form");
   const toggleButton = $("#toggle-auth-mode");
   const authTitle = $("#auth-title");
   const authHint = $("#auth-mode-hint");
@@ -98,6 +101,7 @@ function showAuthMode(mode) {
   const isLogin = mode === "login";
   loginForm.classList.toggle("hidden", !isLogin);
   registerForm.classList.toggle("hidden", isLogin);
+  verificationForm?.classList.add("hidden");
   authTitle.textContent = isLogin ? "Connexion à l'espace de pilotage" : "Créer mon espace client";
   authHint.textContent = isLogin ? "Connectez-vous avec votre compte." : "Créez votre entreprise et votre compte administrateur.";
   toggleButton.textContent = isLogin ? "Créer un compte" : "Se connecter";
@@ -146,6 +150,18 @@ function initAuthFlow() {
         body: JSON.stringify(payload),
       });
 
+      if (result.verificationRequired) {
+        pendingRegistrationEmail = result.email;
+        registerForm.classList.add("hidden");
+        verificationForm.classList.remove("hidden");
+        $("#auth-title").textContent = "Vérifier votre adresse email";
+        $("#auth-mode-hint").textContent = "Saisissez le code reçu par email.";
+        $("#toggle-auth-mode").classList.add("hidden");
+        startResendCountdown();
+        showToast(result.message);
+        return;
+      }
+
       localStorage.setItem("brayano_session", JSON.stringify({ email: result.user.email, token: result.token }));
       localStorage.setItem("brayano_org", result.organizationId);
       showDashboard();
@@ -153,6 +169,31 @@ function initAuthFlow() {
       loadOrganizations().catch((error) => showToast(`API inaccessible : ${error.message}`));
     } catch (error) {
       showToast(error.message || "Impossible de créer votre compte.");
+    }
+  };
+
+  verificationForm.onsubmit = async (event) => {
+    event.preventDefault();
+    try {
+      const result = await api("/register/verify", { method: "POST", body: JSON.stringify({ email: pendingRegistrationEmail, code: $("#register-verification-code").value }) });
+      localStorage.setItem("brayano_session", JSON.stringify({ email: result.user.email, token: result.token, organizationId: result.organizationId }));
+      localStorage.setItem("brayano_org", result.organizationId);
+      orgId = result.organizationId;
+      showDashboard();
+      showToast("Compte créé avec succès.");
+      loadOrganizations().catch((error) => showToast(`API inaccessible : ${error.message}`));
+    } catch (error) {
+      showToast(error.message || "Code incorrect.");
+    }
+  };
+
+  $("#resend-registration-code").onclick = async () => {
+    try {
+      const result = await api("/register/resend", { method: "POST", body: JSON.stringify({ email: pendingRegistrationEmail }) });
+      showToast(result.message);
+      startResendCountdown();
+    } catch (error) {
+      showToast(error.message);
     }
   };
 
@@ -181,6 +222,24 @@ function initAuthFlow() {
       showToast("Session expirée. Veuillez vous reconnecter.");
     });
   }
+}
+
+function startResendCountdown() {
+  const button = $("#resend-registration-code");
+  if (!button) return;
+  let remaining = 60;
+  button.disabled = true;
+  button.textContent = `Renvoyer le code (${remaining}s)`;
+  const timer = setInterval(() => {
+    remaining -= 1;
+    if (remaining <= 0) {
+      clearInterval(timer);
+      button.disabled = false;
+      button.textContent = "Renvoyer le code";
+      return;
+    }
+    button.textContent = `Renvoyer le code (${remaining}s)`;
+  }, 1000);
 }
 async function api(path, options = {}) {
   const requestHeaders = new Headers(options.headers || {});

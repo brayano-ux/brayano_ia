@@ -400,6 +400,8 @@ export const ModelName = {
   Organization: 'Organization',
   AiSettings: 'AiSettings',
   User: 'User',
+  AllowedEmail: 'AllowedEmail',
+  SignupVerification: 'SignupVerification',
   Session: 'Session',
   WhatsAppAccount: 'WhatsAppAccount',
   Contact: 'Contact',
@@ -425,7 +427,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "organization" | "aiSettings" | "user" | "session" | "whatsAppAccount" | "contact" | "conversation" | "aiRun" | "message" | "location" | "responsible" | "organizationRoutingSettings" | "prospectLead"
+    modelProps: "organization" | "aiSettings" | "user" | "allowedEmail" | "signupVerification" | "session" | "whatsAppAccount" | "contact" | "conversation" | "aiRun" | "message" | "location" | "responsible" | "organizationRoutingSettings" | "prospectLead"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -648,6 +650,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.UserCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.UserCountAggregateOutputType> | number
+        }
+      }
+    }
+    AllowedEmail: {
+      payload: Prisma.$AllowedEmailPayload<ExtArgs>
+      fields: Prisma.AllowedEmailFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AllowedEmailFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AllowedEmailPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AllowedEmailFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AllowedEmailPayload>
+        }
+        findFirst: {
+          args: Prisma.AllowedEmailFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AllowedEmailPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AllowedEmailFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AllowedEmailPayload>
+        }
+        findMany: {
+          args: Prisma.AllowedEmailFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AllowedEmailPayload>[]
+        }
+        create: {
+          args: Prisma.AllowedEmailCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AllowedEmailPayload>
+        }
+        createMany: {
+          args: Prisma.AllowedEmailCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AllowedEmailCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AllowedEmailPayload>[]
+        }
+        delete: {
+          args: Prisma.AllowedEmailDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AllowedEmailPayload>
+        }
+        update: {
+          args: Prisma.AllowedEmailUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AllowedEmailPayload>
+        }
+        deleteMany: {
+          args: Prisma.AllowedEmailDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AllowedEmailUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AllowedEmailUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AllowedEmailPayload>[]
+        }
+        upsert: {
+          args: Prisma.AllowedEmailUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AllowedEmailPayload>
+        }
+        aggregate: {
+          args: Prisma.AllowedEmailAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAllowedEmail>
+        }
+        groupBy: {
+          args: Prisma.AllowedEmailGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AllowedEmailGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AllowedEmailCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AllowedEmailCountAggregateOutputType> | number
+        }
+      }
+    }
+    SignupVerification: {
+      payload: Prisma.$SignupVerificationPayload<ExtArgs>
+      fields: Prisma.SignupVerificationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SignupVerificationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SignupVerificationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SignupVerificationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SignupVerificationPayload>
+        }
+        findFirst: {
+          args: Prisma.SignupVerificationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SignupVerificationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SignupVerificationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SignupVerificationPayload>
+        }
+        findMany: {
+          args: Prisma.SignupVerificationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SignupVerificationPayload>[]
+        }
+        create: {
+          args: Prisma.SignupVerificationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SignupVerificationPayload>
+        }
+        createMany: {
+          args: Prisma.SignupVerificationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SignupVerificationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SignupVerificationPayload>[]
+        }
+        delete: {
+          args: Prisma.SignupVerificationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SignupVerificationPayload>
+        }
+        update: {
+          args: Prisma.SignupVerificationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SignupVerificationPayload>
+        }
+        deleteMany: {
+          args: Prisma.SignupVerificationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SignupVerificationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SignupVerificationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SignupVerificationPayload>[]
+        }
+        upsert: {
+          args: Prisma.SignupVerificationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SignupVerificationPayload>
+        }
+        aggregate: {
+          args: Prisma.SignupVerificationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSignupVerification>
+        }
+        groupBy: {
+          args: Prisma.SignupVerificationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SignupVerificationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SignupVerificationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SignupVerificationCountAggregateOutputType> | number
         }
       }
     }
@@ -1470,6 +1620,33 @@ export const UserScalarFieldEnum = {
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
 
 
+export const AllowedEmailScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  createdAt: 'createdAt'
+} as const
+
+export type AllowedEmailScalarFieldEnum = (typeof AllowedEmailScalarFieldEnum)[keyof typeof AllowedEmailScalarFieldEnum]
+
+
+export const SignupVerificationScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  name: 'name',
+  companyName: 'companyName',
+  passwordHash: 'passwordHash',
+  codeHash: 'codeHash',
+  expiresAt: 'expiresAt',
+  lastSentAt: 'lastSentAt',
+  attempts: 'attempts',
+  verifiedAt: 'verifiedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SignupVerificationScalarFieldEnum = (typeof SignupVerificationScalarFieldEnum)[keyof typeof SignupVerificationScalarFieldEnum]
+
+
 export const SessionScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -2039,6 +2216,8 @@ export type GlobalOmitConfig = {
   organization?: Prisma.OrganizationOmit
   aiSettings?: Prisma.AiSettingsOmit
   user?: Prisma.UserOmit
+  allowedEmail?: Prisma.AllowedEmailOmit
+  signupVerification?: Prisma.SignupVerificationOmit
   session?: Prisma.SessionOmit
   whatsAppAccount?: Prisma.WhatsAppAccountOmit
   contact?: Prisma.ContactOmit

@@ -1674,6 +1674,15 @@
           <button type="submit" class="primary auth-submit">Créer mon espace</button>
         </form>
 
+        <form id="register-verification-form" class="auth-form hidden" method="post" action="javascript:void(0)">
+          <label>
+            <span>Code reçu par email</span>
+            <input id="register-verification-code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="123456" required />
+          </label>
+          <button type="submit" class="primary auth-submit">Vérifier le code</button>
+          <button id="resend-registration-code" type="button" class="text-button" disabled>Renvoyer le code</button>
+        </form>
+
         <p class="auth-hint">
           <span id="auth-mode-hint">Accédez à votre espace de pilotage</span>
         </p>

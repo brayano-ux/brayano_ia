@@ -1,5 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
+import nodemailer from "nodemailer";
 import { z } from "zod";
 import { prisma } from "../database/client.js";
 import { env } from "../config/env.js";
@@ -16,6 +17,13 @@ const registerSchema = z.object({
   password: z.string().min(8, "Le mot de passe doit contenir au moins 8 caractères."),
 });
 
+const verifyRegistrationSchema = z.object({
+  email: z.string().email(),
+  code: z.string().regex(/^\d{6}$/, "Le code doit contenir 6 chiffres."),
+});
+
+const resendRegistrationSchema = z.object({ email: z.string().email() });
+
 const VALID_USERS = new Map<string, string>([["admin@brayano.ai", hashPassword("brayano123")]]);
 
 function hashToken(token: string) {
@@ -31,6 +39,34 @@ function verifyPassword(password: string, storedHash: string | undefined) {
   const stored = Buffer.from(storedHash, "utf8");
   const candidate = Buffer.from(hashPassword(password), "utf8");
   return stored.length === candidate.length && timingSafeEqual(stored, candidate);
+}
+
+function createVerificationCode() {
+  return String(randomBytes(4).readUInt32BE(0) % 1000000).padStart(6, "0");
+}
+
+function isSmtpConfigured() {
+  return Boolean(env.SMTP_HOST && env.SMTP_USER && env.SMTP_PASSWORD && env.SMTP_FROM);
+}
+
+async function sendVerificationCode(email: string, code: string) {
+  if (!isSmtpConfigured()) {
+    throw new Error("La messagerie SMTP n'est pas configurée.");
+  }
+
+  const transporter = nodemailer.createTransport({
+    host: env.SMTP_HOST,
+    port: env.SMTP_PORT,
+    secure: env.SMTP_PORT === 465,
+    auth: { user: env.SMTP_USER, pass: env.SMTP_PASSWORD },
+  });
+
+  await transporter.sendMail({
+    from: env.SMTP_FROM,
+    to: email,
+    subject: "Votre code de vérification Brayano AI",
+    text: `Votre code de vérification est : ${code}. Il expire dans 10 minutes.`,
+  });
 }
 
 const FALLBACK_ORGANIZATION_ID = "default-admin-org";
@@ -214,6 +250,46 @@ export async function authRoute(app: FastifyInstance) {
         return { message: "Un compte avec cet email existe déjà." };
       }
 
+      if (email !== "admin@brayano.ai") {
+        const allowedEmail = await prisma.allowedEmail.findUnique({ where: { email } });
+        if (!allowedEmail) {
+          reply.code(403);
+          return { message: "Cette adresse email n'est pas autorisée à créer un compte." };
+        }
+
+        const existingVerification = await prisma.signupVerification.findUnique({ where: { email } });
+        if (existingVerification && Date.now() - existingVerification.lastSentAt.getTime() < 60_000) {
+          reply.code(429);
+          return { message: "Un code vient déjà d'être envoyé. Réessayez dans une minute." };
+        }
+
+        const code = createVerificationCode();
+        await sendVerificationCode(email, code);
+        await prisma.signupVerification.upsert({
+          where: { email },
+          update: {
+            name,
+            companyName,
+            passwordHash: hashPassword(parsed.data.password),
+            codeHash: hashToken(code),
+            expiresAt: new Date(Date.now() + 10 * 60_000),
+            lastSentAt: new Date(),
+            attempts: 0,
+            verifiedAt: null,
+          },
+          create: {
+            email,
+            name,
+            companyName,
+            passwordHash: hashPassword(parsed.data.password),
+            codeHash: hashToken(code),
+            expiresAt: new Date(Date.now() + 10 * 60_000),
+            lastSentAt: new Date(),
+          },
+        });
+        return { verificationRequired: true, email, message: "Un code de vérification a été envoyé par email." };
+      }
+
       const organization = await prisma.$transaction(async (tx) => {
         const createdOrganization = await tx.organization.create({ data: { name: companyName } });
         const createdUser = await tx.user.create({
@@ -251,6 +327,83 @@ export async function authRoute(app: FastifyInstance) {
       reply.code(500);
       return { message: "Impossible de créer le compte pour le moment." };
     }
+  });
+
+  app.post("/register/verify", async (request, reply) => {
+    const parsed = verifyRegistrationSchema.safeParse(request.body);
+    if (!parsed.success) {
+      reply.code(400);
+      return { message: parsed.error.issues[0]?.message ?? "Code invalide." };
+    }
+
+    const email = parsed.data.email.trim().toLowerCase();
+    const verification = await prisma.signupVerification.findUnique({ where: { email } });
+    if (!verification || verification.expiresAt.getTime() <= Date.now()) {
+      reply.code(400);
+      return { message: "Code invalide ou expiré." };
+    }
+    if (verification.attempts >= 5) {
+      reply.code(429);
+      return { message: "Nombre maximal de tentatives atteint." };
+    }
+
+    const validCode = hashToken(parsed.data.code) === verification.codeHash;
+    if (!validCode) {
+      await prisma.signupVerification.update({ where: { email }, data: { attempts: { increment: 1 } } });
+      reply.code(400);
+      return { message: "Code incorrect." };
+    }
+
+    try {
+      const organization = await prisma.$transaction(async (tx) => {
+        const createdOrganization = await tx.organization.create({ data: { name: verification.companyName } });
+        const createdUser = await tx.user.create({
+          data: {
+            organizationId: createdOrganization.id,
+            name: verification.name,
+            email,
+            passwordHash: verification.passwordHash,
+            role: "ADMIN",
+          },
+        });
+        await tx.aiSettings.create({
+          data: { organizationId: createdOrganization.id, agentName: env.AI_AGENT_NAME, systemPrompt: env.AI_SYSTEM_PROMPT },
+        });
+        await tx.signupVerification.delete({ where: { email } });
+        return { organization: createdOrganization, user: createdUser };
+      });
+
+      VALID_USERS.set(email, verification.passwordHash);
+      const token = await issueToken(email, organization.organization.id);
+      return { token, organizationId: organization.organization.id, organizationName: organization.organization.name, user: { email } };
+    } catch (error) {
+      app.log.error(error, "Register verification failed");
+      reply.code(500);
+      return { message: "Impossible de créer le compte pour le moment." };
+    }
+  });
+
+  app.post("/register/resend", async (request, reply) => {
+    const parsed = resendRegistrationSchema.safeParse(request.body);
+    if (!parsed.success) {
+      reply.code(400);
+      return { message: "Adresse email invalide." };
+    }
+
+    const email = parsed.data.email.trim().toLowerCase();
+    const verification = await prisma.signupVerification.findUnique({ where: { email } });
+    if (!verification || Date.now() - verification.lastSentAt.getTime() < 60_000) {
+      reply.code(429);
+      return { message: "Vous pourrez demander un nouveau code dans une minute." };
+    }
+
+    const code = createVerificationCode();
+    await sendVerificationCode(email, code);
+    await prisma.signupVerification.update({
+      where: { email },
+      data: { codeHash: hashToken(code), expiresAt: new Date(Date.now() + 10 * 60_000), lastSentAt: new Date(), attempts: 0 },
+    });
+    return { message: "Un nouveau code a été envoyé." };
   });
 
   app.get("/me", async (request, reply) => {
