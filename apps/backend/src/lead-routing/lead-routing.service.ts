@@ -19,6 +19,19 @@ export type LeadRoutingOutcome = {
   reason?: string;
 };
 
+const qualificationFieldLabels: Record<string, string> = {
+  name: "Nom",
+  city: "Ville",
+  need: "Besoin",
+  budget: "Budget",
+  product: "Produit ou service",
+  urgency: "Urgence",
+};
+
+function formatQualificationFieldLabel(field: string): string {
+  return qualificationFieldLabels[field] ?? field.replace(/[_-]+/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
 export function normalizeCityName(value?: string | null): string | null {
   if (!value || typeof value !== "string") return null;
 
@@ -394,15 +407,30 @@ export async function registerQualifiedLead(input: {
 
   const location = routingResult.locationId ? await prisma.location.findUnique({ where: { id: routingResult.locationId } }) : null;
 
+  const selectedFields = input.requiredFields?.length
+    ? input.requiredFields
+    : ["name", "city", "need"];
+  const leadValues: Record<string, unknown> = {
+    ...(input.leadData ?? {}),
+    name: lead.contactName,
+    city: lead.city,
+    need: lead.need,
+    budget: lead.budget,
+    product: lead.product,
+    urgency: lead.urgency,
+  };
+  const qualificationLines = selectedFields
+    .map((field) => {
+      const value = leadValues[field];
+      const formattedValue = typeof value === "string" && value.trim() ? value : "Non renseigné";
+      return `• ${formatQualificationFieldLabel(field)} : ${formattedValue}`;
+    });
+
   const notificationMessage = [
     "🔔 NOUVEAU PROSPECT QUALIFIÉ",
     "",
-    `👤 Nom : ${lead.contactName ?? "Non renseigné"}`,
     `📞 WhatsApp : ${lead.whatsappNumber}`,
-    `📍 Ville : ${lead.city ?? "Non renseignée"}`,
-    "",
-    `🛍️ Besoin : ${lead.need ?? "Non renseigné"}`,
-    `💰 Budget : ${lead.budget ?? "Non renseigné"}`,
+    ...qualificationLines,
     `📊 Score : ${lead.leadScore}/100`,
     "",
     "🤖 Prospect qualifié par Brayano AI.",

@@ -124,7 +124,7 @@ function getOrCreateProvider(organizationId: string): WhatsAppProvider {
         const value = aiReply.leadData[field];
         return typeof value === "string" && value.trim().length > 0;
       });
-      const handoff = hasRequiredData && (aiReply.needsHuman || aiReply.nextAction === "handoff");
+      const handoff = hasRequiredData;
       const stop = aiReply.nextAction === "stop" && hasRequiredData;
       const qualificationStatus = hasConfiguredQualification && !hasRequiredData && aiReply.qualificationStatus === "qualified"
         ? "QUALIFYING"

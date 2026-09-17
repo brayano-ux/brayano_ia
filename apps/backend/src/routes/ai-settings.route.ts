@@ -11,7 +11,7 @@ const updateAiSettingsSchema = z.object({
   businessInfo: z.string().optional(),
   systemPrompt: z.string().min(1).optional(),
   welcomeMessage: z.string().optional(),
-  qualificationFields: z.array(z.enum(["name", "city", "need", "budget", "product", "urgency"])).optional(),
+  qualificationFields: z.array(z.string().trim().min(1).max(60)).max(30).optional(),
   responseDelaySeconds: z.union([z.literal(3), z.literal(5), z.literal(7), z.literal(60), z.literal(120)]).optional(),
 });
 
