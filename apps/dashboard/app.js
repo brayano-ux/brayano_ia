@@ -110,9 +110,10 @@ function showAuthMode(mode) {
 function initAuthFlow() {
   const loginForm = $("#login-form");
   const registerForm = $("#register-form");
+  const verificationForm = $("#register-verification-form");
   const toggleButton = $("#toggle-auth-mode");
 
-  if (!loginForm || !registerForm || !toggleButton) return;
+  if (!loginForm || !registerForm || !verificationForm || !toggleButton) return;
 
   toggleButton.onclick = () => {
     const isLoginHidden = $("#login-form").classList.contains("hidden");
