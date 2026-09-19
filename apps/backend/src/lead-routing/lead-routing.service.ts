@@ -299,9 +299,26 @@ export async function getCommercialMetrics(organizationId: string) {
 
 export async function resolveRoutingForLead(organizationId: string, city?: string | null): Promise<LeadRoutingOutcome> {
   const normalizedCity = normalizeCityName(city ?? null);
+  const settings = await getRoutingSettings(organizationId);
+  const fallbackPhone = settings.active
+    ? settings.fallbackResponsible?.whatsappNumber ?? settings.fallbackWhatsApp ?? ""
+    : "";
+  const fallbackOutcome: LeadRoutingOutcome = fallbackPhone
+    ? {
+        routed: true,
+        routeType: "fallback",
+        ...(settings.fallbackResponsible?.id ? { responsibleId: settings.fallbackResponsible.id } : {}),
+        responsibleWhatsapp: fallbackPhone,
+        reason: normalizedCity
+          ? `Fallback configuré pour ${normalizedCity}`
+          : "Fallback utilisé car la ville du prospect est absente ou non identifiable.",
+      }
+    : { routed: false, routeType: "none", reason: "Aucun fallback WhatsApp actif configuré." };
 
   if (!normalizedCity) {
-    const outcome: LeadRoutingOutcome = { routed: false, routeType: "none", reason: "Ville absente ou non identifiable." };
+    const outcome: LeadRoutingOutcome = fallbackOutcome.routed
+      ? fallbackOutcome
+      : { routed: false, routeType: "none", reason: "Ville absente ou non identifiable." };
     console.log(`[route:${organizationId}] Ville non identifiable pour le routage`, { rawCity: city, normalizedCity, outcome });
     return outcome;
   }
@@ -332,16 +349,8 @@ export async function resolveRoutingForLead(organizationId: string, city?: strin
     return outcome;
   }
 
-  const settings = await getRoutingSettings(organizationId);
-  if (settings?.fallbackResponsible?.whatsappNumber || settings?.fallbackWhatsApp) {
-    const fallbackPhone = settings.fallbackResponsible?.whatsappNumber ?? settings.fallbackWhatsApp ?? "";
-    const outcome: LeadRoutingOutcome = {
-      routed: true,
-      routeType: "fallback",
-      ...(settings.fallbackResponsible?.id ? { responsibleId: settings.fallbackResponsible.id } : {}),
-      responsibleWhatsapp: fallbackPhone,
-      reason: `Fallback configuré pour ${normalizedCity}`,
-    };
+  if (fallbackOutcome.routed) {
+    const outcome = fallbackOutcome;
     console.log(`[route:${organizationId}] Fallback utilisé pour le routage`, {
       rawCity: city,
       normalizedCity,
