@@ -102,6 +102,7 @@ export const AiSettingsScalarFieldEnum = {
   systemPrompt: 'systemPrompt',
   welcomeMessage: 'welcomeMessage',
   qualificationFields: 'qualificationFields',
+  aiEnabled: 'aiEnabled',
   responseDelaySeconds: 'responseDelaySeconds',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

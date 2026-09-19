@@ -112,6 +112,10 @@ function getOrCreateProvider(organizationId: string): WhatsAppProvider {
         ? conversation.leadData as Record<string, unknown>
         : {};
       const settings = await getOrCreateAiSettings(organizationId);
+      if (!settings.aiEnabled) {
+        console.log(`⏸️  [org:${organizationId}] IA désactivée globalement depuis le dashboard.`);
+        return;
+      }
       const systemPrompt = buildSystemPrompt({ ...settings, knownLeadData: previousLeadData });
       const history = await getRecentHistoryForAi(conversation.id);
       const aiReply = await getAiOrchestrator().getReply(conversation.id, systemPrompt, history);

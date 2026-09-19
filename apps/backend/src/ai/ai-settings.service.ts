@@ -13,6 +13,7 @@ export interface AiSettingsInput {
   systemPrompt?: string | undefined;
   welcomeMessage?: string | undefined;
   qualificationFields?: string[] | undefined;
+  aiEnabled?: boolean | undefined;
   responseDelaySeconds?: number | undefined;
 }
 
@@ -58,6 +59,7 @@ export async function updateAiSettings(organizationId: string, input: AiSettings
     ...(input.businessInfo !== undefined ? { businessInfo: input.businessInfo || null } : {}),
     ...(input.welcomeMessage !== undefined ? { welcomeMessage: input.welcomeMessage || null } : {}),
     ...(input.qualificationFields !== undefined ? { qualificationFields: input.qualificationFields } : {}),
+    ...(input.aiEnabled !== undefined ? { aiEnabled: input.aiEnabled } : {}),
     ...(input.responseDelaySeconds !== undefined
       ? { responseDelaySeconds: resolveResponseDelaySeconds(input.responseDelaySeconds) }
       : {}),
@@ -73,6 +75,7 @@ export async function updateAiSettings(organizationId: string, input: AiSettings
       businessInfo: input.businessInfo ?? null,
       welcomeMessage: input.welcomeMessage ?? null,
       qualificationFields: input.qualificationFields ?? [],
+      aiEnabled: input.aiEnabled ?? true,
       responseDelaySeconds: resolveResponseDelaySeconds(input.responseDelaySeconds),
     },
   });

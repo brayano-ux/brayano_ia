@@ -1598,6 +1598,7 @@ export const AiSettingsScalarFieldEnum = {
   systemPrompt: 'systemPrompt',
   welcomeMessage: 'welcomeMessage',
   qualificationFields: 'qualificationFields',
+  aiEnabled: 'aiEnabled',
   responseDelaySeconds: 'responseDelaySeconds',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -1889,6 +1890,13 @@ export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$Prisma
 
 
 /**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
  * Reference to a field of type 'Int'
  */
 export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
@@ -1927,13 +1935,6 @@ export type EnumWhatsAppAccountStatusFieldRefInput<$PrismaModel> = FieldRefInput
  * Reference to a field of type 'WhatsAppAccountStatus[]'
  */
 export type ListEnumWhatsAppAccountStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'WhatsAppAccountStatus[]'>
-    
-
-
-/**
- * Reference to a field of type 'Boolean'
- */
-export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 

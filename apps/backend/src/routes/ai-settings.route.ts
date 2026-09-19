@@ -12,6 +12,7 @@ const updateAiSettingsSchema = z.object({
   systemPrompt: z.string().min(1).optional(),
   welcomeMessage: z.string().optional(),
   qualificationFields: z.array(z.string().trim().min(1).max(60)).max(30).optional(),
+  aiEnabled: z.boolean().optional(),
   responseDelaySeconds: z.union([z.literal(3), z.literal(5), z.literal(7), z.literal(60), z.literal(120)]).optional(),
 });
 
@@ -35,6 +36,7 @@ export async function aiSettingsRoute(app: FastifyInstance) {
       systemPrompt?: string | undefined;
       welcomeMessage?: string | undefined;
       qualificationFields?: string[] | undefined;
+      aiEnabled?: boolean | undefined;
       responseDelaySeconds?: 3 | 5 | 7 | 60 | 120 | undefined;
     } = {};
 
@@ -43,6 +45,7 @@ export async function aiSettingsRoute(app: FastifyInstance) {
     if (parsed.data.systemPrompt !== undefined) settingsInput.systemPrompt = parsed.data.systemPrompt;
     if (parsed.data.welcomeMessage !== undefined) settingsInput.welcomeMessage = parsed.data.welcomeMessage;
     if (parsed.data.qualificationFields !== undefined) settingsInput.qualificationFields = parsed.data.qualificationFields;
+    if (parsed.data.aiEnabled !== undefined) settingsInput.aiEnabled = parsed.data.aiEnabled;
     if (parsed.data.responseDelaySeconds !== undefined) {
       settingsInput.responseDelaySeconds = parsed.data.responseDelaySeconds;
     }

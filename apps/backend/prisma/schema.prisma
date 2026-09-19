@@ -35,6 +35,7 @@ model AiSettings {
   systemPrompt         String   @map("system_prompt")
   welcomeMessage       String?  @map("welcome_message")
   qualificationFields  Json?    @map("qualification_fields")
+  aiEnabled            Boolean  @default(true) @map("ai_enabled")
   responseDelaySeconds Int      @default(3) @map("response_delay_seconds")
   createdAt            DateTime @default(now()) @map("created_at")
   updatedAt            DateTime @updatedAt @map("updated_at")
