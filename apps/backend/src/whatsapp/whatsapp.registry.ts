@@ -108,8 +108,11 @@ function getOrCreateProvider(organizationId: string): WhatsAppProvider {
         return;
       }
 
+      const previousLeadData = conversation.leadData && typeof conversation.leadData === "object" && !Array.isArray(conversation.leadData)
+        ? conversation.leadData as Record<string, unknown>
+        : {};
       const settings = await getOrCreateAiSettings(organizationId);
-      const systemPrompt = buildSystemPrompt(settings);
+      const systemPrompt = buildSystemPrompt({ ...settings, knownLeadData: previousLeadData });
       const history = await getRecentHistoryForAi(conversation.id);
       const aiReply = await getAiOrchestrator().getReply(conversation.id, systemPrompt, history);
 
@@ -120,10 +123,14 @@ function getOrCreateProvider(organizationId: string): WhatsAppProvider {
         ? configuredQualificationFields
         : ["name", "city", "need"];
       const hasConfiguredQualification = configuredQualificationFields.length > 0;
-      const previousLeadData = conversation.leadData && typeof conversation.leadData === "object" && !Array.isArray(conversation.leadData)
-        ? conversation.leadData as Record<string, unknown>
-        : {};
-      const mergedLeadData = { ...previousLeadData, ...aiReply.leadData };
+      const mergedLeadData = { ...previousLeadData };
+      for (const [field, value] of Object.entries(aiReply.leadData)) {
+        if (typeof value === "string" && value.trim()) {
+          mergedLeadData[field] = value;
+        } else if (!(field in mergedLeadData)) {
+          mergedLeadData[field] = value;
+        }
+      }
       const phoneValue = mergedLeadData.phone ?? mergedLeadData.telephone ?? mergedLeadData.tel ?? mergedLeadData.numero_telephone;
       if (typeof phoneValue === "string" && phoneValue.trim()) {
         mergedLeadData.phone = phoneValue;
