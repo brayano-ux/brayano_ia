@@ -1923,25 +1923,33 @@
             </label>
           </form>
 
-          <section class="panel agent-playground">
-            <div class="panel-heading">
-              <div>
-                <p class="eyebrow">SIMULATION SANS WHATSAPP</p>
-                <h2>Tester l'agent avec un prospect</h2>
-                <p class="muted">Les messages restent dans cette page. Aucun prospect, routage ou message WhatsApp ne sera créé.</p>
-              </div>
-              <button type="button" class="ghost-button" id="clear-agent-test">Réinitialiser</button>
-            </div>
-            <div id="agent-test-messages" class="agent-test-messages">
-              <div class="empty-state">Écrivez un premier message pour simuler un prospect.</div>
-            </div>
-            <form id="agent-test-form" class="agent-test-form">
-              <input id="agent-test-input" type="text" maxlength="4000" placeholder="Ex. Bonjour, je voudrais connaître vos services" required />
-              <button type="submit" class="primary" id="agent-test-send">Tester la réponse</button>
-            </form>
-            <div id="agent-test-result" class="agent-test-result hidden"></div>
-          </section>
-        </section>
+         <section class="panel agent-playground" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); max-width: 600px; font-family: system-ui, -apple-system, sans-serif;">
+  
+  <!-- En-tête du panneau -->
+  <div class="panel-heading" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; gap: 16px;">
+    <div>
+      <p class="eyebrow" style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #6366f1; margin: 0 0 4px 0;">SIMULATION SANS WHATSAPP</p>
+      <h2 style="font-size: 18px; font-weight: 700; color: #1e293b; margin: 0 0 6px 0;">Tester l'agent avec un prospect</h2>
+      <p class="muted" style="font-size: 13px; color: #64748b; margin: 0; line-height: 1.4;">Les messages restent dans cette page. Aucun prospect, routage ou message WhatsApp ne sera créé.</p>
+    </div>
+    <button type="button" class="ghost-button" id="clear-agent-test" style="background: transparent; border: 1px solid #cbd5e1; color: #475569; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: background 0.2s;">Réinitialiser</button>
+  </div>
+
+  <!-- Zone des messages -->
+  <div id="agent-test-messages" class="agent-test-messages" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; height: 250px; overflow-y: auto; margin-bottom: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+    <div class="empty-state" style="color: #94a3b8; font-size: 14px; text-align: center;">Écrivez un premier message pour simuler un prospect.</div>
+  </div>
+
+  <!-- Formulaire d'envoi -->
+  <form id="agent-test-form" class="agent-test-form" style="display: flex; gap: 8px; margin-bottom: 0;">
+    <input id="agent-test-input" type="text" maxlength="4000" placeholder="Ex. Bonjour, je voudrais connaître vos services" required style="flex: 1; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; outline: none; transition: border-color 0.2s;" />
+    <button type="submit" class="primary" id="agent-test-send" style="background: #6366f1; color: #ffffff; border: none; padding: 10px 16px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; transition: background 0.2s;">Tester la réponse</button>
+  </form>
+
+  <!-- Résultat -->
+  <div id="agent-test-result" class="agent-test-result hidden" style="display: none; margin-top: 12px; padding: 10px; border-radius: 6px; background: #e0f2fe; color: #0369a1; font-size: 13px;"></div>
+
+</section>
 
         <!-- VIEW: SETTINGS -->
         <section id="settings-view" class="view hidden">

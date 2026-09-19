@@ -120,8 +120,19 @@ function getOrCreateProvider(organizationId: string): WhatsAppProvider {
         ? configuredQualificationFields
         : ["name", "city", "need"];
       const hasConfiguredQualification = configuredQualificationFields.length > 0;
+      const previousLeadData = conversation.leadData && typeof conversation.leadData === "object" && !Array.isArray(conversation.leadData)
+        ? conversation.leadData as Record<string, unknown>
+        : {};
+      const mergedLeadData = { ...previousLeadData, ...aiReply.leadData };
+      const phoneValue = mergedLeadData.phone ?? mergedLeadData.telephone ?? mergedLeadData.tel ?? mergedLeadData.numero_telephone;
+      if (typeof phoneValue === "string" && phoneValue.trim()) {
+        mergedLeadData.phone = phoneValue;
+        mergedLeadData.telephone = phoneValue;
+        mergedLeadData.tel = phoneValue;
+        mergedLeadData.numero_telephone = phoneValue;
+      }
       const hasRequiredData = qualificationFields.every((field) => {
-        const value = aiReply.leadData[field];
+        const value = mergedLeadData[field];
         return typeof value === "string" && value.trim().length > 0;
       });
       const handoff = hasRequiredData;
@@ -135,18 +146,18 @@ function getOrCreateProvider(organizationId: string): WhatsAppProvider {
           | "QUALIFYING"
           | "QUALIFIED",
         leadScore: aiReply.leadScore,
-        leadData: JSON.parse(JSON.stringify(aiReply.leadData)),
+        leadData: JSON.parse(JSON.stringify(mergedLeadData)),
         status: handoff ? "HUMAN_HANDOFF" : stop ? "CLOSED" : "OPEN",
         aiEnabled: !handoff && !stop,
       });
 
-      const hasLeadData = Object.keys(aiReply.leadData).length > 0;
+      const hasLeadData = Object.keys(mergedLeadData).length > 0;
       const shouldRegisterLead = hasLeadData || aiReply.qualificationStatus === "qualified" || aiReply.leadScore >= 70;
       if (shouldRegisterLead && (!hasConfiguredQualification || hasRequiredData)) {
         await registerQualifiedLead({
           organizationId,
           conversationId: conversation.id,
-          leadData: aiReply.leadData,
+          leadData: mergedLeadData,
           leadScore: aiReply.leadScore,
           requiredFields: qualificationFields,
         });

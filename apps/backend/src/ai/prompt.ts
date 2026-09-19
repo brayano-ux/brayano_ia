@@ -60,6 +60,8 @@ RÈGLES DU JSON :
 - "nextAction" vaut "continue", "handoff" ou "stop".
 - "needsHuman" vaut true et "nextAction" vaut "handoff" uniquement après obtention de tous les champs obligatoires, sauf si le prospect demande explicitement un conseiller humain.
 - "leadData" contient uniquement les informations réellement connues.
+- "leadData" doit conserver les informations déjà obtenues lors des messages précédents et ajouter les nouvelles informations ; ne supprime jamais une donnée connue.
+- Pour un numéro de téléphone, utilise les clés configurées par l'administrateur ; si le champ demandé est téléphone, utilise de préférence "phone" et conserve aussi la valeur sous "telephone".
 - N'invente jamais de données dans "leadData".
 - Le JSON doit être strictement valide.
 - Les chaînes de caractères doivent être correctement échappées.
