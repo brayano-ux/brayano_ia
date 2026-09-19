@@ -164,7 +164,17 @@ function getOrCreateProvider(organizationId: string): WhatsAppProvider {
 
       const hasLeadData = Object.keys(mergedLeadData).length > 0;
       const shouldRegisterLead = hasLeadData || aiReply.qualificationStatus === "qualified" || aiReply.leadScore >= 70;
-      if (shouldRegisterLead && (!hasConfiguredQualification || hasRequiredData)) {
+      if (shouldRegisterLead) {
+        console.log(`[qualification:${organizationId}] Enregistrement du prospect`, {
+          conversationId: conversation.id,
+          aiQualificationStatus: aiReply.qualificationStatus,
+          hasRequiredData,
+          missingFields: qualificationFields.filter((field) => {
+            const value = mergedLeadData[field];
+            return typeof value !== "string" || !value.trim();
+          }),
+          leadDataKeys: Object.keys(mergedLeadData),
+        });
         await registerQualifiedLead({
           organizationId,
           conversationId: conversation.id,
