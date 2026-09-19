@@ -5,6 +5,8 @@ let conversations = [];
 let commercialMetrics = [];
 let currentOrganizationName = "Brayano";
 let pendingRegistrationEmail = "";
+let editingResponsibleId = null;
+let agentTestHistory = [];
 const $ = (selector) => document.querySelector(selector);
 const showToast = (message) => { const toast = $("#toast"); toast.textContent = message; toast.classList.add("show"); setTimeout(() => toast.classList.remove("show"), 2800); };
 
@@ -436,6 +438,62 @@ async function reply(event, id) { event.preventDefault(); const input = event.ta
 async function toggleAi(id, enabled) { try { await api(`/organizations/${orgId}/conversations/${id}/ai/${enabled ? "disable" : "enable"}`, { method: "POST" }); showToast(enabled ? "IA désactivée" : "IA réactivée"); await refresh(); await openConversation(id); } catch (error) { showToast(error.message); } }
 async function loadSettings() { try { const { settings } = await api(`/organizations/${orgId}/ai-settings`); const qualificationFields = settings.qualificationFields || []; $("#agent-name").value = settings.agentName || ""; $("#business-info").value = settings.businessInfo || ""; $("#system-prompt").value = settings.systemPrompt || ""; $("#welcome-message").value = settings.welcomeMessage || ""; document.querySelectorAll('input[name="qualification-field"]').forEach((input) => { input.checked = qualificationFields.includes(input.value); }); $("#custom-qualification-fields").value = qualificationFields.filter((field) => !["name", "city", "need", "budget", "product", "urgency", "quartier"].includes(field)).join(", "); } catch (error) { showToast(error.message); } }
 async function saveSettings(event) { event.preventDefault(); try { const standardFields = [...document.querySelectorAll('input[name="qualification-field"]:checked')].map((input) => input.value); const customFields = $("#custom-qualification-fields").value.split(",").map((field) => field.trim().toLowerCase()).filter(Boolean); const qualificationFields = [...new Set([...standardFields, ...customFields])]; await api(`/organizations/${orgId}/ai-settings`, { method: "PUT", body: JSON.stringify({ agentName: $("#agent-name").value, businessInfo: $("#business-info").value, systemPrompt: $("#system-prompt").value, welcomeMessage: $("#welcome-message").value, qualificationFields }) }); showToast("Configuration enregistrée"); } catch (error) { showToast(error.message); } }
+function renderAgentTestHistory() {
+  const container = $("#agent-test-messages");
+  if (!agentTestHistory.length) {
+    container.innerHTML = '<div class="empty-state">Écrivez un premier message pour simuler un prospect.</div>';
+    return;
+  }
+
+  container.innerHTML = "";
+  agentTestHistory.forEach((message) => {
+    const bubble = document.createElement("div");
+    bubble.className = `agent-test-bubble ${message.role === "user" ? "prospect" : "agent"}`;
+    bubble.textContent = message.content;
+    container.appendChild(bubble);
+  });
+  container.scrollTop = container.scrollHeight;
+}
+
+function clearAgentTest() {
+  agentTestHistory = [];
+  $("#agent-test-result").classList.add("hidden");
+  renderAgentTestHistory();
+}
+
+async function testAgentReply(event) {
+  event.preventDefault();
+  const input = $("#agent-test-input");
+  const button = $("#agent-test-send");
+  const message = input.value.trim();
+  if (!message) return;
+
+  button.disabled = true;
+  input.disabled = true;
+  agentTestHistory.push({ role: "user", content: message });
+  renderAgentTestHistory();
+  input.value = "";
+
+  try {
+    const result = await api(`/organizations/${orgId}/ai-test/reply`, {
+      method: "POST",
+      body: JSON.stringify({ message, history: agentTestHistory.slice(0, -1) }),
+    });
+    agentTestHistory.push({ role: "assistant", content: result.reply });
+    renderAgentTestHistory();
+    const resultPanel = $("#agent-test-result");
+    resultPanel.classList.remove("hidden");
+    resultPanel.textContent = `Qualification : ${result.qualificationStatus} | Score : ${result.leadScore}/100 | Action : ${result.nextAction}`;
+  } catch (error) {
+    agentTestHistory.pop();
+    renderAgentTestHistory();
+    showToast(error.message || "Impossible de tester l'agent.");
+  } finally {
+    button.disabled = false;
+    input.disabled = false;
+    input.focus();
+  }
+}
 async function loadDelaySettings() {
   try {
     const { settings } = await api(`/organizations/${orgId}/ai-settings`);
@@ -480,7 +538,15 @@ async function loadRoutingConfig() {
       list.innerHTML = '<div class="empty-state">Aucune zone configurée pour le moment.</div>';
     } else {
       list.innerHTML = locations.map((location) => {
-        const responsible = (location.responsible || []).map((person) => `<li>${person.name} — ${person.whatsappNumber}</li>`).join("") || "<li>Aucun responsable</li>";
+        const responsible = (location.responsible || []).map((person) => `
+          <li class="routing-responsible">
+            <span>${person.name} — ${person.whatsappNumber}${person.active ? "" : " (inactif)"}</span>
+            <span class="routing-actions">
+              <button type="button" class="text-button" data-edit-responsible="${person.id}">Modifier</button>
+              <button type="button" class="text-button danger-text" data-delete-responsible="${person.id}">Supprimer</button>
+            </span>
+          </li>
+        `).join("") || "<li>Aucun responsable</li>";
         return `
           <div class="routing-item">
             <div>
@@ -491,11 +557,18 @@ async function loadRoutingConfig() {
           </div>
         `;
       }).join("");
+
+      list.querySelectorAll("[data-edit-responsible]").forEach((button) => {
+        button.onclick = () => startResponsibleEdit(button.dataset.editResponsible, locations);
+      });
+      list.querySelectorAll("[data-delete-responsible]").forEach((button) => {
+        button.onclick = () => deleteResponsibleConfig(button.dataset.deleteResponsible);
+      });
     }
 
     if (fallbackSelect) {
       fallbackSelect.innerHTML = '<option value="">Aucun responsable</option>' +
-        locations.flatMap((location) => location.responsible || []).map((person) => `<option value="${person.id}">${person.name} — ${location.name}</option>`).join("");
+        locations.flatMap((location) => (location.responsible || []).filter((person) => person.active).map((person) => `<option value="${person.id}">${person.name} — ${location.name}</option>`)).join("");
       fallbackSelect.value = settings?.fallbackResponsibleId || "";
     }
 
@@ -503,6 +576,44 @@ async function loadRoutingConfig() {
     if (fallbackInput) fallbackInput.value = settings?.fallbackWhatsApp || "";
   } catch (error) {
     showToast(error.message || "Impossible de charger la configuration de routage.");
+  }
+}
+
+function resetResponsibleForm() {
+  editingResponsibleId = null;
+  $("#responsible-form").reset();
+  $("#responsible-active").checked = true;
+  $("#responsible-id").value = "";
+  $("#responsible-form button[type=submit]").textContent = "Enregistrer le responsable";
+  $("#cancel-responsible-edit").classList.add("hidden");
+}
+
+function startResponsibleEdit(responsibleId, locations) {
+  const person = locations.flatMap((location) => location.responsible || []).find((entry) => entry.id === responsibleId);
+  if (!person) return;
+
+  editingResponsibleId = person.id;
+  $("#responsible-id").value = person.id;
+  $("#responsible-location").value = person.locationId;
+  $("#responsible-name").value = person.name;
+  $("#responsible-whatsapp").value = person.whatsappNumber;
+  $("#responsible-active").checked = person.active;
+  $("#responsible-form button[type=submit]").textContent = "Enregistrer les modifications";
+  $("#cancel-responsible-edit").classList.remove("hidden");
+  $("#responsible-form").scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+async function deleteResponsibleConfig(responsibleId) {
+  const confirmed = window.confirm("Supprimer définitivement ce commercial ? Les anciens prospects seront conservés, mais ne seront plus liés à ce commercial.");
+  if (!confirmed) return;
+
+  try {
+    await api(`/organizations/${orgId}/responsibles/${responsibleId}`, { method: "DELETE" });
+    if (editingResponsibleId === responsibleId) resetResponsibleForm();
+    showToast("Commercial supprimé définitivement.");
+    await loadRoutingConfig();
+  } catch (error) {
+    showToast(error.message || "Impossible de supprimer le commercial.");
   }
 }
 
@@ -530,21 +641,24 @@ async function saveLocationConfig(event) {
 
 async function saveResponsibleConfig(event) {
   event.preventDefault();
+  const wasEditing = Boolean(editingResponsibleId);
   const payload = {
     locationId: $("#responsible-location").value,
     name: $("#responsible-name").value,
     whatsappNumber: $("#responsible-whatsapp").value,
-    active: true,
+    active: $("#responsible-active").checked,
   };
 
   try {
-    await api(`/organizations/${orgId}/responsibles`, {
-      method: "POST",
+    await api(editingResponsibleId
+      ? `/organizations/${orgId}/responsibles/${editingResponsibleId}`
+      : `/organizations/${orgId}/responsibles`, {
+      method: editingResponsibleId ? "PUT" : "POST",
       body: JSON.stringify(payload),
     });
-    $("#responsible-form").reset();
-    showToast("Responsable enregistré.");
-    loadRoutingConfig();
+    resetResponsibleForm();
+    showToast(wasEditing ? "Commercial modifié." : "Responsable enregistré.");
+    await loadRoutingConfig();
   } catch (error) {
     showToast(error.message || "Impossible d'enregistrer le responsable.");
   }
@@ -588,11 +702,14 @@ async function disconnectWhatsApp() {
 
 document.querySelectorAll("[data-view], [data-view-target]").forEach((element) => element.onclick = () => setView(element.dataset.view || element.dataset.viewTarget));
 $("#agent-form").onsubmit = saveSettings;
+$("#agent-test-form").onsubmit = testAgentReply;
+$("#clear-agent-test").onclick = clearAgentTest;
 $("#save-agent").onclick = () => $("#agent-form").requestSubmit();
 $("#delay-form").onsubmit = saveDelaySettings;
 $("#save-settings").onclick = () => $("#delay-form").requestSubmit();
 $("#location-form").onsubmit = saveLocationConfig;
 $("#responsible-form").onsubmit = saveResponsibleConfig;
+$("#cancel-responsible-edit").onclick = resetResponsibleForm;
 $("#fallback-form").onsubmit = saveFallbackConfig;
 
 const logoutButton = document.createElement("button");

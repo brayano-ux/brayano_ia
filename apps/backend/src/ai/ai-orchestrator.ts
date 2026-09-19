@@ -30,6 +30,7 @@ export class AiOrchestrator {
     conversationId: string,
     systemPrompt: string,
     history: AIChatMessage[],
+    options: { logRun?: boolean } = {},
   ): Promise<AIReply> {
     let rawText = "";
     let latencyMs = 0;
@@ -61,14 +62,16 @@ export class AiOrchestrator {
       }
     }
 
-    await logAiRun({
-      conversationId,
-      provider: providerName,
-      model: providerName === "gemini" ? env.GEMINI_MODEL : providerName === "openrouter" ? env.OPENROUTER_MODEL : env.MISTRAL_MODEL,
-      latencyMs,
-      rawResponse: rawText,
-      isValid: parsed !== null,
-    });
+    if (options.logRun !== false) {
+      await logAiRun({
+        conversationId,
+        provider: providerName,
+        model: providerName === "gemini" ? env.GEMINI_MODEL : providerName === "openrouter" ? env.OPENROUTER_MODEL : env.MISTRAL_MODEL,
+        latencyMs,
+        rawResponse: rawText,
+        isValid: parsed !== null,
+      });
+    }
 
     return parsed ?? FALLBACK_REPLY;
   }

@@ -105,7 +105,7 @@ export function resolveLeadQualification(lead: Record<string, unknown>, configur
 export async function listLocations(organizationId: string) {
   return prisma.location.findMany({
     where: { organizationId },
-    include: { responsible: { where: { active: true }, orderBy: { name: "asc" } } },
+    include: { responsible: { orderBy: { name: "asc" } } },
     orderBy: { name: "asc" },
   });
 }
@@ -149,6 +149,53 @@ export async function createResponsible(
       whatsappNumber: input.whatsappNumber.trim(),
       active: input.active ?? true,
     },
+  });
+}
+
+export async function updateResponsible(
+  organizationId: string,
+  responsibleId: string,
+  input: { locationId?: string | undefined; name?: string | undefined; whatsappNumber?: string | undefined; active?: boolean | undefined },
+) {
+  const responsible = await prisma.responsible.findFirst({ where: { id: responsibleId, organizationId } });
+  if (!responsible) {
+    throw new Error("Commercial introuvable pour cette organisation.");
+  }
+
+  if (input.locationId) {
+    const location = await prisma.location.findFirst({ where: { id: input.locationId, organizationId } });
+    if (!location) {
+      throw new Error("Zone introuvable pour cette organisation.");
+    }
+  }
+
+  return prisma.responsible.update({
+    where: { id: responsibleId },
+    data: {
+      ...(input.locationId ? { locationId: input.locationId } : {}),
+      ...(input.name !== undefined ? { name: input.name.trim() } : {}),
+      ...(input.whatsappNumber !== undefined ? { whatsappNumber: input.whatsappNumber.trim() } : {}),
+      ...(input.active !== undefined ? { active: input.active } : {}),
+    },
+  });
+}
+
+export async function deleteResponsible(organizationId: string, responsibleId: string) {
+  const responsible = await prisma.responsible.findFirst({ where: { id: responsibleId, organizationId } });
+  if (!responsible) {
+    throw new Error("Commercial introuvable pour cette organisation.");
+  }
+
+  return prisma.$transaction(async (transaction) => {
+    await transaction.organizationRoutingSettings.updateMany({
+      where: { organizationId, fallbackResponsibleId: responsibleId },
+      data: { fallbackResponsibleId: null },
+    });
+    await transaction.prospectLead.updateMany({
+      where: { organizationId, responsibleId: responsibleId },
+      data: { responsibleId: null },
+    });
+    await transaction.responsible.delete({ where: { id: responsibleId } });
   });
 }
 

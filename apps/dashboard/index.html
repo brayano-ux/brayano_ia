@@ -1922,6 +1922,25 @@
               <textarea id="welcome-message" rows="3"></textarea>
             </label>
           </form>
+
+          <section class="panel agent-playground">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">SIMULATION SANS WHATSAPP</p>
+                <h2>Tester l'agent avec un prospect</h2>
+                <p class="muted">Les messages restent dans cette page. Aucun prospect, routage ou message WhatsApp ne sera créé.</p>
+              </div>
+              <button type="button" class="ghost-button" id="clear-agent-test">Réinitialiser</button>
+            </div>
+            <div id="agent-test-messages" class="agent-test-messages">
+              <div class="empty-state">Écrivez un premier message pour simuler un prospect.</div>
+            </div>
+            <form id="agent-test-form" class="agent-test-form">
+              <input id="agent-test-input" type="text" maxlength="4000" placeholder="Ex. Bonjour, je voudrais connaître vos services" required />
+              <button type="submit" class="primary" id="agent-test-send">Tester la réponse</button>
+            </form>
+            <div id="agent-test-result" class="agent-test-result hidden"></div>
+          </section>
         </section>
 
         <!-- VIEW: SETTINGS -->
@@ -1997,7 +2016,13 @@
                   WhatsApp du responsable
                   <input id="responsible-whatsapp" type="text" placeholder="+237..." required />
                 </label>
+                <label class="checkbox-row">
+                  <input id="responsible-active" type="checkbox" checked />
+                  Commercial actif
+                </label>
+                <input id="responsible-id" type="hidden" />
                 <button type="submit" class="primary" style="margin-top: 10px;">Enregistrer le responsable</button>
+                <button type="button" id="cancel-responsible-edit" class="text-button hidden" style="margin-top: 10px;">Annuler la modification</button>
               </form>
             </div>
 

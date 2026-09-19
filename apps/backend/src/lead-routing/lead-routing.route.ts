@@ -7,6 +7,8 @@ import {
   getRoutingSettings,
   listLocations,
   listResponsiblesForLocation,
+  updateResponsible,
+  deleteResponsible,
   setRoutingFallback,
 } from "./lead-routing.service.js";
 
@@ -23,6 +25,13 @@ const createResponsibleSchema = z.object({
   whatsappNumber: z.string().min(1, "Le numéro du responsable est requis."),
   active: z.boolean().optional().or(z.literal(undefined)),
 });
+
+const updateResponsibleSchema = z.object({
+  locationId: z.string().min(1, "La zone est requise.").optional(),
+  name: z.string().min(1, "Le nom du responsable est requis.").optional(),
+  whatsappNumber: z.string().min(1, "Le numéro du responsable est requis.").optional(),
+  active: z.boolean().optional(),
+}).refine((input) => Object.keys(input).length > 0, "Aucune modification fournie.");
 
 const fallbackSchema = z.object({
   fallbackResponsibleId: z.string().nullable().optional(),
@@ -67,6 +76,23 @@ export async function routingRoute(app: FastifyInstance) {
 
     const responsible = await createResponsible(orgId, parsed.data);
     return { responsible };
+  });
+
+  app.put("/organizations/:orgId/responsibles/:responsibleId", async (request) => {
+    const { orgId, responsibleId } = request.params as { orgId: string; responsibleId: string };
+    const parsed = updateResponsibleSchema.safeParse(request.body);
+    if (!parsed.success) {
+      throw new Error(parsed.error.issues[0]?.message ?? "Erreur de validation du responsable.");
+    }
+
+    const responsible = await updateResponsible(orgId, responsibleId, parsed.data);
+    return { responsible };
+  });
+
+  app.delete("/organizations/:orgId/responsibles/:responsibleId", async (request) => {
+    const { orgId, responsibleId } = request.params as { orgId: string; responsibleId: string };
+    await deleteResponsible(orgId, responsibleId);
+    return { success: true };
   });
 
   app.get("/organizations/:orgId/routing/fallback", async (request) => {
