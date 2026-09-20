@@ -103,7 +103,6 @@ export async function listProspectsForExport(organizationId: string) {
     where: { organizationId },
     include: {
       contact: true,
-      messages: { orderBy: { createdAt: "asc" } },
       prospectLeads: {
         orderBy: { updatedAt: "desc" },
         take: 1,

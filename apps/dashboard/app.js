@@ -376,10 +376,9 @@ async function exportProspects() {
       return data && typeof data === "object" && !Array.isArray(data) ? Object.keys(data) : [];
     }))].sort();
     const headers = [
-      "ID conversation", "Nom", "WhatsApp", "Date de début", "Dernière activité",
-      "Statut conversation", "IA active", "Qualification", "Score", "Statut lead",
-      "Routage", "Routé", "Date routage", "Ville", "Besoin", "Budget", "Produit",
-      "Urgence", "Zone", "Commercial", "Messages",
+      "Nom", "WhatsApp", "Date de début", "Dernière activité", "Qualification", "Score",
+      "Statut lead", "Routage", "Routé", "Date routage", "Ville", "Besoin", "Budget",
+      "Produit", "Urgence", "Zone", "Commercial",
       ...customFields.map((field) => `Champ: ${field}`),
     ];
     const rows = prospects.map((prospect) => {
@@ -389,15 +388,11 @@ async function exportProspects() {
         : prospect.leadData && typeof prospect.leadData === "object" && !Array.isArray(prospect.leadData)
           ? prospect.leadData
           : {};
-      const messages = (prospect.messages || []).map((message) => `${message.author}: ${message.content}`).join(" | ");
       const values = [
-        prospect.id,
         lead.contactName ?? prospect.contact?.displayName ?? "",
         lead.whatsappNumber ?? prospect.contact?.whatsappJid ?? "",
         formatExportDate(prospect.createdAt),
         formatExportDate(prospect.updatedAt),
-        prospect.status,
-        prospect.aiEnabled ? "Oui" : "Non",
         prospect.qualificationStatus,
         prospect.leadScore ?? lead.leadScore ?? "",
         lead.status ?? "",
@@ -411,7 +406,6 @@ async function exportProspects() {
         lead.urgency ?? data.urgency ?? "",
         lead.location?.name ?? "",
         lead.responsible?.name ?? "",
-        messages,
         ...customFields.map((field) => data[field] ?? ""),
       ];
       return values.map(csvValue).join(";");

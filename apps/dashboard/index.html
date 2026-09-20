@@ -1377,6 +1377,45 @@
         accent-color: var(--violet);
       }
 
+      .export-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        border: 1px solid #d8d2f5;
+        border-radius: var(--radius-md);
+        background: linear-gradient(135deg, #f3f0ff, #fff);
+        color: var(--violet-deep);
+        font-size: 12px;
+        font-weight: 700;
+        box-shadow: 0 5px 14px rgba(92, 66, 201, .08);
+        transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+      }
+
+      .export-button span {
+        display: grid;
+        place-items: center;
+        width: 20px;
+        height: 20px;
+        border-radius: 6px;
+        background: var(--violet);
+        color: #fff;
+        font-size: 15px;
+        line-height: 1;
+      }
+
+      .export-button:hover {
+        transform: translateY(-1px);
+        border-color: #bcb2ed;
+        box-shadow: 0 8px 18px rgba(92, 66, 201, .14);
+      }
+
+      .export-button:disabled {
+        cursor: wait;
+        opacity: .65;
+        transform: none;
+      }
+
       .custom-qualification-fields {
         display: contents;
       }
@@ -1825,7 +1864,7 @@
                     <option value="all">Tout</option>
                   </select>
                 </label>
-                <button type="button" class="ghost-button" id="export-prospects">Exporter les prospects</button>
+                <button type="button" class="export-button" id="export-prospects"><span>↓</span> Exporter les prospects</button>
               </div>
             </div>
             <div id="commercial-metrics-list" class="commercial-list"></div>
