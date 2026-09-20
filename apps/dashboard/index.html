@@ -1377,6 +1377,29 @@
         accent-color: var(--violet);
       }
 
+      .custom-qualification-fields {
+        display: contents;
+      }
+
+      .custom-field-creator {
+        grid-column: 1 / -1;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        padding-top: 4px;
+      }
+
+      .custom-field-creator input {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .custom-field-creator .ghost-button {
+        padding: 9px 14px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+      }
+
       .delay-options {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1792,15 +1815,18 @@
                 <h2>Messages reçus par commercial</h2>
                 <p class="muted">Suivez le volume reçu par chaque commercial selon la période.</p>
               </div>
-              <label class="metric-filter">
-                <span>Période</span>
-                <select id="commercial-period">
-                  <option value="today">Aujourd'hui</option>
-                  <option value="7d">7 derniers jours</option>
-                  <option value="30d">30 derniers jours</option>
-                  <option value="all">Tout</option>
-                </select>
-              </label>
+              <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <label class="metric-filter">
+                  <span>Période</span>
+                  <select id="commercial-period">
+                    <option value="today">Aujourd'hui</option>
+                    <option value="7d">7 derniers jours</option>
+                    <option value="30d">30 derniers jours</option>
+                    <option value="all">Tout</option>
+                  </select>
+                </label>
+                <button type="button" class="ghost-button" id="export-prospects">Exporter les prospects</button>
+              </div>
             </div>
             <div id="commercial-metrics-list" class="commercial-list"></div>
           </div>
@@ -1889,6 +1915,13 @@
             <button class="primary" id="save-agent">Enregistrer les modifications</button>
           </div>
           <form id="agent-form" class="panel settings-form">
+            <label class="ai-global-toggle">
+              <span>
+                <strong>Agent IA global</strong>
+                <small>Active ou désactive les réponses automatiques pour tous les prospects.</small>
+              </span>
+              <input id="global-ai-enabled" type="checkbox" checked />
+            </label>
             <label>
               Nom de l'agent
               <input id="agent-name" required />
@@ -1911,11 +1944,12 @@
               <label><input type="checkbox" name="qualification-field" value="product" /> Produit ou service</label>
               <label><input type="checkbox" name="qualification-field" value="urgency" /> Urgence</label>
               <label><input type="checkbox" name="qualification-field" value="quartier" /> Quartier</label>
-              <label>
-                Champs personnalisés à collecter et transmettre
-                <input id="custom-qualification-fields" placeholder="Ex. quartier, campus, filiere" />
-              </label>
-              <p class="muted">Séparez les champs par des virgules. Utilisez des noms courts sans accents.</p>
+              <div id="custom-qualification-fields" class="custom-qualification-fields"></div>
+              <div class="custom-field-creator">
+                <input id="custom-qualification-field-input" type="text" maxlength="60" placeholder="Ex. campus, filiere, telephone" />
+                <button type="button" class="ghost-button" id="create-qualification-field">Créer</button>
+              </div>
+              <p class="muted">Créez un champ personnalisé : il sera ajouté comme case cochée.</p>
             </fieldset>
             <label>
               Message d'accueil
@@ -1923,33 +1957,25 @@
             </label>
           </form>
 
-         <section class="panel agent-playground" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); max-width: 600px; font-family: system-ui, -apple-system, sans-serif;">
-  
-  <!-- En-tête du panneau -->
-  <div class="panel-heading" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; gap: 16px;">
-    <div>
-      <p class="eyebrow" style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #6366f1; margin: 0 0 4px 0;">SIMULATION SANS WHATSAPP</p>
-      <h2 style="font-size: 18px; font-weight: 700; color: #1e293b; margin: 0 0 6px 0;">Tester l'agent avec un prospect</h2>
-      <p class="muted" style="font-size: 13px; color: #64748b; margin: 0; line-height: 1.4;">Les messages restent dans cette page. Aucun prospect, routage ou message WhatsApp ne sera créé.</p>
-    </div>
-    <button type="button" class="ghost-button" id="clear-agent-test" style="background: transparent; border: 1px solid #cbd5e1; color: #475569; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: background 0.2s;">Réinitialiser</button>
-  </div>
-
-  <!-- Zone des messages -->
-  <div id="agent-test-messages" class="agent-test-messages" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; height: 250px; overflow-y: auto; margin-bottom: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-    <div class="empty-state" style="color: #94a3b8; font-size: 14px; text-align: center;">Écrivez un premier message pour simuler un prospect.</div>
-  </div>
-
-  <!-- Formulaire d'envoi -->
-  <form id="agent-test-form" class="agent-test-form" style="display: flex; gap: 8px; margin-bottom: 0;">
-    <input id="agent-test-input" type="text" maxlength="4000" placeholder="Ex. Bonjour, je voudrais connaître vos services" required style="flex: 1; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; outline: none; transition: border-color 0.2s;" />
-    <button type="submit" class="primary" id="agent-test-send" style="background: #6366f1; color: #ffffff; border: none; padding: 10px 16px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; transition: background 0.2s;">Tester la réponse</button>
-  </form>
-
-  <!-- Résultat -->
-  <div id="agent-test-result" class="agent-test-result hidden" style="display: none; margin-top: 12px; padding: 10px; border-radius: 6px; background: #e0f2fe; color: #0369a1; font-size: 13px;"></div>
-
-</section>
+          <section class="panel agent-playground">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">SIMULATION SANS WHATSAPP</p>
+                <h2>Tester l'agent avec un prospect</h2>
+                <p class="muted">Les messages restent dans cette page. Aucun prospect, routage ou message WhatsApp ne sera créé.</p>
+              </div>
+              <button type="button" class="ghost-button" id="clear-agent-test">Réinitialiser</button>
+            </div>
+            <div id="agent-test-messages" class="agent-test-messages">
+              <div class="empty-state">Écrivez un premier message pour simuler un prospect.</div>
+            </div>
+            <form id="agent-test-form" class="agent-test-form">
+              <input id="agent-test-input" type="text" maxlength="4000" placeholder="Ex. Bonjour, je voudrais connaître vos services" required />
+              <button type="submit" class="primary" id="agent-test-send">Tester la réponse</button>
+            </form>
+            <div id="agent-test-result" class="agent-test-result hidden"></div>
+          </section>
+        </section>
 
         <!-- VIEW: SETTINGS -->
         <section id="settings-view" class="view hidden">

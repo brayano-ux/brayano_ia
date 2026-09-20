@@ -98,6 +98,22 @@ export async function listConversations(organizationId: string) {
   });
 }
 
+export async function listProspectsForExport(organizationId: string) {
+  return prisma.conversation.findMany({
+    where: { organizationId },
+    include: {
+      contact: true,
+      messages: { orderBy: { createdAt: "asc" } },
+      prospectLeads: {
+        orderBy: { updatedAt: "desc" },
+        take: 1,
+        include: { location: true, responsible: true },
+      },
+    },
+    orderBy: { createdAt: "asc" },
+  });
+}
+
 export function shouldReactivateAiAfterHandoff(lastHandoffAt: Date | string): boolean {
   const handoffAt = new Date(lastHandoffAt);
   const now = new Date();

@@ -351,6 +351,88 @@ async function loadCommercialMetrics() {
   }
 }
 
+function csvValue(value) {
+  const text = value === null || value === undefined ? "" : String(value);
+  return `"${text.replace(/"/g, '""').replace(/\r?\n/g, " ")}"`;
+}
+
+function formatExportDate(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString("fr-FR");
+}
+
+async function exportProspects() {
+  const button = $("#export-prospects");
+  if (!button) return;
+
+  button.disabled = true;
+  const originalLabel = button.textContent;
+  button.textContent = "Préparation...";
+  try {
+    const { conversations: prospects = [] } = await api(`/organizations/${orgId}/prospects/export`);
+    const customFields = [...new Set(prospects.flatMap((prospect) => {
+      const data = prospect.prospectLeads?.[0]?.leadData ?? prospect.leadData;
+      return data && typeof data === "object" && !Array.isArray(data) ? Object.keys(data) : [];
+    }))].sort();
+    const headers = [
+      "ID conversation", "Nom", "WhatsApp", "Date de début", "Dernière activité",
+      "Statut conversation", "IA active", "Qualification", "Score", "Statut lead",
+      "Routage", "Routé", "Date routage", "Ville", "Besoin", "Budget", "Produit",
+      "Urgence", "Zone", "Commercial", "Messages",
+      ...customFields.map((field) => `Champ: ${field}`),
+    ];
+    const rows = prospects.map((prospect) => {
+      const lead = prospect.prospectLeads?.[0] ?? {};
+      const data = lead.leadData && typeof lead.leadData === "object" && !Array.isArray(lead.leadData)
+        ? lead.leadData
+        : prospect.leadData && typeof prospect.leadData === "object" && !Array.isArray(prospect.leadData)
+          ? prospect.leadData
+          : {};
+      const messages = (prospect.messages || []).map((message) => `${message.author}: ${message.content}`).join(" | ");
+      const values = [
+        prospect.id,
+        lead.contactName ?? prospect.contact?.displayName ?? "",
+        lead.whatsappNumber ?? prospect.contact?.whatsappJid ?? "",
+        formatExportDate(prospect.createdAt),
+        formatExportDate(prospect.updatedAt),
+        prospect.status,
+        prospect.aiEnabled ? "Oui" : "Non",
+        prospect.qualificationStatus,
+        prospect.leadScore ?? lead.leadScore ?? "",
+        lead.status ?? "",
+        lead.routeStatus ?? "",
+        lead.isRouted ? "Oui" : "Non",
+        formatExportDate(lead.routedAt),
+        lead.city ?? data.city ?? "",
+        lead.need ?? data.need ?? "",
+        lead.budget ?? data.budget ?? "",
+        lead.product ?? data.product ?? "",
+        lead.urgency ?? data.urgency ?? "",
+        lead.location?.name ?? "",
+        lead.responsible?.name ?? "",
+        messages,
+        ...customFields.map((field) => data[field] ?? ""),
+      ];
+      return values.map(csvValue).join(";");
+    });
+    const csv = `\uFEFF${headers.map(csvValue).join(";")}\r\n${rows.join("\r\n")}`;
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `prospects-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    showToast(`${prospects.length} prospect${prospects.length > 1 ? "s" : ""} exporté${prospects.length > 1 ? "s" : ""}.`);
+  } catch (error) {
+    showToast(error.message || "Impossible d'exporter les prospects.");
+  } finally {
+    button.disabled = false;
+    button.textContent = originalLabel;
+  }
+}
+
 async function loadOrganizations() {
   const data = await api("/organizations");
   const select = $("#org-select");
@@ -436,8 +518,17 @@ function renderInbox() { $("#inbox-total").textContent = `${conversations.length
 async function openConversation(id) { try { const data = await api(`/organizations/${orgId}/conversations/${id}`); const conversation = data.conversation; const name = conversation.contact?.displayName || conversation.contact?.whatsappJid || "Contact"; const statusLabel = conversation.status === "CLOSED" ? "Conversation fermée" : conversation.status === "HUMAN_HANDOFF" ? "En attente d'un humain" : conversation.aiEnabled ? "Agent IA actif" : "Prise en main humaine"; $("#conversation-detail").innerHTML = `<div class="panel-heading"><div><h2>${name}</h2><p class="muted">${statusLabel}</p></div><button class="ghost-button" id="toggle-ai">${conversation.aiEnabled ? "Désactiver l'IA" : "Réactiver l'IA"}</button></div><div class="messages">${(conversation.messages || []).map((message) => `<div style="padding:10px 13px;margin:8px 0;max-width:75%;border-radius:10px;background:${message.author === "CONTACT" ? "#f3f4f8" : "#f0edff"};margin-left:${message.author === "CONTACT" ? "0" : "auto"};font-size:12px">${message.content}</div>`).join("")}</div><form id="reply-form" style="display:flex;gap:8px;margin-top:22px"><input required placeholder="Écrire une réponse..." style="flex:1;border:1px solid var(--line);border-radius:8px;padding:11px" /><button class="primary">Envoyer</button></form>`; $("#toggle-ai").onclick = () => toggleAi(id, conversation.aiEnabled); $("#reply-form").onsubmit = (event) => reply(event, id); } catch (error) { showToast(error.message); } }
 async function reply(event, id) { event.preventDefault(); const input = event.target.querySelector("input"); try { await api(`/organizations/${orgId}/conversations/${id}/reply`, { method: "POST", body: JSON.stringify({ text: input.value }) }); input.value = ""; showToast("Réponse envoyée"); await refresh(); await openConversation(id); } catch (error) { showToast(error.message); } }
 async function toggleAi(id, enabled) { try { await api(`/organizations/${orgId}/conversations/${id}/ai/${enabled ? "disable" : "enable"}`, { method: "POST" }); showToast(enabled ? "IA désactivée" : "IA réactivée"); await refresh(); await openConversation(id); } catch (error) { showToast(error.message); } }
-async function loadSettings() { try { const { settings } = await api(`/organizations/${orgId}/ai-settings`); const qualificationFields = settings.qualificationFields || []; $("#agent-name").value = settings.agentName || ""; $("#business-info").value = settings.businessInfo || ""; $("#system-prompt").value = settings.systemPrompt || ""; $("#welcome-message").value = settings.welcomeMessage || ""; document.querySelectorAll('input[name="qualification-field"]').forEach((input) => { input.checked = qualificationFields.includes(input.value); }); $("#custom-qualification-fields").value = qualificationFields.filter((field) => !["name", "city", "need", "budget", "product", "urgency", "quartier"].includes(field)).join(", "); } catch (error) { showToast(error.message); } }
-async function saveSettings(event) { event.preventDefault(); try { const standardFields = [...document.querySelectorAll('input[name="qualification-field"]:checked')].map((input) => input.value); const customFields = $("#custom-qualification-fields").value.split(",").map((field) => field.trim().toLowerCase()).filter(Boolean); const qualificationFields = [...new Set([...standardFields, ...customFields])]; await api(`/organizations/${orgId}/ai-settings`, { method: "PUT", body: JSON.stringify({ agentName: $("#agent-name").value, businessInfo: $("#business-info").value, systemPrompt: $("#system-prompt").value, welcomeMessage: $("#welcome-message").value, qualificationFields }) }); showToast("Configuration enregistrée"); } catch (error) { showToast(error.message); } }
+function renderCustomQualificationFields(fields = []) {
+  const container = $("#custom-qualification-fields");
+  const standardFields = ["name", "city", "need", "budget", "product", "urgency", "quartier"];
+  container.innerHTML = fields.filter((field) => !standardFields.includes(field)).map((field) => {
+    const label = field.replace(/[_-]+/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+    return `<label><input type="checkbox" class="custom-qualification-field" value="${field}" checked /> ${label}</label>`;
+  }).join("");
+}
+async function loadSettings() { try { const { settings } = await api(`/organizations/${orgId}/ai-settings`); const qualificationFields = settings.qualificationFields || []; $("#global-ai-enabled").checked = settings.aiEnabled !== false; $("#agent-name").value = settings.agentName || ""; $("#business-info").value = settings.businessInfo || ""; $("#system-prompt").value = settings.systemPrompt || ""; $("#welcome-message").value = settings.welcomeMessage || ""; document.querySelectorAll('input[name="qualification-field"]').forEach((input) => { input.checked = qualificationFields.includes(input.value); }); renderCustomQualificationFields(qualificationFields); } catch (error) { showToast(error.message); } }
+async function saveSettings(event) { event.preventDefault(); try { const standardFields = [...document.querySelectorAll('input[name="qualification-field"]:checked')].map((input) => input.value); const customFields = [...document.querySelectorAll('.custom-qualification-field:checked')].map((input) => input.value); const qualificationFields = [...new Set([...standardFields, ...customFields])]; const aiEnabled = $("#global-ai-enabled").checked; await api(`/organizations/${orgId}/ai-settings`, { method: "PUT", body: JSON.stringify({ aiEnabled, agentName: $("#agent-name").value, businessInfo: $("#business-info").value, systemPrompt: $("#system-prompt").value, welcomeMessage: $("#welcome-message").value, qualificationFields }) }); showToast(aiEnabled ? "Agent IA activé" : "Agent IA désactivé"); } catch (error) { showToast(error.message); } }
+function createQualificationField() { const input = $("#custom-qualification-field-input"); const field = input.value.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, ""); if (!field) return; const existingFields = [...document.querySelectorAll('input[name="qualification-field"], .custom-qualification-field')].map((item) => item.value); if (existingFields.includes(field)) { showToast("Ce champ existe déjà."); return; } renderCustomQualificationFields([...document.querySelectorAll('.custom-qualification-field')].map((item) => item.value).concat(field)); input.value = ""; showToast("Champ ajouté et coché."); }
 function renderAgentTestHistory() {
   const container = $("#agent-test-messages");
   if (!agentTestHistory.length) {
@@ -702,6 +793,8 @@ async function disconnectWhatsApp() {
 
 document.querySelectorAll("[data-view], [data-view-target]").forEach((element) => element.onclick = () => setView(element.dataset.view || element.dataset.viewTarget));
 $("#agent-form").onsubmit = saveSettings;
+$("#create-qualification-field").onclick = createQualificationField;
+$("#custom-qualification-field-input").onkeydown = (event) => { if (event.key === "Enter") { event.preventDefault(); createQualificationField(); } };
 $("#agent-test-form").onsubmit = testAgentReply;
 $("#clear-agent-test").onclick = clearAgentTest;
 $("#save-agent").onclick = () => $("#agent-form").requestSubmit();
@@ -732,6 +825,7 @@ if (newOrgButton) {
 }
 
 $("#commercial-period")?.addEventListener("change", renderCommercialMetrics);
+$("#export-prospects")?.addEventListener("click", exportProspects);
 setInterval(updateRealtimeHeader, 1000);
 
 initAuthFlow();

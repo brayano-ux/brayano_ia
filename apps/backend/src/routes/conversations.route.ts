@@ -3,6 +3,7 @@ import { z } from "zod";
 import {
   getConversationWithMessages,
   listConversations,
+  listProspectsForExport,
   recordOutboundMessage,
   setConversationAiEnabled,
 } from "../conversations/conversations.service.js";
@@ -30,6 +31,12 @@ export async function conversationsRoute(app: FastifyInstance) {
   app.get("/organizations/:orgId/conversations", async (request) => {
     const { orgId } = request.params as { orgId: string };
     const conversations = await listConversations(orgId);
+    return { conversations };
+  });
+
+  app.get("/organizations/:orgId/prospects/export", async (request) => {
+    const { orgId } = request.params as { orgId: string };
+    const conversations = await listProspectsForExport(orgId);
     return { conversations };
   });
 
