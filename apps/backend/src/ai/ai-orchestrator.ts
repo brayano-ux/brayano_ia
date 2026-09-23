@@ -10,7 +10,7 @@ import { aiReplySchema, type AIReply } from "./schemas.js";
  */
 const FALLBACK_REPLY: AIReply = {
   reply:
-    "Merci pour votre message. Un conseiller humain va prendre le relais pour vous répondre au mieux.",
+    "Merci pour votre message.",
   intent: "erreur_traitement",
   confidence: 0,
   needsHuman: true,
