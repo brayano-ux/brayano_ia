@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeCityName, resolveLeadQualification } from "./lead-routing.service.js";
+import { findBestMatchingLocation, normalizeCityName, resolveLeadQualification } from "./lead-routing.service.js";
 
 describe("lead routing service", () => {
   it("normalise correctement les villes et les variantes", () => {
@@ -25,5 +25,37 @@ describe("lead routing service", () => {
     };
 
     expect(resolveLeadQualification(lead).isQualified).toBe(false);
+  });
+
+  it("privilégie le quartier avant la ville quand les deux sont disponibles", () => {
+    const locations = [
+      {
+        id: "loc-1",
+        name: "Mokolo",
+        city: "Yaoundé",
+        responsible: [{ id: "resp-1", whatsappNumber: "+237111", active: true }],
+      },
+      {
+        id: "loc-2",
+        name: "Centre",
+        city: "Yaoundé",
+        responsible: [{ id: "resp-2", whatsappNumber: "+237222", active: true }],
+      },
+    ];
+
+    expect(findBestMatchingLocation(locations, "Yaoundé", "Mokolo")).toMatchObject({ id: "loc-1" });
+  });
+
+  it("reporte sur le bon quartier même si la ville est absente ou imprécise", () => {
+    const locations = [
+      {
+        id: "loc-3",
+        name: "Bonaberi",
+        city: "Douala",
+        responsible: [{ id: "resp-3", whatsappNumber: "+237333", active: true }],
+      },
+    ];
+
+    expect(findBestMatchingLocation(locations, null, "Bonaberi")).toMatchObject({ id: "loc-3" });
   });
 });

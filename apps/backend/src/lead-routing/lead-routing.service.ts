@@ -245,6 +245,49 @@ export async function getOrganizationRoutingTargets(organizationId: string) {
   });
 }
 
+export function findBestMatchingLocation(
+  locations: Array<{
+    id: string;
+    city: string;
+    name: string;
+    responsible: Array<{ id: string; whatsappNumber: string | null; active: boolean }>;
+  }>,
+  city?: string | null,
+  quarter?: string | null,
+) {
+  const normalizedCity = normalizeCityName(city ?? null);
+  const normalizedQuarter = quarter ? quarter.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim() : null;
+
+  const exactQuarterMatches = locations.filter((location) => {
+    const locationQuarter = location.name ? location.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim() : "";
+    const locationCity = normalizeCityName(location.city);
+    if (!normalizedQuarter || !locationQuarter) return false;
+
+    const sameQuarter = locationQuarter.includes(normalizedQuarter) || normalizedQuarter.includes(locationQuarter);
+    const sameCity = !normalizedCity || !locationCity || normalizedCity === locationCity || normalizedCity.includes(locationCity) || locationCity.includes(normalizedCity);
+    return sameQuarter && sameCity;
+  });
+
+  if (exactQuarterMatches.length > 0) {
+    return exactQuarterMatches[0];
+  }
+
+  if (normalizedQuarter) {
+    const quarterOnlyMatches = locations.filter((location) => {
+      const locationQuarter = location.name ? location.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim() : "";
+      return locationQuarter && (locationQuarter.includes(normalizedQuarter) || normalizedQuarter.includes(locationQuarter));
+    });
+    if (quarterOnlyMatches.length > 0) return quarterOnlyMatches[0];
+  }
+
+  if (normalizedCity) {
+    const cityMatches = locations.filter((location) => normalizeCityName(location.city) === normalizedCity);
+    if (cityMatches.length > 0) return cityMatches[0];
+  }
+
+  return null;
+}
+
 export async function getCommercialMetrics(organizationId: string) {
   const responsibles = await prisma.responsible.findMany({
     where: { organizationId, active: true },
@@ -297,7 +340,11 @@ export async function getCommercialMetrics(organizationId: string) {
   });
 }
 
-export async function resolveRoutingForLead(organizationId: string, city?: string | null): Promise<LeadRoutingOutcome> {
+export async function resolveRoutingForLead(
+  organizationId: string,
+  city?: string | null,
+  quarter?: string | null,
+): Promise<LeadRoutingOutcome> {
   const normalizedCity = normalizeCityName(city ?? null);
   const settings = await getRoutingSettings(organizationId);
   const fallbackPhone = settings.active
@@ -311,36 +358,33 @@ export async function resolveRoutingForLead(organizationId: string, city?: strin
         responsibleWhatsapp: fallbackPhone,
         reason: normalizedCity
           ? `Fallback configuré pour ${normalizedCity}`
-          : "Fallback utilisé car la ville du prospect est absente ou non identifiable.",
+          : "Fallback utilisé car la ville ou le quartier du prospect est absent ou non identifiable.",
       }
     : { routed: false, routeType: "none", reason: "Aucun fallback WhatsApp actif configuré." };
 
-  if (!normalizedCity) {
-    const outcome: LeadRoutingOutcome = fallbackOutcome.routed
-      ? fallbackOutcome
-      : { routed: false, routeType: "none", reason: "Ville absente ou non identifiable." };
-    console.log(`[route:${organizationId}] Ville non identifiable pour le routage`, { rawCity: city, normalizedCity, outcome });
-    return outcome;
-  }
-
   const locations = await getOrganizationRoutingTargets(organizationId);
-  const exactMatch = locations.find((location) => normalizeCityName(location.city) === normalizedCity);
+  const matchedLocation = findBestMatchingLocation(locations, city, quarter ?? null);
 
-  if (exactMatch?.responsible?.[0]) {
-    const responsible = exactMatch.responsible[0];
+  if (matchedLocation?.responsible?.[0]) {
+    const responsible = matchedLocation.responsible[0];
     const outcome: LeadRoutingOutcome = {
       routed: true,
       routeType: "location",
-      locationId: exactMatch.id,
+      locationId: matchedLocation.id,
       responsibleId: responsible.id,
       responsibleWhatsapp: responsible.whatsappNumber ?? undefined,
-      reason: `Location détectée pour ${normalizedCity}`,
+      reason: quarter
+        ? `Quartier détecté : ${quarter}`
+        : normalizedCity
+          ? `Location détectée pour ${normalizedCity}`
+          : "Location détectée sans ville précise",
     };
-    console.log(`[route:${organizationId}] Responsable trouvé par ville`, {
+    console.log(`[route:${organizationId}] Responsable trouvé par quartier/ville`, {
       rawCity: city,
+      rawQuarter: quarter,
       normalizedCity,
-      locationId: exactMatch.id,
-      locationName: exactMatch.name,
+      locationId: matchedLocation.id,
+      locationName: matchedLocation.name,
       responsibleId: responsible.id,
       responsibleName: responsible.name,
       responsibleWhatsapp: responsible.whatsappNumber,
@@ -349,10 +393,19 @@ export async function resolveRoutingForLead(organizationId: string, city?: strin
     return outcome;
   }
 
+  if (!normalizedCity && !quarter) {
+    const outcome: LeadRoutingOutcome = fallbackOutcome.routed
+      ? fallbackOutcome
+      : { routed: false, routeType: "none", reason: "Ville et quartier absents ou non identifiables." };
+    console.log(`[route:${organizationId}] Ville et quartier non identifiables pour le routage`, { rawCity: city, rawQuarter: quarter, normalizedCity, outcome });
+    return outcome;
+  }
+
   if (fallbackOutcome.routed) {
     const outcome = fallbackOutcome;
     console.log(`[route:${organizationId}] Fallback utilisé pour le routage`, {
       rawCity: city,
+      rawQuarter: quarter,
       normalizedCity,
       fallbackResponsibleId: settings.fallbackResponsible?.id,
       fallbackResponsibleName: settings.fallbackResponsible?.name,
@@ -362,9 +415,14 @@ export async function resolveRoutingForLead(organizationId: string, city?: strin
     return outcome;
   }
 
-  const outcome: LeadRoutingOutcome = { routed: false, routeType: "none", reason: `Aucune localisation correspondante pour ${normalizedCity}` };
-  console.log(`[route:${organizationId}] Aucune route trouvée pour la ville`, {
+  const outcome: LeadRoutingOutcome = {
+    routed: false,
+    routeType: "none",
+    reason: quarter ? `Aucune localisation correspondante pour le quartier ${quarter}` : `Aucune localisation correspondante pour ${normalizedCity}`,
+  };
+  console.log(`[route:${organizationId}] Aucune route trouvée`, {
     rawCity: city,
+    rawQuarter: quarter,
     normalizedCity,
     locationsCount: locations.length,
     outcome,
@@ -444,8 +502,9 @@ export async function registerQualifiedLead(input: {
     return lead;
   }
 
-  const routingValue = lead.city ?? readLeadValue("quartier", "neighborhood", "district");
-  const routingResult = await resolveRoutingForLead(input.organizationId, routingValue);
+  const routingCity = lead.city ?? readLeadValue("city", "ville", "location");
+  const routingQuarter = readLeadValue("quartier", "quarter", "neighborhood", "district", "zone");
+  const routingResult = await resolveRoutingForLead(input.organizationId, routingCity, routingQuarter);
   if (!routingResult.routed || !routingResult.responsibleWhatsapp) {
     await prisma.prospectLead.update({
       where: { id: lead.id },
