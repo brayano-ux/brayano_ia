@@ -13,10 +13,10 @@ export type LeadQualificationResult = {
 export type LeadRoutingOutcome = {
   routed: boolean;
   routeType: "location" | "fallback" | "none";
-  locationId?: string;
-  responsibleId?: string;
-  responsibleWhatsapp?: string;
-  reason?: string;
+  locationId?: string | undefined;
+  responsibleId?: string | undefined;
+  responsibleWhatsapp?: string | undefined;
+  reason?: string | undefined;
 };
 
 const qualificationFieldLabels: Record<string, string> = {
@@ -250,7 +250,7 @@ export function findBestMatchingLocation(
     id: string;
     city: string;
     name: string;
-    responsible: Array<{ id: string; whatsappNumber: string | null; active: boolean }>;
+    responsible: Array<{ id: string; name?: string; whatsappNumber: string | null; active: boolean }>;
   }>,
   city?: string | null,
   quarter?: string | null,
