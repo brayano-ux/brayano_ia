@@ -1,0 +1,219 @@
+/* ============================================================
+   COMPONANTS PARTAGÉS (panels, cartes métriques, bannière statut)
+============================================================ */
+.status-banner {
+  background: linear-gradient(120deg, var(--violet-light) 0%, #f4f3fe 100%);
+  border: 1px solid rgba(96, 88, 232, 0.18);
+  padding: 17px 20px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.status-banner strong {
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.status-banner p {
+  margin: 2px 0 0;
+  color: var(--ink-light);
+  font-size: 13px;
+}
+
+.status-icon {
+  display: grid;
+  place-items: center;
+  background: var(--paper);
+  color: var(--violet);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  box-shadow: var(--shadow-xs);
+  flex-shrink: 0;
+}
+
+.status-banner .text-button {
+  margin-left: auto;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.metric-card, .panel {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+  transition: var(--transition);
+}
+
+.metric-card {
+  padding: 20px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.metric-card:hover, .panel:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+.metric-icon {
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-md);
+  width: 44px;
+  height: 44px;
+  font-size: 19px;
+  flex-shrink: 0;
+}
+
+.metric-card small {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.metric-card strong {
+  display: block;
+  font: 700 25px "Space Grotesk", sans-serif;
+  margin: 3px 0;
+  color: var(--ink);
+}
+
+.trend {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 20px;
+}
+
+.panel {
+  padding: 24px;
+}
+
+.panel-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  gap: 10px;
+}
+
+.panel h2 {
+  font: 600 17px "Space Grotesk", sans-serif;
+  margin: 0 0 4px;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.quick-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.quick-action {
+  width: 100%;
+  background: var(--paper);
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: left;
+  padding: 14px;
+  margin-bottom: 10px;
+  color: var(--ink);
+  transition: var(--transition);
+}
+
+.quick-action:hover {
+  border-color: var(--line);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+.quick-action > span:last-child {
+  margin-left: auto;
+  color: var(--muted-light);
+  transition: var(--transition);
+}
+
+.quick-action:hover > span:last-child {
+  color: var(--violet);
+  transform: translateX(2px);
+}
+
+.quick-action strong, .quick-action small {
+  display: block;
+}
+
+.quick-action strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.quick-action small {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.quick-icon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+  font-size: 16px;
+}
+
+.green-bg { background: var(--green-light); color: #0a7d57; }
+.violet-bg { background: var(--violet-light); color: var(--violet-deep); }
+.orange-bg { background: var(--orange-light); color: #a4620f; }
+
+/* ============================================================
+   TOAST
+============================================================ */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--ink);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: var(--transition);
+  z-index: 100;
+  pointer-events: none;
+  border-left: 3px solid var(--violet);
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast[data-type="success"] { border-left-color: var(--green); }
+.toast[data-type="error"] { border-left-color: var(--red); }

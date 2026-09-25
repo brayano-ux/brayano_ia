@@ -1,0 +1,47 @@
+/* ============================================================
+   DESIGN TOKENS
+   Source unique de vérité pour couleurs, ombres, rayons, easing.
+   Toute nouvelle feature doit réutiliser ces variables plutôt
+   que d'introduire de nouvelles valeurs magiques.
+============================================================ */
+:root {
+  /* Encre & neutres, très légèrement chauds pour ne jamais lire "gris plat" */
+  --ink: #12172b;
+  --ink-light: #384057;
+  --muted: #6b7288;
+  --muted-light: #9aa0b3;
+  --line: #e6e8f2;
+  --line-subtle: #f1f2f8;
+  --paper: #ffffff;
+  --bg: #f6f7fb;
+
+  /* Marque : famille indigo/violet, plus une teinte encre-violet pour les dégradés */
+  --violet: #6058e8;
+  --violet-dark: #4a41d1;
+  --violet-deep: #2f2a8f;
+  --violet-light: #eeecfd;
+  --violet-glow: rgba(96, 88, 232, 0.16);
+  --violet-glow-strong: rgba(96, 88, 232, 0.32);
+
+  --green: #0fa672;
+  --green-light: #e9fbf3;
+  --orange: #e08a1f;
+  --orange-light: #fff6e8;
+  --red: #e15252;
+  --red-light: #fdeeee;
+
+  /* Élévation : plus froide et plus douce qu'une ombre grise générique */
+  --shadow-xs: 0 1px 2px 0 rgba(18, 23, 43, 0.05);
+  --shadow-sm: 0 3px 10px -4px rgba(18, 23, 43, 0.10);
+  --shadow-md: 0 12px 28px -10px rgba(18, 23, 43, 0.14);
+  --shadow-lg: 0 28px 64px -16px rgba(35, 30, 90, 0.22);
+  --shadow-glow: 0 8px 24px -6px var(--violet-glow-strong);
+
+  --radius-xl: 20px;
+  --radius-lg: 14px;
+  --radius-md: 10px;
+  --radius-sm: 7px;
+
+  --ease: cubic-bezier(0.19, 1, 0.22, 1);
+  --transition: all 0.22s var(--ease);
+}

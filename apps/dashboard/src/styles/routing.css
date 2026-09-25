@@ -1,0 +1,188 @@
+/* ============================================================
+   VUE : PARAMÈTRES (délai de réponse + zones & responsables)
+============================================================ */
+.delay-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.delay-option {
+  position: relative;
+  cursor: pointer;
+}
+
+.delay-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.delay-option span {
+  display: grid;
+  gap: 4px;
+  padding: 16px 12px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  text-align: center;
+  font-weight: 700;
+  color: var(--ink);
+  transition: var(--transition);
+}
+
+.delay-option small {
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.delay-option:hover span {
+  border-color: #d3d6e6;
+}
+
+.delay-option input:checked + span {
+  border-color: var(--violet);
+  background: var(--violet-light);
+  box-shadow: 0 0 0 4px var(--violet-glow);
+}
+
+.routing-settings {
+  margin-top: 24px;
+}
+
+.routing-forms {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.routing-form,
+.routing-fallback,
+.routing-list-panel {
+  padding: 20px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+}
+
+.routing-form h3,
+.routing-fallback h3,
+.routing-list-panel h3 {
+  margin-top: 0;
+}
+
+.routing-form label,
+.routing-fallback label {
+  display: grid;
+  gap: 7px;
+  margin-top: 14px;
+}
+
+.checkbox-row {
+  display: flex !important;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500 !important;
+}
+
+.checkbox-row input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--violet);
+}
+
+.routing-form input,
+.routing-form select,
+.routing-fallback input,
+.routing-fallback select {
+  width: 100%;
+  min-width: 0;
+}
+
+.routing-form .primary,
+.routing-fallback .primary {
+  width: 100%;
+}
+
+.routing-fallback,
+.routing-list-panel {
+  margin-top: 20px;
+}
+
+.routing-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 16px;
+  padding: 14px 0;
+  border-top: 1px solid var(--line-subtle);
+}
+
+.routing-item:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.routing-item strong,
+.routing-item small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.routing-item small {
+  margin-top: 4px;
+  color: var(--muted);
+}
+
+.routing-item ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+  overflow-wrap: anywhere;
+}
+
+.routing-responsible {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12.5px;
+  color: var(--ink-light);
+}
+
+.routing-actions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 580px) {
+  .routing-settings {
+    padding: 18px;
+  }
+
+  .routing-settings h2 {
+    margin-bottom: 16px !important;
+  }
+
+  .routing-forms {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .routing-form,
+  .routing-fallback,
+  .routing-list-panel {
+    padding: 16px;
+  }
+
+  .routing-fallback,
+  .routing-list-panel {
+    margin-top: 14px;
+  }
+
+  .routing-item {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}

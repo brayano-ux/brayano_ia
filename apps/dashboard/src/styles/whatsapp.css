@@ -1,0 +1,87 @@
+/* ============================================================
+   VUE : CONNEXION WHATSAPP
+============================================================ */
+.whatsapp-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.connect-card {
+  text-align: center;
+  padding: 48px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.connection-illustration {
+  margin: 0 auto 20px;
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  background: var(--green-light);
+  color: #0a7d57;
+  border-radius: 50%;
+  font-size: 30px;
+}
+
+.connect-card h2 {
+  font: 600 21px "Space Grotesk", sans-serif;
+  margin: 0 0 8px;
+  letter-spacing: -0.01em;
+}
+
+.connect-card .primary {
+  margin-top: 24px;
+}
+
+.connect-card .text-button {
+  margin-top: 16px;
+  font-size: 13px;
+}
+
+.qr-card {
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+.qr-placeholder {
+  flex: 1;
+  border: 2px dashed var(--line);
+  border-radius: var(--radius-md);
+  display: grid;
+  place-content: center;
+  text-align: center;
+  color: var(--muted-light);
+  margin-top: 16px;
+  padding: 32px;
+  background: var(--bg);
+}
+
+.qr-placeholder span {
+  font-size: 46px;
+  color: var(--muted-light);
+  margin-bottom: 8px;
+  display: block;
+}
+
+.qr-placeholder p {
+  font-size: 13px;
+  margin: 0;
+}
+
+.qr-placeholder img {
+  width: 230px;
+  height: 230px;
+  border-radius: var(--radius-sm);
+}
+
+@media (max-width: 868px) {
+  .whatsapp-grid {
+    grid-template-columns: 1fr;
+  }
+}
