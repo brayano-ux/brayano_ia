@@ -8,7 +8,7 @@ vi.mock("@whiskeysockets/baileys", () => ({
   downloadMediaMessage: vi.fn(),
   fetchLatestBaileysVersion: vi.fn(async () => ({ version: [2, 0, 0] })),
   useMultiFileAuthState: vi.fn(async () => ({ state: {}, saveCreds: vi.fn() })),
-  generateMessageID: vi.fn(() => "ID"),
+  generateMessageIDV2: vi.fn(() => "ID"),
 }));
 vi.mock("qrcode", () => ({ default: { toDataURL: vi.fn() } }));
 

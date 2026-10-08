@@ -4,7 +4,7 @@ import makeWASocket, {
   DisconnectReason,
   downloadMediaMessage,
   fetchLatestBaileysVersion,
-  generateMessageID,
+  generateMessageIDV2,
   useMultiFileAuthState,
   type WASocket,
 } from "@whiskeysockets/baileys";
@@ -260,7 +260,8 @@ export class BaileysWhatsAppProvider implements WhatsAppProvider {
     if (!this.socket) {
       throw new Error("Le socket WhatsApp n'est pas connecté.");
     }
-    const messageId = generateMessageID();
+    // Même format que celui que la bibliothèque génère toute seule (lié au numéro), pour ne rien changer aux yeux de WhatsApp.
+    const messageId = generateMessageIDV2(this.socket.user?.id);
     this.botSentIds.add(messageId);
     await this.socket.sendMessage(jid, { text }, { messageId });
   }
@@ -279,7 +280,8 @@ export class BaileysWhatsAppProvider implements WhatsAppProvider {
       payload.caption = normalizedCaption;
     }
 
-    const messageId = generateMessageID();
+    // Même format que celui que la bibliothèque génère toute seule (lié au numéro), pour ne rien changer aux yeux de WhatsApp.
+    const messageId = generateMessageIDV2(this.socket.user?.id);
     this.botSentIds.add(messageId);
     await this.socket.sendMessage(jid, payload as any, { messageId });
   }
