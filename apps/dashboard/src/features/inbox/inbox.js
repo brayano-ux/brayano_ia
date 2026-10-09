@@ -1,5 +1,5 @@
 import { api } from "../../services/api.js";
-import { $, escapeHtml, showToast } from "../../utils/dom.js";
+import { $, $$, escapeHtml, showToast } from "../../utils/dom.js";
 import { formatDateTime } from "../../utils/format.js";
 import { getState } from "../../state/store.js";
 import { conversationMarkup, bindConversationRows } from "./conversation-item.js";
@@ -68,6 +68,8 @@ export async function openConversation(id) {
       </form>
     `;
 
+    $$(".conversation-row").forEach((row) => row.classList.toggle("active", row.dataset.id === id));
+    if (window.innerWidth < 1100) detailPanel.scrollIntoView({ behavior: "smooth", block: "start" });
     $("#toggle-ai").onclick = () => toggleAi(id, conversation.aiEnabled);
     $("#reply-form").onsubmit = (event) => sendReply(event, id);
   } catch (error) {

@@ -12,6 +12,12 @@ export function getConversationStatusLabel(item) {
   return "Actif";
 }
 
+function statusTone(item) {
+  if (item.status === "HUMAN_HANDOFF") return "warning";
+  if (item.status === "CLOSED" || !item.aiEnabled) return "neutral";
+  return "success";
+}
+
 export function conversationMarkup(item) {
   const name = item.contact?.displayName || item.contact?.whatsappJid || "Contact";
   const lastMessage = item.messages?.[item.messages.length - 1];
@@ -25,8 +31,8 @@ export function conversationMarkup(item) {
         <p>${escapeHtml(lastMessage?.content || "Aucun message")}</p>
       </div>
       <div class="conversation-meta">
-        ${lastMessage ? formatTime(lastMessage.createdAt) : ""}
-        <span class="unread">${escapeHtml(statusLabel)}</span>
+        <time>${lastMessage ? formatTime(lastMessage.createdAt) : ""}</time>
+        <span class="status-chip ${statusTone(item)}">${escapeHtml(statusLabel)}</span>
       </div>
     </div>
   `;

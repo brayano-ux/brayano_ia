@@ -1,288 +1,39 @@
 /* ============================================================
-   VUE : BOÎTE DE RÉCEPTION — remplace l'ancien bloc.
-   Scopé sous #inbox-view. Les lignes .conversation-row / .contact-avatar /
-   .unread restent définies avec la vue Aperçu (partagées) ; ici on ne
-   les ajuste que dans la boîte de réception.
+   BOÎTE DE RÉCEPTION
+   Desktop : liste + fil côte à côte
+   Mobile/tablette étroite : liste puis fil en plein écran
 ============================================================ */
+.inbox-layout { display: grid; grid-template-columns: minmax(300px, 380px) minmax(0, 1fr); gap: var(--space-5); align-items: start; height: calc(100dvh - var(--topbar-height) - 200px); min-height: 520px; }
+.inbox-panel, .detail-panel { padding: 0; display: flex; flex-direction: column; height: 100%; min-height: 0; overflow: hidden; }
+.inbox-toolbar { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-4) var(--space-5); border-bottom: 1px solid var(--line-soft); font-size: var(--text-sm); }
+.inbox-panel .conversation-list { padding: var(--space-2); overflow-y: auto; flex: 1; align-content: start; }
 
-#inbox-view :is(button, input):focus-visible {
-  outline: 3px solid var(--violet-glow);
-  outline-offset: 2px;
+.detail-panel > .empty-state { margin: auto; max-width: 320px; background: transparent; border: 0; }
+.detail-panel.has-conversation { display: flex; }
+.detail-panel .panel-heading { margin: 0; padding: var(--space-4) var(--space-5); border-bottom: 1px solid var(--line-soft); align-items: center; flex-wrap: nowrap; }
+.detail-panel .panel-heading h2 { font-size: var(--text-base); }
+.detail-panel .panel-heading > div { min-width: 0; }
+.detail-back { display: none; }
+
+.conversation-thread { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-5); background: var(--surface-2); }
+.thread-bubble { display: grid; gap: 4px; max-width: min(78%, 560px); padding: 10px 14px; border-radius: 16px; font-size: var(--text-sm); line-height: 1.5; word-break: break-word; box-shadow: var(--shadow-xs); }
+.thread-bubble span { white-space: pre-wrap; }
+.thread-bubble time { font-size: 0.6875rem; opacity: 0.65; justify-self: end; }
+.thread-bubble.from-contact { align-self: flex-start; background: var(--surface); border: 1px solid var(--line); border-bottom-left-radius: 4px; }
+.thread-bubble.from-agent { align-self: flex-end; background: var(--brand-500); color: #fff; border-bottom-right-radius: 4px; }
+
+.reply-form { display: flex; gap: var(--space-2); padding: var(--space-3) var(--space-4); border-top: 1px solid var(--line-soft); background: var(--surface); }
+.reply-form input { flex: 1; min-width: 0; }
+
+@media (max-width: 1099px) {
+  .inbox-layout { grid-template-columns: minmax(0, 1fr); height: auto; min-height: 0; }
+  .inbox-panel { height: auto; max-height: none; }
+  .inbox-panel .conversation-list { max-height: 360px; }
+  .detail-panel { height: min(70dvh, 640px); }
 }
-
-/* ---------- En-tête : pastille de synchronisation ---------- */
-#inbox-view .page-heading .pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  flex: none;
-  padding: 6px 12px;
-  border-radius: 99px;
-  background: var(--green-light);
-  color: #0a7d57;
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-#inbox-view .page-heading .pill i {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--green);
-  animation: inboxPulse 2s ease-out infinite;
-}
-
-@keyframes inboxPulse {
-  0% { box-shadow: 0 0 0 0 rgba(15, 166, 114, 0.45); }
-  70%, 100% { box-shadow: 0 0 0 7px rgba(15, 166, 114, 0); }
-}
-
-/* ---------- Mise en page « messagerie » : liste + conversation ---------- */
-#inbox-view .inbox-layout {
-  --inbox-h: clamp(520px, calc(100vh - 240px), 780px);
-  display: grid;
-  grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
-  gap: 20px;
-  align-items: stretch;
-  height: var(--inbox-h);
-}
-
-/* ---------- Liste des conversations ---------- */
-#inbox-view .inbox-panel {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  padding: 0;
-  overflow: hidden;
-}
-
-#inbox-view .inbox-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 14px 16px 14px 20px;
-  border-bottom: 1px solid var(--line);
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--ink);
-}
-
-#inbox-view .inbox-toolbar .ghost-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 7px 10px 7px 12px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-#inbox-view .inbox-toolbar .ghost-button svg { width: 16px; height: 16px; }
-
-#inbox-view .inbox-panel .conversation-list {
-  flex: 1;
-  min-height: 0;
-  max-height: none;
-  align-content: start;
-  gap: 2px;
-  padding: 8px;
-  overflow-y: auto;
-  scrollbar-width: thin;
-}
-
-#inbox-view .conversation-row {
-  padding: 12px 10px;
-  border-bottom-color: transparent;
-  border-radius: 12px;
-}
-
-#inbox-view .conversation-row:hover { background: var(--bg); }
-
-/* Conversation ouverte (selon la classe que votre JS ajoute) */
-#inbox-view .conversation-row:is(.active, .is-active, .selected, .current, [aria-selected="true"]) {
-  background: var(--violet-light);
-}
-
-#inbox-view .conversation-row:is(.active, .is-active, .selected, .current, [aria-selected="true"]) .conversation-main strong {
-  color: var(--violet-deep);
-}
-
-/* ---------- Panneau de conversation ---------- */
-#inbox-view .detail-panel {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-height: 0;
-  overflow-y: auto;
-  scrollbar-width: thin;
-}
-
-#inbox-view .detail-panel.has-conversation { justify-content: flex-start; }
-
-/* En-tête de la conversation (généré par le JS) */
-#inbox-view .detail-panel .panel-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 14px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--line-subtle);
-}
-
-#inbox-view .detail-panel .panel-heading h2 {
-  margin: 0;
-  font-size: 17px;
-  letter-spacing: -0.01em;
-}
-
-#inbox-view .detail-panel .panel-heading .muted {
-  margin: 2px 0 0;
-  font-size: 12.5px;
-}
-
-#inbox-view .detail-panel .panel-heading button { flex: none; }
-
-#inbox-view #toggle-ai:disabled {
-  color: var(--muted);
-  cursor: not-allowed;
-  opacity: 0.75;
-}
-
-/* État vide : icône ajoutée en CSS, donc conservée si le JS réécrit le texte */
-#inbox-view .empty-state {
-  max-width: 300px;
-  margin: 0 auto;
-  padding: 36px 16px;
-  color: var(--muted);
-  font-size: 14px;
-  line-height: 1.55;
-  text-align: center;
-}
-
-#inbox-view .detail-panel > .empty-state::before {
-  content: "";
-  display: block;
-  width: 52px;
-  height: 52px;
-  margin: 0 auto 14px;
-  background: var(--muted-light);
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'/%3E%3C/svg%3E") center / contain no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'/%3E%3C/svg%3E") center / contain no-repeat;
-}
-
-/* ---------- Fil de messages ---------- */
-#inbox-view .conversation-thread {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  gap: 8px;
-  min-height: 0;
-  max-height: calc(var(--inbox-h) - 210px);
-  padding: 16px;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  border-radius: var(--radius-md);
-  background: var(--bg);
-}
-
-#inbox-view .thread-bubble {
-  max-width: 78%;
-  padding: 10px 14px;
-  border-radius: 16px;
-  font-size: 13px;
-  line-height: 1.55;
-  overflow-wrap: anywhere;
-  white-space: pre-wrap;
-}
-
-#inbox-view .thread-bubble.from-contact {
-  align-self: flex-start;
-  border-bottom-left-radius: 4px;
-  background: var(--paper);
-  border: 1px solid var(--line-subtle);
-  box-shadow: var(--shadow-xs);
-}
-
-#inbox-view .thread-bubble.from-agent {
-  align-self: flex-end;
-  border-bottom-right-radius: 4px;
-  background: var(--violet-light);
-  color: var(--violet-deep);
-}
-
-#inbox-view .thread-bubble time {
-  display: block;
-  margin-top: 4px;
-  font-size: 10.5px;
-  text-align: right;
-  opacity: 0.65;
-}
-
-/* ---------- Zone de réponse ---------- */
-#inbox-view .reply-form {
-  display: flex;
-  gap: 10px;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid var(--line-subtle);
-}
-
-#inbox-view .reply-form input {
-  flex: 1;
-  min-width: 0;
-  min-height: 44px;
-  padding: 11px 16px;
-  border: 1.5px solid var(--line);
-  border-radius: 12px;
-  background: var(--bg);
-  color: var(--ink);
-  font: inherit;
-  font-size: 14px;
-  outline: none;
-  transition: var(--transition);
-}
-
-#inbox-view .reply-form input:focus {
-  border-color: var(--violet);
-  background: var(--paper);
-  box-shadow: 0 0 0 4px var(--violet-glow);
-}
-
-#inbox-view .reply-form button {
-  flex: none;
-  min-height: 44px;
-  white-space: nowrap;
-}
-
-/* ---------- Responsive ---------- */
-@media (max-width: 1024px) {
-  #inbox-view .inbox-layout { grid-template-columns: minmax(260px, 300px) minmax(0, 1fr); }
-}
-
-@media (max-width: 868px) {
-  #inbox-view .inbox-layout {
-    grid-template-columns: 1fr;
-    height: auto;
-  }
-
-  #inbox-view .inbox-panel .conversation-list { max-height: 380px; }
-  #inbox-view .detail-panel { min-height: 360px; }
-  #inbox-view .conversation-thread { max-height: 420px; }
-}
-
-@media (max-width: 480px) {
-  #inbox-view .reply-form { flex-direction: column; }
-  #inbox-view .reply-form button { width: 100%; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  #inbox-view *, #inbox-view *::before, #inbox-view *::after {
-    animation: none !important;
-    transition: none !important;
-  }
+@media (max-width: 767px) {
+  .inbox-panel .conversation-list { max-height: none; }
+  .detail-panel { height: min(75dvh, 620px); }
+  .thread-bubble { max-width: 88%; }
+  .reply-form { padding: var(--space-3); }
 }

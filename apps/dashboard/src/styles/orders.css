@@ -1,20 +1,27 @@
-/* Vue Commandes */
-.orders-settings { display: grid; gap: 6px; padding: 18px 20px; margin-bottom: 18px; max-width: 760px; }
-.orders-settings .agenda-switch { display: flex; align-items: center; gap: 8px; font-weight: 600; }
-.orders-settings .field-hint { margin: 0; font-size: 12px; }
+/* ============================================================
+   COMMANDES
+============================================================ */
+.orders-settings { display: grid; gap: var(--space-2); margin-bottom: var(--space-5); max-width: 760px; }
+.orders-settings .field-hint { margin: 0; }
+.orders-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-4); }
+.orders-filters { display: flex; gap: var(--space-2); overflow-x: auto; max-width: 100%; padding-bottom: 2px; }
+.orders-filter { flex: none; min-height: 36px; padding: 0 var(--space-4); border: 1px solid var(--line); border-radius: var(--radius-full); background: var(--surface); color: var(--ink-2); font-size: var(--text-sm); font-weight: 600; transition: var(--transition); }
+.orders-filter:hover { background: var(--surface-2); }
+.orders-filter.active { background: var(--brand-500); border-color: var(--brand-500); color: #fff; }
 
-.orders-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
-.orders-filters { display: flex; flex-wrap: wrap; gap: 6px; }
-.orders-filter { border: 1px solid rgba(120, 120, 140, 0.3); background: transparent; color: inherit; padding: 6px 14px; border-radius: 999px; font-size: 13px; cursor: pointer; }
-.orders-filter.active { background: rgba(91, 79, 233, 0.14); border-color: rgba(91, 79, 233, 0.5); font-weight: 700; }
-
-.orders-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
-.order-card { display: grid; gap: 10px; padding: 16px; border: 1px solid rgba(120, 120, 140, 0.22); border-radius: 14px; }
-.order-card.status-cancelled { opacity: 0.6; }
-.order-card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.orders-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: var(--space-4); }
+.order-card { display: grid; gap: var(--space-3); align-content: start; padding: var(--space-5); border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow-xs); }
+.order-card.status-cancelled { opacity: 0.65; }
+.order-card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-3); }
 .order-card-head > div { display: grid; gap: 2px; min-width: 0; }
-.order-items { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
-.order-items li { display: flex; justify-content: space-between; gap: 10px; }
-.order-address { margin: 0; font-size: 14px; }
-.order-card-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; border-top: 1px solid rgba(120, 120, 140, 0.18); padding-top: 10px; }
+.order-card-head small { font-size: var(--text-xs); }
+.order-card .appointment-status { background: var(--info-bg); color: var(--info); }
+.order-card.status-confirmed .appointment-status { background: var(--brand-50); color: var(--brand-700); }
+.order-card.status-delivered .appointment-status { background: var(--success-bg); color: var(--success); }
+.order-card.status-cancelled .appointment-status { background: var(--danger-bg); color: var(--danger); }
+.order-items { list-style: none; margin: 0; padding: var(--space-3); display: grid; gap: var(--space-2); border-radius: var(--radius-md); background: var(--surface-2); font-size: var(--text-sm); }
+.order-items li { display: flex; justify-content: space-between; gap: var(--space-3); }
+.order-address { font-size: var(--text-sm); }
+.order-card-foot { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); flex-wrap: wrap; padding-top: var(--space-3); border-top: 1px solid var(--line-soft); }
 .order-card-foot .appointment-actions { grid-column: auto; }
+@media (max-width: 639px) { .orders-list { grid-template-columns: minmax(0, 1fr); } }

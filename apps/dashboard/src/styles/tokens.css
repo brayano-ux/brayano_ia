@@ -1,47 +1,90 @@
 /* ============================================================
-   DESIGN TOKENS
-   Source unique de vérité pour couleurs, ombres, rayons, easing.
-   Toute nouvelle feature doit réutiliser ces variables plutôt
-   que d'introduire de nouvelles valeurs magiques.
+   DESIGN TOKENS — source unique de vérité du design system.
+   Toute nouvelle feature réutilise ces variables.
 ============================================================ */
 :root {
-  /* Encre & neutres, très légèrement chauds pour ne jamais lire "gris plat" */
-  --ink: #12172b;
-  --ink-light: #384057;
-  --muted: #6b7288;
-  --muted-light: #9aa0b3;
-  --line: #e6e8f2;
-  --line-subtle: #f1f2f8;
-  --paper: #ffffff;
-  --bg: #f6f7fb;
+  /* Marque */
+  --brand-50: #f1f0ff;
+  --brand-100: #e5e3ff;
+  --brand-200: #ccc8ff;
+  --brand-500: #5b50e8;
+  --brand-600: #4b40d6;
+  --brand-700: #3d33b5;
+  --brand-900: #1f1b5c;
 
-  /* Marque : famille indigo/violet, plus une teinte encre-violet pour les dégradés */
-  --violet: #6058e8;
-  --violet-dark: #4a41d1;
-  --violet-deep: #2f2a8f;
-  --violet-light: #eeecfd;
-  --violet-glow: rgba(96, 88, 232, 0.16);
-  --violet-glow-strong: rgba(96, 88, 232, 0.32);
+  /* Neutres (très légèrement bleutés) */
+  --ink: #101426;
+  --ink-2: #2b3147;
+  --muted: #5d6479;
+  --subtle: #8a90a4;
+  --line: #e4e6ef;
+  --line-soft: #eef0f6;
+  --surface: #ffffff;
+  --surface-2: #f7f8fc;
+  --bg: #f3f4f9;
 
-  --green: #0fa672;
-  --green-light: #e9fbf3;
-  --orange: #e08a1f;
-  --orange-light: #fff6e8;
-  --red: #e15252;
-  --red-light: #fdeeee;
+  /* Sémantique */
+  --success: #0b8f63;
+  --success-bg: #e6f7f0;
+  --warning: #a35d06;
+  --warning-bg: #fff3e0;
+  --danger: #c93b3b;
+  --danger-bg: #fdeeee;
+  --info: #2563c9;
+  --info-bg: #e9f1fd;
 
-  /* Élévation : plus froide et plus douce qu'une ombre grise générique */
-  --shadow-xs: 0 1px 2px 0 rgba(18, 23, 43, 0.05);
-  --shadow-sm: 0 3px 10px -4px rgba(18, 23, 43, 0.10);
-  --shadow-md: 0 12px 28px -10px rgba(18, 23, 43, 0.14);
-  --shadow-lg: 0 28px 64px -16px rgba(35, 30, 90, 0.22);
-  --shadow-glow: 0 8px 24px -6px var(--violet-glow-strong);
+  /* Alias historiques (les vues existantes les utilisent encore) */
+  --violet: var(--brand-500);
+  --violet-dark: var(--brand-600);
+  --violet-deep: var(--brand-900);
+  --violet-light: var(--brand-50);
+  --violet-glow: rgba(91, 80, 232, 0.16);
+  --violet-glow-strong: rgba(91, 80, 232, 0.3);
+  --ink-light: var(--ink-2);
+  --muted-light: var(--subtle);
+  --line-subtle: var(--line-soft);
+  --paper: var(--surface);
+  --green: var(--success);
+  --green-light: var(--success-bg);
+  --orange: var(--warning);
+  --orange-light: var(--warning-bg);
+  --red: var(--danger);
+  --red-light: var(--danger-bg);
 
+  /* Typographie */
+  --font: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-lg: 1.0625rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.625rem;
+  --text-3xl: 2rem;
+
+  /* Espacement */
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+  --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px;
+
+  /* Formes & élévation */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
   --radius-xl: 20px;
-  --radius-lg: 14px;
-  --radius-md: 10px;
-  --radius-sm: 7px;
+  --radius-full: 999px;
+  --shadow-xs: 0 1px 2px rgba(16, 20, 38, 0.05);
+  --shadow-sm: 0 1px 3px rgba(16, 20, 38, 0.06), 0 1px 2px rgba(16, 20, 38, 0.04);
+  --shadow-md: 0 8px 24px -8px rgba(16, 20, 38, 0.14);
+  --shadow-lg: 0 24px 56px -16px rgba(30, 24, 90, 0.25);
+  --shadow-glow: 0 1px 2px rgba(31, 27, 92, 0.2);
+  --ring: 0 0 0 3px rgba(91, 80, 232, 0.28);
 
-  --ease: cubic-bezier(0.19, 1, 0.22, 1);
-  --transition: all 0.22s var(--ease);
+  /* Mise en page */
+  --sidebar-width: 264px;
+  --topbar-height: 60px;
+  --tabbar-height: 64px;
+  --content-max: 1240px;
+  --touch: 44px;
+
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --transition: all 0.18s var(--ease);
 }

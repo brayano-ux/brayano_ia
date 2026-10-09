@@ -10,7 +10,15 @@ import { APP_CONFIG } from "../../config.js";
  */
 export function setView(view, onViewShown = {}) {
   $$(".view").forEach((section) => section.classList.toggle("hidden", section.id !== `${view}-view`));
-  $$(".nav-item[data-view]").forEach((item) => item.classList.toggle("active", item.dataset.view === view));
+  $$(".nav-item[data-view], .tab-item[data-view]").forEach((item) => {
+    const active = item.dataset.view === view;
+    item.classList.toggle("active", active);
+    if (active) item.setAttribute("aria-current", "page");
+    else item.removeAttribute("aria-current");
+  });
+  // Les vues secondaires (produits, rendez-vous…) activent « Plus » sur mobile.
+  $("#tab-more")?.classList.toggle("active", !$(".tab-item[data-view].active"));
+  window.scrollTo({ top: 0 });
   onViewShown[view]?.();
 }
 
@@ -48,10 +56,14 @@ export function initNavigation(onViewShown) {
 
   trigger?.addEventListener("click", toggleMenu);
   overlay?.addEventListener("click", toggleMenu);
+  $("#tab-more")?.addEventListener("click", toggleMenu);
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && sidebar.classList.contains("mobile-open")) toggleMenu();
+  });
 
-  $$(".nav-item").forEach((item) => {
+  $$(".nav-item, .tab-item[data-view]").forEach((item) => {
     item.addEventListener("click", () => {
-      if (window.innerWidth <= APP_CONFIG.mobileBreakpointPx) {
+      if (window.innerWidth <= APP_CONFIG.mobileBreakpointPx && sidebar.classList.contains("mobile-open")) {
         sidebar.classList.remove("mobile-open");
         overlay.classList.remove("active");
       }
