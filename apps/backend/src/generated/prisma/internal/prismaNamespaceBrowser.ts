@@ -69,7 +69,11 @@ export const ModelName = {
   Location: 'Location',
   Responsible: 'Responsible',
   OrganizationRoutingSettings: 'OrganizationRoutingSettings',
-  ProspectLead: 'ProspectLead'
+  ProspectLead: 'ProspectLead',
+  AppointmentSettings: 'AppointmentSettings',
+  Appointment: 'Appointment',
+  OrderSettings: 'OrderSettings',
+  Order: 'Order'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -94,7 +98,10 @@ export const OrganizationScalarFieldEnum = {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   freeAiResponsesRemaining: 'freeAiResponsesRemaining',
-  trialUpgradeEmailSentAt: 'trialUpgradeEmailSentAt'
+  trialUpgradeEmailSentAt: 'trialUpgradeEmailSentAt',
+  platformSuspended: 'platformSuspended',
+  suspensionReason: 'suspensionReason',
+  suspendedAt: 'suspendedAt'
 } as const
 
 export type OrganizationScalarFieldEnum = (typeof OrganizationScalarFieldEnum)[keyof typeof OrganizationScalarFieldEnum]
@@ -242,6 +249,9 @@ export const WhatsAppAccountScalarFieldEnum = {
   organizationId: 'organizationId',
   phoneNumber: 'phoneNumber',
   status: 'status',
+  lastConnectedAt: 'lastConnectedAt',
+  lastDisconnectedAt: 'lastDisconnectedAt',
+  lastDisconnectReason: 'lastDisconnectReason',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -375,6 +385,77 @@ export const ProspectLeadScalarFieldEnum = {
 export type ProspectLeadScalarFieldEnum = (typeof ProspectLeadScalarFieldEnum)[keyof typeof ProspectLeadScalarFieldEnum]
 
 
+export const AppointmentSettingsScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  enabled: 'enabled',
+  timezone: 'timezone',
+  slotMinutes: 'slotMinutes',
+  bufferMinutes: 'bufferMinutes',
+  capacity: 'capacity',
+  minNoticeMinutes: 'minNoticeMinutes',
+  horizonDays: 'horizonDays',
+  workingHours: 'workingHours',
+  closedDates: 'closedDates',
+  serviceLabel: 'serviceLabel',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AppointmentSettingsScalarFieldEnum = (typeof AppointmentSettingsScalarFieldEnum)[keyof typeof AppointmentSettingsScalarFieldEnum]
+
+
+export const AppointmentScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  conversationId: 'conversationId',
+  contactName: 'contactName',
+  contactPhone: 'contactPhone',
+  contactJid: 'contactJid',
+  service: 'service',
+  notes: 'notes',
+  startsAt: 'startsAt',
+  endsAt: 'endsAt',
+  status: 'status',
+  source: 'source',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AppointmentScalarFieldEnum = (typeof AppointmentScalarFieldEnum)[keyof typeof AppointmentScalarFieldEnum]
+
+
+export const OrderSettingsScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  enabled: 'enabled',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type OrderSettingsScalarFieldEnum = (typeof OrderSettingsScalarFieldEnum)[keyof typeof OrderSettingsScalarFieldEnum]
+
+
+export const OrderScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  conversationId: 'conversationId',
+  contactJid: 'contactJid',
+  customerName: 'customerName',
+  customerPhone: 'customerPhone',
+  deliveryAddress: 'deliveryAddress',
+  notes: 'notes',
+  items: 'items',
+  total: 'total',
+  status: 'status',
+  source: 'source',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -389,6 +470,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {

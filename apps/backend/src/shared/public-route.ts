@@ -7,6 +7,7 @@ export function isPublicRoute(url: string) {
     || url.startsWith("/register/")
     || url.startsWith("/password-reset/")
     || url.startsWith("/health")
+    || url.startsWith("/admin/")
     || url === "/billing/plans"
     || url === "/billing/campay/callback"
     || url.startsWith("/billing/campay/callback?")

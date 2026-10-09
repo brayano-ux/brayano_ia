@@ -31,3 +31,16 @@ export function getAiOrchestrator(): AiOrchestrator {
   }
   return orchestrator;
 }
+
+/** Fournisseurs bruts (principal puis secours) pour les tâches qui ne sont pas une réponse WhatsApp. */
+export function getRawProviders(): AIProvider[] {
+  const providers: AIProvider[] = [];
+  for (const create of [createProvider, createFallbackProvider]) {
+    try {
+      providers.push(create());
+    } catch (error) {
+      console.warn("Fournisseur IA indisponible :", error instanceof Error ? error.message : error);
+    }
+  }
+  return providers;
+}

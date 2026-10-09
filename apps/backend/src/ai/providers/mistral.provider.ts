@@ -55,7 +55,7 @@ export class MistralProvider implements AIProvider {
         messages: [
           {
             role: "user",
-            content: `Transcris fidèlement cet audio en français. Retourne uniquement le texte transcrit, sans commentaire ni formatage.\n\n[Audio binaire attaché]`,
+            content: `Transcris fidèlement cet audio dans la langue parlée (français, anglais ou pidgin camerounais). Ne traduis pas. Retourne uniquement le texte transcrit, sans commentaire ni formatage.\n\n[Audio binaire attaché]`,
           },
         ],
       }),

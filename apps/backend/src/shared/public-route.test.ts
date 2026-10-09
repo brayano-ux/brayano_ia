@@ -7,6 +7,11 @@ describe("public routes", () => {
       .toBe(true);
   });
 
+  it("leaves /admin routes to their own platform token check", () => {
+    expect(isPublicRoute("/admin/organizations")).toBe(true);
+    expect(isPublicRoute("/administrator")).toBe(false);
+  });
+
   it("does not make other media paths public", () => {
     expect(isPublicRoute("/media/products/invalid/product.webp?t=123:signature")).toBe(false);
     expect(isPublicRoute("/media/other/file.webp")).toBe(false);

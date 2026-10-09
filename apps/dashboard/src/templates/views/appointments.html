@@ -1,0 +1,74 @@
+<!-- VIEW: APPOINTMENTS -->
+<section id="appointments-view" class="view hidden">
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">AGENDA</p>
+      <h1>Rendez-vous</h1>
+      <p class="muted">Définissez vos horaires : l’agent propose uniquement les créneaux libres et enregistre les rendez-vous confirmés par vos clients.</p>
+    </div>
+  </div>
+
+  <div class="appointments-layout">
+    <form id="agenda-form" class="panel settings-form agenda-form">
+      <div class="agenda-form-head">
+        <h2>Réglages de l’agenda</h2>
+        <label class="agenda-switch">
+          <input id="agenda-enabled" type="checkbox" />
+          <span>Prise de rendez-vous par l’agent</span>
+        </label>
+      </div>
+      <p class="field-hint">Désactivé, l’agent ne propose aucun rendez-vous et se comporte comme avant.</p>
+
+      <label>
+        <span class="field-label">Type de rendez-vous</span>
+        <input id="agenda-service" type="text" maxlength="160" placeholder="Ex. Coupe + brushing, Consultation…" />
+      </label>
+
+      <div class="agenda-grid">
+        <label><span class="field-label">Durée d’un créneau (min)</span><input id="agenda-slot" type="number" min="10" max="240" step="5" /></label>
+        <label><span class="field-label">Pause entre deux RDV (min)</span><input id="agenda-buffer" type="number" min="0" max="120" step="5" /></label>
+        <label><span class="field-label">RDV simultanés</span><input id="agenda-capacity" type="number" min="1" max="50" /></label>
+        <label><span class="field-label">Préavis minimum (min)</span><input id="agenda-notice" type="number" min="0" max="10080" step="15" /></label>
+        <label><span class="field-label">Réservable jusqu’à (jours)</span><input id="agenda-horizon" type="number" min="1" max="180" /></label>
+        <label><span class="field-label">Fuseau horaire</span><input id="agenda-timezone" type="text" placeholder="Africa/Douala" /></label>
+      </div>
+
+      <fieldset class="agenda-hours">
+        <legend class="field-label">Horaires d’ouverture</legend>
+        <p class="field-hint">Deux plages possibles par jour (ex. matin et après-midi). Laissez vide un jour fermé.</p>
+        <div id="agenda-hours-rows"></div>
+      </fieldset>
+
+      <fieldset class="agenda-closed">
+        <legend class="field-label">Jours fermés (fériés, congés)</legend>
+        <div class="agenda-closed-add">
+          <input id="agenda-closed-date" type="date" />
+          <button id="agenda-closed-add" type="button" class="ghost-button">Ajouter</button>
+        </div>
+        <div id="agenda-closed-list" class="agenda-chips"></div>
+      </fieldset>
+
+      <button id="agenda-save" type="submit" class="primary">Enregistrer l’agenda</button>
+    </form>
+
+    <section class="appointments-list-section">
+      <div class="products-list-heading">
+        <h2>Rendez-vous à venir</h2>
+        <span id="appointments-count" class="muted"></span>
+      </div>
+
+      <form id="appointment-add-form" class="panel appointment-add">
+        <strong>Ajouter manuellement</strong>
+        <div class="agenda-grid">
+          <label><span class="field-label">Date</span><input id="appt-date" type="date" required /></label>
+          <label><span class="field-label">Heure</span><input id="appt-time" type="time" required /></label>
+          <label><span class="field-label">Nom</span><input id="appt-name" type="text" maxlength="160" /></label>
+          <label><span class="field-label">Téléphone</span><input id="appt-phone" type="tel" maxlength="40" /></label>
+        </div>
+        <button type="submit" class="ghost-button">Réserver ce créneau</button>
+      </form>
+
+      <div id="appointments-list" class="appointments-list" aria-live="polite"></div>
+    </section>
+  </div>
+</section>

@@ -48,7 +48,7 @@ export class GeminiProvider implements AIProvider {
         role: "user",
         parts: [
           { inlineData: { data: input.data.toString("base64"), mimeType: input.mimeType } },
-          { text: "Transcris fidèlement cet audio en français. Retourne uniquement le texte transcrit, sans commentaire ni formatage." },
+          { text: "Transcris fidèlement cet audio dans la langue parlée (français, anglais ou pidgin camerounais). Ne traduis pas. Retourne uniquement le texte transcrit, sans commentaire ni formatage." },
         ],
       }],
     });

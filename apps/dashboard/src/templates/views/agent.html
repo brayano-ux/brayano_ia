@@ -1,66 +1,203 @@
 <!-- VIEW: AGENT -->
-        <section id="agent-view" class="view hidden">
-          <div class="page-heading">
-            <div>
-              <p class="eyebrow">INTELLIGENCE ARTIFICIELLE</p>
-              <h1>Votre agent IA</h1>
-              <p class="muted">Donnez à votre assistant le contexte nécessaire pour bien répondre.</p>
-            </div>
-            <button class="primary" id="save-agent">Enregistrer les modifications</button>
+<section id="agent-view" class="view hidden">
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">INTELLIGENCE ARTIFICIELLE</p>
+      <h1>Votre agent IA</h1>
+      <p class="muted">Configurez ce que votre agent sait, comment il parle et ce qu’il peut faire, puis testez-le tout de suite.</p>
+    </div>
+    <div class="agent-save-area">
+      <span id="agent-dirty" class="agent-dirty hidden" role="status">● Modifications non enregistrées</span>
+      <button class="primary" id="save-agent" type="button">Enregistrer</button>
+    </div>
+  </div>
+
+  <section class="panel agent-hero" aria-label="État de l’agent">
+    <div class="agent-hero-identity">
+      <div class="agent-avatar" id="agent-avatar" aria-hidden="true">IA</div>
+      <div class="agent-hero-text">
+        <strong id="agent-hero-name">Assistant</strong>
+        <span id="agent-hero-status" class="agent-status-pill on">Actif</span>
+      </div>
+      <label class="agent-switch" title="Active ou désactive les réponses automatiques pour tous les prospects.">
+        <input id="global-ai-enabled" form="agent-form" type="checkbox" checked />
+        <span class="agent-switch-track" aria-hidden="true"></span>
+        <span class="agent-switch-label">Réponses automatiques</span>
+      </label>
+    </div>
+    <div class="agent-completeness">
+      <div class="agent-completeness-head">
+        <strong>Configuration</strong>
+        <span id="agent-score-label">0 / 5</span>
+      </div>
+      <div class="agent-meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="agent-meter"><span id="agent-meter-fill"></span></div>
+      <ul id="agent-checklist" class="agent-checklist"></ul>
+    </div>
+  </section>
+
+  <div class="agent-layout">
+    <div class="agent-main">
+      <div class="agent-tabs" role="tablist" aria-label="Sections de configuration">
+        <button type="button" class="agent-tab active" role="tab" data-agent-tab="identity">Identité</button>
+        <button type="button" class="agent-tab" role="tab" data-agent-tab="knowledge">Connaissances</button>
+        <button type="button" class="agent-tab" role="tab" data-agent-tab="behavior">Comportement</button>
+        <button type="button" class="agent-tab" role="tab" data-agent-tab="features">Fonctions</button>
+      </div>
+
+      <form id="agent-form" class="panel settings-form agent-form">
+        <div class="agent-pane" data-agent-pane="identity">
+          <div class="agent-pane-head">
+            <h2>Identité de l’agent</h2>
+            <p class="muted">Le nom et l’image que vos clients voient dans la conversation.</p>
           </div>
-          <form id="agent-form" class="panel settings-form">
-            <label class="ai-global-toggle">
-              <span>
-                <strong>Agent IA global</strong>
-                <small>Active ou désactive les réponses automatiques pour tous les prospects.</small>
-              </span>
-              <input id="global-ai-enabled" type="checkbox" checked />
-            </label>
-            <label>
-              Nom de l'agent
-              <input id="agent-name" required />
-            </label>
-            <label>
-              Informations sur votre activité
-              <textarea id="business-info" rows="5" placeholder="Présentez votre entreprise, vos offres et vos horaires..."></textarea>
-            </label>
-            <div class="agent-image-field">
-              <label for="agent-image-url">Image de l'agent</label>
-              <div class="agent-image-actions">
-                <input id="agent-image-url" type="url" placeholder="https://exemple.com/visuel.png" />
-                <input id="agent-image-file" type="file" accept="image/*" />
-              </div>
-              <div class="agent-image-preview-wrap">
-                <img id="agent-image-preview" class="agent-image-preview hidden" alt="Aperçu de l'image de l'agent" />
-              </div>
-              <p class="muted">Choisissez directement une image depuis votre téléphone ou votre ordinateur, ou collez une URL publique.</p>
+          <label>
+            Nom de l'agent
+            <input id="agent-name" required maxlength="80" placeholder="Ex. Awa, Assistante du Salon Belle Époque" />
+          </label>
+          <div class="agent-image-field">
+            <label for="agent-image-url">Image de l'agent</label>
+            <div class="agent-image-actions">
+              <input id="agent-image-url" type="url" placeholder="https://exemple.com/visuel.png" />
+              <input id="agent-image-file" type="file" accept="image/*" />
             </div>
-            <label>
-              Instructions de l'agent
-              <textarea id="system-prompt" rows="6" required></textarea>
-            </label>
-            <fieldset class="qualification-fields">
-              <legend>Informations à collecter avant transfert</legend>
-              <p class="muted">Si aucun champ n'est sélectionné, l'IA suit uniquement vos instructions libres.</p>
-              <label><input type="checkbox" name="qualification-field" value="name" /> Nom du prospect</label>
-              <label><input type="checkbox" name="qualification-field" value="city" /> Ville</label>
-              <label><input type="checkbox" name="qualification-field" value="need" /> Besoin</label>
-              <label><input type="checkbox" name="qualification-field" value="budget" /> Budget</label>
-              <label><input type="checkbox" name="qualification-field" value="product" /> Produit ou service</label>
-              <label><input type="checkbox" name="qualification-field" value="urgency" /> Urgence</label>
-              <label><input type="checkbox" name="qualification-field" value="quartier" /> Quartier</label>
-              <div id="custom-qualification-fields" class="custom-qualification-fields"></div>
-              <div class="custom-field-creator">
-                <input id="custom-qualification-field-input" type="text" maxlength="60" placeholder="Ex. campus, filiere, telephone" />
-                <button type="button" class="ghost-button" id="create-qualification-field">Créer</button>
+            <div class="agent-image-preview-wrap">
+              <img id="agent-image-preview" class="agent-image-preview hidden" alt="Aperçu de l'image de l'agent" />
+            </div>
+            <p class="muted">Choisissez une image depuis votre téléphone ou votre ordinateur, ou collez une URL publique.</p>
+          </div>
+        </div>
+
+        <div class="agent-pane hidden" data-agent-pane="knowledge">
+          <div class="agent-pane-head">
+            <h2>Ce que l’agent sait de votre entreprise</h2>
+            <p class="muted">L’agent s’appuie sur ces informations pour répondre. Ce qui n’y figure pas, il ne l’invente pas : il propose de vous passer la main.</p>
+          </div>
+          <section id="config-assistant" class="panel config-assistant">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">ASSISTANT DE CONFIGURATION</p>
+                <h2>Remplir les informations de votre entreprise</h2>
+                <p class="muted">Donnez une source (texte, site web ou PDF) : l’assistant en extrait uniquement ce qui y est écrit. Il n’invente rien et vous validez avant d’enregistrer.</p>
               </div>
-              <p class="muted">Créez un champ personnalisé : il sera ajouté comme case cochée.</p>
-            </fieldset>
-            <label>
-              Message d'accueil
-              <textarea id="welcome-message" rows="3"></textarea>
-            </label>
-          </form>
+            </div>
+            <div class="ca-tabs" role="tablist">
+              <button type="button" class="ca-tab active" data-ca-tab="text" role="tab">Texte collé</button>
+              <button type="button" class="ca-tab" data-ca-tab="url" role="tab">Site web</button>
+              <button type="button" class="ca-tab" data-ca-tab="pdf" role="tab">Document PDF</button>
+            </div>
+            <div class="ca-pane" data-ca-pane="text">
+              <textarea id="ca-text" rows="5" maxlength="60000" placeholder="Collez ici le texte de votre site, de votre page Facebook (copiez la section « À propos »), d’une brochure…"></textarea>
+              <p class="field-hint">Pour une page Facebook : ouvrez-la, copiez les informations visibles puis collez-les ici. L’assistant ne se connecte pas à Facebook.</p>
+            </div>
+            <div class="ca-pane hidden" data-ca-pane="url">
+              <input id="ca-url" type="url" placeholder="https://www.monentreprise.com" />
+              <p class="field-hint">Seules les pages publiques sont lues (la page indiquée et quelques pages « contact », « à propos »…).</p>
+            </div>
+            <div class="ca-pane hidden" data-ca-pane="pdf">
+              <input id="ca-pdf" type="file" accept="application/pdf" />
+              <p class="field-hint">PDF avec texte sélectionnable, 5 Mo maximum.</p>
+            </div>
+            <div class="ca-actions">
+              <button type="button" class="primary" id="ca-analyze">Analyser la source</button>
+              <span id="ca-status" class="muted" aria-live="polite"></span>
+            </div>
+            <div id="ca-result" class="ca-result hidden">
+              <p class="ca-notice">Relisez chaque ligne : l’assistant peut se tromper. Rien n’est enregistré tant que vous ne cliquez pas sur « Enregistrer les modifications ».</p>
+              <div id="ca-missing" class="ca-missing hidden"></div>
+              <textarea id="ca-draft" rows="9" aria-label="Brouillon à relire et corriger"></textarea>
+              <details id="ca-warnings" class="ca-warnings hidden"><summary></summary><ul></ul></details>
+              <div class="ca-actions">
+                <button type="button" class="primary" id="ca-apply-replace">Utiliser ce texte</button>
+                <button type="button" class="ghost-button" id="ca-apply-append">Ajouter à la suite</button>
+                <button type="button" class="ghost-button" id="ca-discard">Ignorer</button>
+              </div>
+            </div>
+          </section>
+
+          <label>
+            Informations sur votre activité
+            <textarea id="business-info" rows="9" maxlength="8000" placeholder="Présentez votre entreprise : activité, adresse, horaires, téléphone, livraison, moyens de paiement, conditions…"></textarea>
+            <span class="agent-counter" data-counter-for="business-info"></span>
+          </label>
+          <p class="agent-tip">💡 Plus c’est précis (horaires, tarifs, quartiers livrés, moyens de paiement), moins l’agent devra vous solliciter. N’écrivez que des informations exactes.</p>
+        </div>
+
+        <div class="agent-pane hidden" data-agent-pane="behavior">
+          <div class="agent-pane-head">
+            <h2>Comportement</h2>
+            <p class="muted">Le ton, les consignes et les informations à recueillir auprès de vos prospects.</p>
+          </div>
+          <label>
+            Instructions de l'agent
+            <textarea id="system-prompt" rows="8" maxlength="8000" required></textarea>
+            <span class="agent-counter" data-counter-for="system-prompt"></span>
+          </label>
+          <div class="agent-templates">
+            <label for="agent-template">Partir d’un modèle</label>
+            <select id="agent-template">
+              <option value="">Choisir un modèle d’instructions…</option>
+              <option value="boutique">Boutique / vente de produits</option>
+              <option value="salon">Salon de coiffure / beauté</option>
+              <option value="clinique">Clinique / cabinet</option>
+              <option value="restaurant">Restaurant / traiteur</option>
+              <option value="services">Prestataire de services</option>
+            </select>
+            <p class="muted">Un modèle remplace le contenu actuel après votre confirmation. Adaptez-le ensuite à votre entreprise.</p>
+          </div>
+          <fieldset class="qualification-fields">
+            <legend>Informations à collecter avant transfert</legend>
+            <p class="muted">Si aucun champ n'est sélectionné, l'IA suit uniquement vos instructions libres.</p>
+            <label><input type="checkbox" name="qualification-field" value="name" /> Nom du prospect</label>
+            <label><input type="checkbox" name="qualification-field" value="city" /> Ville</label>
+            <label><input type="checkbox" name="qualification-field" value="need" /> Besoin</label>
+            <label><input type="checkbox" name="qualification-field" value="budget" /> Budget</label>
+            <label><input type="checkbox" name="qualification-field" value="product" /> Produit ou service</label>
+            <label><input type="checkbox" name="qualification-field" value="urgency" /> Urgence</label>
+            <label><input type="checkbox" name="qualification-field" value="quartier" /> Quartier</label>
+            <div id="custom-qualification-fields" class="custom-qualification-fields"></div>
+            <div class="custom-field-creator">
+              <input id="custom-qualification-field-input" type="text" maxlength="60" placeholder="Ex. campus, filiere, telephone" />
+              <button type="button" class="ghost-button" id="create-qualification-field">Créer</button>
+            </div>
+            <p class="muted">Créez un champ personnalisé : il sera ajouté comme case cochée.</p>
+          </fieldset>
+          <label>
+            Message d'accueil
+            <textarea id="welcome-message" rows="3" maxlength="1000" placeholder="Ex. Bonjour 👋 Bienvenue chez Belle Époque, comment puis-je vous aider ?"></textarea>
+            <span class="agent-counter" data-counter-for="welcome-message"></span>
+          </label>
+        </div>
+
+        <div class="agent-pane hidden" data-agent-pane="features">
+          <div class="agent-pane-head">
+            <h2>Fonctions de l’agent</h2>
+            <p class="muted">Ce que l’agent peut faire en plus de répondre aux questions. Chaque fonction se règle sur sa page.</p>
+          </div>
+          <div class="agent-feature-list">
+            <article class="agent-feature" data-feature="products">
+              <div><strong>Catalogue produits</strong><p class="muted">L’agent recommande vos produits et envoie leurs photos.</p></div>
+              <span class="agent-feature-state" id="feature-products-state">…</span>
+              <button type="button" class="ghost-button" data-goto-view="products">Configurer</button>
+            </article>
+            <article class="agent-feature" data-feature="appointments">
+              <div><strong>Prise de rendez-vous</strong><p class="muted">L’agent propose vos créneaux libres et réserve.</p></div>
+              <span class="agent-feature-state" id="feature-appointments-state">…</span>
+              <button type="button" class="ghost-button" data-goto-view="appointments">Configurer</button>
+            </article>
+            <article class="agent-feature" data-feature="orders">
+              <div><strong>Prise de commande</strong><p class="muted">L’agent enregistre produit, quantité et adresse.</p></div>
+              <span class="agent-feature-state" id="feature-orders-state">…</span>
+              <button type="button" class="ghost-button" data-goto-view="orders">Configurer</button>
+            </article>
+            <article class="agent-feature" data-feature="whatsapp">
+              <div><strong>Numéro WhatsApp</strong><p class="muted">Le numéro sur lequel l’agent répond à vos clients.</p></div>
+              <span class="agent-feature-state" id="feature-whatsapp-state">Voir la page</span>
+              <button type="button" class="ghost-button" data-goto-view="whatsapp">Ouvrir</button>
+            </article>
+          </div>
+        </div>
+      </form>
+    </div>
 
           <section class="panel agent-playground">
             <div class="panel-heading">
@@ -81,167 +218,3 @@
             <div id="agent-test-result" class="agent-test-result hidden"></div>
           </section>
         </section>
-        <script>
-          /* ============================================================
-   Bloc « Informations sur votre activité »
-   - Texte vide      -> éditeur (textarea #business-info)
-   - Texte enregistré -> carte avec icônes Voir / Modifier / Supprimer
-
-   Le textarea #business-info reste dans la page (masqué quand la
-   carte est affichée) : votre app.js continue de lire/écrire sa valeur.
-
-   Branchement le plus fiable dans app.js (2 lignes) :
-     1) après avoir rempli les champs avec la config reçue :  businessInfoCard.sync();
-     2) après un enregistrement RÉUSSI :                       businessInfoCard.sync();
-   Si vous ne les ajoutez pas, un mode automatique prend le relais
-   (détection de l'ouverture de la vue + clic sur « Enregistrer »).
-   Pour le désactiver, avant de charger ce script :
-     window.BUSINESS_INFO_AUTO = false;
-   La suppression enregistre aussi la config automatiquement ; pour
-   l'empêcher :  window.BUSINESS_INFO_SAVE_ON_DELETE = false;
-============================================================ */
-(() => {
-  const $ = (id) => document.getElementById(id);
-
-  const textarea = $('business-info');
-  if (!textarea) return;
-
-  const agentView = $('agent-view');
-  const saveBtn = $('save-agent');
-  const editor = $('business-info-editor');
-  const card = $('business-info-card');
-  const preview = $('business-info-preview');
-  const meta = $('business-info-meta');
-  const cancelBtn = $('business-info-cancel');
-  const viewBtn = $('business-info-view');
-  const editBtn = $('business-info-edit');
-  const deleteBtn = $('business-info-delete');
-  const confirmBox = $('business-info-confirm');
-  const confirmYes = $('business-info-confirm-yes');
-  const confirmNo = $('business-info-confirm-no');
-  const dialog = $('business-info-dialog');
-  const fullText = $('business-info-full');
-  const dialogClose = $('business-info-dialog-close');
-  const dialogDone = $('business-info-dialog-done');
-  const dialogEdit = $('business-info-dialog-edit');
-
-  const AUTO = window.BUSINESS_INFO_AUTO !== false;
-  const SAVE_ON_DELETE = window.BUSINESS_INFO_SAVE_ON_DELETE !== false;
-
-  let savedValue = '';
-  let userEdited = false; // vrai dès que l'utilisateur tape dans le textarea
-
-  function stats(text) {
-    const words = text.trim().split(/\s+/).filter(Boolean).length;
-    const chars = text.length;
-    return `${words.toLocaleString('fr-FR')} mot${words > 1 ? 's' : ''}, ${chars.toLocaleString('fr-FR')} caractère${chars > 1 ? 's' : ''}`;
-  }
-
-  // Affiche la carte si un texte est enregistré, sinon l'éditeur.
-  function sync() {
-    const value = textarea.value;
-    savedValue = value;
-    userEdited = false;
-    confirmBox.hidden = true;
-    cancelBtn.hidden = true;
-
-    if (value.trim()) {
-      preview.textContent = value.trim();
-      fullText.textContent = value.trim();
-      meta.textContent = stats(value);
-      editor.hidden = true;
-      card.hidden = false;
-    } else {
-      card.hidden = true;
-      editor.hidden = false;
-    }
-  }
-
-  function edit() {
-    if (dialog.open) dialog.close();
-    confirmBox.hidden = true;
-    card.hidden = true;
-    editor.hidden = false;
-    cancelBtn.hidden = !savedValue.trim(); // « Annuler » seulement s'il y a une version enregistrée
-    textarea.focus();
-    const end = textarea.value.length;
-    textarea.setSelectionRange(end, end);
-  }
-
-  textarea.addEventListener('input', () => { userEdited = true; });
-
-  cancelBtn.addEventListener('click', () => {
-    textarea.value = savedValue;
-    sync();
-  });
-
-  // --- Voir ---
-  viewBtn.addEventListener('click', () => {
-    fullText.textContent = textarea.value.trim();
-    dialog.showModal();
-    dialogDone.focus();
-  });
-
-  const closeDialog = () => dialog.close();
-  dialogClose.addEventListener('click', closeDialog);
-  dialogDone.addEventListener('click', closeDialog);
-  dialogEdit.addEventListener('click', edit);
-  dialog.addEventListener('click', (event) => {
-    if (event.target === dialog) closeDialog(); // clic sur l'arrière-plan
-  });
-
-  // --- Modifier ---
-  editBtn.addEventListener('click', edit);
-
-  // --- Supprimer (avec confirmation) ---
-  deleteBtn.addEventListener('click', () => {
-    confirmBox.hidden = false;
-    confirmNo.focus();
-  });
-
-  confirmNo.addEventListener('click', () => {
-    confirmBox.hidden = true;
-    deleteBtn.focus();
-  });
-
-  confirmYes.addEventListener('click', () => {
-    textarea.value = '';
-    sync();
-    textarea.focus();
-    if (SAVE_ON_DELETE && saveBtn) saveBtn.click();
-  });
-
-  // --- Mode automatique (si app.js n'appelle pas sync() lui-même) ---
-  if (AUTO) {
-    if (saveBtn) {
-      saveBtn.addEventListener('click', () => setTimeout(sync, 1200));
-    }
-
-    // La config arrive après un appel réseau (parfois lent) : on surveille
-    // le champ jusqu'à ce qu'il soit rempli, sauf si l'utilisateur a déjà tapé.
-    let watcher = null;
-    const watchLoad = () => {
-      clearInterval(watcher);
-      let tries = 0;
-      watcher = setInterval(() => {
-        tries += 1;
-        if (userEdited || tries > 60) return clearInterval(watcher);
-        if (textarea.value.trim() && card.hidden) {
-          sync();
-          clearInterval(watcher);
-        }
-      }, 500);
-    };
-
-    if (agentView) {
-      new MutationObserver(() => {
-        if (!agentView.classList.contains('hidden')) watchLoad();
-      }).observe(agentView, { attributes: true, attributeFilter: ['class'] });
-      if (!agentView.classList.contains('hidden')) watchLoad();
-    }
-  }
-
-  window.businessInfoCard = { sync, edit };
-  sync();
-})();
-        </script>

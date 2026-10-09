@@ -1,16 +1,21 @@
 import Fastify from "fastify";
 import { env } from "./config/env.js";
+import { appointmentsRoute } from "./appointments/appointments.route.js";
+import { configAssistantRoute } from "./config-assistant/config-assistant.route.js";
+import { adminRoute } from "./routes/admin.route.js";
 import { aiSettingsRoute } from "./routes/ai-settings.route.js";
 import { aiTestRoute } from "./routes/ai-test.route.js";
 import { authRoute, requireAuth } from "./routes/auth.route.js";
 import { conversationsRoute } from "./routes/conversations.route.js";
 import { healthRoute } from "./routes/health.route.js";
 import { organizationsRoute } from "./routes/organizations.route.js";
+import { ordersRoute } from "./orders/orders.route.js";
 import { productsRoute } from "./products/products.route.js";
 import { routingRoute } from "./lead-routing/lead-routing.route.js";
 import { whatsappRoute } from "./routes/whatsapp.route.js";
 import { AppError } from "./shared/errors.js";
 import { isPublicRoute } from "./shared/public-route.js";
+import { warnIfProductImagesAreEphemeral } from "./shared/storage-check.js";
 import { restoreWhatsAppConnections } from "./whatsapp/whatsapp.registry.js";
 
 async function buildServer() {
@@ -23,6 +28,10 @@ async function buildServer() {
   });
 
   app.addContentTypeParser(/^image\/(jpeg|png|webp)$/, { parseAs: "buffer" }, (_request, body, done) => {
+    done(null, body);
+  });
+
+  app.addContentTypeParser("application/pdf", { parseAs: "buffer" }, (_request, body, done) => {
     done(null, body);
   });
 
@@ -120,9 +129,13 @@ async function buildServer() {
   });
 
   await app.register(healthRoute);
+  await app.register(adminRoute);
   await app.register(authRoute);
   await app.register(organizationsRoute);
   await app.register(productsRoute);
+  await app.register(appointmentsRoute);
+  await app.register(ordersRoute);
+  await app.register(configAssistantRoute);
   await app.register(aiSettingsRoute);
   await app.register(aiTestRoute);
   await app.register(routingRoute);
@@ -139,6 +152,7 @@ async function buildServer() {
 }
 
 async function start() {
+  warnIfProductImagesAreEphemeral(env.WHATSAPP_AUTH_DIR, env.PRODUCT_IMAGE_DIR);
   const app = await buildServer();
 
   try {

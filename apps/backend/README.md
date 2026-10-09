@@ -58,7 +58,7 @@ Si tu ne configures rien, des valeurs génériques par défaut sont utilisées a
 
 ### Catalogue produits et photos
 
-Dans le dashboard HTML, ouvre **Produits** pour créer une fiche avec son nom, sa description, sa catégorie, son prix et une photo JPEG, PNG ou WebP (5 Mo maximum). Une fiche désactivée n’est pas proposée à l’agent. Les images sont enregistrées dans `PRODUCT_IMAGE_DIR`; configure ce chemin sur un disque persistant en production (`/data/product-images` sur Render et Docker Compose).
+Dans le dashboard HTML, ouvre **Produits** pour créer une fiche avec son nom, sa description, sa catégorie, son prix et une photo JPEG, PNG ou WebP (5 Mo maximum). Une fiche désactivée n’est pas proposée à l’agent. Les images sont enregistrées dans `PRODUCT_IMAGE_DIR`. Si la variable n'est pas définie, elles sont rangées à côté des sessions WhatsApp (`<dossier de WHATSAPP_AUTH_DIR>/product-images`), donc sur le même disque persistant. En production, laisse-la vide : le serveur affiche un avertissement au démarrage si les photos ne sont pas sur le même disque que les sessions.
 
 L’agent reçoit les fiches actives comme contexte et peut sélectionner leur identifiant lorsqu’un prospect demande une photo. Le backend vérifie cet identifiant dans le catalogue de la même entreprise et transmet l’image stockée, jamais une URL de photo arbitraire produite par le modèle.
 

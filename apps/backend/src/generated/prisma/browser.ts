@@ -112,3 +112,23 @@ export type OrganizationRoutingSettings = Prisma.OrganizationRoutingSettingsMode
  * 
  */
 export type ProspectLead = Prisma.ProspectLeadModel
+/**
+ * Model AppointmentSettings
+ * 
+ */
+export type AppointmentSettings = Prisma.AppointmentSettingsModel
+/**
+ * Model Appointment
+ * 
+ */
+export type Appointment = Prisma.AppointmentModel
+/**
+ * Model OrderSettings
+ * 
+ */
+export type OrderSettings = Prisma.OrderSettingsModel
+/**
+ * Model Order
+ * 
+ */
+export type Order = Prisma.OrderModel

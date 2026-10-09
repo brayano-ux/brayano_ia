@@ -4,8 +4,9 @@ import path from "node:path";
 import { env } from "../config/env.js";
 import { prisma } from "../database/client.js";
 import { NotFoundError, ValidationError } from "../shared/errors.js";
+import { compressProductImage, type ImageExtension } from "./image-compression.js";
 
-const imageTypes = new Map([
+const imageTypes = new Map<string, ImageExtension>([
   ["image/jpeg", "jpg"],
   ["image/png", "png"],
   ["image/webp", "webp"],
@@ -156,10 +157,17 @@ export async function saveProductImage(
   contents: Buffer,
   publicBaseUrl: string,
 ) {
-  const extension = validateProductImagePayload(mimeType, contents);
+  const uploadedExtension = validateProductImagePayload(mimeType, contents);
 
   const product = await prisma.product.findFirst({ where: { id: productId, organizationId } });
   if (!product) throw new NotFoundError("Produit introuvable.");
+
+  // Réduit la photo (jamais pire qu'avant : en cas d'échec, la photo d'origine est conservée).
+  const prepared = await compressProductImage(contents, uploadedExtension);
+  const extension = prepared.extension;
+  if (prepared.compressed) {
+    console.log(`🖼️  Photo produit compressée : ${(contents.length / 1024).toFixed(0)} Ko → ${(prepared.contents.length / 1024).toFixed(0)} Ko`);
+  }
 
   const directory = productImageDirectory(organizationId);
   await fs.mkdir(directory, { recursive: true });
@@ -167,7 +175,7 @@ export async function saveProductImage(
   const filename = `${productId}.${extension}`;
   const destination = path.join(directory, filename);
   const temporaryFile = path.join(directory, `${randomUUID()}.tmp`);
-  await fs.writeFile(temporaryFile, contents, { flag: "wx" });
+  await fs.writeFile(temporaryFile, prepared.contents, { flag: "wx" });
   await fs.rename(temporaryFile, destination);
 
   const token = createProductImageToken(organizationId, filename);

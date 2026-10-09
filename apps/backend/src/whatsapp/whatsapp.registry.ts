@@ -6,6 +6,7 @@ import { buildSystemPrompt } from "../ai/prompt.js";
 import { env } from "../config/env.js";
 import {
   getRecentHistoryForAi,
+  recordHumanReplyFromPhone,
   recordInboundMessage,
   recordOutboundMessage,
   isConversationUpdateStillCurrent,
@@ -13,8 +14,11 @@ import {
   shouldReactivateAiAfterHandoff,
   updateConversationQualification,
 } from "../conversations/conversations.service.js";
+import { applyAiBooking, loadAgendaPrompt } from "../appointments/appointments.service.js";
+import { applyAiOrder, loadOrderPrompt } from "../orders/orders.service.js";
 import { withConversationSendLock } from "../conversations/conversation-send-lock.js";
 import { prisma } from "../database/client.js";
+import { getPlatformSuspension } from "../organizations/platform-suspension.service.js";
 import { registerQualifiedLead } from "../lead-routing/lead-routing.service.js";
 import {
   buildProductDetailsMessage,
@@ -22,7 +26,15 @@ import {
   resolveRequestedProductImage,
 } from "../products/product-image-selection.js";
 import { listProductsForAssistant } from "../products/products.service.js";
+import {
+  sendClientDisconnectEmail,
+  sendClientRecoveredEmail,
+  sendWhatsAppDisconnectAlert,
+  sendWhatsAppRecoveredNotice,
+} from "../notifications/whatsapp-alerts.js";
 import { BaileysWhatsAppProvider } from "./baileys.provider.js";
+import { createConnectionMonitor } from "./connection-monitor.js";
+import { buildAccountHistoryUpdate } from "./disconnect-reasons.js";
 import type {
   IncomingWhatsAppMessage,
   WhatsAppConnectionStatus,
@@ -49,6 +61,25 @@ async function getOrCreateAccount(organizationId: string) {
   });
 }
 
+/** Prévient le propriétaire quand un numéro reste déconnecté (voir connection-monitor.ts). */
+const connectionMonitor = createConnectionMonitor({
+  graceMs: env.WHATSAPP_ALERT_DELAY_MINUTES * 60_000,
+  onAlert: (outage) => sendWhatsAppDisconnectAlert(outage).then(() => undefined),
+  onRecovered: (outage, downMs) => sendWhatsAppRecoveredNotice(outage, downMs).then(() => undefined),
+  clientGraceMs: env.WHATSAPP_CLIENT_ALERT_DELAY_MINUTES * 60_000,
+  onClientAlert: (outage) => sendClientDisconnectEmail(outage).then(() => undefined),
+  onClientRecovered: (outage) => sendClientRecoveredEmail(outage).then(() => undefined),
+});
+
+/** Traite les changements d'état d'une entreprise dans l'ordre où ils arrivent, même s'ils attendent la base. */
+const statusQueues = new Map<string, Promise<void>>();
+function enqueueStatusUpdate(organizationId: string, work: () => Promise<void>) {
+  const previous = statusQueues.get(organizationId) ?? Promise.resolve();
+  const next = previous.then(work, work);
+  statusQueues.set(organizationId, next);
+  return next;
+}
+
 function getOrCreateProvider(organizationId: string): WhatsAppProvider {
   const existing = providers.get(organizationId);
   if (existing) return existing;
@@ -61,15 +92,42 @@ function getOrCreateProvider(organizationId: string): WhatsAppProvider {
   const instance = new BaileysWhatsAppProvider(authDir);
   providers.set(organizationId, instance);
 
-  instance.onConnectionUpdate(async ({ status, phoneNumber }) => {
+  instance.onConnectionUpdate(({ status, phoneNumber, reason, detail }) => enqueueStatusUpdate(organizationId, async () => {
+    let previouslyConnected = false;
+    console.log(`📶 [org:${organizationId}] WhatsApp ${status}${detail ? ` : ${detail}` : reason ? ` (${reason})` : ""}`);
     try {
       const account = await getOrCreateAccount(organizationId);
+      // Un numéro déjà enregistré s'est connecté au moins une fois : sa déconnexion mérite une alerte.
+      previouslyConnected = Boolean(account.phoneNumber);
       await prisma.whatsAppAccount.update({
         where: { id: account.id },
-        data: { status, ...(phoneNumber ? { phoneNumber } : {}) },
+        data: {
+          status,
+          ...(phoneNumber ? { phoneNumber } : {}),
+          ...buildAccountHistoryUpdate({ status, ...(reason ? { reason } : {}), ...(detail ? { detail } : {}) }, new Date()),
+        },
       });
     } catch (error) {
       console.error(`[org:${organizationId}] Échec de sauvegarde du statut WhatsApp :`, error);
+    }
+    connectionMonitor.handle(organizationId, { status, ...(reason ? { reason } : {}), ...(detail ? { detail } : {}), previouslyConnected });
+  }));
+
+  // Le gérant écrit lui-même au prospect depuis son téléphone : l'IA se tait pendant 24 h.
+  instance.onHumanMessage?.(async (message) => {
+    try {
+      const result = await recordHumanReplyFromPhone({
+        organizationId,
+        toJid: message.toJid,
+        externalId: message.externalId,
+        text: message.text,
+        timestamp: message.timestamp,
+      });
+      if (result.aiPaused) {
+        console.log(`🙋 [org:${organizationId}] Un humain répond depuis le téléphone : IA en pause 24 h pour ce prospect.`);
+      }
+    } catch (error) {
+      console.error(`❌ [org:${organizationId}] Réponse humaine depuis le téléphone non enregistrée :`, error);
     }
   });
 
@@ -128,8 +186,28 @@ function getOrCreateProvider(organizationId: string): WhatsAppProvider {
         console.log(`⏸️  [org:${organizationId}] IA désactivée globalement depuis le dashboard.`);
         return;
       }
+      const suspension = await getPlatformSuspension(organizationId);
+      if (suspension.suspended) {
+        console.log(`⛔ [org:${organizationId}] IA suspendue par l'administrateur de la plateforme.`);
+        return;
+      }
       const products = await listProductsForAssistant(organizationId);
-      const systemPrompt = buildSystemPrompt({ ...settings, knownLeadData: previousLeadData, products });
+      // L'agenda est optionnel : toute erreur ici ne doit jamais empêcher la réponse.
+      const agenda = await loadAgendaPrompt(organizationId).catch((error) => {
+        console.error(`❌ [agenda:${organizationId}] Chargement de l'agenda ignoré :`, error);
+        return null;
+      });
+      const orderSection = await loadOrderPrompt(organizationId).catch((error) => {
+        console.error(`❌ [orders:${organizationId}] Chargement des commandes ignoré :`, error);
+        return null;
+      });
+      const systemPrompt = buildSystemPrompt({
+        ...settings,
+        knownLeadData: previousLeadData,
+        products,
+        agenda: agenda?.section ?? null,
+        orders: orderSection,
+      });
       const history = await getRecentHistoryForAi(conversation.id);
       const aiReply = await getAiOrchestrator().getReply(conversation.id, systemPrompt, history);
 
@@ -221,20 +299,56 @@ function getOrCreateProvider(organizationId: string): WhatsAppProvider {
           return false;
         }
 
+        let textToSend = outboundText;
+        if (agenda && aiReply.booking) {
+          const leadName = typeof mergedLeadData.name === "string" ? mergedLeadData.name : null;
+          const phone = message.fromJid.endsWith("@s.whatsapp.net") ? message.fromJid.split("@")[0] ?? null : null;
+          const outcome = await applyAiBooking(agenda, aiReply.booking, {
+            organizationId,
+            conversationId: conversation.id,
+            contactJid: message.fromJid,
+            contactName: leadName,
+            contactPhone: phone,
+          });
+          if (outcome?.replaceReply) {
+            textToSend = outcome.replaceReply;
+          } else if (outcome?.appendToReply) {
+            textToSend = `${outboundText}\n\n${outcome.appendToReply}`;
+          }
+        }
+
+        if (orderSection && aiReply.order) {
+          const leadName = typeof mergedLeadData.name === "string" ? mergedLeadData.name : null;
+          const phone = message.fromJid.endsWith("@s.whatsapp.net") ? message.fromJid.split("@")[0] ?? null : null;
+          const outcome = await applyAiOrder(aiReply.order, {
+            organizationId,
+            conversationId: conversation.id,
+            contactJid: message.fromJid,
+            contactName: leadName,
+            contactPhone: phone,
+          });
+          if (outcome?.replaceReply) {
+            textToSend = outcome.replaceReply;
+          } else if (outcome?.appendToReply) {
+            textToSend = `${textToSend}\n\n${outcome.appendToReply}`;
+          }
+        }
+
         if (imageUrl) {
           if (selectedProduct) {
-            await instance.sendMessage(message.fromJid, outboundText);
+            await instance.sendMessage(message.fromJid, textToSend);
             await instance.sendImage(message.fromJid, imageUrl, buildProductImageCaption(selectedProduct));
           } else {
             await instance.sendImage(message.fromJid, imageUrl, aiReply.reply);
+            if (textToSend !== outboundText) await instance.sendMessage(message.fromJid, textToSend);
           }
         } else {
-          await instance.sendMessage(message.fromJid, outboundText);
+          await instance.sendMessage(message.fromJid, textToSend);
         }
 
         await recordOutboundMessage({
           conversationId: conversation.id,
-          text: outboundText,
+          text: textToSend,
           author: "AI",
         });
         return true;
@@ -313,6 +427,7 @@ export async function connectWhatsAppAccountWithPairingCode(
 }
 
 export async function disconnectWhatsAppAccount(organizationId: string): Promise<void> {
+  connectionMonitor.markIntentional(organizationId);
   connectionAttempts.delete(organizationId);
   const provider = providers.get(organizationId);
 

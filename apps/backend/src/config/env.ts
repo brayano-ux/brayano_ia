@@ -1,5 +1,6 @@
 import { config } from "dotenv";
 import { z } from "zod";
+import { defaultProductImageDir } from "./data-paths.js";
 
 config();
 
@@ -9,7 +10,7 @@ const envSchema = z.object({
   APP_URL: z.string().url(),
   DATABASE_URL: z.string().min(1, "DATABASE_URL est requis"),
   WHATSAPP_AUTH_DIR: z.string().default("./wa-session"),
-  PRODUCT_IMAGE_DIR: z.string().default("./uploads/products"),
+  PRODUCT_IMAGE_DIR: z.string().optional(),
   CORS_ALLOWED_ORIGINS: z.string().default("http://localhost:5173,http://localhost:3000,http://localhost:4173"),
   PAYMENT_PROVIDER: z.enum(["campay", "manual"]).default("campay"),
   CAMPAY_BASE_URL: z.string().url().default("https://demo.campay.net/api"),
@@ -18,6 +19,11 @@ const envSchema = z.object({
   CAMPAY_CURRENCY: z.string().default("XAF"),
   CAMPAY_DEMO_AMOUNT: z.coerce.number().positive().max(25).default(25),
   CAMPAY_CALLBACK_URL: z.string().url().optional().or(z.literal("")),
+  WHATSAPP_CLIENT_ALERT_DELAY_MINUTES: z.coerce.number().int().min(1).max(1440).default(5),
+  CLIENT_DASHBOARD_URL: z.string().url().optional().or(z.literal("")),
+  WHATSAPP_ALERT_DELAY_MINUTES: z.coerce.number().int().min(1).max(1440).default(5),
+  PLATFORM_ADMIN_EMAILS: z.string().optional().or(z.literal("")),
+  PLATFORM_ADMIN_TOKEN: z.string().min(32, "PLATFORM_ADMIN_TOKEN doit faire au moins 32 caractères").optional().or(z.literal("")),
   SUPPORT_EMAIL: z.string().email().optional().or(z.literal("")),
   DEFAULT_ADMIN_EMAIL: z.string().trim().email().optional().or(z.literal("")),
   DEFAULT_ADMIN_PASSWORD: z.string().min(8).optional().or(z.literal("")),
@@ -76,7 +82,7 @@ const envSchema = z.object({
   }
 });
 
-export type Env = z.infer<typeof envSchema>;
+export type Env = Omit<z.infer<typeof envSchema>, "PRODUCT_IMAGE_DIR"> & { PRODUCT_IMAGE_DIR: string };
 
 function loadEnv(): Env {
   const parsed = envSchema.safeParse(process.env);
@@ -87,7 +93,10 @@ function loadEnv(): Env {
     process.exit(1);
   }
 
-  return parsed.data;
+  return {
+    ...parsed.data,
+    PRODUCT_IMAGE_DIR: parsed.data.PRODUCT_IMAGE_DIR?.trim() || defaultProductImageDir(parsed.data.WHATSAPP_AUTH_DIR),
+  };
 }
 
 export const env = loadEnv();

@@ -8,10 +8,12 @@
 @import "./base.css";
 @import "./auth.css";
 @import "./layout.css";
-@import "./components.css";
 @import "./overview.css";
 @import "./inbox.css";
 @import "./agent.css";
 @import "./routing.css";
 @import "./whatsapp.css";
 @import "./products.css";
+@import "./appointments.css";
+@import "./orders.css";
+@import "./config-assistant.css";

@@ -536,14 +536,6 @@ export type AiSettingsUncheckedUpdateOneWithoutOrganizationNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.AiSettingsUpdateToOneWithWhereWithoutOrganizationInput, Prisma.AiSettingsUpdateWithoutOrganizationInput>, Prisma.AiSettingsUncheckedUpdateWithoutOrganizationInput>
 }
 
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
-}
-
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
-}
-
 export type AiSettingsCreateWithoutOrganizationInput = {
   id?: string
   agentName?: string

@@ -1,5 +1,6 @@
 import { findOrCreateContact } from "../contacts/contacts.service.js";
 import { prisma } from "../database/client.js";
+import { withConversationSendLock } from "./conversation-send-lock.js";
 import type { Prisma } from "../generated/prisma/client.js";
 import type {
   RecordInboundMessageInput,
@@ -73,6 +74,48 @@ export async function recordInboundMessage(input: RecordInboundMessageInput) {
   });
 
   return { conversation, message, isDuplicate: false as const };
+}
+
+/**
+ * Un humain répond à un prospect depuis le téléphone du numéro connecté.
+ * L'IA se met en pause pour cette conversation, qualifiée ou non. Le délai de 24 h repart de ce message
+ * (voir shouldReactivateAiAfterHandoff) : l'IA reprendra au prochain message du prospect après ce délai.
+ */
+export async function recordHumanReplyFromPhone(input: {
+  organizationId: string;
+  toJid: string;
+  externalId: string;
+  text: string | null;
+  timestamp: Date;
+}) {
+  const alreadyExists = await prisma.message.findUnique({ where: { externalId: input.externalId } });
+  if (alreadyExists) return { duplicate: true as const, aiPaused: false };
+
+  const contact = await findOrCreateContact(input.organizationId, input.toJid);
+  const conversation = await findOrCreateConversation(input.organizationId, contact.id);
+
+  return withConversationSendLock(conversation.id, async () => {
+    await prisma.message.create({
+      data: {
+        conversationId: conversation.id,
+        direction: "OUTBOUND",
+        author: "HUMAN",
+        type: "TEXT",
+        content: input.text ?? "[Message envoyé depuis le téléphone]",
+        externalId: input.externalId,
+        createdAt: input.timestamp,
+      },
+    });
+
+    // Une conversation clôturée par l'IA le reste : on garde seulement la trace du message.
+    if (conversation.status === "CLOSED") return { duplicate: false as const, aiPaused: false };
+
+    await prisma.conversation.update({
+      where: { id: conversation.id },
+      data: { aiEnabled: false, status: "HUMAN_HANDOFF", updatedAt: new Date() },
+    });
+    return { duplicate: false as const, aiPaused: true };
+  });
 }
 
 export async function recordOutboundMessage(input: RecordOutboundMessageInput) {

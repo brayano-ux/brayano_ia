@@ -119,3 +119,31 @@ export const ProspectRoutingStatus = {
 } as const
 
 export type ProspectRoutingStatus = (typeof ProspectRoutingStatus)[keyof typeof ProspectRoutingStatus]
+
+
+export const AppointmentStatus = {
+  BOOKED: 'BOOKED',
+  CANCELLED: 'CANCELLED',
+  DONE: 'DONE',
+  NO_SHOW: 'NO_SHOW'
+} as const
+
+export type AppointmentStatus = (typeof AppointmentStatus)[keyof typeof AppointmentStatus]
+
+
+export const AppointmentSource = {
+  AI: 'AI',
+  HUMAN: 'HUMAN'
+} as const
+
+export type AppointmentSource = (typeof AppointmentSource)[keyof typeof AppointmentSource]
+
+
+export const OrderStatus = {
+  NEW: 'NEW',
+  CONFIRMED: 'CONFIRMED',
+  DELIVERED: 'DELIVERED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus]

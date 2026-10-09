@@ -1,0 +1,31 @@
+<!-- VIEW: ORDERS -->
+<section id="orders-view" class="view hidden">
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">VENTES</p>
+      <h1>Commandes</h1>
+      <p class="muted">Quand un client confirme sa commande sur WhatsApp, l’agent l’enregistre ici avec le produit, la quantité et l’adresse. Vous recevez aussi un email.</p>
+    </div>
+  </div>
+
+  <div class="panel orders-settings">
+    <label class="agenda-switch">
+      <input id="orders-enabled" type="checkbox" />
+      <span>Prise de commande par l’agent</span>
+    </label>
+    <p class="field-hint">L’agent ne propose que les produits actifs de votre catalogue (page « Produits »). Désactivé, il se comporte comme avant.</p>
+  </div>
+
+  <div class="orders-toolbar">
+    <div id="orders-filters" class="orders-filters" role="tablist" aria-label="Filtrer par statut">
+      <button type="button" class="orders-filter active" data-filter="">Toutes</button>
+      <button type="button" class="orders-filter" data-filter="NEW">Nouvelles</button>
+      <button type="button" class="orders-filter" data-filter="CONFIRMED">Confirmées</button>
+      <button type="button" class="orders-filter" data-filter="DELIVERED">Livrées</button>
+      <button type="button" class="orders-filter" data-filter="CANCELLED">Annulées</button>
+    </div>
+    <span id="orders-count" class="muted"></span>
+  </div>
+
+  <div id="orders-list" class="orders-list" aria-live="polite"></div>
+</section>

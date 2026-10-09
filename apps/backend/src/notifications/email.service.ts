@@ -1,8 +1,12 @@
 import nodemailer from "nodemailer";
 import { env } from "../config/env.js";
 
+export function isEmailConfigured() {
+  return Boolean(env.SMTP_HOST && env.SMTP_USER && env.SMTP_PASSWORD && env.SMTP_FROM);
+}
+
 export async function sendEmail(input: { to: string; subject: string; text: string; html?: string }) {
-  if (!env.SMTP_HOST || !env.SMTP_USER || !env.SMTP_PASSWORD || !env.SMTP_FROM) {
+  if (!isEmailConfigured()) {
     return false;
   }
 

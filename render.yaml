@@ -38,6 +38,12 @@ services:
         sync: false
       - key: BILLING_PAGE_URL
         sync: false
+      - key: PLATFORM_ADMIN_EMAILS
+        sync: false
+      - key: PLATFORM_ADMIN_TOKEN
+        sync: false
+      - key: CLIENT_DASHBOARD_URL
+        sync: false
       - key: SUPPORT_EMAIL
         sync: false
       - key: GEMINI_API_KEY
@@ -54,5 +60,3 @@ services:
         sync: false
       - key: WHATSAPP_AUTH_DIR
         value: /data/wa-session
-      - key: PRODUCT_IMAGE_DIR
-        value: /data/product-images

@@ -7,8 +7,13 @@ import { initInbox, renderInbox, openConversation, bindInboxRefresh } from "./fe
 import { initAgent, loadSettings } from "./features/agent/agent.js";
 import { initDelaySettings, loadDelaySettings } from "./features/settings/delay-settings.js";
 import { initRoutingSettings, loadRoutingConfig } from "./features/settings/routing-settings.js";
+import { loadPlatformSuspension } from "./features/suspension/suspension.js";
 import { initWhatsapp, loadWhatsApp } from "./features/whatsapp/whatsapp.js";
 import { initProducts, loadProducts } from "./features/products/products.js";
+import { initAppointments, loadAppointments } from "./features/appointments/appointments.js";
+import { initOrders, loadOrders } from "./features/orders/orders.js";
+import { initConfigAssistant } from "./features/config-assistant/config-assistant.js";
+import { readSession } from "./services/storage.js";
 import { isNetworkError } from "./services/api.js";
 import { showToast } from "./utils/dom.js";
 
@@ -19,7 +24,7 @@ import { showToast } from "./utils/dom.js";
  */
 
 async function refreshAll() {
-  await refreshOverview(openConversation);
+  await Promise.all([refreshOverview(openConversation), loadPlatformSuspension()]);
 }
 
 const viewLoaders = {
@@ -27,6 +32,8 @@ const viewLoaders = {
   inbox: renderInbox,
   agent: loadSettings,
   products: loadProducts,
+  appointments: loadAppointments,
+  orders: loadOrders,
   settings: () => {
     loadDelaySettings();
     loadRoutingConfig();
@@ -34,7 +41,17 @@ const viewLoaders = {
   whatsapp: loadWhatsApp,
 };
 
+function renderUserCard() {
+  const email = readSession()?.email || "";
+  const local = email.split("@")[0] || "Mon compte";
+  const name = local.replace(/[._-]+/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+  $("#user-name").textContent = name;
+  $("#user-email").textContent = email || "Compte principal";
+  $("#user-avatar").textContent = (name.match(/\b\w/g) || ["A"]).slice(0, 2).join("").toUpperCase();
+}
+
 async function onAuthenticated() {
+  renderUserCard();
   try {
     await loadOrganizations(refreshAll);
   } catch (error) {
@@ -45,7 +62,7 @@ async function onAuthenticated() {
 function initLogout() {
   const logoutButton = document.createElement("button");
   logoutButton.className = "nav-item";
-  logoutButton.innerHTML = "<span>⇠</span> Se déconnecter";
+  logoutButton.innerHTML = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-logout"/></svg><span>Se déconnecter</span>';
   logoutButton.onclick = () => {
     if (window.confirm("Voulez-vous vraiment vous déconnecter ?")) {
       logoutUser();
@@ -65,7 +82,10 @@ function bootstrap() {
   initOverview();
   initInbox();
   initAgent();
+  initConfigAssistant();
   initProducts();
+  initAppointments();
+  initOrders();
   initDelaySettings();
   initRoutingSettings();
   initWhatsapp();
