@@ -62,6 +62,7 @@ async function analyze() {
   status.textContent = "Analyse en cours… (jusqu’à 30 secondes)";
   try {
     const { analysis } = await request;
+    if (!analysis) throw new Error("Réponse inattendue du serveur.");
     renderResult(analysis);
     status.textContent = "";
   } catch (error) {
