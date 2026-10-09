@@ -48,7 +48,7 @@ function renderOrders() {
       <ul class="order-items">
         ${items.map((item) => `<li><span>${escapeHtml(item.quantity)} × ${escapeHtml(item.name)}</span><small class="muted">${escapeHtml(item.unitPrice || "")}</small></li>`).join("")}
       </ul>
-      <p class="order-address">📍 ${escapeHtml(order.deliveryAddress)}</p>
+      <p class="order-address"><small class="muted">Livraison</small><br />${escapeHtml(order.deliveryAddress)}</p>
       ${order.notes ? `<p class="muted">${escapeHtml(order.notes)}</p>` : ""}
       <footer class="order-card-foot">
         <strong>${order.total !== null && order.total !== undefined ? escapeHtml(formatMoney(order.total)) : "Total à confirmer"}</strong>

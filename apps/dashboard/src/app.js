@@ -13,6 +13,7 @@ import { initProducts, loadProducts } from "./features/products/products.js";
 import { initAppointments, loadAppointments } from "./features/appointments/appointments.js";
 import { initOrders, loadOrders } from "./features/orders/orders.js";
 import { initConfigAssistant } from "./features/config-assistant/config-assistant.js";
+import { readSession } from "./services/storage.js";
 import { isNetworkError } from "./services/api.js";
 import { showToast } from "./utils/dom.js";
 
@@ -40,7 +41,17 @@ const viewLoaders = {
   whatsapp: loadWhatsApp,
 };
 
+function renderUserCard() {
+  const email = readSession()?.email || "";
+  const local = email.split("@")[0] || "Mon compte";
+  const name = local.replace(/[._-]+/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+  $("#user-name").textContent = name;
+  $("#user-email").textContent = email || "Compte principal";
+  $("#user-avatar").textContent = (name.match(/\b\w/g) || ["A"]).slice(0, 2).join("").toUpperCase();
+}
+
 async function onAuthenticated() {
+  renderUserCard();
   try {
     await loadOrganizations(refreshAll);
   } catch (error) {
@@ -51,7 +62,7 @@ async function onAuthenticated() {
 function initLogout() {
   const logoutButton = document.createElement("button");
   logoutButton.className = "nav-item";
-  logoutButton.innerHTML = "<span>⇠</span> Se déconnecter";
+  logoutButton.innerHTML = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-logout"/></svg><span>Se déconnecter</span>';
   logoutButton.onclick = () => {
     if (window.confirm("Voulez-vous vraiment vous déconnecter ?")) {
       logoutUser();

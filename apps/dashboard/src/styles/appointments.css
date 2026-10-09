@@ -1,48 +1,59 @@
-/* Vue Rendez-vous */
-.appointments-layout {
-  display: grid;
-  grid-template-columns: minmax(320px, 460px) minmax(0, 1fr);
-  align-items: start;
-  gap: 28px;
+/* ============================================================
+   RENDEZ-VOUS — réglages de l'agenda + liste
+============================================================ */
+.appointments-layout { display: grid; grid-template-columns: minmax(340px, 480px) minmax(0, 1fr); gap: var(--space-6); align-items: start; }
+
+.agenda-form { display: grid; gap: var(--space-5); }
+.agenda-form h2 { font-size: var(--text-lg); }
+.agenda-form-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.agenda-switch, .agenda-form .agenda-switch, .orders-settings .agenda-switch { display: inline-flex !important; align-items: center; gap: 10px; font-weight: 600; cursor: pointer; }
+.agenda-form .field-hint { margin: calc(var(--space-2) * -1) 0 0; }
+.agenda-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
+
+.agenda-hours, .agenda-closed { border: 0; margin: 0; padding: 0; display: grid; gap: var(--space-3); min-width: 0; }
+.agenda-hours legend, .agenda-closed legend { padding: 0; font-size: var(--text-sm); font-weight: 700; margin-bottom: var(--space-2); }
+.agenda-hours-row { display: grid; gap: var(--space-2); padding: var(--space-2) var(--space-3); border: 1px solid var(--line-soft); border-radius: var(--radius-md); background: var(--surface-2); }
+.agenda-day { font-size: var(--text-sm); font-weight: 700; }
+.agenda-range { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: var(--space-2); color: var(--subtle); }
+.agenda-range input { min-height: 40px; padding: 6px 8px; text-align: center; }
+.agenda-range input::-webkit-calendar-picker-indicator { display: none; }
+#agenda-hours-rows { display: grid; gap: var(--space-2); }
+
+.agenda-closed-add { display: flex; gap: var(--space-2); }
+.agenda-closed-add input { flex: 1; min-width: 0; }
+.agenda-chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.agenda-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 6px 4px 12px; border-radius: var(--radius-full); background: var(--line-soft); font-size: var(--text-sm); font-weight: 600; }
+.agenda-chip button { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; color: var(--muted); font-size: 16px; line-height: 1; }
+.agenda-chip button:hover { background: var(--danger-bg); color: var(--danger); }
+
+.appointments-list-section { display: grid; gap: var(--space-4); min-width: 0; }
+.appointments-list-section h2 { font-size: var(--text-xl); }
+.appointment-add { display: grid; gap: var(--space-4); }
+.appointment-add > strong { font-size: var(--text-base); }
+.appointment-add label { display: grid; gap: 6px; font-size: var(--text-sm); font-weight: 600; color: var(--ink-2); }
+.appointments-list { display: grid; gap: var(--space-5); }
+.appointment-day h3 { margin-bottom: var(--space-2); font-size: var(--text-xs); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.appointment-card { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; align-items: center; gap: var(--space-3) var(--space-4); padding: var(--space-4); margin-bottom: var(--space-2); border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow-xs); }
+.appointment-time { font-size: var(--text-lg); font-weight: 800; letter-spacing: -0.02em; }
+.appointment-info { display: grid; gap: 2px; min-width: 0; font-weight: 600; font-size: var(--text-sm); }
+.appointment-info span, .appointment-info small { overflow: hidden; text-overflow: ellipsis; }
+.appointment-info small { font-weight: 500; font-size: var(--text-xs); }
+.appointment-status { padding: 3px 10px; border-radius: var(--radius-full); background: var(--success-bg); color: var(--success); font-size: 0.6875rem; font-weight: 700; white-space: nowrap; }
+.appointment-card.status-done .appointment-status { background: var(--info-bg); color: var(--info); }
+.appointment-card.status-cancelled, .appointment-card.status-no_show { opacity: 0.65; }
+.appointment-card.status-cancelled .appointment-status, .appointment-card.status-no_show .appointment-status { background: var(--danger-bg); color: var(--danger); }
+.appointment-actions { grid-column: 2 / -1; display: flex; flex-wrap: wrap; gap: var(--space-1); }
+
+@media (max-width: 1099px) { .appointments-layout { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 639px) {
+  .agenda-grid { grid-template-columns: minmax(0, 1fr); }
+  .appointment-card { grid-template-columns: 52px minmax(0, 1fr); }
+  .appointment-status { grid-column: 2; justify-self: start; }
 }
 
-.agenda-form { display: grid; gap: 16px; padding: 24px; max-width: none; width: 100%; }
-.agenda-form h2, .appointments-list-section h2 { margin: 0; font-size: 18px; letter-spacing: -0.01em; }
-.agenda-form label { display: grid; gap: 6px; margin: 0; font-size: 13px; font-weight: 600; }
-.agenda-form-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
-.agenda-form .agenda-switch { display: flex; align-items: center; gap: 8px; }
-.agenda-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-
-.agenda-hours, .agenda-closed { border: 0; margin: 0; padding: 0; display: grid; gap: 8px; min-width: 0; }
-.agenda-hours-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; margin-bottom: 10px; font-size: 13px; }
-.agenda-hours-row .agenda-day { grid-column: 1 / -1; }
-.agenda-range { display: flex; align-items: center; gap: 6px; min-width: 0; }
-.agenda-range input { flex: 1; min-width: 0; padding: 8px 6px; font-size: 13px; }
-.agenda-day { font-weight: 600; }
-
-.agenda-closed-add { display: flex; gap: 8px; }
-.agenda-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.agenda-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: rgba(120, 120, 140, 0.12); font-size: 13px; }
-.agenda-chip button { border: 0; background: none; cursor: pointer; font-size: 16px; line-height: 1; padding: 0; color: inherit; }
-
-.appointments-list-section { display: grid; gap: 16px; min-width: 0; }
-.appointment-add { display: grid; gap: 12px; padding: 18px; }
-.appointment-add label { display: grid; gap: 6px; margin: 0; font-size: 13px; font-weight: 600; }
-.appointments-list { display: grid; gap: 18px; }
-.appointment-day h3 { margin: 0 0 8px; font-size: 13px; text-transform: capitalize; color: var(--muted, #6b7280); letter-spacing: 0.02em; }
-.appointment-card { display: grid; grid-template-columns: 64px 1fr auto; align-items: center; gap: 12px; padding: 12px 14px; margin-bottom: 8px; border: 1px solid rgba(120, 120, 140, 0.22); border-radius: 12px; }
-.appointment-time { font-size: 16px; }
-.appointment-info { display: grid; gap: 2px; min-width: 0; }
-.appointment-status { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: rgba(34, 139, 94, 0.14); }
-.appointment-card.status-cancelled, .appointment-card.status-no_show { opacity: 0.6; }
-.appointment-card.status-cancelled .appointment-status, .appointment-card.status-no_show .appointment-status { background: rgba(190, 60, 60, 0.14); }
-.appointment-actions { grid-column: 2 / -1; display: flex; gap: 14px; flex-wrap: wrap; }
-.appointment-actions .text-button { font-size: 12px; padding: 0; }
-.agenda-form .field-hint { font-size: 12px; margin: 0; }
-
-@media (max-width: 960px) {
-  .appointments-layout { grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 640px) {
+  .agenda-hours-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-2) var(--space-4); }
+  .agenda-hours-row .agenda-day { grid-column: 1 / -1; }
 }
-@media (max-width: 560px) {
-  .appointment-card { grid-template-columns: 56px 1fr; }
-}
+@media (max-width: 639px) { .agenda-hours-row { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 1099px) { .agenda-chip button { width: 32px; height: 32px; } }

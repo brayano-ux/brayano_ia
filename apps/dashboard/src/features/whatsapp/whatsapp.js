@@ -45,7 +45,7 @@ export async function loadWhatsApp() {
       }
     } else if (!connected) {
       $("#qr-container").className = "qr-placeholder";
-      $("#qr-container").innerHTML = '<span>◫</span><p>Le QR code apparaîtra ici</p>';
+      $("#qr-container").innerHTML = '<span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3"/><path d="M21 14v.01"/><path d="M14 21h.01"/><path d="M18 18h3v3h-3z"/></svg></span><p>Le QR code apparaîtra ici</p>';
     }
   } catch (error) {
     showToast(error.message, "error");
