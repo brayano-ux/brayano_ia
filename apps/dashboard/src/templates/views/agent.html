@@ -81,3 +81,167 @@
             <div id="agent-test-result" class="agent-test-result hidden"></div>
           </section>
         </section>
+        <script>
+          /* ============================================================
+   Bloc « Informations sur votre activité »
+   - Texte vide      -> éditeur (textarea #business-info)
+   - Texte enregistré -> carte avec icônes Voir / Modifier / Supprimer
+
+   Le textarea #business-info reste dans la page (masqué quand la
+   carte est affichée) : votre app.js continue de lire/écrire sa valeur.
+
+   Branchement le plus fiable dans app.js (2 lignes) :
+     1) après avoir rempli les champs avec la config reçue :  businessInfoCard.sync();
+     2) après un enregistrement RÉUSSI :                       businessInfoCard.sync();
+   Si vous ne les ajoutez pas, un mode automatique prend le relais
+   (détection de l'ouverture de la vue + clic sur « Enregistrer »).
+   Pour le désactiver, avant de charger ce script :
+     window.BUSINESS_INFO_AUTO = false;
+   La suppression enregistre aussi la config automatiquement ; pour
+   l'empêcher :  window.BUSINESS_INFO_SAVE_ON_DELETE = false;
+============================================================ */
+(() => {
+  const $ = (id) => document.getElementById(id);
+
+  const textarea = $('business-info');
+  if (!textarea) return;
+
+  const agentView = $('agent-view');
+  const saveBtn = $('save-agent');
+  const editor = $('business-info-editor');
+  const card = $('business-info-card');
+  const preview = $('business-info-preview');
+  const meta = $('business-info-meta');
+  const cancelBtn = $('business-info-cancel');
+  const viewBtn = $('business-info-view');
+  const editBtn = $('business-info-edit');
+  const deleteBtn = $('business-info-delete');
+  const confirmBox = $('business-info-confirm');
+  const confirmYes = $('business-info-confirm-yes');
+  const confirmNo = $('business-info-confirm-no');
+  const dialog = $('business-info-dialog');
+  const fullText = $('business-info-full');
+  const dialogClose = $('business-info-dialog-close');
+  const dialogDone = $('business-info-dialog-done');
+  const dialogEdit = $('business-info-dialog-edit');
+
+  const AUTO = window.BUSINESS_INFO_AUTO !== false;
+  const SAVE_ON_DELETE = window.BUSINESS_INFO_SAVE_ON_DELETE !== false;
+
+  let savedValue = '';
+  let userEdited = false; // vrai dès que l'utilisateur tape dans le textarea
+
+  function stats(text) {
+    const words = text.trim().split(/\s+/).filter(Boolean).length;
+    const chars = text.length;
+    return `${words.toLocaleString('fr-FR')} mot${words > 1 ? 's' : ''}, ${chars.toLocaleString('fr-FR')} caractère${chars > 1 ? 's' : ''}`;
+  }
+
+  // Affiche la carte si un texte est enregistré, sinon l'éditeur.
+  function sync() {
+    const value = textarea.value;
+    savedValue = value;
+    userEdited = false;
+    confirmBox.hidden = true;
+    cancelBtn.hidden = true;
+
+    if (value.trim()) {
+      preview.textContent = value.trim();
+      fullText.textContent = value.trim();
+      meta.textContent = stats(value);
+      editor.hidden = true;
+      card.hidden = false;
+    } else {
+      card.hidden = true;
+      editor.hidden = false;
+    }
+  }
+
+  function edit() {
+    if (dialog.open) dialog.close();
+    confirmBox.hidden = true;
+    card.hidden = true;
+    editor.hidden = false;
+    cancelBtn.hidden = !savedValue.trim(); // « Annuler » seulement s'il y a une version enregistrée
+    textarea.focus();
+    const end = textarea.value.length;
+    textarea.setSelectionRange(end, end);
+  }
+
+  textarea.addEventListener('input', () => { userEdited = true; });
+
+  cancelBtn.addEventListener('click', () => {
+    textarea.value = savedValue;
+    sync();
+  });
+
+  // --- Voir ---
+  viewBtn.addEventListener('click', () => {
+    fullText.textContent = textarea.value.trim();
+    dialog.showModal();
+    dialogDone.focus();
+  });
+
+  const closeDialog = () => dialog.close();
+  dialogClose.addEventListener('click', closeDialog);
+  dialogDone.addEventListener('click', closeDialog);
+  dialogEdit.addEventListener('click', edit);
+  dialog.addEventListener('click', (event) => {
+    if (event.target === dialog) closeDialog(); // clic sur l'arrière-plan
+  });
+
+  // --- Modifier ---
+  editBtn.addEventListener('click', edit);
+
+  // --- Supprimer (avec confirmation) ---
+  deleteBtn.addEventListener('click', () => {
+    confirmBox.hidden = false;
+    confirmNo.focus();
+  });
+
+  confirmNo.addEventListener('click', () => {
+    confirmBox.hidden = true;
+    deleteBtn.focus();
+  });
+
+  confirmYes.addEventListener('click', () => {
+    textarea.value = '';
+    sync();
+    textarea.focus();
+    if (SAVE_ON_DELETE && saveBtn) saveBtn.click();
+  });
+
+  // --- Mode automatique (si app.js n'appelle pas sync() lui-même) ---
+  if (AUTO) {
+    if (saveBtn) {
+      saveBtn.addEventListener('click', () => setTimeout(sync, 1200));
+    }
+
+    // La config arrive après un appel réseau (parfois lent) : on surveille
+    // le champ jusqu'à ce qu'il soit rempli, sauf si l'utilisateur a déjà tapé.
+    let watcher = null;
+    const watchLoad = () => {
+      clearInterval(watcher);
+      let tries = 0;
+      watcher = setInterval(() => {
+        tries += 1;
+        if (userEdited || tries > 60) return clearInterval(watcher);
+        if (textarea.value.trim() && card.hidden) {
+          sync();
+          clearInterval(watcher);
+        }
+      }, 500);
+    };
+
+    if (agentView) {
+      new MutationObserver(() => {
+        if (!agentView.classList.contains('hidden')) watchLoad();
+      }).observe(agentView, { attributes: true, attributeFilter: ['class'] });
+      if (!agentView.classList.contains('hidden')) watchLoad();
+    }
+  }
+
+  window.businessInfoCard = { sync, edit };
+  sync();
+})();
+        </script>
