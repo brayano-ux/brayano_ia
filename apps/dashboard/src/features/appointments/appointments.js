@@ -66,6 +66,22 @@ function fillSettingsForm() {
   closedDates = Array.isArray(settings.closedDates) ? [...settings.closedDates] : [];
   renderHoursRows();
   renderClosedDates();
+  cleanAgendaSnapshot = agendaSnapshot();
+}
+
+let cleanAgendaSnapshot = "";
+
+function agendaSnapshot() {
+  return JSON.stringify([
+    $("#agenda-enabled").checked, $("#agenda-service").value, $("#agenda-slot").value, $("#agenda-buffer").value,
+    $("#agenda-capacity").value, $("#agenda-notice").value, $("#agenda-horizon").value, $("#agenda-timezone").value,
+    readWorkingHours(), closedDates,
+  ]);
+}
+
+/** Vrai si les réglages de l'agenda ont été modifiés sans être enregistrés. */
+export function hasUnsavedAgendaChanges() {
+  return Boolean(cleanAgendaSnapshot) && agendaSnapshot() !== cleanAgendaSnapshot;
 }
 
 function readWorkingHours() {
@@ -205,6 +221,12 @@ export async function loadAppointments() {
 }
 
 export function initAppointments() {
+  window.addEventListener("beforeunload", (event) => {
+    if (hasUnsavedAgendaChanges()) {
+      event.preventDefault();
+      event.returnValue = "";
+    }
+  });
   $("#agenda-form").addEventListener("submit", saveSettings);
   $("#appointment-add-form").addEventListener("submit", addManual);
   $("#agenda-closed-add").onclick = () => {

@@ -61,8 +61,9 @@ describe("conversation handoff routes", () => {
     await app.close();
   });
 
-  it("rejects manual AI reactivation before the 24-hour cooldown expires", async () => {
+  it("lets the owner reactivate the AI at any time, even right after a handoff", async () => {
     mocks.shouldReactivateAiAfterHandoff.mockReturnValue(false);
+    mocks.setConversationAiEnabled.mockResolvedValue({ id: "conversation-1", aiEnabled: true, status: "OPEN" });
     const app = await createApp();
 
     const response = await app.inject({
@@ -70,9 +71,8 @@ describe("conversation handoff routes", () => {
       url: "/organizations/org-1/conversations/conversation-1/ai/enable",
     });
 
-    expect(response.statusCode).toBe(409);
-    expect(response.json().code).toBe("HANDOFF_COOLDOWN");
-    expect(mocks.setConversationAiEnabled).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(200);
+    expect(mocks.setConversationAiEnabled).toHaveBeenCalledWith("conversation-1", true);
     await app.close();
   });
 });

@@ -14,8 +14,9 @@ import {
   shouldReactivateAiAfterHandoff,
   updateConversationQualification,
 } from "../conversations/conversations.service.js";
-import { applyAiBooking, loadAgendaPrompt } from "../appointments/appointments.service.js";
-import { applyAiOrder, loadOrderPrompt } from "../orders/orders.service.js";
+import { applyAiBooking, findContactUpcoming, loadAgendaPrompt } from "../appointments/appointments.service.js";
+import { buildClaimCorrection, describeUnbackedClaims, findUnbackedClaims, type UnbackedClaim } from "../ai/claim-guard.js";
+import { applyAiOrder, getContactOrderState, loadOrderPrompt } from "../orders/orders.service.js";
 import { withConversationSendLock } from "../conversations/conversation-send-lock.js";
 import { prisma } from "../database/client.js";
 import { getPlatformSuspension } from "../organizations/platform-suspension.service.js";
@@ -193,11 +194,11 @@ function getOrCreateProvider(organizationId: string): WhatsAppProvider {
       }
       const products = await listProductsForAssistant(organizationId);
       // L'agenda est optionnel : toute erreur ici ne doit jamais empêcher la réponse.
-      const agenda = await loadAgendaPrompt(organizationId).catch((error) => {
+      const agenda = await loadAgendaPrompt(organizationId, new Date(), message.fromJid).catch((error) => {
         console.error(`❌ [agenda:${organizationId}] Chargement de l'agenda ignoré :`, error);
         return null;
       });
-      const orderSection = await loadOrderPrompt(organizationId).catch((error) => {
+      const orderSection = await loadOrderPrompt(organizationId, message.fromJid).catch((error) => {
         console.error(`❌ [orders:${organizationId}] Chargement des commandes ignoré :`, error);
         return null;
       });
@@ -209,7 +210,45 @@ function getOrCreateProvider(organizationId: string): WhatsAppProvider {
         orders: orderSection,
       });
       const history = await getRecentHistoryForAi(conversation.id);
-      const aiReply = await getAiOrchestrator().getReply(conversation.id, systemPrompt, history);
+      let aiReply = await getAiOrchestrator().getReply(conversation.id, systemPrompt, history);
+
+      // Garde-fou : le modèle dit « rendez-vous confirmé / annulé », « commande enregistrée / annulée »
+      // sans demander l'action au serveur. On compare à l'état réel et on redemande UNE fois.
+      let unbackedClaims: UnbackedClaim[] = [];
+      if (agenda || orderSection) {
+        try {
+          const [upcoming, orderState] = await Promise.all([
+            agenda ? findContactUpcoming(organizationId, message.fromJid) : Promise.resolve(null),
+            orderSection ? getContactOrderState(organizationId, message.fromJid) : Promise.resolve({ hasRecentOrder: false, hasOpenNewOrder: false }),
+          ]);
+          const check = (reply: typeof aiReply) =>
+            findUnbackedClaims({
+              reply: reply.reply,
+              agendaEnabled: Boolean(agenda),
+              ordersEnabled: Boolean(orderSection),
+              booking: reply.booking ?? null,
+              order: reply.order ?? null,
+              hasUpcomingAppointment: Boolean(upcoming),
+              ...orderState,
+            });
+          unbackedClaims = check(aiReply);
+          if (unbackedClaims.length) {
+            console.warn(`⚠️ [org:${organizationId}] Promesse IA non tenue (${unbackedClaims.join(", ")}) : nouvelle tentative.`);
+            const retry = await getAiOrchestrator().getReply(
+              conversation.id,
+              `${systemPrompt}\n\n${buildClaimCorrection(unbackedClaims)}`,
+              history,
+            );
+            if (retry.intent !== "erreur_traitement") {
+              aiReply = retry;
+              unbackedClaims = check(retry);
+            }
+          }
+        } catch (error) {
+          console.error(`❌ [org:${organizationId}] Contrôle des promesses IA ignoré :`, error);
+          unbackedClaims = [];
+        }
+      }
 
       const configuredQualificationFields = Array.isArray(settings.qualificationFields)
         ? settings.qualificationFields.filter((field): field is string => typeof field === "string")
@@ -332,6 +371,11 @@ function getOrCreateProvider(organizationId: string): WhatsAppProvider {
           } else if (outcome?.appendToReply) {
             textToSend = `${textToSend}\n\n${outcome.appendToReply}`;
           }
+        }
+
+        if (unbackedClaims.length) {
+          // Même après une seconde tentative, la réponse promet une action non faite : on le dit au client.
+          textToSend = `${textToSend}\n\n${describeUnbackedClaims(unbackedClaims)}`;
         }
 
         if (imageUrl) {

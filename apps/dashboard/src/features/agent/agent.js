@@ -225,6 +225,11 @@ function snapshot() {
   ]);
 }
 
+/** Vrai si le formulaire a été modifié depuis le dernier chargement ou enregistrement. */
+export function hasUnsavedAgentChanges() {
+  return Boolean(cleanSnapshot) && snapshot() !== cleanSnapshot;
+}
+
 function markClean() {
   cleanSnapshot = snapshot();
   $("#agent-dirty").classList.add("hidden");

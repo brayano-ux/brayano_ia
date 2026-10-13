@@ -203,10 +203,29 @@ export interface AgendaPrompt {
 }
 
 /** Section de prompt avec l'heure actuelle et les créneaux libres. null si l'agenda est désactivé. */
-export async function loadAgendaPrompt(organizationId: string, now = new Date()): Promise<AgendaPrompt | null> {
+/** Prochain rendez-vous (réservé) d'un contact, ou null. */
+export async function findContactUpcoming(organizationId: string, contactJid: string, now = new Date()) {
+  return prisma.appointment.findFirst({
+    where: { organizationId, contactJid, status: "BOOKED", startsAt: { gte: now } },
+    orderBy: { startsAt: "asc" },
+    select: { id: true, startsAt: true, endsAt: true },
+  });
+}
+
+export async function loadAgendaPrompt(
+  organizationId: string,
+  now = new Date(),
+  contactJid?: string,
+): Promise<AgendaPrompt | null> {
   const row = await prisma.appointmentSettings.findUnique({ where: { organizationId } });
   if (!row?.enabled) return null;
   const config = toAgendaConfig(row);
+  const upcoming = contactJid ? await findContactUpcoming(organizationId, contactJid, now) : null;
+  const contactState = contactJid
+    ? upcoming
+      ? `Rendez-vous réservé de CE prospect : ${formatSlotLabel(upcoming.startsAt, config.timezone)}.`
+      : "Rendez-vous réservé de CE prospect : AUCUN (il n'a actuellement aucun rendez-vous enregistré)."
+    : null;
 
   const busy = await prisma.appointment.findMany({
     where: { organizationId, status: "BOOKED", endsAt: { gte: now } },
@@ -236,7 +255,7 @@ PRISE DE RENDEZ-VOUS (AGENDA ACTIVÉ)
 Date et heure actuelles : ${nowLabel} (fuseau ${config.timezone}). Date d'aujourd'hui : ${today}.
 Type de rendez-vous : ${row.serviceLabel ?? "rendez-vous"} — durée d'un créneau : ${config.slotMinutes} minutes.
 
-CRÉNEAUX LIBRES (heure locale, ${promptDays} prochains jours). Une plage « 08:00–12:00 » signifie que des créneaux de ${config.slotMinutes} minutes sont libres de 08:00 jusqu'à 12:00 (le dernier se termine à 12:00).
+${contactState ? `${contactState}\n\n` : ""}CRÉNEAUX LIBRES (heure locale, ${promptDays} prochains jours). Une plage « 08:00–12:00 » signifie que des créneaux de ${config.slotMinutes} minutes sont libres de 08:00 jusqu'à 12:00 (le dernier se termine à 12:00).
 ${free}
 
 Règles :
@@ -244,7 +263,8 @@ Règles :
 - Pour réserver, demande d'abord le jour et l'heure souhaités et le nom du prospect si inconnu, puis confirme clairement avant de réserver.
 - Quand le prospect a confirmé un créneau précis, renseigne le champ "booking" : {"action":"book","date":"AAAA-MM-JJ","time":"HH:mm","service":"…"} (heure locale, 24 h). Le serveur vérifie et enregistre réellement le rendez-vous.
 - Pour déplacer son prochain rendez-vous : action "reschedule" avec la nouvelle date et heure. Pour l'annuler : {"action":"cancel"}.
-- N'affirme « rendez-vous confirmé » que si tu renseignes "booking" dans cette même réponse. Sans "booking", le rendez-vous n'est PAS enregistré.
+- N'affirme « rendez-vous confirmé », « réservé », « déplacé » ou « annulé » que si tu renseignes "booking" dans cette même réponse. Sans "booking", rien n'est enregistré, déplacé ni annulé.
+- L'état « Rendez-vous réservé de CE prospect » ci-dessus est la seule vérité : les anciens messages de la conversation (« rendez-vous confirmé », « annulé »…) ne font pas foi. Si le prospect n'a AUCUN rendez-vous et veut en (re)prendre un — par exemple après une annulation, ou pour « remettre » le même créneau — réserve avec une NOUVELLE action "book" (date et heure précises, dans la liste des créneaux libres) ; ne réponds jamais que c'est fait sans renseigner "booking".
 - Si aucun rendez-vous n'est demandé, laisse "booking" à null.
 - Si le prospect demande un horaire non listé, propose les créneaux listés les plus proches.
 `.trim();

@@ -1,16 +1,16 @@
 import { $ } from "./utils/dom.js";
 import { initAuthFlow, logoutUser } from "./features/auth/auth.js";
 import { loadOrganizations } from "./features/organizations/organizations.js";
-import { initNavigation, setView, updateRealtimeHeader } from "./features/navigation/navigation.js";
+import { initNavigation, registerLeaveGuard, setView, UNSAVED_CHANGES_MESSAGE, updateRealtimeHeader } from "./features/navigation/navigation.js";
 import { initOverview, refreshOverview } from "./features/overview/overview.js";
 import { initInbox, renderInbox, openConversation, bindInboxRefresh } from "./features/inbox/inbox.js";
-import { initAgent, loadSettings } from "./features/agent/agent.js";
+import { hasUnsavedAgentChanges, initAgent, loadSettings } from "./features/agent/agent.js";
 import { initDelaySettings, loadDelaySettings } from "./features/settings/delay-settings.js";
 import { initRoutingSettings, loadRoutingConfig } from "./features/settings/routing-settings.js";
 import { loadPlatformSuspension } from "./features/suspension/suspension.js";
 import { initWhatsapp, loadWhatsApp } from "./features/whatsapp/whatsapp.js";
 import { initProducts, loadProducts } from "./features/products/products.js";
-import { initAppointments, loadAppointments } from "./features/appointments/appointments.js";
+import { hasUnsavedAgendaChanges, initAppointments, loadAppointments } from "./features/appointments/appointments.js";
 import { initOrders, loadOrders } from "./features/orders/orders.js";
 import { initConfigAssistant } from "./features/config-assistant/config-assistant.js";
 import { readSession } from "./services/storage.js";
@@ -78,6 +78,8 @@ function initLogout() {
 
 function bootstrap() {
   bindInboxRefresh(refreshAll);
+  registerLeaveGuard("agent", () => !hasUnsavedAgentChanges() || window.confirm(UNSAVED_CHANGES_MESSAGE));
+  registerLeaveGuard("appointments", () => !hasUnsavedAgendaChanges() || window.confirm(UNSAVED_CHANGES_MESSAGE));
   initNavigation(viewLoaders);
   initOverview();
   initInbox();
