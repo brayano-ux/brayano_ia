@@ -40,6 +40,28 @@ export function buildOrderEmail(input: {
   };
 }
 
+/**
+ * `cancelled` : l'IA a annulé une commande encore « Nouvelle ».
+ * `requested` : le client demande d'annuler une commande déjà confirmée/livrée → action du propriétaire.
+ */
+export function buildOrderCancellationEmail(input: {
+  organizationName: string;
+  kind: "cancelled" | "requested";
+  prospect: ProspectInfo;
+  items: Array<{ quantity: number; name: string }>;
+  totalLabel: string | null;
+}) {
+  const items = input.items.map((item) => `• ${item.quantity} × ${item.name}`).join("\n");
+  const who = input.prospect.name || "client WhatsApp";
+  const intro = input.kind === "cancelled"
+    ? `L'assistant IA de ${input.organizationName} a annulé une commande à la demande du client (elle n'était pas encore confirmée).`
+    : `Un client de ${input.organizationName} demande l'annulation d'une commande déjà confirmée ou livrée. L'assistant IA n'a pas pu l'annuler : c'est à vous de la traiter.`;
+  return {
+    subject: input.kind === "cancelled" ? `🛒 Commande annulée — ${who}` : `⚠️ Demande d'annulation de commande — ${who}`,
+    text: `Bonjour,\n\n${intro}\n\nCLIENT\n${prospectBlock(input.prospect)}\n\nCOMMANDE\n${items}${input.totalLabel ? `\nTotal : ${input.totalLabel}` : ""}${footer()}`,
+  };
+}
+
 export function buildAppointmentEmail(input: {
   organizationName: string;
   kind: "booked" | "rescheduled" | "cancelled";

@@ -20,16 +20,20 @@ function conversationDetailStatusLabel(conversation) {
   return conversation.aiEnabled ? "Agent IA actif" : "Prise en main humaine";
 }
 
-function handoffCooldownLabel(conversation) {
-  if (conversation.status !== "HUMAN_HANDOFF" || conversation.aiEnabled) return null;
+/**
+ * Pendant une prise en main humaine, l'IA reprend seule 24 h après, au prochain message du
+ * prospect. Ce délai est une simple information : le bouton « Réactiver l'IA » reste toujours actif.
+ */
+function autoResumeHint(conversation) {
+  if (conversation.status !== "HUMAN_HANDOFF" || conversation.aiEnabled) return "";
 
   const remainingMs = new Date(conversation.updatedAt).getTime() + 24 * 60 * 60 * 1000 - Date.now();
-  if (remainingMs <= 0) return null;
+  if (remainingMs <= 0) return "L'IA reprendra dès le prochain message du client.";
 
   const remainingMinutes = Math.ceil(remainingMs / 60000);
   const hours = Math.floor(remainingMinutes / 60);
   const minutes = remainingMinutes % 60;
-  return `IA bloquée encore ${hours} h ${minutes} min`;
+  return `Sans action de votre part, l'IA reprend dans ${hours} h ${minutes} min (au prochain message du client).`;
 }
 
 function messageBubbleMarkup(message) {
@@ -49,7 +53,7 @@ export async function openConversation(id) {
     const conversation = data.conversation;
     const name = conversation.contact?.displayName || conversation.contact?.whatsappJid || "Contact";
     const statusLabel = conversationDetailStatusLabel(conversation);
-    const cooldownLabel = handoffCooldownLabel(conversation);
+    const resumeHint = autoResumeHint(conversation);
     const detailPanel = $("#conversation-detail");
 
     detailPanel.classList.add("has-conversation");
@@ -58,8 +62,9 @@ export async function openConversation(id) {
         <div>
           <h2>${escapeHtml(name)}</h2>
           <p class="muted">${escapeHtml(statusLabel)}</p>
+          ${resumeHint ? `<p class="muted handoff-hint">${escapeHtml(resumeHint)}</p>` : ""}
         </div>
-        <button class="ghost-button" id="toggle-ai" ${cooldownLabel ? "disabled" : ""} title="${cooldownLabel || ""}">${cooldownLabel || (conversation.aiEnabled ? "Désactiver l'IA" : "Réactiver l'IA")}</button>
+        <button class="ghost-button" id="toggle-ai">${conversation.aiEnabled ? "Désactiver l'IA" : "Réactiver l'IA"}</button>
       </div>
       <div class="conversation-thread">${(conversation.messages || []).map(messageBubbleMarkup).join("")}</div>
       <form id="reply-form" class="reply-form">

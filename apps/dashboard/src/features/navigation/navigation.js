@@ -3,12 +3,33 @@ import { formatClock, formatFullDate } from "../../utils/format.js";
 import { getState } from "../../state/store.js";
 import { APP_CONFIG } from "../../config.js";
 
+/** Garde-fous « modifications non enregistrées » : vue → () => true si on peut quitter la vue. */
+const leaveGuards = new Map();
+
+export function registerLeaveGuard(view, canLeave) {
+  leaveGuards.set(view, canLeave);
+}
+
+export const UNSAVED_CHANGES_MESSAGE =
+  "Vous avez des modifications non enregistrées sur cette page. Si vous continuez, elles seront perdues.\n\nQuitter sans enregistrer ?";
+
+function currentView() {
+  const visible = $$(".view").find((section) => !section.classList.contains("hidden"));
+  return visible ? visible.id.replace(/-view$/, "") : null;
+}
+
 /**
  * Affiche/masque les vues (`.view`) et met en évidence l'item de nav actif.
+ * Si la vue actuelle a des modifications non enregistrées, l'utilisateur doit confirmer
+ * (y compris pour « recharger » la même vue, qui écraserait le formulaire).
  * @param {string} view identifiant de vue ("overview", "inbox", "agent", ...)
  * @param {Record<string, () => void>} onViewShown callbacks de chargement par vue
+ * @returns {boolean} false si la navigation a été annulée
  */
 export function setView(view, onViewShown = {}) {
+  const current = currentView();
+  const guard = current ? leaveGuards.get(current) : null;
+  if (guard && !guard()) return false;
   $$(".view").forEach((section) => section.classList.toggle("hidden", section.id !== `${view}-view`));
   $$(".nav-item[data-view], .tab-item[data-view]").forEach((item) => {
     const active = item.dataset.view === view;
@@ -20,6 +41,7 @@ export function setView(view, onViewShown = {}) {
   $("#tab-more")?.classList.toggle("active", !$(".tab-item[data-view].active"));
   window.scrollTo({ top: 0 });
   onViewShown[view]?.();
+  return true;
 }
 
 export function updateRealtimeHeader() {

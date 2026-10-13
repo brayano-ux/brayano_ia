@@ -290,7 +290,7 @@ RÈGLES JSON
 - leadData : objet contenant uniquement les données connues.
 - productId : identifiant d’un produit actif du catalogue, uniquement pour joindre sa photo à une demande explicite du prospect; sinon chaîne vide.
 - imageUrl : URL d'image facultative à envoyer au prospect, uniquement si elle est utile et valide.
-${settings.agenda ? '- booking : null, ou une demande de rendez-vous {"action":"book"|"reschedule"|"cancel","date":"AAAA-MM-JJ","time":"HH:mm","service":"…"} (voir la section PRISE DE RENDEZ-VOUS).\n' : ""}${settings.orders ? '- order : null, ou une commande confirmée {"action":"create","items":[{"productId":"…","quantity":1}],"customerName":"…","address":"…"} (voir la section PRISE DE COMMANDE).\n' : ""}
+${settings.agenda ? '- booking : null, ou une demande de rendez-vous {"action":"book"|"reschedule"|"cancel","date":"AAAA-MM-JJ","time":"HH:mm","service":"…"} (voir la section PRISE DE RENDEZ-VOUS).\n' : ""}${settings.orders ? '- order : null, ou une commande confirmée {"action":"create","items":[{"productId":"…","quantity":1}],"customerName":"…","address":"…"} ou {"action":"cancel"} pour annuler la commande du client (voir la section PRISE DE COMMANDE).\n' : ""}
 Cohérence obligatoire :
 
 - Si needsHuman = true, nextAction doit être "handoff".

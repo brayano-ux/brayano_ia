@@ -6,10 +6,9 @@ import {
   listProspectsForExport,
   recordOutboundMessage,
   setConversationAiEnabled,
-  shouldReactivateAiAfterHandoff,
 } from "../conversations/conversations.service.js";
 import { withConversationSendLock } from "../conversations/conversation-send-lock.js";
-import { AppError, NotFoundError, ValidationError } from "../shared/errors.js";
+import { NotFoundError, ValidationError } from "../shared/errors.js";
 import { sendWhatsAppMessageForOrg } from "../whatsapp/whatsapp.registry.js";
 
 const replyBodySchema = z.object({
@@ -73,11 +72,10 @@ export async function conversationsRoute(app: FastifyInstance) {
 
   app.post("/organizations/:orgId/conversations/:id/ai/enable", async (request) => {
     const { orgId, id } = request.params as { orgId: string; id: string };
+    // Le propriétaire peut toujours rendre la main à l'IA : le délai de 24 h ne concerne que la
+    // reprise AUTOMATIQUE (au prochain message du prospect), jamais ce bouton.
     const conversation = await withConversationSendLock(id, async () => {
-      const current = await getOwnedConversationOrThrow(orgId, id);
-      if (current.status === "HUMAN_HANDOFF" && !shouldReactivateAiAfterHandoff(current.updatedAt)) {
-        throw new AppError("La réactivation de l’IA est disponible 24 heures après le passage à un humain.", 409, "HANDOFF_COOLDOWN");
-      }
+      await getOwnedConversationOrThrow(orgId, id);
       return setConversationAiEnabled(id, true);
     });
     return { conversation };

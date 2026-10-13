@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { aiReplySchema } from "../ai/schemas.js";
-import { buildAppointmentEmail, buildOrderEmail } from "../notifications/owner-notifications.js";
-import { decideOrder, describeOrderOutcome, orderSignature, parsePrice } from "./order-logic.js";
+import { buildAppointmentEmail, buildOrderCancellationEmail, buildOrderEmail } from "../notifications/owner-notifications.js";
+import { decideOrder, decideOrderCancellation, describeOrderOutcome, orderSignature, parsePrice } from "./order-logic.js";
 
 const A = "191e4567-e89b-42d3-a456-426614174000";
 const B = "291e4567-e89b-42d3-a456-426614174000";
@@ -77,10 +77,49 @@ describe("order field in the AI reply", () => {
   it("is optional, parses quantities sent as text, and drops malformed requests without invalidating the reply", () => {
     expect(aiReplySchema.safeParse(reply).success).toBe(true);
     const ok = aiReplySchema.parse({ ...reply, order: { action: "create", items: [{ productId: A, quantity: "2" }], address: "Akwa" } });
-    expect(ok.order?.items[0]?.quantity).toBe(2);
+    expect(ok.order?.action === "create" && ok.order.items[0]?.quantity).toBe(2);
     const bad = aiReplySchema.safeParse({ ...reply, order: { action: "create", items: [{ productId: "pas-un-uuid", quantity: 1 }] } });
     expect(bad.success).toBe(true);
     expect(bad.success && bad.data.order).toBeUndefined();
+  });
+});
+
+describe("order cancellation", () => {
+  const at = (iso: string) => new Date(iso);
+  const order = (id: string, status: "NEW" | "CONFIRMED" | "DELIVERED" | "CANCELLED", iso: string) => ({ id, status, createdAt: at(iso) });
+
+  it("parses a cancel request, without needing any item", () => {
+    const reply = { reply: "ok", intent: "annulation", confidence: 0.9, needsHuman: false, leadScore: 0, qualificationStatus: "not_qualified", nextAction: "continue", leadData: {} };
+    const parsed = aiReplySchema.parse({ ...reply, order: { action: "cancel" } });
+    expect(parsed.order).toEqual({ action: "cancel" });
+  });
+
+  it("cancels the most recent open order while it is still NEW", () => {
+    const decision = decideOrderCancellation([
+      order("old", "DELIVERED", "2026-10-01T10:00:00Z"),
+      order("recent", "NEW", "2026-10-12T10:00:00Z"),
+      order("gone", "CANCELLED", "2026-10-13T10:00:00Z"),
+    ]);
+    expect(decision).toEqual({ kind: "cancel", orderId: "recent" });
+    expect(describeOrderOutcome(decision).appendToReply).toContain("annulée");
+  });
+
+  it("refuses to cancel an order the owner already confirmed and asks the owner to step in", () => {
+    const decision = decideOrderCancellation([order("c", "CONFIRMED", "2026-10-12T10:00:00Z")]);
+    expect(decision).toMatchObject({ kind: "cancel_too_late", orderId: "c" });
+    expect(describeOrderOutcome(decision).replaceReply).toContain("prévenu l'équipe");
+  });
+
+  it("says so when there is nothing to cancel", () => {
+    const decision = decideOrderCancellation([order("x", "CANCELLED", "2026-10-12T10:00:00Z")]);
+    expect(decision).toEqual({ kind: "nothing_to_cancel" });
+    expect(describeOrderOutcome(decision).replaceReply).toContain("aucune commande");
+  });
+
+  it("builds an owner email that differs for a cancellation and a request on a confirmed order", () => {
+    const base = { organizationName: "Boutique Zoé", prospect: { name: "Awa", phone: "237650000001" }, items: [{ quantity: 2, name: "Kit" }], totalLabel: "36 000 FCFA" };
+    expect(buildOrderCancellationEmail({ ...base, kind: "cancelled" }).subject).toContain("Commande annulée");
+    expect(buildOrderCancellationEmail({ ...base, kind: "requested" }).subject).toContain("Demande d'annulation");
   });
 });
 
