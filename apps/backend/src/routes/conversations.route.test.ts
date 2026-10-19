@@ -18,6 +18,8 @@ const { mocks } = vi.hoisted(() => ({
 vi.mock("../conversations/conversations.service.js", () => mocks);
 vi.mock("../whatsapp/whatsapp.registry.js", () => ({ sendWhatsAppMessageForOrg: mocks.sendWhatsAppMessageForOrg }));
 
+vi.mock("./auth.route.js", () => ({ requireAuth: vi.fn(async () => ({ email: "owner@example.com", organizationId: "org-1", name: "Fatou" })) }));
+vi.mock("../contacts/contacts.service.js", () => ({ setContactOptOut: vi.fn() }));
 vi.mock("../database/client.js", () => ({ prisma: { message: { findFirst: vi.fn() } } }));
 
 import { conversationsRoute } from "./conversations.route.js";
@@ -62,6 +64,7 @@ describe("conversation handoff routes", () => {
 
     expect(response.statusCode).toBe(200);
     expect(order).toEqual(["disable", "send", "record"]);
+    expect(mocks.recordOutboundMessage).toHaveBeenCalledWith(expect.objectContaining({ author: "HUMAN", aiMeta: { sentBy: "Fatou" } }));
     await app.close();
   });
 

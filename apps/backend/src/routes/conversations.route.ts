@@ -12,6 +12,8 @@ import {
 import { STAGE_LABELS } from "../conversations/stage.js";
 import { buildClientMediaPath, clientMediaResponseHeaders, readClientMedia, verifyClientMediaToken } from "../media/client-media.service.js";
 import { prisma } from "../database/client.js";
+import { setContactOptOut } from "../contacts/contacts.service.js";
+import { requireAuth } from "./auth.route.js";
 import { withConversationSendLock } from "../conversations/conversation-send-lock.js";
 import { NotFoundError, ValidationError } from "../shared/errors.js";
 import { sendWhatsAppMessageForOrg } from "../whatsapp/whatsapp.registry.js";
@@ -78,6 +80,15 @@ export async function conversationsRoute(app: FastifyInstance) {
     return { success: true };
   });
 
+  app.post("/organizations/:orgId/conversations/:id/opt-out", async (request) => {
+    const { orgId, id } = request.params as { orgId: string; id: string };
+    const parsed = z.object({ optedOut: z.boolean() }).safeParse(request.body);
+    if (!parsed.success) throw new ValidationError("Choix invalide.");
+    const conversation = await getOwnedConversationOrThrow(orgId, id);
+    await setContactOptOut(orgId, conversation.contactId, parsed.data.optedOut);
+    return { optedOut: parsed.data.optedOut };
+  });
+
   app.post("/organizations/:orgId/conversations/:id/stage", async (request) => {
     const { orgId, id } = request.params as { orgId: string; id: string };
     const parsed = stageBodySchema.safeParse(request.body);
@@ -114,6 +125,8 @@ export async function conversationsRoute(app: FastifyInstance) {
     }
 
     const conversation = await getOwnedConversationOrThrow(orgId, id);
+    // Plusieurs personnes partagent la boîte : on garde qui a répondu.
+    const session = await requireAuth(request.headers.authorization);
 
     const message = await withConversationSendLock(id, async () => {
       await setConversationAiEnabled(id, false);
@@ -122,6 +135,7 @@ export async function conversationsRoute(app: FastifyInstance) {
         conversationId: conversation.id,
         text: parsed.data.text,
         author: "HUMAN",
+        ...(session?.name ? { aiMeta: { sentBy: session.name } } : {}),
       });
     });
     return { message };

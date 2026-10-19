@@ -5,6 +5,7 @@ import type { AIReply } from "../ai/schemas.js";
 import type { AIChatMessage } from "../ai/ai.types.js";
 import type { IncomingWhatsAppMessage, WhatsAppConnectionStatus, WhatsAppProvider } from "../whatsapp/whatsapp.types.js";
 import { processIncomingMessage } from "../whatsapp/incoming-message.js";
+import { hashPassword } from "../routes/auth.route.js";
 
 /** Les tests d'intégration ont besoin d'une vraie base PostgreSQL : INTEGRATION_DB=1 et DATABASE_URL vers une base de TEST. */
 export const integrationEnabled = process.env.INTEGRATION_DB === "1";
@@ -15,11 +16,11 @@ export async function resetDatabase() {
   await prisma.$executeRawUnsafe(`TRUNCATE ${tables.map((table) => `"${table.tablename}"`).join(", ")} RESTART IDENTITY CASCADE`);
 }
 
-export async function createTestOrganization(name = "Salon Éclat", options: { email?: string; role?: "ADMIN" | "AGENT" } = {}) {
+export async function createTestOrganization(name = "Salon Éclat", options: { email?: string; role?: "ADMIN" | "AGENT"; password?: string } = {}) {
   const organization = await prisma.organization.create({ data: { name } });
   const email = options.email ?? `owner-${randomUUID().slice(0, 8)}@example.com`;
   const user = await prisma.user.create({
-    data: { organizationId: organization.id, email, passwordHash: "x", name: "Propriétaire", role: options.role ?? "ADMIN" },
+    data: { organizationId: organization.id, email, passwordHash: options.password ? hashPassword(options.password) : "x", name: "Propriétaire", role: options.role ?? "ADMIN" },
   });
   await prisma.aiSettings.create({
     data: { organizationId: organization.id, agentName: "Assistant", systemPrompt: "Réponds poliment.", businessInfo: "Salon de coiffure à Douala.", responseDelaySeconds: 3 },
