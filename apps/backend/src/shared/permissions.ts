@@ -22,7 +22,7 @@ const AGENT_RULES: Rule[] = [
   { methods: ["GET"], pattern: new RegExp(`${ORG}/whatsapp/status${END}`) },
   { methods: ["GET"], pattern: new RegExp(`${ORG}/routing/commercial-metrics${END}`) },
   // Répondre aux clients, étiqueter, corriger une réponse, marquer comme lu, essayer l'assistant
-  { methods: ["POST"], pattern: new RegExp(`${ORG}/conversations/[^/?]+/(?:reply|read|stage|ai/enable|ai/disable|opt-out)(?:\\?.*)?$`) },
+  { methods: ["POST"], pattern: new RegExp(`${ORG}/conversations/[^/?]+/(?:reply|read|stage|ai/enable|ai/disable|opt-out|payment-check)(?:\\?.*)?$`) },
   { methods: ["POST"], pattern: new RegExp(`${ORG}/conversations/[^/?]+/messages/[^/?]+/correct(?:\\?.*)?$`) },
   { methods: ["POST"], pattern: new RegExp(`${ORG}/ai-test/reply(?:\\?.*)?$`) },
   // Commandes et rendez-vous (pas leurs réglages)

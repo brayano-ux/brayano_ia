@@ -8,6 +8,7 @@ import {
   recordOutboundMessage,
   setConversationAiEnabled,
   setConversationStage,
+  setPaymentCheckPending,
 } from "../conversations/conversations.service.js";
 import { STAGE_LABELS } from "../conversations/stage.js";
 import { buildClientMediaPath, clientMediaResponseHeaders, readClientMedia, verifyClientMediaToken } from "../media/client-media.service.js";
@@ -87,6 +88,16 @@ export async function conversationsRoute(app: FastifyInstance) {
     const conversation = await getOwnedConversationOrThrow(orgId, id);
     await setContactOptOut(orgId, conversation.contactId, parsed.data.optedOut);
     return { optedOut: parsed.data.optedOut };
+  });
+
+  // « J'ai vérifié le paiement » : efface le signalement « preuve de paiement à vérifier » (ou le remet).
+  app.post("/organizations/:orgId/conversations/:id/payment-check", async (request) => {
+    const { orgId, id } = request.params as { orgId: string; id: string };
+    const parsed = z.object({ pending: z.boolean() }).safeParse(request.body);
+    if (!parsed.success) throw new ValidationError("Choix invalide.");
+    await getOwnedConversationOrThrow(orgId, id);
+    await setPaymentCheckPending(id, parsed.data.pending);
+    return { paymentCheckPending: parsed.data.pending };
   });
 
   app.post("/organizations/:orgId/conversations/:id/stage", async (request) => {

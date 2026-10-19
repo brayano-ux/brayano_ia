@@ -7,6 +7,7 @@ const { mocks } = vi.hoisted(() => ({
     listConversationSummaries: vi.fn(),
     markConversationRead: vi.fn(),
     setConversationStage: vi.fn(),
+    setPaymentCheckPending: vi.fn(),
     listProspectsForExport: vi.fn(),
     recordOutboundMessage: vi.fn(),
     setConversationAiEnabled: vi.fn(),

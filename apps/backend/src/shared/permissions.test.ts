@@ -26,6 +26,8 @@ describe("isAllowedForRole", () => {
     ["POST", `${org}/conversations/abc/reply`],
     ["POST", `${org}/conversations/abc/read`],
     ["POST", `${org}/conversations/abc/stage`],
+    ["POST", `${org}/conversations/abc/opt-out`],
+    ["POST", `${org}/conversations/abc/payment-check`],
     ["POST", `${org}/conversations/abc/ai/enable`],
     ["POST", `${org}/conversations/abc/ai/disable`],
     ["POST", `${org}/conversations/abc/messages/def/correct`],
