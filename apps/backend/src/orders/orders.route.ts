@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { ValidationError } from "../shared/errors.js";
-import { getOrderSettings, listOrders, orderStatusSchema, updateOrderSettings, updateOrderStatus } from "./orders.service.js";
+import { getOrderSettings, listOrders, orderStatusSchema, paymentStatusSchema, updateOrderPayment, updateOrderSettings, updateOrderStatus } from "./orders.service.js";
 
 export async function ordersRoute(app: FastifyInstance) {
   app.get("/organizations/:orgId/orders/settings", async (request) => {
@@ -18,9 +18,9 @@ export async function ordersRoute(app: FastifyInstance) {
 
   app.get("/organizations/:orgId/orders", async (request) => {
     const { orgId } = request.params as { orgId: string };
-    const parsed = z.object({ status: orderStatusSchema.optional() }).safeParse(request.query ?? {});
+    const parsed = z.object({ status: orderStatusSchema.optional(), payment: paymentStatusSchema.optional() }).safeParse(request.query ?? {});
     if (!parsed.success) throw new ValidationError("Filtre invalide.");
-    return { orders: await listOrders(orgId, parsed.data.status) };
+    return { orders: await listOrders(orgId, { status: parsed.data.status, payment: parsed.data.payment }) };
   });
 
   app.put("/organizations/:orgId/orders/:orderId", async (request) => {
@@ -28,5 +28,14 @@ export async function ordersRoute(app: FastifyInstance) {
     const parsed = z.object({ status: orderStatusSchema }).safeParse(request.body);
     if (!parsed.success) throw new ValidationError("Statut invalide.");
     return { order: await updateOrderStatus(orgId, orderId, parsed.data.status) };
+  });
+
+  app.put("/organizations/:orgId/orders/:orderId/payment", async (request) => {
+    const { orgId, orderId } = request.params as { orgId: string; orderId: string };
+    const parsed = z
+      .object({ paymentStatus: paymentStatusSchema, paymentMethod: z.string().trim().max(40).optional(), paymentNote: z.string().trim().max(200).optional() })
+      .safeParse(request.body);
+    if (!parsed.success) throw new ValidationError("Paiement invalide.");
+    return { order: await updateOrderPayment(orgId, orderId, parsed.data) };
   });
 }

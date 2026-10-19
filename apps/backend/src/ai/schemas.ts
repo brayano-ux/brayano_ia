@@ -18,6 +18,8 @@ export const aiReplySchema = z.object({
   nextAction: z.enum(["continue", "handoff", "stop"]),
   leadData: z.record(z.string(), z.unknown()).default({}),
   productId: z.string().uuid().optional().or(z.literal("")),
+  /** Plusieurs produits dont le client veut voir les photos (3 au maximum sont envoyées). */
+  productIds: z.array(z.string().uuid()).max(10).optional().catch(undefined),
   imageUrl: z.string().url().optional().or(z.literal("")),
   booking: bookingRequestSchema,
   order: orderRequestSchema,

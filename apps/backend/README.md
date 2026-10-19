@@ -90,6 +90,24 @@ curl.exe -X POST http://localhost:3000/organizations/<orgId>/conversations/<id>/
 curl.exe -X POST http://localhost:3000/organizations/<orgId>/conversations/<id>/ai/enable
 ```
 
+### 7. Suivi des clients, relances, messages groupés, équipe
+
+- **Photos et documents reçus** : enregistrés sur le disque persistant (`CLIENT_MEDIA_DIR`, par défaut à côté de `wa-session`), supprimés après `CLIENT_MEDIA_RETENTION_DAYS` jours (90 par défaut). Le propriétaire est prévenu par email ; une preuve de paiement probable marque la conversation « paiement à vérifier ». L'IA ne confirme jamais un paiement : seul le propriétaire le fait (onglet Commandes). Les vidéos et autocollants sont toujours ignorés.
+- **Étiquettes** (Nouveau, Intéressé, A commandé, À rappeler) : posées automatiquement, modifiables à la main (`POST /conversations/:id/stage`, `AUTO` rend la main à l'assistant).
+- **Horaires d'ouverture et relances automatiques** : réglés dans `PUT /ai-settings` (`businessHours*`, `closedMessage`, `followUp*`). Les relances ne partent que vers les clients « Intéressé » dont le dernier message vient de l'IA, jamais hors horaires, jamais après un « STOP ».
+- **Statistiques** : `GET /organizations/:id/stats?days=1|7|30` (le temps gagné est une estimation d'une minute par réponse de l'IA).
+- **Corrections** : `POST /conversations/:id/messages/:messageId/correct` et `/ai-corrections` ; l'assistant s'en souvient. Il s'inspire aussi, de façon anonymisée, des conversations passées qui ont abouti (commande, rendez-vous).
+- **Messages groupés** : `/organizations/:id/broadcasts` (aperçu, envoi, annulation). Garde-fous : clients ayant écrit dans les 30 derniers jours, pas de désinscrits, 50 destinataires maximum par envoi, 100 messages par jour, pause aléatoire de 8 à 20 s, mention « répondez STOP » ajoutée automatiquement. Un envoi interrompu par un redémarrage reprend tout seul.
+- **Équipe** : `/organizations/:id/team`. Un employé (rôle `AGENT`) répond aux clients et suit commandes et rendez-vous ; il ne peut ni modifier l'agent, ni le catalogue, ni WhatsApp, ni l'équipe (liste blanche dans `src/shared/permissions.ts`).
+- Les tâches de fond (relances, reprise des envois, nettoyage des fichiers) tournent toutes les 5 minutes ; `BACKGROUND_JOBS=false` les coupe.
+- Au démarrage, `prisma db push` ajoute les nouvelles colonnes (aucune donnée n'est supprimée).
+
+### Tester avec une vraie base
+```bash
+INTEGRATION_DB=1 DATABASE_URL=postgresql://.../base_de_test npm test
+```
+Les tests d'intégration vident la base indiquée : n'utilisez jamais celle d'un client.
+
 ---
 
 ## Erreurs fréquentes

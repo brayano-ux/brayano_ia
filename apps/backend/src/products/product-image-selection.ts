@@ -25,6 +25,36 @@ export function buildProductImageCaption(product: ProductDetails) {
   return [product.name, product.price].filter(Boolean).join(" · ");
 }
 
+/** Le client demande-t-il à voir une photo ? (français et anglais, y compris « montrez », « pics », « picture »). */
+export function isImageRequested(message: string): boolean {
+  const text = message.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return /\b(?:photos?|photographies?|images?|visuels?|voir|montre|montres|montrer|montrez|apercu|picture|pictures|pic|pics|show)\b/i.test(text);
+}
+
+/** Nombre maximum de photos envoyées pour une seule demande (évite d'inonder le client et de faire bloquer le numéro). */
+export const MAX_PRODUCT_PHOTOS_PER_REPLY = 3;
+
+/**
+ * Photos de PRODUITS DU CATALOGUE demandées par le client, dans l'ordre choisi par l'assistant (productId d'abord,
+ * puis productIds), sans doublon ni produit sans photo. Jamais une URL fournie par le modèle.
+ */
+export function resolveRequestedProductPhotos<T extends ProductImageCandidate>(input: {
+  message: string;
+  productId?: string | undefined;
+  productIds?: string[] | undefined;
+  products: T[];
+}): Array<T & { imageUrl: string }> {
+  if (!isImageRequested(input.message)) return [];
+  const wanted = [input.productId, ...(input.productIds ?? [])].filter((id): id is string => Boolean(id));
+  const photos: Array<T & { imageUrl: string }> = [];
+  for (const id of wanted) {
+    const product = input.products.find((candidate) => candidate.id === id);
+    if (product?.imageUrl && !photos.some((photo) => photo.id === product.id)) photos.push(product as T & { imageUrl: string });
+    if (photos.length >= MAX_PRODUCT_PHOTOS_PER_REPLY) break;
+  }
+  return photos;
+}
+
 export function resolveRequestedProductImage(input: {
   message: string;
   productId?: string | undefined;
@@ -32,8 +62,7 @@ export function resolveRequestedProductImage(input: {
   legacyImageUrl?: string | null | undefined;
   configuredLegacyImageUrl?: string | null | undefined;
 }) {
-  const imageRequested = /\b(photo|photos|image|images|visuel|visuels|voir|montre|montrer)\b/i.test(input.message);
-  if (!imageRequested) return null;
+  if (!isImageRequested(input.message)) return null;
 
   const selectedProduct = input.products.find((product) => product.id === input.productId && product.imageUrl);
   if (selectedProduct?.imageUrl) return selectedProduct.imageUrl;

@@ -81,7 +81,7 @@ function hashToken(token: string) {
   return createHash("sha256").update(token).digest("hex");
 }
 
-function hashPassword(password: string) {
+export function hashPassword(password: string) {
   return createHash("sha256").update(password).digest("hex");
 }
 
@@ -200,11 +200,13 @@ export async function getSessionFromToken(token: string | null) {
         email: true,
         organizationId: true,
         expiresAt: true,
-        user: { select: { email: true, organizationId: true } },
+        user: { select: { id: true, name: true, email: true, organizationId: true, role: true, active: true } },
       },
     });
 
     if (!session) return null;
+    // Un membre désactivé par le propriétaire perd l'accès tout de suite, même avec une session encore valide.
+    if (!session.user.active) return null;
     if (session.expiresAt && session.expiresAt.getTime() <= Date.now()) {
       await prisma.session.delete({ where: { tokenHash: hashed } }).catch(() => undefined);
       return null;
@@ -214,7 +216,7 @@ export async function getSessionFromToken(token: string | null) {
       ? session.user.organizationId
       : session.organizationId ?? session.user.organizationId;
 
-    return { email: session.email, organizationId };
+    return { email: session.email, organizationId, userId: session.user.id, name: session.user.name, role: session.user.role };
   });
 }
 
@@ -278,12 +280,16 @@ export async function authRoute(app: FastifyInstance) {
       const organizationId = await ensureDefaultAdminOrganization(email);
       const configuredAdmin = getConfiguredAdminCredentials();
       const storedPassword = VALID_USERS.get(email);
-      const dbUser = storedPassword ? null : await prisma.user.findUnique({ where: { email }, select: { organizationId: true, passwordHash: true } });
+      const dbUser = storedPassword ? null : await prisma.user.findUnique({ where: { email }, select: { organizationId: true, passwordHash: true, active: true } });
       const isValidPassword = verifyPassword(password, storedPassword ?? dbUser?.passwordHash);
 
       if (!isValidPassword) {
         reply.code(401);
         return { message: "Email ou mot de passe incorrect." };
+      }
+      if (dbUser && !dbUser.active) {
+        reply.code(403);
+        return { message: "Ce compte a été désactivé. Contactez le propriétaire de l'entreprise." };
       }
 
       let issuedOrganizationId = organizationId ?? dbUser?.organizationId;
@@ -556,6 +562,6 @@ export async function authRoute(app: FastifyInstance) {
       return { message: "Non autorisé." };
     }
 
-    return { organizationId: session.organizationId, user: { email: session.email } };
+    return { organizationId: session.organizationId, user: { email: session.email, name: session.name ?? null, role: session.role ?? "ADMIN" } };
   });
 }

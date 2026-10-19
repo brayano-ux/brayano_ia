@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { prisma } from "../database/client.js";
 import { NotFoundError } from "../shared/errors.js";
+import { setPaymentCheckPending } from "../conversations/conversations.service.js";
+import type { ActionOutcome } from "../appointments/appointments.service.js";
 import { buildOrderCancellationEmail, buildOrderEmail, notifyOrganizationAdmins } from "../notifications/owner-notifications.js";
 import {
   decideOrder,
@@ -39,12 +41,60 @@ export async function updateOrderSettings(organizationId: string, input: { enabl
 
 export const orderStatusSchema = z.enum(["NEW", "CONFIRMED", "DELIVERED", "CANCELLED"]);
 
-export async function listOrders(organizationId: string, status?: string) {
-  return prisma.order.findMany({
-    where: { organizationId, ...(status ? { status: status as never } : {}) },
+export const paymentStatusSchema = z.enum(["UNPAID", "PAID"]);
+export const PAYMENT_METHODS = ["Orange Money", "MTN MoMo", "Espèces", "Virement", "Autre"] as const;
+
+/**
+ * Commandes de l'entreprise. `proofReceived` : le client a envoyé une capture de paiement pas encore vérifiée
+ * (l'assistant ne confirme jamais un paiement : c'est au propriétaire de le marquer « Payée »).
+ */
+export async function listOrders(organizationId: string, filters: { status?: string | undefined; payment?: "UNPAID" | "PAID" | undefined } = {}) {
+  const orders = await prisma.order.findMany({
+    where: {
+      organizationId,
+      ...(filters.status ? { status: filters.status as never } : {}),
+      ...(filters.payment ? { paymentStatus: filters.payment } : {}),
+    },
     orderBy: { createdAt: "desc" },
     take: 300,
   });
+  const conversationIds = [...new Set(orders.filter((order) => order.paymentStatus === "UNPAID" && order.conversationId).map((order) => order.conversationId!))];
+  const flagged = conversationIds.length
+    ? new Set(
+        (await prisma.conversation.findMany({ where: { id: { in: conversationIds }, organizationId, paymentCheckPending: true }, select: { id: true } })).map((conversation) => conversation.id),
+      )
+    : new Set<string>();
+  return orders.map((order) => ({
+    ...order,
+    proofReceived: order.paymentStatus === "UNPAID" && order.status !== "CANCELLED" && Boolean(order.conversationId && flagged.has(order.conversationId)),
+  }));
+}
+
+/** Le propriétaire marque une commande payée (ou non payée). Efface le signalement « preuve de paiement à vérifier » quand plus rien n'est en attente. */
+export async function updateOrderPayment(
+  organizationId: string,
+  orderId: string,
+  input: { paymentStatus: "UNPAID" | "PAID"; paymentMethod?: string | undefined; paymentNote?: string | undefined },
+) {
+  const found = await prisma.order.findFirst({ where: { id: orderId, organizationId } });
+  if (!found) throw new NotFoundError("Commande introuvable.");
+  const paid = input.paymentStatus === "PAID";
+  const order = await prisma.order.update({
+    where: { id: orderId },
+    data: {
+      paymentStatus: input.paymentStatus,
+      paidAt: paid ? (found.paidAt ?? new Date()) : null,
+      paymentMethod: paid ? input.paymentMethod?.trim() || found.paymentMethod : null,
+      paymentNote: paid ? input.paymentNote?.trim() || found.paymentNote : null,
+    },
+  });
+  if (paid && order.conversationId) {
+    const stillWaiting = await prisma.order.count({
+      where: { organizationId, conversationId: order.conversationId, paymentStatus: "UNPAID", status: { not: "CANCELLED" } },
+    });
+    if (stillWaiting === 0) await setPaymentCheckPending(order.conversationId, false);
+  }
+  return order;
 }
 
 /** État des commandes d'un client, pour détecter les promesses non tenues de l'IA. */
@@ -65,13 +115,20 @@ export async function updateOrderStatus(organizationId: string, orderId: string,
 }
 
 /** Section de prompt : présente seulement si les commandes sont activées ET le catalogue non vide. */
-export async function loadOrderPrompt(organizationId: string, contactJid?: string): Promise<string | null> {
+export async function loadOrderPrompt(
+  organizationId: string,
+  contactJid?: string,
+  /** Simulateur de l'agent : commande « fictive » du testeur à la place de celle d'un vrai client. */
+  override?: { latest: { items: Array<{ quantity: number; name: string }>; total: number | null } | null },
+): Promise<string | null> {
   const settings = await prisma.orderSettings.findUnique({ where: { organizationId } });
   if (!settings?.enabled) return null;
   const products = await prisma.product.count({ where: { organizationId, active: true } });
   if (products === 0) return null;
 
-  const latest = contactJid ? await findLatestOpenOrder(organizationId, contactJid) : null;
+  const latest = override
+    ? override.latest && { ...override.latest, status: "NEW" as const, createdAt: new Date(), deliveryAddress: "" }
+    : contactJid ? await findLatestOpenOrder(organizationId, contactJid) : null;
   const items = latest ? (latest.items as Array<{ quantity: number; name: string }>) : [];
   const current = latest
     ? `Commande en cours de CE client : ${items.map((item) => `${item.quantity} × ${item.name}`).join(", ")}${latest.total != null ? ` (total ${formatAmount(latest.total)})` : ""} — statut : ${STATUS_LABEL[latest.status as ContactOrder["status"]]}.`
@@ -111,12 +168,33 @@ export interface OrderContext {
   contactPhone?: string | null | undefined;
 }
 
+/**
+ * Simulation (testeur de l'agent) : ce que l'IA ferait avec cette commande, SANS rien enregistrer ni envoyer d'email.
+ */
+export async function previewAiOrder(
+  request: OrderRequest,
+  organizationId: string,
+  simulatedLatest: { items: Array<{ quantity: number; name: string }>; total: number | null } | null,
+) {
+  if (request.action === "cancel") {
+    const decision = decideOrderCancellation(simulatedLatest ? [{ id: "simulated", status: "NEW", createdAt: new Date() }] : []);
+    return { decision, outcome: { ...describeOrderOutcome(decision), kind: decision.kind }, order: null as null | { items: Array<{ quantity: number; name: string }>; total: number | null; address: string } };
+  }
+  const catalog = await prisma.product.findMany({ where: { organizationId, active: true }, select: { id: true, name: true, price: true } });
+  const decision = decideOrder({ request, catalog, fallbackName: "Client test", fallbackPhone: null });
+  return {
+    decision,
+    outcome: { ...describeOrderOutcome(decision), kind: decision.kind },
+    order: decision.kind === "create" ? { items: decision.items.map((line) => ({ quantity: line.quantity, name: line.name })), total: decision.total, address: decision.address } : null,
+  };
+}
+
 /** Ne lève jamais : en cas d'erreur la réponse WhatsApp part quand même (retourne null). */
 export async function applyAiOrder(
   request: OrderRequest,
   context: OrderContext,
   now = new Date(),
-): Promise<{ appendToReply: string | null; replaceReply: string | null } | null> {
+): Promise<ActionOutcome | null> {
   try {
     if (request.action === "cancel") {
       return await applyOrderCancellation(context);
@@ -131,7 +209,7 @@ export async function applyAiOrder(
       fallbackName: context.contactName,
       fallbackPhone: context.contactPhone,
     });
-    if (decision.kind !== "create") return describeOrderOutcome(decision);
+    if (decision.kind !== "create") return { ...describeOrderOutcome(decision), kind: decision.kind };
 
     // Idempotence : la même commande répétée par l'IA ne crée pas de doublon.
     const signature = orderSignature(decision.items);
@@ -145,7 +223,7 @@ export async function applyAiOrder(
       select: { items: true },
     });
     if (recent.some((order) => orderSignature(order.items as Array<{ productId: string; quantity: number }>) === signature)) {
-      return describeOrderOutcome({ kind: "already_created" });
+      return { ...describeOrderOutcome({ kind: "already_created" }), kind: "already_created" };
     }
 
     await prisma.order.create({
@@ -173,14 +251,14 @@ export async function applyAiOrder(
         notes: decision.notes,
       }),
     );
-    return describeOrderOutcome(decision);
+    return { ...describeOrderOutcome(decision), kind: "create" };
   } catch (error) {
     console.error(`❌ [orders:${context.organizationId}] Échec de l'enregistrement de la commande :`, error);
     return null;
   }
 }
 
-async function applyOrderCancellation(context: OrderContext) {
+async function applyOrderCancellation(context: OrderContext): Promise<ActionOutcome> {
   const orders = await prisma.order.findMany({
     where: { organizationId: context.organizationId, contactJid: context.contactJid },
     orderBy: { createdAt: "desc" },
@@ -195,7 +273,7 @@ async function applyOrderCancellation(context: OrderContext) {
       data: { status: "CANCELLED" },
     });
     if (updated.count === 0) {
-      return describeOrderOutcome({ kind: "cancel_too_late", orderId: decision.orderId, status: "CONFIRMED" });
+      return { ...describeOrderOutcome({ kind: "cancel_too_late", orderId: decision.orderId, status: "CONFIRMED" }), kind: "cancel_too_late" };
     }
   }
   if (decision.kind === "cancel" || decision.kind === "cancel_too_late") {
@@ -211,5 +289,5 @@ async function applyOrderCancellation(context: OrderContext) {
       }),
     );
   }
-  return describeOrderOutcome(decision);
+  return { ...describeOrderOutcome(decision), kind: decision.kind };
 }

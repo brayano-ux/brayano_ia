@@ -8,7 +8,7 @@
     </div>
   </div>
 
-  <div class="panel orders-settings">
+  <div class="panel orders-settings admin-only">
     <label class="agenda-switch">
       <input id="orders-enabled" type="checkbox" />
       <span>Prise de commande par l’agent</span>
@@ -19,6 +19,7 @@
   <div class="orders-toolbar">
     <div id="orders-filters" class="orders-filters" role="tablist" aria-label="Filtrer par statut">
       <button type="button" class="orders-filter active" data-filter="">Toutes</button>
+      <button type="button" class="orders-filter" data-filter="UNPAID">À encaisser</button>
       <button type="button" class="orders-filter" data-filter="NEW">Nouvelles</button>
       <button type="button" class="orders-filter" data-filter="CONFIRMED">Confirmées</button>
       <button type="button" class="orders-filter" data-filter="DELIVERED">Livrées</button>

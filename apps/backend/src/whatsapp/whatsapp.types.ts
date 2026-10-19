@@ -1,5 +1,14 @@
 export type WhatsAppConnectionStatus = "DISCONNECTED" | "QR_PENDING" | "CONNECTED";
 
+/** Photo ou document envoyé par un contact. `data` est absent si le fichier est trop gros ou n'a pas pu être téléchargé. */
+export interface IncomingMedia {
+  kind: "image" | "document";
+  mimeType: string;
+  fileName?: string;
+  data?: Buffer;
+  caption?: string;
+}
+
 export interface IncomingWhatsAppMessage {
   externalId: string;
   fromJid: string;
@@ -9,6 +18,7 @@ export interface IncomingWhatsAppMessage {
     data: Buffer;
     mimeType: string;
   };
+  media?: IncomingMedia;
 }
 
 /** Message envoyé par un humain depuis le téléphone du numéro connecté (pas par l'application). */

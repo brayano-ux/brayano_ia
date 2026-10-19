@@ -1,11 +1,14 @@
 import { env } from "../config/env.js";
 import { prisma } from "../database/client.js";
 import { NotFoundError } from "../shared/errors.js";
+import type { WorkingHours } from "../appointments/availability.js";
 
 export const RESPONSE_DELAY_OPTIONS = [3, 5, 7, 60, 120] as const;
 export const DEFAULT_RESPONSE_DELAY_SECONDS = 3;
 
 export type ResponseDelaySeconds = (typeof RESPONSE_DELAY_OPTIONS)[number];
+
+export const DEFAULT_FOLLOW_UP_DELAY_HOURS = 24;
 
 export interface AiSettingsInput {
   agentName?: string | undefined;
@@ -16,6 +19,13 @@ export interface AiSettingsInput {
   qualificationFields?: string[] | undefined;
   aiEnabled?: boolean | undefined;
   responseDelaySeconds?: number | undefined;
+  businessHoursEnabled?: boolean | undefined;
+  businessHours?: WorkingHours | undefined;
+  businessTimezone?: string | undefined;
+  closedMessage?: string | null | undefined;
+  followUpEnabled?: boolean | undefined;
+  followUpDelayHours?: number | undefined;
+  followUpMax?: number | undefined;
 }
 
 export function resolveResponseDelaySeconds(value: unknown): ResponseDelaySeconds {
@@ -66,6 +76,13 @@ export async function updateAiSettings(organizationId: string, input: AiSettings
     ...(input.responseDelaySeconds !== undefined
       ? { responseDelaySeconds: resolveResponseDelaySeconds(input.responseDelaySeconds) }
       : {}),
+    ...(input.businessHoursEnabled !== undefined ? { businessHoursEnabled: input.businessHoursEnabled } : {}),
+    ...(input.businessHours !== undefined ? { businessHours: input.businessHours as object } : {}),
+    ...(input.businessTimezone !== undefined ? { businessTimezone: input.businessTimezone } : {}),
+    ...(input.closedMessage !== undefined ? { closedMessage: input.closedMessage?.trim() || null } : {}),
+    ...(input.followUpEnabled !== undefined ? { followUpEnabled: input.followUpEnabled } : {}),
+    ...(input.followUpDelayHours !== undefined ? { followUpDelayHours: input.followUpDelayHours } : {}),
+    ...(input.followUpMax !== undefined ? { followUpMax: input.followUpMax } : {}),
   };
 
   return prisma.aiSettings.upsert({
@@ -81,6 +98,7 @@ export async function updateAiSettings(organizationId: string, input: AiSettings
       qualificationFields: input.qualificationFields ?? [],
       aiEnabled: input.aiEnabled ?? true,
       responseDelaySeconds: resolveResponseDelaySeconds(input.responseDelaySeconds),
+      ...updatePayload,
     },
   });
 }

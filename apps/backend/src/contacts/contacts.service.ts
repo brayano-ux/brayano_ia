@@ -12,3 +12,12 @@ export async function findOrCreateContact(organizationId: string, whatsappJid: s
     data: { organizationId, whatsappJid },
   });
 }
+
+/** « STOP » du client, ou choix du propriétaire : plus de relances ni de messages groupés pour ce contact. */
+export async function setContactOptOut(organizationId: string, contactId: string, optedOut: boolean) {
+  const result = await prisma.contact.updateMany({
+    where: { id: contactId, organizationId },
+    data: { optedOut, optedOutAt: optedOut ? new Date() : null },
+  });
+  return result.count > 0;
+}

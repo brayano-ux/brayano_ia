@@ -13,6 +13,12 @@ export interface AIRawResult {
   latencyMs: number;
 }
 
+export interface AIMediaInput {
+  data: Buffer;
+  mimeType: string;
+  caption?: string | undefined;
+}
+
 export interface AIAudioInput {
   data: Buffer;
   mimeType: string;
@@ -27,4 +33,6 @@ export interface AIProvider {
   readonly name: string;
   generateResponse(input: AIRequestInput): Promise<AIRawResult>;
   transcribeAudio(input: AIAudioInput): Promise<string>;
+  /** Optionnel : décrit une photo ou un document reçu (nécessite un modèle qui voit les images). */
+  analyzeMedia?(input: AIMediaInput): Promise<string>;
 }

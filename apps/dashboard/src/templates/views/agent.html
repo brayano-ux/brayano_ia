@@ -41,6 +41,8 @@
         <button type="button" class="agent-tab active" role="tab" data-agent-tab="identity">Identité</button>
         <button type="button" class="agent-tab" role="tab" data-agent-tab="knowledge">Connaissances</button>
         <button type="button" class="agent-tab" role="tab" data-agent-tab="behavior">Comportement</button>
+        <button type="button" class="agent-tab" role="tab" data-agent-tab="hours">Horaires</button>
+        <button type="button" class="agent-tab" role="tab" data-agent-tab="learning">Apprentissage</button>
         <button type="button" class="agent-tab" role="tab" data-agent-tab="features">Fonctions</button>
       </div>
 
@@ -168,6 +170,60 @@
           </label>
         </div>
 
+        <div class="agent-pane hidden" data-agent-pane="hours">
+          <div class="agent-pane-head">
+            <h2>Horaires d’ouverture</h2>
+            <p class="muted">Quand votre entreprise est fermée, l’agent répond quand même, mais prévient le client que l’équipe sera disponible plus tard et note sa demande.</p>
+          </div>
+          <label class="agenda-switch">
+            <input id="bh-enabled" type="checkbox" />
+            <span>Mon entreprise a des horaires d’ouverture</span>
+          </label>
+          <div id="bh-details" class="bh-details">
+            <div id="bh-rows" class="bh-rows"></div>
+            <label>
+              <span class="field-label">Fuseau horaire</span>
+              <input id="bh-timezone" type="text" placeholder="Africa/Douala" />
+            </label>
+            <label>
+              <span class="field-label">Consigne pour les heures de fermeture (facultatif)</span>
+              <textarea id="bh-closed-message" rows="3" maxlength="500" placeholder="Ex. Nous répondons dès 8 h. Pour une urgence, appelez le 6xx xx xx xx."></textarea>
+            </label>
+          </div>
+
+          <div class="agent-pane-head bh-section">
+            <h2>Relances automatiques</h2>
+            <p class="muted">Si un client intéressé ne répond plus, l’agent peut lui écrire un court message pour reprendre la conversation.</p>
+          </div>
+          <label class="agenda-switch">
+            <input id="fu-enabled" type="checkbox" />
+            <span>Relancer les clients intéressés qui ne répondent plus</span>
+          </label>
+          <div id="fu-details" class="bh-details">
+            <div class="agenda-grid">
+              <label>
+                <span class="field-label">Attendre avant de relancer</span>
+                <select id="fu-delay">
+                  <option value="2">2 heures</option>
+                  <option value="4">4 heures</option>
+                  <option value="8">8 heures</option>
+                  <option value="24">1 jour</option>
+                  <option value="48">2 jours</option>
+                  <option value="72">3 jours</option>
+                </select>
+              </label>
+              <label>
+                <span class="field-label">Nombre de relances maximum</span>
+                <select id="fu-max">
+                  <option value="1">1 relance</option>
+                  <option value="2">2 relances</option>
+                </select>
+              </label>
+            </div>
+            <p class="agent-tip">🛡️ Garde-fous : seuls les clients étiquetés « Intéressé » dont le dernier message vient de l’agent sont relancés. Jamais pendant la fermeture de l’entreprise, jamais après un « STOP », et jamais si vous avez repris la conversation.</p>
+          </div>
+        </div>
+
         <div class="agent-pane hidden" data-agent-pane="features">
           <div class="agent-pane-head">
             <h2>Fonctions de l’agent</h2>
@@ -197,24 +253,54 @@
           </div>
         </div>
       </form>
+
+      <section class="panel agent-pane agent-learning hidden" data-agent-pane="learning" id="agent-learning">
+        <div class="agent-pane-head">
+          <h2>Ce que l’agent a appris de vous</h2>
+          <p class="muted">Quand une réponse n’est pas bonne, ouvrez la conversation, cliquez sur « Pourquoi cette réponse ? » puis « Corriger ». L’agent s’en souvient pour les questions semblables. Vous pouvez aussi ajouter une règle ici.</p>
+        </div>
+        <div class="learning-add">
+          <label><span class="field-label">Quand le client demande… (facultatif)</span>
+            <input id="learn-question" type="text" maxlength="300" placeholder="Ex. Vous livrez à Bonamoussadi ?" />
+          </label>
+          <label><span class="field-label">L’agent doit répondre</span>
+            <textarea id="learn-answer" rows="3" maxlength="1000" placeholder="Ex. Oui, nous livrons à Bonamoussadi pour 1 000 FCFA, sous 24 h."></textarea>
+          </label>
+          <div><button type="button" class="primary" id="learn-add">Ajouter cette règle</button></div>
+        </div>
+        <div id="learning-list" class="learning-list" aria-live="polite"></div>
+        <p class="agent-tip">💡 L’agent s’inspire aussi, tout seul, de vos conversations passées qui ont abouti à une commande ou un rendez-vous (sans jamais reprendre de nom ni de numéro).</p>
+      </section>
     </div>
 
+    <aside class="agent-side">
           <section class="panel agent-playground">
             <div class="panel-heading">
               <div>
                 <p class="eyebrow">SIMULATION SANS WHATSAPP</p>
                 <h2>Tester l'agent avec un prospect</h2>
-                <p class="muted">Les messages restent dans cette page. Aucun prospect, routage ou message WhatsApp ne sera créé.</p>
+                <p class="muted">Rien n’est enregistré ni envoyé. Le testeur montre ce que l’agent ferait vraiment : rendez-vous, commande, photos, passage de main.</p>
               </div>
               <button type="button" class="ghost-button" id="clear-agent-test">Réinitialiser</button>
             </div>
             <div id="agent-test-messages" class="agent-test-messages">
               <div class="empty-state">Écrivez un premier message pour simuler un prospect.</div>
             </div>
+            <div id="agent-test-state" class="agent-test-state hidden" aria-live="polite"></div>
             <form id="agent-test-form" class="agent-test-form">
-              <input id="agent-test-input" type="text" maxlength="4000" placeholder="Ex. Bonjour, je voudrais connaître vos services" required />
-              <button type="submit" class="primary" id="agent-test-send">Tester la réponse</button>
+              <input id="agent-test-input" type="text" maxlength="4000" placeholder="Ex. Bonjour, je voudrais connaître vos services" />
+              <button type="submit" class="primary" id="agent-test-send">Envoyer</button>
             </form>
+            <div class="agent-test-attach" role="group" aria-label="Simuler l’envoi d’un fichier par le client">
+              <span class="muted">Le client envoie :</span>
+              <button type="button" class="chip-button" data-test-media="payment_proof">📷 Capture de paiement</button>
+              <button type="button" class="chip-button" data-test-media="product_photo">📷 Photo d’un produit</button>
+              <button type="button" class="chip-button" data-test-media="document">📎 Document</button>
+              <button type="button" class="chip-button" id="agent-test-file-button">🖼️ Mon fichier…</button>
+              <input id="agent-test-file" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" class="hidden" />
+            </div>
             <div id="agent-test-result" class="agent-test-result hidden"></div>
           </section>
-        </section>
+    </aside>
+  </div>
+</section>

@@ -16,7 +16,7 @@
       <strong>Votre agent est prêt à échanger.</strong>
       <p>Il répond automatiquement aux messages reçus sur WhatsApp.</p>
     </div>
-    <button class="text-button" data-view-target="agent">
+    <button class="text-button admin-only" data-view-target="agent">
       Configurer l'agent
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
     </button>
@@ -39,9 +39,9 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 7 17l-5-5"/><path d="m22 10-7.5 7.5L13 16"/></svg>
       </span>
       <div>
-        <small>Messages traités</small>
-        <strong id="metric-messages">—</strong>
-        <span class="trend">Aujourd'hui</span>
+        <small>Clients à traiter</small>
+        <strong id="metric-todo">—</strong>
+        <span id="metric-todo-hint" class="trend">Nouveaux messages, prises de main, paiements</span>
       </div>
     </article>
 
@@ -56,6 +56,27 @@
       </div>
     </article>
   </div>
+
+
+  <section class="panel stats-panel" aria-labelledby="stats-title">
+    <div class="panel-heading">
+      <div>
+        <h2 id="stats-title">Ce que votre agent a fait</h2>
+        <p class="muted" id="stats-subtitle">Chiffres calculés sur vos vraies conversations.</p>
+      </div>
+      <div class="panel-tools">
+        <label class="metric-filter">
+          <span>Période</span>
+          <select id="stats-period">
+            <option value="1">Aujourd'hui</option>
+            <option value="7" selected>7 derniers jours</option>
+            <option value="30">30 derniers jours</option>
+          </select>
+        </label>
+      </div>
+    </div>
+    <div id="stats-body" class="stats-body"><div class="empty-state">Chargement…</div></div>
+  </section>
 
   <div class="panel commercial-panel">
     <div class="panel-heading">
@@ -107,7 +128,7 @@
         </div>
       </div>
 
-      <button class="quick-action" data-view-target="whatsapp">
+      <button class="quick-action admin-only" data-view-target="whatsapp">
         <span class="quick-icon green-bg" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
         </span>
@@ -118,7 +139,7 @@
         <svg class="quick-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
       </button>
 
-      <button class="quick-action" data-view-target="agent">
+      <button class="quick-action admin-only" data-view-target="agent">
         <span class="quick-icon violet-bg" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 3v4"/><path d="M21 5h-4"/></svg>
         </span>

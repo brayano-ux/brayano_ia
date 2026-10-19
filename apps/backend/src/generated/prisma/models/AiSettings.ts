@@ -28,10 +28,14 @@ export type AggregateAiSettings = {
 
 export type AiSettingsAvgAggregateOutputType = {
   responseDelaySeconds: number | null
+  followUpDelayHours: number | null
+  followUpMax: number | null
 }
 
 export type AiSettingsSumAggregateOutputType = {
   responseDelaySeconds: number | null
+  followUpDelayHours: number | null
+  followUpMax: number | null
 }
 
 export type AiSettingsMinAggregateOutputType = {
@@ -44,6 +48,12 @@ export type AiSettingsMinAggregateOutputType = {
   welcomeMessage: string | null
   aiEnabled: boolean | null
   responseDelaySeconds: number | null
+  businessHoursEnabled: boolean | null
+  businessTimezone: string | null
+  closedMessage: string | null
+  followUpEnabled: boolean | null
+  followUpDelayHours: number | null
+  followUpMax: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -58,6 +68,12 @@ export type AiSettingsMaxAggregateOutputType = {
   welcomeMessage: string | null
   aiEnabled: boolean | null
   responseDelaySeconds: number | null
+  businessHoursEnabled: boolean | null
+  businessTimezone: string | null
+  closedMessage: string | null
+  followUpEnabled: boolean | null
+  followUpDelayHours: number | null
+  followUpMax: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -73,6 +89,13 @@ export type AiSettingsCountAggregateOutputType = {
   qualificationFields: number
   aiEnabled: number
   responseDelaySeconds: number
+  businessHoursEnabled: number
+  businessHours: number
+  businessTimezone: number
+  closedMessage: number
+  followUpEnabled: number
+  followUpDelayHours: number
+  followUpMax: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -81,10 +104,14 @@ export type AiSettingsCountAggregateOutputType = {
 
 export type AiSettingsAvgAggregateInputType = {
   responseDelaySeconds?: true
+  followUpDelayHours?: true
+  followUpMax?: true
 }
 
 export type AiSettingsSumAggregateInputType = {
   responseDelaySeconds?: true
+  followUpDelayHours?: true
+  followUpMax?: true
 }
 
 export type AiSettingsMinAggregateInputType = {
@@ -97,6 +124,12 @@ export type AiSettingsMinAggregateInputType = {
   welcomeMessage?: true
   aiEnabled?: true
   responseDelaySeconds?: true
+  businessHoursEnabled?: true
+  businessTimezone?: true
+  closedMessage?: true
+  followUpEnabled?: true
+  followUpDelayHours?: true
+  followUpMax?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -111,6 +144,12 @@ export type AiSettingsMaxAggregateInputType = {
   welcomeMessage?: true
   aiEnabled?: true
   responseDelaySeconds?: true
+  businessHoursEnabled?: true
+  businessTimezone?: true
+  closedMessage?: true
+  followUpEnabled?: true
+  followUpDelayHours?: true
+  followUpMax?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -126,6 +165,13 @@ export type AiSettingsCountAggregateInputType = {
   qualificationFields?: true
   aiEnabled?: true
   responseDelaySeconds?: true
+  businessHoursEnabled?: true
+  businessHours?: true
+  businessTimezone?: true
+  closedMessage?: true
+  followUpEnabled?: true
+  followUpDelayHours?: true
+  followUpMax?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -228,6 +274,13 @@ export type AiSettingsGroupByOutputType = {
   qualificationFields: runtime.JsonValue | null
   aiEnabled: boolean
   responseDelaySeconds: number
+  businessHoursEnabled: boolean
+  businessHours: runtime.JsonValue | null
+  businessTimezone: string
+  closedMessage: string | null
+  followUpEnabled: boolean
+  followUpDelayHours: number
+  followUpMax: number
   createdAt: Date
   updatedAt: Date
   _count: AiSettingsCountAggregateOutputType | null
@@ -266,6 +319,13 @@ export type AiSettingsWhereInput = {
   qualificationFields?: Prisma.JsonNullableFilter<"AiSettings">
   aiEnabled?: Prisma.BoolFilter<"AiSettings"> | boolean
   responseDelaySeconds?: Prisma.IntFilter<"AiSettings"> | number
+  businessHoursEnabled?: Prisma.BoolFilter<"AiSettings"> | boolean
+  businessHours?: Prisma.JsonNullableFilter<"AiSettings">
+  businessTimezone?: Prisma.StringFilter<"AiSettings"> | string
+  closedMessage?: Prisma.StringNullableFilter<"AiSettings"> | string | null
+  followUpEnabled?: Prisma.BoolFilter<"AiSettings"> | boolean
+  followUpDelayHours?: Prisma.IntFilter<"AiSettings"> | number
+  followUpMax?: Prisma.IntFilter<"AiSettings"> | number
   createdAt?: Prisma.DateTimeFilter<"AiSettings"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AiSettings"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
@@ -282,6 +342,13 @@ export type AiSettingsOrderByWithRelationInput = {
   qualificationFields?: Prisma.SortOrderInput | Prisma.SortOrder
   aiEnabled?: Prisma.SortOrder
   responseDelaySeconds?: Prisma.SortOrder
+  businessHoursEnabled?: Prisma.SortOrder
+  businessHours?: Prisma.SortOrderInput | Prisma.SortOrder
+  businessTimezone?: Prisma.SortOrder
+  closedMessage?: Prisma.SortOrderInput | Prisma.SortOrder
+  followUpEnabled?: Prisma.SortOrder
+  followUpDelayHours?: Prisma.SortOrder
+  followUpMax?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   organization?: Prisma.OrganizationOrderByWithRelationInput
@@ -301,6 +368,13 @@ export type AiSettingsWhereUniqueInput = Prisma.AtLeast<{
   qualificationFields?: Prisma.JsonNullableFilter<"AiSettings">
   aiEnabled?: Prisma.BoolFilter<"AiSettings"> | boolean
   responseDelaySeconds?: Prisma.IntFilter<"AiSettings"> | number
+  businessHoursEnabled?: Prisma.BoolFilter<"AiSettings"> | boolean
+  businessHours?: Prisma.JsonNullableFilter<"AiSettings">
+  businessTimezone?: Prisma.StringFilter<"AiSettings"> | string
+  closedMessage?: Prisma.StringNullableFilter<"AiSettings"> | string | null
+  followUpEnabled?: Prisma.BoolFilter<"AiSettings"> | boolean
+  followUpDelayHours?: Prisma.IntFilter<"AiSettings"> | number
+  followUpMax?: Prisma.IntFilter<"AiSettings"> | number
   createdAt?: Prisma.DateTimeFilter<"AiSettings"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AiSettings"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
@@ -317,6 +391,13 @@ export type AiSettingsOrderByWithAggregationInput = {
   qualificationFields?: Prisma.SortOrderInput | Prisma.SortOrder
   aiEnabled?: Prisma.SortOrder
   responseDelaySeconds?: Prisma.SortOrder
+  businessHoursEnabled?: Prisma.SortOrder
+  businessHours?: Prisma.SortOrderInput | Prisma.SortOrder
+  businessTimezone?: Prisma.SortOrder
+  closedMessage?: Prisma.SortOrderInput | Prisma.SortOrder
+  followUpEnabled?: Prisma.SortOrder
+  followUpDelayHours?: Prisma.SortOrder
+  followUpMax?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.AiSettingsCountOrderByAggregateInput
@@ -340,6 +421,13 @@ export type AiSettingsScalarWhereWithAggregatesInput = {
   qualificationFields?: Prisma.JsonNullableWithAggregatesFilter<"AiSettings">
   aiEnabled?: Prisma.BoolWithAggregatesFilter<"AiSettings"> | boolean
   responseDelaySeconds?: Prisma.IntWithAggregatesFilter<"AiSettings"> | number
+  businessHoursEnabled?: Prisma.BoolWithAggregatesFilter<"AiSettings"> | boolean
+  businessHours?: Prisma.JsonNullableWithAggregatesFilter<"AiSettings">
+  businessTimezone?: Prisma.StringWithAggregatesFilter<"AiSettings"> | string
+  closedMessage?: Prisma.StringNullableWithAggregatesFilter<"AiSettings"> | string | null
+  followUpEnabled?: Prisma.BoolWithAggregatesFilter<"AiSettings"> | boolean
+  followUpDelayHours?: Prisma.IntWithAggregatesFilter<"AiSettings"> | number
+  followUpMax?: Prisma.IntWithAggregatesFilter<"AiSettings"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"AiSettings"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"AiSettings"> | Date | string
 }
@@ -354,6 +442,13 @@ export type AiSettingsCreateInput = {
   qualificationFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   aiEnabled?: boolean
   responseDelaySeconds?: number
+  businessHoursEnabled?: boolean
+  businessHours?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  businessTimezone?: string
+  closedMessage?: string | null
+  followUpEnabled?: boolean
+  followUpDelayHours?: number
+  followUpMax?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutAiSettingsInput
@@ -370,6 +465,13 @@ export type AiSettingsUncheckedCreateInput = {
   qualificationFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   aiEnabled?: boolean
   responseDelaySeconds?: number
+  businessHoursEnabled?: boolean
+  businessHours?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  businessTimezone?: string
+  closedMessage?: string | null
+  followUpEnabled?: boolean
+  followUpDelayHours?: number
+  followUpMax?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -384,6 +486,13 @@ export type AiSettingsUpdateInput = {
   qualificationFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   aiEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseDelaySeconds?: Prisma.IntFieldUpdateOperationsInput | number
+  businessHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  businessHours?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  businessTimezone?: Prisma.StringFieldUpdateOperationsInput | string
+  closedMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  followUpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  followUpDelayHours?: Prisma.IntFieldUpdateOperationsInput | number
+  followUpMax?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutAiSettingsNestedInput
@@ -400,6 +509,13 @@ export type AiSettingsUncheckedUpdateInput = {
   qualificationFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   aiEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseDelaySeconds?: Prisma.IntFieldUpdateOperationsInput | number
+  businessHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  businessHours?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  businessTimezone?: Prisma.StringFieldUpdateOperationsInput | string
+  closedMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  followUpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  followUpDelayHours?: Prisma.IntFieldUpdateOperationsInput | number
+  followUpMax?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -415,6 +531,13 @@ export type AiSettingsCreateManyInput = {
   qualificationFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   aiEnabled?: boolean
   responseDelaySeconds?: number
+  businessHoursEnabled?: boolean
+  businessHours?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  businessTimezone?: string
+  closedMessage?: string | null
+  followUpEnabled?: boolean
+  followUpDelayHours?: number
+  followUpMax?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -429,6 +552,13 @@ export type AiSettingsUpdateManyMutationInput = {
   qualificationFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   aiEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseDelaySeconds?: Prisma.IntFieldUpdateOperationsInput | number
+  businessHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  businessHours?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  businessTimezone?: Prisma.StringFieldUpdateOperationsInput | string
+  closedMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  followUpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  followUpDelayHours?: Prisma.IntFieldUpdateOperationsInput | number
+  followUpMax?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -444,6 +574,13 @@ export type AiSettingsUncheckedUpdateManyInput = {
   qualificationFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   aiEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseDelaySeconds?: Prisma.IntFieldUpdateOperationsInput | number
+  businessHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  businessHours?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  businessTimezone?: Prisma.StringFieldUpdateOperationsInput | string
+  closedMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  followUpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  followUpDelayHours?: Prisma.IntFieldUpdateOperationsInput | number
+  followUpMax?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -464,12 +601,21 @@ export type AiSettingsCountOrderByAggregateInput = {
   qualificationFields?: Prisma.SortOrder
   aiEnabled?: Prisma.SortOrder
   responseDelaySeconds?: Prisma.SortOrder
+  businessHoursEnabled?: Prisma.SortOrder
+  businessHours?: Prisma.SortOrder
+  businessTimezone?: Prisma.SortOrder
+  closedMessage?: Prisma.SortOrder
+  followUpEnabled?: Prisma.SortOrder
+  followUpDelayHours?: Prisma.SortOrder
+  followUpMax?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type AiSettingsAvgOrderByAggregateInput = {
   responseDelaySeconds?: Prisma.SortOrder
+  followUpDelayHours?: Prisma.SortOrder
+  followUpMax?: Prisma.SortOrder
 }
 
 export type AiSettingsMaxOrderByAggregateInput = {
@@ -482,6 +628,12 @@ export type AiSettingsMaxOrderByAggregateInput = {
   welcomeMessage?: Prisma.SortOrder
   aiEnabled?: Prisma.SortOrder
   responseDelaySeconds?: Prisma.SortOrder
+  businessHoursEnabled?: Prisma.SortOrder
+  businessTimezone?: Prisma.SortOrder
+  closedMessage?: Prisma.SortOrder
+  followUpEnabled?: Prisma.SortOrder
+  followUpDelayHours?: Prisma.SortOrder
+  followUpMax?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -496,12 +648,20 @@ export type AiSettingsMinOrderByAggregateInput = {
   welcomeMessage?: Prisma.SortOrder
   aiEnabled?: Prisma.SortOrder
   responseDelaySeconds?: Prisma.SortOrder
+  businessHoursEnabled?: Prisma.SortOrder
+  businessTimezone?: Prisma.SortOrder
+  closedMessage?: Prisma.SortOrder
+  followUpEnabled?: Prisma.SortOrder
+  followUpDelayHours?: Prisma.SortOrder
+  followUpMax?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type AiSettingsSumOrderByAggregateInput = {
   responseDelaySeconds?: Prisma.SortOrder
+  followUpDelayHours?: Prisma.SortOrder
+  followUpMax?: Prisma.SortOrder
 }
 
 export type AiSettingsCreateNestedOneWithoutOrganizationInput = {
@@ -546,6 +706,13 @@ export type AiSettingsCreateWithoutOrganizationInput = {
   qualificationFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   aiEnabled?: boolean
   responseDelaySeconds?: number
+  businessHoursEnabled?: boolean
+  businessHours?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  businessTimezone?: string
+  closedMessage?: string | null
+  followUpEnabled?: boolean
+  followUpDelayHours?: number
+  followUpMax?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -560,6 +727,13 @@ export type AiSettingsUncheckedCreateWithoutOrganizationInput = {
   qualificationFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   aiEnabled?: boolean
   responseDelaySeconds?: number
+  businessHoursEnabled?: boolean
+  businessHours?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  businessTimezone?: string
+  closedMessage?: string | null
+  followUpEnabled?: boolean
+  followUpDelayHours?: number
+  followUpMax?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -590,6 +764,13 @@ export type AiSettingsUpdateWithoutOrganizationInput = {
   qualificationFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   aiEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseDelaySeconds?: Prisma.IntFieldUpdateOperationsInput | number
+  businessHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  businessHours?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  businessTimezone?: Prisma.StringFieldUpdateOperationsInput | string
+  closedMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  followUpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  followUpDelayHours?: Prisma.IntFieldUpdateOperationsInput | number
+  followUpMax?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -604,6 +785,13 @@ export type AiSettingsUncheckedUpdateWithoutOrganizationInput = {
   qualificationFields?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   aiEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseDelaySeconds?: Prisma.IntFieldUpdateOperationsInput | number
+  businessHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  businessHours?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  businessTimezone?: Prisma.StringFieldUpdateOperationsInput | string
+  closedMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  followUpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  followUpDelayHours?: Prisma.IntFieldUpdateOperationsInput | number
+  followUpMax?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -621,6 +809,13 @@ export type AiSettingsSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   qualificationFields?: boolean
   aiEnabled?: boolean
   responseDelaySeconds?: boolean
+  businessHoursEnabled?: boolean
+  businessHours?: boolean
+  businessTimezone?: boolean
+  closedMessage?: boolean
+  followUpEnabled?: boolean
+  followUpDelayHours?: boolean
+  followUpMax?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -637,6 +832,13 @@ export type AiSettingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   qualificationFields?: boolean
   aiEnabled?: boolean
   responseDelaySeconds?: boolean
+  businessHoursEnabled?: boolean
+  businessHours?: boolean
+  businessTimezone?: boolean
+  closedMessage?: boolean
+  followUpEnabled?: boolean
+  followUpDelayHours?: boolean
+  followUpMax?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -653,6 +855,13 @@ export type AiSettingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   qualificationFields?: boolean
   aiEnabled?: boolean
   responseDelaySeconds?: boolean
+  businessHoursEnabled?: boolean
+  businessHours?: boolean
+  businessTimezone?: boolean
+  closedMessage?: boolean
+  followUpEnabled?: boolean
+  followUpDelayHours?: boolean
+  followUpMax?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -669,11 +878,18 @@ export type AiSettingsSelectScalar = {
   qualificationFields?: boolean
   aiEnabled?: boolean
   responseDelaySeconds?: boolean
+  businessHoursEnabled?: boolean
+  businessHours?: boolean
+  businessTimezone?: boolean
+  closedMessage?: boolean
+  followUpEnabled?: boolean
+  followUpDelayHours?: boolean
+  followUpMax?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type AiSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "agentName" | "businessInfo" | "agentImageUrl" | "systemPrompt" | "welcomeMessage" | "qualificationFields" | "aiEnabled" | "responseDelaySeconds" | "createdAt" | "updatedAt", ExtArgs["result"]["aiSettings"]>
+export type AiSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "agentName" | "businessInfo" | "agentImageUrl" | "systemPrompt" | "welcomeMessage" | "qualificationFields" | "aiEnabled" | "responseDelaySeconds" | "businessHoursEnabled" | "businessHours" | "businessTimezone" | "closedMessage" | "followUpEnabled" | "followUpDelayHours" | "followUpMax" | "createdAt" | "updatedAt", ExtArgs["result"]["aiSettings"]>
 export type AiSettingsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
 }
@@ -700,6 +916,13 @@ export type $AiSettingsPayload<ExtArgs extends runtime.Types.Extensions.Internal
     qualificationFields: runtime.JsonValue | null
     aiEnabled: boolean
     responseDelaySeconds: number
+    businessHoursEnabled: boolean
+    businessHours: runtime.JsonValue | null
+    businessTimezone: string
+    closedMessage: string | null
+    followUpEnabled: boolean
+    followUpDelayHours: number
+    followUpMax: number
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["aiSettings"]>
@@ -1136,6 +1359,13 @@ export interface AiSettingsFieldRefs {
   readonly qualificationFields: Prisma.FieldRef<"AiSettings", 'Json'>
   readonly aiEnabled: Prisma.FieldRef<"AiSettings", 'Boolean'>
   readonly responseDelaySeconds: Prisma.FieldRef<"AiSettings", 'Int'>
+  readonly businessHoursEnabled: Prisma.FieldRef<"AiSettings", 'Boolean'>
+  readonly businessHours: Prisma.FieldRef<"AiSettings", 'Json'>
+  readonly businessTimezone: Prisma.FieldRef<"AiSettings", 'String'>
+  readonly closedMessage: Prisma.FieldRef<"AiSettings", 'String'>
+  readonly followUpEnabled: Prisma.FieldRef<"AiSettings", 'Boolean'>
+  readonly followUpDelayHours: Prisma.FieldRef<"AiSettings", 'Int'>
+  readonly followUpMax: Prisma.FieldRef<"AiSettings", 'Int'>
   readonly createdAt: Prisma.FieldRef<"AiSettings", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"AiSettings", 'DateTime'>
 }

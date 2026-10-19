@@ -1,6 +1,7 @@
 import { env } from "../config/env.js";
 import { logAiRun } from "./ai-runs.service.js";
-import type { AIAudioInput, AIChatMessage, AIProvider } from "./ai.types.js";
+import type { AIAudioInput, AIChatMessage, AIMediaInput, AIProvider } from "./ai.types.js";
+import { parseMediaAnalysis, type MediaAnalysis } from "./media-analysis.js";
 import { aiReplySchema, type AIReply } from "./schemas.js";
 
 /**
@@ -78,6 +79,24 @@ export class AiOrchestrator {
 
   async transcribeAudio(input: AIAudioInput): Promise<string> {
     return this.provider.transcribeAudio(input);
+  }
+
+  /** Décrit une photo ou un document reçu. Renvoie null si aucun modèle ne sait le faire : l'appelant s'en passe. */
+  async analyzeMedia(input: AIMediaInput): Promise<MediaAnalysis | null> {
+    for (const provider of [this.provider, this.fallbackProvider]) {
+      if (!provider?.analyzeMedia) continue;
+      try {
+        const raw = await Promise.race([
+          provider.analyzeMedia(input),
+          new Promise<never>((_resolve, reject) => setTimeout(() => reject(new Error("Analyse du fichier trop longue.")), 25_000)),
+        ]);
+        const analysis = parseMediaAnalysis(raw);
+        if (analysis) return analysis;
+      } catch (error) {
+        console.error(`❌ Analyse de fichier impossible avec ${provider.name} :`, error instanceof Error ? error.message : error);
+      }
+    }
+    return null;
   }
 
   private parseAndValidate(rawText: string): AIReply | null {

@@ -52,6 +52,16 @@ export const ConversationStatus = {
 export type ConversationStatus = (typeof ConversationStatus)[keyof typeof ConversationStatus]
 
 
+export const ConversationStage = {
+  NEW: 'NEW',
+  INTERESTED: 'INTERESTED',
+  ORDERED: 'ORDERED',
+  CALLBACK: 'CALLBACK'
+} as const
+
+export type ConversationStage = (typeof ConversationStage)[keyof typeof ConversationStage]
+
+
 export const QualificationStatus = {
   NOT_QUALIFIED: 'NOT_QUALIFIED',
   QUALIFYING: 'QUALIFYING',
@@ -139,6 +149,14 @@ export const AppointmentSource = {
 export type AppointmentSource = (typeof AppointmentSource)[keyof typeof AppointmentSource]
 
 
+export const PaymentStatus = {
+  UNPAID: 'UNPAID',
+  PAID: 'PAID'
+} as const
+
+export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus]
+
+
 export const OrderStatus = {
   NEW: 'NEW',
   CONFIRMED: 'CONFIRMED',
@@ -147,3 +165,22 @@ export const OrderStatus = {
 } as const
 
 export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus]
+
+
+export const BroadcastStatus = {
+  SENDING: 'SENDING',
+  DONE: 'DONE',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type BroadcastStatus = (typeof BroadcastStatus)[keyof typeof BroadcastStatus]
+
+
+export const BroadcastRecipientStatus = {
+  PENDING: 'PENDING',
+  SENT: 'SENT',
+  FAILED: 'FAILED',
+  SKIPPED: 'SKIPPED'
+} as const
+
+export type BroadcastRecipientStatus = (typeof BroadcastRecipientStatus)[keyof typeof BroadcastRecipientStatus]

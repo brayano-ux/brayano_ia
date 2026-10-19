@@ -197,6 +197,7 @@ async function loadBusy(tx: Tx, organizationId: string, localDate: string) {
 }
 
 export interface AgendaPrompt {
+  organizationId: string;
   section: string;
   config: AgendaConfig;
   serviceLabel: string | null;
@@ -216,12 +217,14 @@ export async function loadAgendaPrompt(
   organizationId: string,
   now = new Date(),
   contactJid?: string,
+  /** Simulateur de l'agent : rendez-vous « fictif » du testeur à la place de celui d'un vrai client. */
+  override?: { upcoming: { startsAt: Date; endsAt: Date } | null },
 ): Promise<AgendaPrompt | null> {
   const row = await prisma.appointmentSettings.findUnique({ where: { organizationId } });
   if (!row?.enabled) return null;
   const config = toAgendaConfig(row);
-  const upcoming = contactJid ? await findContactUpcoming(organizationId, contactJid, now) : null;
-  const contactState = contactJid
+  const upcoming = override ? override.upcoming : contactJid ? await findContactUpcoming(organizationId, contactJid, now) : null;
+  const contactState = contactJid || override
     ? upcoming
       ? `Rendez-vous réservé de CE prospect : ${formatSlotLabel(upcoming.startsAt, config.timezone)}.`
       : "Rendez-vous réservé de CE prospect : AUCUN (il n'a actuellement aucun rendez-vous enregistré)."
@@ -269,7 +272,40 @@ Règles :
 - Si le prospect demande un horaire non listé, propose les créneaux listés les plus proches.
 `.trim();
 
-  return { section, config, serviceLabel: row.serviceLabel };
+  return { organizationId, section, config, serviceLabel: row.serviceLabel };
+}
+
+/** Résultat d'une action demandée par l'IA : texte à ajouter ou à substituer à la réponse, et ce qui s'est réellement passé. */
+export interface ActionOutcome {
+  appendToReply: string | null;
+  replaceReply: string | null;
+  kind: string;
+}
+
+/**
+ * Simulation (testeur de l'agent) : ce que l'IA ferait avec cette demande, SANS rien enregistrer ni envoyer d'email.
+ * Utilise les vrais créneaux libres de l'agenda.
+ */
+export async function previewAiBooking(
+  agenda: AgendaPrompt,
+  request: BookingRequest,
+  simulatedUpcoming: { startsAt: Date; endsAt: Date } | null,
+  now = new Date(),
+) {
+  const referenceDate = request.date ?? formatLocalDate(now, agenda.config.timezone);
+  const center = new Date(`${referenceDate}T12:00:00Z`);
+  const busy = await prisma.appointment.findMany({
+    where: { organizationId: agenda.organizationId, status: "BOOKED", startsAt: { gte: new Date(center.getTime() - 48 * 3_600_000), lte: new Date(center.getTime() + 48 * 3_600_000) } },
+    select: { id: true, startsAt: true, endsAt: true },
+  });
+  const decision = decideBooking({
+    request,
+    config: agenda.config,
+    now,
+    busy,
+    contactUpcoming: simulatedUpcoming ? { id: "simulated", ...simulatedUpcoming } : null,
+  });
+  return { decision, outcome: { ...describeBookingOutcome(decision, agenda.config.timezone), kind: decision.kind }, label: decision.kind === "book" || decision.kind === "reschedule" ? formatSlotLabel(decision.startsAt, agenda.config.timezone) : null };
 }
 
 export interface BookingContext {
@@ -289,7 +325,7 @@ export async function applyAiBooking(
   request: BookingRequest,
   context: BookingContext,
   now = new Date(),
-): Promise<{ appendToReply: string | null; replaceReply: string | null } | null> {
+): Promise<ActionOutcome | null> {
   try {
     const decision = await runInAgendaTransaction(context.organizationId, async (tx) => {
       const referenceDate = request.date ?? formatLocalDate(now, agenda.config.timezone);
@@ -347,7 +383,7 @@ export async function applyAiBooking(
         }),
       );
     }
-    return describeBookingOutcome(decision, agenda.config.timezone);
+    return { ...describeBookingOutcome(decision, agenda.config.timezone), kind: decision.kind };
   } catch (error) {
     console.error(`❌ [agenda:${context.organizationId}] Échec de la réservation IA :`, error);
     return null;

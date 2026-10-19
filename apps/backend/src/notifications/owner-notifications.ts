@@ -76,6 +76,73 @@ export function buildAppointmentEmail(input: {
   };
 }
 
+
+const HANDOFF_REASONS: Record<string, string> = {
+  demande_contact_humain: "Le client demande à parler à une personne.",
+  reclamation: "Le client a une réclamation ou un problème à régler.",
+  achat: "Le client semble prêt à acheter.",
+  demande_commande: "Le client veut passer commande.",
+  demande_paiement: "Le client pose une question sur le paiement.",
+  demande_livraison: "Le client pose une question sur la livraison.",
+  demande_inscription: "Le client veut s'inscrire.",
+  erreur_traitement: "L'assistant n'a pas pu traiter ce message (erreur technique).",
+};
+
+export function describeHandoffReason(intent: string | null | undefined): string {
+  return (intent && HANDOFF_REASONS[intent]) || "L'assistant a jugé qu'une personne de l'équipe devait répondre.";
+}
+
+/**
+ * L'IA passe la main : le propriétaire doit répondre lui-même. Le client attend — l'email doit être clair et rapide à lire.
+ */
+export function buildHandoffEmail(input: {
+  organizationName: string;
+  prospect: ProspectInfo;
+  intent: string | null | undefined;
+  recent: Array<{ author: "CONTACT" | "AI" | "HUMAN"; text: string }>;
+  leadData?: Record<string, unknown> | null;
+}) {
+  const who = input.prospect.name || "un client WhatsApp";
+  const authorLabel = { CONTACT: "Client", AI: "Assistant", HUMAN: "Vous" } as const;
+  const excerpt = input.recent
+    .slice(-4)
+    .map((message) => `${authorLabel[message.author]} : ${message.text.replace(/\s+/g, " ").trim().slice(0, 240)}`)
+    .join("\n");
+  const known = Object.entries(input.leadData ?? {})
+    .filter(([, value]) => typeof value === "string" && value.trim())
+    .map(([field, value]) => `${field} : ${String(value).trim()}`)
+    .join("\n");
+  return {
+    subject: `🙋 ${who} attend votre réponse`,
+    text: `Bonjour,\n\nL'assistant IA de ${input.organizationName} a passé la main : ${describeHandoffReason(input.intent)}\nL'IA est en pause pour cette conversation. Répondez depuis votre téléphone ou depuis l'onglet Conversations de votre tableau de bord.\n\nCLIENT\n${prospectBlock(input.prospect)}${known ? `\n\nINFORMATIONS RECUEILLIES\n${known}` : ""}\n\nDERNIERS MESSAGES\n${excerpt || "(aucun message)"}${footer()}`,
+  };
+}
+
+/** Un client a envoyé une photo ou un document : l'IA ne peut pas le vérifier à la place du propriétaire. */
+export function buildMediaReceivedEmail(input: {
+  organizationName: string;
+  prospect: ProspectInfo;
+  kind: "payment_proof" | "product_photo" | "document" | "other";
+  fileLabel: string;
+  caption: string | null;
+  summary: string | null;
+}) {
+  const who = input.prospect.name || "un client WhatsApp";
+  const title = {
+    payment_proof: "💳 Preuve de paiement reçue — à vérifier",
+    product_photo: "📷 Photo de produit reçue",
+    document: "📎 Document reçu",
+    other: "📷 Photo reçue",
+  }[input.kind];
+  const warning = input.kind === "payment_proof"
+    ? "\nL'assistant n'a PAS confirmé le paiement au client : vérifiez votre solde Mobile Money / votre compte avant de livrer.\n"
+    : "";
+  return {
+    subject: `${title} — ${who}`,
+    text: `Bonjour,\n\nUn client de ${input.organizationName} vient d'envoyer ${input.fileLabel}.${warning}\nCLIENT\n${prospectBlock(input.prospect)}${input.caption ? `\n\nMESSAGE DU CLIENT\n${input.caption}` : ""}${input.summary ? `\n\nCE QUE L'ASSISTANT A REMARQUÉ\n${input.summary}` : ""}\n\nOuvrez la conversation dans l'onglet Conversations pour voir le fichier.${footer()}`,
+  };
+}
+
 /**
  * Envoie un email à tous les administrateurs de l'entreprise.
  * Ne lève jamais : une notification ne doit jamais perturber la conversation WhatsApp.

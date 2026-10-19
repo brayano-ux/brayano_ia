@@ -7,6 +7,12 @@ describe("public routes", () => {
       .toBe(true);
   });
 
+  it("allows signed client media paths but nothing else under /media/client", () => {
+    expect(isPublicRoute("/media/client/123e4567-e89b-12d3-a456-426614174000/123e4567-e89b-12d3-a456-426614174001.jpg?t=123:signature")).toBe(true);
+    expect(isPublicRoute("/media/client/123e4567-e89b-12d3-a456-426614174000/../secret.jpg")).toBe(false);
+    expect(isPublicRoute("/media/client/invalid/file.jpg")).toBe(false);
+  });
+
   it("leaves /admin routes to their own platform token check", () => {
     expect(isPublicRoute("/admin/organizations")).toBe(true);
     expect(isPublicRoute("/administrator")).toBe(false);

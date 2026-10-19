@@ -1,5 +1,7 @@
 import { findOrCreateContact } from "../contacts/contacts.service.js";
 import { prisma } from "../database/client.js";
+import { NotFoundError } from "../shared/errors.js";
+import { computeAutoStage, stagePriority, type ConversationStageValue, type StageSignals } from "./stage.js";
 import { withConversationSendLock } from "./conversation-send-lock.js";
 import type { Prisma } from "../generated/prisma/client.js";
 import type {
@@ -66,12 +68,15 @@ export async function recordInboundMessage(input: RecordInboundMessageInput) {
       conversationId: conversation.id,
       direction: "INBOUND",
       author: "CONTACT",
-      type: "TEXT",
+      type: input.type ?? "TEXT",
       content: input.text,
       externalId: input.externalId,
       createdAt: input.timestamp,
+      ...(input.media ? { mediaFile: input.media.file, mediaMimeType: input.media.mimeType, mediaName: input.media.name } : {}),
+      ...(input.aiMeta ? { aiMeta: input.aiMeta } : {}),
     },
   });
+  await touchLastInbound(conversation.id, input.timestamp);
 
   return { conversation, message, isDuplicate: false as const };
 }
@@ -126,19 +131,91 @@ export async function recordOutboundMessage(input: RecordOutboundMessageInput) {
       author: input.author,
       type: "TEXT",
       content: input.text,
+      ...(input.aiMeta ? { aiMeta: input.aiMeta } : {}),
     },
   });
 }
 
-export async function listConversations(organizationId: string) {
-  return prisma.conversation.findMany({
-    where: { organizationId },
+/**
+ * Champs de suivi qui ne doivent JAMAIS compter comme « la conversation a changé d'état » :
+ * on les écrit en SQL direct pour ne pas modifier updated_at. Cette date sert à détecter une prise de main
+ * humaine pendant que l'IA prépare sa réponse, et à calculer le délai de reprise automatique.
+ */
+export async function touchLastInbound(conversationId: string, at: Date) {
+  await prisma.$executeRaw`UPDATE conversations SET last_inbound_at = ${at} WHERE id = ${conversationId} AND (last_inbound_at IS NULL OR last_inbound_at < ${at})`;
+}
+
+export async function markConversationRead(organizationId: string, conversationId: string) {
+  await prisma.$executeRaw`UPDATE conversations SET last_read_at = NOW() WHERE id = ${conversationId} AND organization_id = ${organizationId}`;
+}
+
+export async function setConversationStageSilently(conversationId: string, stage: ConversationStageValue) {
+  await prisma.$executeRaw`UPDATE conversations SET stage = ${stage}::"ConversationStage" WHERE id = ${conversationId}`;
+}
+
+export async function setPaymentCheckPending(conversationId: string, pending: boolean) {
+  await prisma.$executeRaw`UPDATE conversations SET payment_check_pending = ${pending} WHERE id = ${conversationId}`;
+}
+
+/** Fait avancer l'étiquette d'un client d'après ce que l'IA vient de faire (sans effet si le propriétaire l'a fixée à la main). */
+export async function advanceConversationStage(conversationId: string, signals: StageSignals) {
+  const conversation = await prisma.conversation.findUnique({ where: { id: conversationId }, select: { stage: true, stageLocked: true } });
+  if (!conversation) return null;
+  const next = computeAutoStage(conversation.stage, conversation.stageLocked, signals);
+  if (next !== conversation.stage) await setConversationStageSilently(conversationId, next);
+  return next;
+}
+
+/** Le propriétaire choisit l'étiquette à la main ; « AUTO » rend la main à l'assistant. */
+export async function setConversationStage(organizationId: string, conversationId: string, stage: ConversationStageValue | "AUTO") {
+  const conversation = await prisma.conversation.findFirst({ where: { id: conversationId, organizationId }, select: { id: true } });
+  if (!conversation) throw new NotFoundError("Conversation introuvable pour cette entreprise.");
+  if (stage === "AUTO") {
+    await prisma.$executeRaw`UPDATE conversations SET stage_locked = false WHERE id = ${conversationId}`;
+  } else {
+    await prisma.$executeRaw`UPDATE conversations SET stage = ${stage}::"ConversationStage", stage_locked = true WHERE id = ${conversationId}`;
+  }
+  return prisma.conversation.findUnique({ where: { id: conversationId }, select: { id: true, stage: true, stageLocked: true } });
+}
+
+export interface ConversationListFilters {
+  stage?: ConversationStageValue | undefined;
+  search?: string | undefined;
+}
+
+/**
+ * Liste légère pour la boîte de réception : le dernier message et le nombre de messages seulement
+ * (le fil complet se charge à l'ouverture d'une conversation). Les clients qui attendent une personne passent en premier.
+ */
+export async function listConversationSummaries(organizationId: string, filters: ConversationListFilters = {}) {
+  const search = filters.search?.trim();
+  const conversations = await prisma.conversation.findMany({
+    where: {
+      organizationId,
+      ...(filters.stage ? { stage: filters.stage } : {}),
+      ...(search
+        ? { OR: [{ contact: { displayName: { contains: search, mode: "insensitive" as const } } }, { contact: { whatsappJid: { contains: search.replace(/\D/g, "") || search } } }] }
+        : {}),
+    },
     include: {
       contact: true,
-      messages: { orderBy: { createdAt: "asc" } },
+      messages: { orderBy: { createdAt: "desc" }, take: 1, select: { content: true, createdAt: true, author: true, type: true } },
+      _count: { select: { messages: true } },
     },
     orderBy: { updatedAt: "desc" },
+    take: 500,
   });
+
+  return conversations
+    .map(({ messages, _count, ...conversation }) => {
+      const lastMessage = messages[0] ?? null;
+      const lastMessageAt = lastMessage?.createdAt ?? conversation.updatedAt;
+      const unread = Boolean(conversation.lastInboundAt && (!conversation.lastReadAt || conversation.lastInboundAt > conversation.lastReadAt));
+      return { ...conversation, lastMessage, lastMessageAt, unread, messageCount: _count.messages };
+    })
+    .sort((a, b) =>
+      stagePriority(a.stage, a.status) - stagePriority(b.stage, b.status) || b.lastMessageAt.getTime() - a.lastMessageAt.getTime(),
+    );
 }
 
 export async function listProspectsForExport(organizationId: string) {
@@ -237,8 +314,11 @@ export async function getRecentHistoryForAi(conversationId: string) {
 
   return messages
     .reverse()
-    .map((message) => ({
-      role: message.direction === "INBOUND" ? ("user" as const) : ("assistant" as const),
-      content: message.content,
-    }));
+    .map((message) => {
+      const note = (message.aiMeta as { mediaNote?: unknown } | null)?.mediaNote;
+      return {
+        role: message.direction === "INBOUND" ? ("user" as const) : ("assistant" as const),
+        content: typeof note === "string" && note ? `${message.content}\n${note}` : message.content,
+      };
+    });
 }

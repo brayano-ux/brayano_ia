@@ -21,6 +21,9 @@ import type {
   WhatsAppProvider,
 } from "./whatsapp.types.js";
 
+/** Au-delà, un fichier reçu n'est pas enregistré (photos WhatsApp : moins de 1 Mo ; documents : quelques Mo). */
+const MAX_MEDIA_BYTES = 10 * 1024 * 1024;
+
 const logger = pino({ level: "silent" }); // Baileys est très verbeux ; on garde nos propres logs applicatifs
 
 export class BaileysWhatsAppProvider implements WhatsAppProvider {
@@ -91,7 +94,7 @@ export class BaileysWhatsAppProvider implements WhatsAppProvider {
           await this.connect();
         } else {
           // WhatsApp a invalidé les identifiants persistés (déconnexion depuis
-          // le téléphone). Un prochain clic sur « Connecter » doit générer un
+          // le téléphone). Un prochain clic sur la connexion par QR code doit générer un
           // nouveau QR au lieu de recharger cette session invalide.
           fs.rmSync(this.authDir, { recursive: true, force: true });
           fs.mkdirSync(this.authDir, { recursive: true });
@@ -159,8 +162,28 @@ export class BaileysWhatsAppProvider implements WhatsAppProvider {
           }
         }
 
-        // Phase 3 : texte uniquement. Les autres types (image, audio, ...)
-        // sont ignorés ici et seront traités explicitement en Phase 4+.
+        let media: IncomingWhatsAppMessage["media"];
+        const imageMessage = unwrapped.imageMessage;
+        const documentMessage = unwrapped.documentMessage ?? unwrapped.documentWithCaptionMessage?.message?.documentMessage;
+        if (!text && (imageMessage || documentMessage)) {
+          const isImage = Boolean(imageMessage);
+          const info = (imageMessage ?? documentMessage)!;
+          const caption = info.caption?.trim() || undefined;
+          const fileName = documentMessage?.fileName?.trim() || undefined;
+          const mimeType = info.mimetype || (isImage ? "image/jpeg" : "application/octet-stream");
+          media = { kind: isImage ? "image" : "document", mimeType, ...(fileName ? { fileName } : {}), ...(caption ? { caption } : {}) };
+          if (Number(info.fileLength ?? 0) <= MAX_MEDIA_BYTES) {
+            try {
+              const file = await downloadMediaMessage(msg, "buffer", {}, { logger, reuploadRequest: this.socket!.updateMediaMessage });
+              if ((file as Buffer).length <= MAX_MEDIA_BYTES) media.data = file as Buffer;
+            } catch (error) {
+              console.error("❌ Impossible de télécharger le fichier reçu sur WhatsApp :", error);
+            }
+          }
+          text = caption ?? (isImage ? "[Photo reçue]" : `[Document reçu${fileName ? ` : ${fileName}` : ""}]`);
+        }
+
+        // Les autres types (vidéo, position, contact...) restent ignorés.
         if (!text || !msg.key.id) continue;
 
         const incoming: IncomingWhatsAppMessage = {
@@ -169,6 +192,7 @@ export class BaileysWhatsAppProvider implements WhatsAppProvider {
           text,
           timestamp: new Date(Number(msg.messageTimestamp) * 1000),
           ...(audio ? { audio } : {}),
+          ...(media ? { media } : {}),
         };
 
         for (const handler of this.messageHandlers) {

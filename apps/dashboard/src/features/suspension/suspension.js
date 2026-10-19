@@ -1,6 +1,7 @@
 import { api } from "../../services/api.js";
 import { $ } from "../../utils/dom.js";
 import { getState } from "../../state/store.js";
+import { isAgentRole } from "../navigation/roles.js";
 
 /**
  * Suspension de l'IA décidée par l'administrateur de la plateforme.
@@ -27,7 +28,8 @@ export function applyPlatformSuspension(suspension) {
 
 export async function loadPlatformSuspension() {
   const organizationId = getState().organizationId;
-  if (!organizationId) return;
+  // Un employé n'a pas accès aux réglages de l'agent : la bannière lit ces réglages, on ne la charge donc pas pour lui.
+  if (!organizationId || isAgentRole()) return;
   try {
     const { platformSuspension } = await api(`/organizations/${organizationId}/ai-settings`);
     applyPlatformSuspension(platformSuspension);

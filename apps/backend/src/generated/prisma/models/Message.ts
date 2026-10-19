@@ -32,6 +32,9 @@ export type MessageMinAggregateOutputType = {
   type: $Enums.MessageType | null
   content: string | null
   externalId: string | null
+  mediaFile: string | null
+  mediaMimeType: string | null
+  mediaName: string | null
   createdAt: Date | null
 }
 
@@ -43,6 +46,9 @@ export type MessageMaxAggregateOutputType = {
   type: $Enums.MessageType | null
   content: string | null
   externalId: string | null
+  mediaFile: string | null
+  mediaMimeType: string | null
+  mediaName: string | null
   createdAt: Date | null
 }
 
@@ -54,6 +60,10 @@ export type MessageCountAggregateOutputType = {
   type: number
   content: number
   externalId: number
+  mediaFile: number
+  mediaMimeType: number
+  mediaName: number
+  aiMeta: number
   createdAt: number
   _all: number
 }
@@ -67,6 +77,9 @@ export type MessageMinAggregateInputType = {
   type?: true
   content?: true
   externalId?: true
+  mediaFile?: true
+  mediaMimeType?: true
+  mediaName?: true
   createdAt?: true
 }
 
@@ -78,6 +91,9 @@ export type MessageMaxAggregateInputType = {
   type?: true
   content?: true
   externalId?: true
+  mediaFile?: true
+  mediaMimeType?: true
+  mediaName?: true
   createdAt?: true
 }
 
@@ -89,6 +105,10 @@ export type MessageCountAggregateInputType = {
   type?: true
   content?: true
   externalId?: true
+  mediaFile?: true
+  mediaMimeType?: true
+  mediaName?: true
+  aiMeta?: true
   createdAt?: true
   _all?: true
 }
@@ -173,6 +193,10 @@ export type MessageGroupByOutputType = {
   type: $Enums.MessageType
   content: string
   externalId: string | null
+  mediaFile: string | null
+  mediaMimeType: string | null
+  mediaName: string | null
+  aiMeta: runtime.JsonValue | null
   createdAt: Date
   _count: MessageCountAggregateOutputType | null
   _min: MessageMinAggregateOutputType | null
@@ -205,6 +229,10 @@ export type MessageWhereInput = {
   type?: Prisma.EnumMessageTypeFilter<"Message"> | $Enums.MessageType
   content?: Prisma.StringFilter<"Message"> | string
   externalId?: Prisma.StringNullableFilter<"Message"> | string | null
+  mediaFile?: Prisma.StringNullableFilter<"Message"> | string | null
+  mediaMimeType?: Prisma.StringNullableFilter<"Message"> | string | null
+  mediaName?: Prisma.StringNullableFilter<"Message"> | string | null
+  aiMeta?: Prisma.JsonNullableFilter<"Message">
   createdAt?: Prisma.DateTimeFilter<"Message"> | Date | string
   conversation?: Prisma.XOR<Prisma.ConversationScalarRelationFilter, Prisma.ConversationWhereInput>
 }
@@ -217,6 +245,10 @@ export type MessageOrderByWithRelationInput = {
   type?: Prisma.SortOrder
   content?: Prisma.SortOrder
   externalId?: Prisma.SortOrderInput | Prisma.SortOrder
+  mediaFile?: Prisma.SortOrderInput | Prisma.SortOrder
+  mediaMimeType?: Prisma.SortOrderInput | Prisma.SortOrder
+  mediaName?: Prisma.SortOrderInput | Prisma.SortOrder
+  aiMeta?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   conversation?: Prisma.ConversationOrderByWithRelationInput
 }
@@ -232,6 +264,10 @@ export type MessageWhereUniqueInput = Prisma.AtLeast<{
   author?: Prisma.EnumMessageAuthorFilter<"Message"> | $Enums.MessageAuthor
   type?: Prisma.EnumMessageTypeFilter<"Message"> | $Enums.MessageType
   content?: Prisma.StringFilter<"Message"> | string
+  mediaFile?: Prisma.StringNullableFilter<"Message"> | string | null
+  mediaMimeType?: Prisma.StringNullableFilter<"Message"> | string | null
+  mediaName?: Prisma.StringNullableFilter<"Message"> | string | null
+  aiMeta?: Prisma.JsonNullableFilter<"Message">
   createdAt?: Prisma.DateTimeFilter<"Message"> | Date | string
   conversation?: Prisma.XOR<Prisma.ConversationScalarRelationFilter, Prisma.ConversationWhereInput>
 }, "id" | "externalId">
@@ -244,6 +280,10 @@ export type MessageOrderByWithAggregationInput = {
   type?: Prisma.SortOrder
   content?: Prisma.SortOrder
   externalId?: Prisma.SortOrderInput | Prisma.SortOrder
+  mediaFile?: Prisma.SortOrderInput | Prisma.SortOrder
+  mediaMimeType?: Prisma.SortOrderInput | Prisma.SortOrder
+  mediaName?: Prisma.SortOrderInput | Prisma.SortOrder
+  aiMeta?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.MessageCountOrderByAggregateInput
   _max?: Prisma.MessageMaxOrderByAggregateInput
@@ -261,6 +301,10 @@ export type MessageScalarWhereWithAggregatesInput = {
   type?: Prisma.EnumMessageTypeWithAggregatesFilter<"Message"> | $Enums.MessageType
   content?: Prisma.StringWithAggregatesFilter<"Message"> | string
   externalId?: Prisma.StringNullableWithAggregatesFilter<"Message"> | string | null
+  mediaFile?: Prisma.StringNullableWithAggregatesFilter<"Message"> | string | null
+  mediaMimeType?: Prisma.StringNullableWithAggregatesFilter<"Message"> | string | null
+  mediaName?: Prisma.StringNullableWithAggregatesFilter<"Message"> | string | null
+  aiMeta?: Prisma.JsonNullableWithAggregatesFilter<"Message">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Message"> | Date | string
 }
 
@@ -271,6 +315,10 @@ export type MessageCreateInput = {
   type?: $Enums.MessageType
   content: string
   externalId?: string | null
+  mediaFile?: string | null
+  mediaMimeType?: string | null
+  mediaName?: string | null
+  aiMeta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   conversation: Prisma.ConversationCreateNestedOneWithoutMessagesInput
 }
@@ -283,6 +331,10 @@ export type MessageUncheckedCreateInput = {
   type?: $Enums.MessageType
   content: string
   externalId?: string | null
+  mediaFile?: string | null
+  mediaMimeType?: string | null
+  mediaName?: string | null
+  aiMeta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
 }
 
@@ -293,6 +345,10 @@ export type MessageUpdateInput = {
   type?: Prisma.EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType
   content?: Prisma.StringFieldUpdateOperationsInput | string
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mediaFile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mediaMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mediaName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiMeta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   conversation?: Prisma.ConversationUpdateOneRequiredWithoutMessagesNestedInput
 }
@@ -305,6 +361,10 @@ export type MessageUncheckedUpdateInput = {
   type?: Prisma.EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType
   content?: Prisma.StringFieldUpdateOperationsInput | string
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mediaFile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mediaMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mediaName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiMeta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -316,6 +376,10 @@ export type MessageCreateManyInput = {
   type?: $Enums.MessageType
   content: string
   externalId?: string | null
+  mediaFile?: string | null
+  mediaMimeType?: string | null
+  mediaName?: string | null
+  aiMeta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
 }
 
@@ -326,6 +390,10 @@ export type MessageUpdateManyMutationInput = {
   type?: Prisma.EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType
   content?: Prisma.StringFieldUpdateOperationsInput | string
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mediaFile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mediaMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mediaName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiMeta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -337,6 +405,10 @@ export type MessageUncheckedUpdateManyInput = {
   type?: Prisma.EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType
   content?: Prisma.StringFieldUpdateOperationsInput | string
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mediaFile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mediaMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mediaName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiMeta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -358,6 +430,10 @@ export type MessageCountOrderByAggregateInput = {
   type?: Prisma.SortOrder
   content?: Prisma.SortOrder
   externalId?: Prisma.SortOrder
+  mediaFile?: Prisma.SortOrder
+  mediaMimeType?: Prisma.SortOrder
+  mediaName?: Prisma.SortOrder
+  aiMeta?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -369,6 +445,9 @@ export type MessageMaxOrderByAggregateInput = {
   type?: Prisma.SortOrder
   content?: Prisma.SortOrder
   externalId?: Prisma.SortOrder
+  mediaFile?: Prisma.SortOrder
+  mediaMimeType?: Prisma.SortOrder
+  mediaName?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -380,6 +459,9 @@ export type MessageMinOrderByAggregateInput = {
   type?: Prisma.SortOrder
   content?: Prisma.SortOrder
   externalId?: Prisma.SortOrder
+  mediaFile?: Prisma.SortOrder
+  mediaMimeType?: Prisma.SortOrder
+  mediaName?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -444,6 +526,10 @@ export type MessageCreateWithoutConversationInput = {
   type?: $Enums.MessageType
   content: string
   externalId?: string | null
+  mediaFile?: string | null
+  mediaMimeType?: string | null
+  mediaName?: string | null
+  aiMeta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
 }
 
@@ -454,6 +540,10 @@ export type MessageUncheckedCreateWithoutConversationInput = {
   type?: $Enums.MessageType
   content: string
   externalId?: string | null
+  mediaFile?: string | null
+  mediaMimeType?: string | null
+  mediaName?: string | null
+  aiMeta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
 }
 
@@ -494,6 +584,10 @@ export type MessageScalarWhereInput = {
   type?: Prisma.EnumMessageTypeFilter<"Message"> | $Enums.MessageType
   content?: Prisma.StringFilter<"Message"> | string
   externalId?: Prisma.StringNullableFilter<"Message"> | string | null
+  mediaFile?: Prisma.StringNullableFilter<"Message"> | string | null
+  mediaMimeType?: Prisma.StringNullableFilter<"Message"> | string | null
+  mediaName?: Prisma.StringNullableFilter<"Message"> | string | null
+  aiMeta?: Prisma.JsonNullableFilter<"Message">
   createdAt?: Prisma.DateTimeFilter<"Message"> | Date | string
 }
 
@@ -504,6 +598,10 @@ export type MessageCreateManyConversationInput = {
   type?: $Enums.MessageType
   content: string
   externalId?: string | null
+  mediaFile?: string | null
+  mediaMimeType?: string | null
+  mediaName?: string | null
+  aiMeta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
 }
 
@@ -514,6 +612,10 @@ export type MessageUpdateWithoutConversationInput = {
   type?: Prisma.EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType
   content?: Prisma.StringFieldUpdateOperationsInput | string
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mediaFile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mediaMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mediaName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiMeta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -524,6 +626,10 @@ export type MessageUncheckedUpdateWithoutConversationInput = {
   type?: Prisma.EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType
   content?: Prisma.StringFieldUpdateOperationsInput | string
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mediaFile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mediaMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mediaName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiMeta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -534,6 +640,10 @@ export type MessageUncheckedUpdateManyWithoutConversationInput = {
   type?: Prisma.EnumMessageTypeFieldUpdateOperationsInput | $Enums.MessageType
   content?: Prisma.StringFieldUpdateOperationsInput | string
   externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mediaFile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mediaMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mediaName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiMeta?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -547,6 +657,10 @@ export type MessageSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   type?: boolean
   content?: boolean
   externalId?: boolean
+  mediaFile?: boolean
+  mediaMimeType?: boolean
+  mediaName?: boolean
+  aiMeta?: boolean
   createdAt?: boolean
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["message"]>
@@ -559,6 +673,10 @@ export type MessageSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   type?: boolean
   content?: boolean
   externalId?: boolean
+  mediaFile?: boolean
+  mediaMimeType?: boolean
+  mediaName?: boolean
+  aiMeta?: boolean
   createdAt?: boolean
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["message"]>
@@ -571,6 +689,10 @@ export type MessageSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   type?: boolean
   content?: boolean
   externalId?: boolean
+  mediaFile?: boolean
+  mediaMimeType?: boolean
+  mediaName?: boolean
+  aiMeta?: boolean
   createdAt?: boolean
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["message"]>
@@ -583,10 +705,14 @@ export type MessageSelectScalar = {
   type?: boolean
   content?: boolean
   externalId?: boolean
+  mediaFile?: boolean
+  mediaMimeType?: boolean
+  mediaName?: boolean
+  aiMeta?: boolean
   createdAt?: boolean
 }
 
-export type MessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "conversationId" | "direction" | "author" | "type" | "content" | "externalId" | "createdAt", ExtArgs["result"]["message"]>
+export type MessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "conversationId" | "direction" | "author" | "type" | "content" | "externalId" | "mediaFile" | "mediaMimeType" | "mediaName" | "aiMeta" | "createdAt", ExtArgs["result"]["message"]>
 export type MessageInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
 }
@@ -610,6 +736,10 @@ export type $MessagePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     type: $Enums.MessageType
     content: string
     externalId: string | null
+    mediaFile: string | null
+    mediaMimeType: string | null
+    mediaName: string | null
+    aiMeta: runtime.JsonValue | null
     createdAt: Date
   }, ExtArgs["result"]["message"]>
   composites: {}
@@ -1042,6 +1172,10 @@ export interface MessageFieldRefs {
   readonly type: Prisma.FieldRef<"Message", 'MessageType'>
   readonly content: Prisma.FieldRef<"Message", 'String'>
   readonly externalId: Prisma.FieldRef<"Message", 'String'>
+  readonly mediaFile: Prisma.FieldRef<"Message", 'String'>
+  readonly mediaMimeType: Prisma.FieldRef<"Message", 'String'>
+  readonly mediaName: Prisma.FieldRef<"Message", 'String'>
+  readonly aiMeta: Prisma.FieldRef<"Message", 'Json'>
   readonly createdAt: Prisma.FieldRef<"Message", 'DateTime'>
 }
     

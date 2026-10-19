@@ -5,6 +5,8 @@ import { buildProspectsCsv, downloadCsv } from "../../utils/csv.js";
 import { getState, setState } from "../../state/store.js";
 import { conversationMarkup, bindConversationRows } from "../inbox/conversation-item.js";
 import { updateRealtimeHeader } from "../navigation/navigation.js";
+import { updateBadges, needsAttention } from "../inbox/inbox.js";
+import { loadStats, initStats } from "./stats.js";
 
 function getDateWindow(days) {
   if (days === "all") return null;
@@ -118,6 +120,7 @@ export function renderRecent(onSelectConversation) {
 
 export async function refreshOverview(onSelectConversation) {
   const orgId = getState().organizationId;
+  if (!orgId) return;
   const orgLabel = $("#org-select").selectedOptions[0]?.textContent || "Brayano";
   $("#current-org").textContent = orgLabel;
   $("#org-initial").textContent = orgLabel[0]?.toUpperCase() || "B";
@@ -134,12 +137,15 @@ export async function refreshOverview(onSelectConversation) {
     setState({ conversations, commercialMetrics: metrics.commercialMetrics || [] });
 
     const activeConversationCount = conversations.filter((item) => item.status !== "CLOSED").length;
+    const toHandle = conversations.filter(needsAttention).length;
     $("#metric-active").textContent = activeConversationCount;
-    $("#metric-messages").textContent = conversations.reduce((count, item) => count + (item.messages?.length || 0), 0);
+    $("#metric-todo").textContent = toHandle;
+    $("#metric-todo-hint").textContent = toHandle ? "Cliquez sur « Conversations » pour les voir" : "Tout est à jour";
     updateWhatsAppMetric(status.status);
     renderCommercialMetrics();
     renderRecent(onSelectConversation);
-    $("#nav-count").textContent = activeConversationCount;
+    updateBadges(conversations);
+    void loadStats();
   } catch (error) {
     showToast(error.message, "error");
   }
@@ -148,4 +154,5 @@ export async function refreshOverview(onSelectConversation) {
 export function initOverview() {
   $("#commercial-period")?.addEventListener("change", renderCommercialMetrics);
   $("#export-prospects")?.addEventListener("click", exportProspects);
+  initStats();
 }

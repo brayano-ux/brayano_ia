@@ -7,6 +7,11 @@ import { OpenRouterProvider } from "./providers/openrouter.provider.js";
 
 let orchestrator: AiOrchestrator | null = null;
 
+/** Réservé aux tests d'intégration : remplace l'orchestrateur IA par un faux (null pour revenir au vrai). */
+export function setAiOrchestratorForTests(fake: Pick<AiOrchestrator, "getReply" | "transcribeAudio"> & Partial<Pick<AiOrchestrator, "analyzeMedia">> | null) {
+  orchestrator = fake as AiOrchestrator | null;
+}
+
 function createProvider(): AIProvider {
   switch (env.LLM_PROVIDER) {
     case "gemini":

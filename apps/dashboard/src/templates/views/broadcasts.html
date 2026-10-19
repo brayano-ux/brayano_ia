@@ -1,0 +1,59 @@
+<!-- VIEW: BROADCASTS -->
+<section id="broadcasts-view" class="view hidden">
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">COMMUNICATION</p>
+      <h1>Messages groupés</h1>
+      <p class="muted">Envoyez une annonce (promotion, nouveau produit, horaires) à vos clients, sans risquer de faire bloquer votre numéro.</p>
+    </div>
+  </div>
+
+  <div class="panel broadcast-safety">
+    <strong>🛡️ Pour protéger votre numéro WhatsApp</strong>
+    <ul>
+      <li>Seuls les clients qui vous ont <b>déjà écrit</b> récemment sont contactés.</li>
+      <li>Un client qui écrit « STOP » n’est plus jamais contacté. La mention est ajoutée automatiquement à chaque message.</li>
+      <li>Maximum <b id="bc-max-per">50</b> personnes par envoi et <b id="bc-max-day">100</b> messages par jour, envoyés lentement, un à un.</li>
+    </ul>
+  </div>
+
+  <div class="broadcast-layout">
+    <form id="broadcast-form" class="panel broadcast-form">
+      <h2>Nouvel envoi</h2>
+      <fieldset class="broadcast-audience">
+        <legend class="field-label">À qui l’envoyer ?</legend>
+        <div id="bc-stages" class="broadcast-stages">
+          <label><input type="checkbox" value="NEW" /> Nouveaux</label>
+          <label><input type="checkbox" value="INTERESTED" /> Intéressés</label>
+          <label><input type="checkbox" value="ORDERED" /> Ont commandé</label>
+          <label><input type="checkbox" value="CALLBACK" /> À rappeler</label>
+        </div>
+        <p class="field-hint">Ne cochez rien pour viser tous vos clients éligibles.</p>
+        <label class="bc-window">
+          <span class="field-label">Clients qui ont écrit depuis</span>
+          <select id="bc-window">
+            <option value="7">7 jours</option>
+            <option value="14">14 jours</option>
+            <option value="30" selected>30 jours</option>
+            <option value="60">60 jours</option>
+          </select>
+        </label>
+      </fieldset>
+      <div id="bc-preview" class="broadcast-preview" aria-live="polite">Calcul du nombre de destinataires…</div>
+      <label>
+        <span class="field-label">Votre message</span>
+        <textarea id="bc-text" rows="6" maxlength="1000" placeholder="Ex. Bonjour 👋 Cette semaine, -10 % sur tous nos sacs. Répondez à ce message pour commander."></textarea>
+        <span class="agent-counter" id="bc-counter">0 / 1000 caractères</span>
+      </label>
+      <p class="field-hint">Ajouté automatiquement à la fin : « Pour ne plus recevoir nos messages, répondez STOP. »</p>
+      <div class="form-actions">
+        <button type="submit" class="primary" id="bc-send">Envoyer</button>
+      </div>
+    </form>
+
+    <section class="panel broadcast-history">
+      <h2>Derniers envois</h2>
+      <div id="bc-list" class="bc-list" aria-live="polite"><div class="empty-state">Chargement…</div></div>
+    </section>
+  </div>
+</section>
