@@ -67,6 +67,47 @@ describe("BaileysWhatsAppProvider : réponse humaine depuis le téléphone", () 
     expect(incoming).not.toHaveBeenCalled();
   });
 
+  it("delivers a photo sent by a prospect with its caption", async () => {
+    const { downloadMediaMessage } = await import("@whiskeysockets/baileys");
+    vi.mocked(downloadMediaMessage).mockResolvedValueOnce(Buffer.from([1, 2, 3]) as never);
+    upsert({ key: { id: "IMG-1", fromMe: false, remoteJid: JID }, message: { imageMessage: { caption: "Voici le paiement", mimetype: "image/jpeg", fileLength: 3 } }, messageTimestamp: nowSeconds() });
+    await new Promise((r) => setTimeout(r, 20));
+    expect(incoming).toHaveBeenCalledWith(expect.objectContaining({
+      externalId: "IMG-1",
+      text: "Voici le paiement",
+      media: expect.objectContaining({ kind: "image", mimeType: "image/jpeg", caption: "Voici le paiement", data: Buffer.from([1, 2, 3]) }),
+    }));
+  });
+
+  it("delivers a document, with a placeholder text when there is no caption", async () => {
+    const { downloadMediaMessage } = await import("@whiskeysockets/baileys");
+    vi.mocked(downloadMediaMessage).mockResolvedValueOnce(Buffer.from("%PDF") as never);
+    upsert({ key: { id: "DOC-1", fromMe: false, remoteJid: JID }, message: { documentMessage: { fileName: "facture.pdf", mimetype: "application/pdf", fileLength: 4 } }, messageTimestamp: nowSeconds() });
+    await new Promise((r) => setTimeout(r, 20));
+    expect(incoming).toHaveBeenCalledWith(expect.objectContaining({
+      text: "[Document reçu : facture.pdf]",
+      media: expect.objectContaining({ kind: "document", fileName: "facture.pdf", data: expect.any(Buffer) }),
+    }));
+  });
+
+  it("still tells the app about a photo that could not be downloaded", async () => {
+    const { downloadMediaMessage } = await import("@whiskeysockets/baileys");
+    vi.mocked(downloadMediaMessage).mockRejectedValueOnce(new Error("expired"));
+    const errors = vi.spyOn(console, "error").mockImplementation(() => {});
+    upsert({ key: { id: "IMG-2", fromMe: false, remoteJid: JID }, message: { imageMessage: { mimetype: "image/jpeg" } }, messageTimestamp: nowSeconds() });
+    await new Promise((r) => setTimeout(r, 20));
+    errors.mockRestore();
+    expect(incoming).toHaveBeenCalledWith(expect.objectContaining({ text: "[Photo reçue]", media: expect.not.objectContaining({ data: expect.anything() }) }));
+  });
+
+  it("does not download a file that is too large", async () => {
+    const { downloadMediaMessage } = await import("@whiskeysockets/baileys");
+    upsert({ key: { id: "DOC-2", fromMe: false, remoteJid: JID }, message: { documentMessage: { fileName: "gros.zip", mimetype: "application/zip", fileLength: 50 * 1024 * 1024 } }, messageTimestamp: nowSeconds() });
+    await new Promise((r) => setTimeout(r, 20));
+    expect(downloadMediaMessage).not.toHaveBeenCalled();
+    expect(incoming).toHaveBeenCalledWith(expect.objectContaining({ media: expect.objectContaining({ kind: "document", fileName: "gros.zip" }) }));
+  });
+
   it("still delivers a prospect's message as an incoming message", async () => {
     upsert({ key: { id: "IN-1", fromMe: false, remoteJid: JID }, message: { conversation: "Bonjour" }, messageTimestamp: nowSeconds() });
     await new Promise((r) => setTimeout(r, 20));

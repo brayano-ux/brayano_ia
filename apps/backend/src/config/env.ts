@@ -1,6 +1,6 @@
 import { config } from "dotenv";
 import { z } from "zod";
-import { defaultProductImageDir } from "./data-paths.js";
+import { defaultClientMediaDir, defaultProductImageDir } from "./data-paths.js";
 
 config();
 
@@ -11,6 +11,8 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1, "DATABASE_URL est requis"),
   WHATSAPP_AUTH_DIR: z.string().default("./wa-session"),
   PRODUCT_IMAGE_DIR: z.string().optional(),
+  CLIENT_MEDIA_DIR: z.string().optional(),
+  CLIENT_MEDIA_RETENTION_DAYS: z.coerce.number().int().min(7).max(3650).default(90),
   CORS_ALLOWED_ORIGINS: z.string().default("http://localhost:5173,http://localhost:3000,http://localhost:4173"),
   PAYMENT_PROVIDER: z.enum(["campay", "manual"]).default("campay"),
   CAMPAY_BASE_URL: z.string().url().default("https://demo.campay.net/api"),
@@ -82,7 +84,7 @@ const envSchema = z.object({
   }
 });
 
-export type Env = Omit<z.infer<typeof envSchema>, "PRODUCT_IMAGE_DIR"> & { PRODUCT_IMAGE_DIR: string };
+export type Env = Omit<z.infer<typeof envSchema>, "PRODUCT_IMAGE_DIR" | "CLIENT_MEDIA_DIR"> & { PRODUCT_IMAGE_DIR: string; CLIENT_MEDIA_DIR: string };
 
 function loadEnv(): Env {
   const parsed = envSchema.safeParse(process.env);
@@ -96,6 +98,7 @@ function loadEnv(): Env {
   return {
     ...parsed.data,
     PRODUCT_IMAGE_DIR: parsed.data.PRODUCT_IMAGE_DIR?.trim() || defaultProductImageDir(parsed.data.WHATSAPP_AUTH_DIR),
+    CLIENT_MEDIA_DIR: parsed.data.CLIENT_MEDIA_DIR?.trim() || defaultClientMediaDir(parsed.data.WHATSAPP_AUTH_DIR),
   };
 }
 

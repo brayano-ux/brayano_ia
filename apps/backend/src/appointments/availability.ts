@@ -105,13 +105,13 @@ export function formatLocalTime(utc: Date, timezone: string): string {
   return `${String(p.hour).padStart(2, "0")}:${String(p.minute).padStart(2, "0")}`;
 }
 
-function addDays(date: string, days: number): string {
+export function addDays(date: string, days: number): string {
   const [y, m, d] = date.split("-").map(Number) as [number, number, number];
   const next = new Date(Date.UTC(y, m - 1, d + days));
   return `${next.getUTCFullYear()}-${String(next.getUTCMonth() + 1).padStart(2, "0")}-${String(next.getUTCDate()).padStart(2, "0")}`;
 }
 
-function weekdayOf(date: string): WeekdayKey {
+export function weekdayOf(date: string): WeekdayKey {
   const [y, m, d] = date.split("-").map(Number) as [number, number, number];
   return WEEKDAY_KEYS[new Date(Date.UTC(y, m - 1, d)).getUTCDay()]!;
 }

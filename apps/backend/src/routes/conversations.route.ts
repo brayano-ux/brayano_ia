@@ -2,14 +2,36 @@ import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import {
   getConversationWithMessages,
-  listConversations,
+  listConversationSummaries,
   listProspectsForExport,
+  markConversationRead,
   recordOutboundMessage,
   setConversationAiEnabled,
+  setConversationStage,
 } from "../conversations/conversations.service.js";
+import { STAGE_LABELS } from "../conversations/stage.js";
+import { buildClientMediaPath, clientMediaResponseHeaders, readClientMedia, verifyClientMediaToken } from "../media/client-media.service.js";
+import { prisma } from "../database/client.js";
 import { withConversationSendLock } from "../conversations/conversation-send-lock.js";
 import { NotFoundError, ValidationError } from "../shared/errors.js";
 import { sendWhatsAppMessageForOrg } from "../whatsapp/whatsapp.registry.js";
+
+const stageBodySchema = z.object({
+  stage: z.enum(["NEW", "INTERESTED", "ORDERED", "CALLBACK", "AUTO"]),
+});
+
+const listQuerySchema = z.object({
+  stage: z.enum(["NEW", "INTERESTED", "ORDERED", "CALLBACK"]).optional(),
+  q: z.string().trim().max(80).optional(),
+});
+
+/** Ajoute à chaque message le lien signé (temporaire) de son fichier, sans jamais exposer le nom du fichier stocké. */
+function withMediaUrls<T extends { mediaFile?: string | null }>(organizationId: string, messages: T[]) {
+  return messages.map(({ mediaFile, ...message }) => ({
+    ...message,
+    mediaUrl: mediaFile ? buildClientMediaPath(organizationId, mediaFile) : null,
+  }));
+}
 
 const replyBodySchema = z.object({
   text: z.string().min(1, "Le texte de la réponse ne peut pas être vide."),
@@ -31,8 +53,10 @@ async function getOwnedConversationOrThrow(orgId: string, conversationId: string
 export async function conversationsRoute(app: FastifyInstance) {
   app.get("/organizations/:orgId/conversations", async (request) => {
     const { orgId } = request.params as { orgId: string };
-    const conversations = await listConversations(orgId);
-    return { conversations };
+    const query = listQuerySchema.safeParse(request.query);
+    if (!query.success) throw new ValidationError(query.error.issues[0]?.message);
+    const conversations = await listConversationSummaries(orgId, { stage: query.data.stage, search: query.data.q });
+    return { conversations, stageLabels: STAGE_LABELS };
   });
 
   app.get("/organizations/:orgId/prospects/export", async (request) => {
@@ -44,7 +68,40 @@ export async function conversationsRoute(app: FastifyInstance) {
   app.get("/organizations/:orgId/conversations/:id", async (request) => {
     const { orgId, id } = request.params as { orgId: string; id: string };
     const conversation = await getOwnedConversationOrThrow(orgId, id);
-    return { conversation };
+    return { conversation: { ...conversation, messages: withMediaUrls(orgId, conversation.messages) } };
+  });
+
+  app.post("/organizations/:orgId/conversations/:id/read", async (request) => {
+    const { orgId, id } = request.params as { orgId: string; id: string };
+    await getOwnedConversationOrThrow(orgId, id);
+    await markConversationRead(orgId, id);
+    return { success: true };
+  });
+
+  app.post("/organizations/:orgId/conversations/:id/stage", async (request) => {
+    const { orgId, id } = request.params as { orgId: string; id: string };
+    const parsed = stageBodySchema.safeParse(request.body);
+    if (!parsed.success) throw new ValidationError("Étiquette invalide.");
+    return { conversation: await setConversationStage(orgId, id, parsed.data.stage) };
+  });
+
+  // Fichier reçu d'un client : lien signé et temporaire (voir shared/public-route.ts), pas de jeton de connexion.
+  app.get("/media/client/:orgId/:filename", async (request, reply) => {
+    const { orgId, filename } = request.params as { orgId: string; filename: string };
+    const token = (request.query as { t?: string } | undefined)?.t;
+    if (!/^[0-9a-f-]{36}$/i.test(orgId) || !verifyClientMediaToken(orgId, filename, typeof token === "string" ? token : undefined)) {
+      reply.code(403);
+      return { message: "Accès interdit à ce fichier." };
+    }
+    const [contents, message] = await Promise.all([
+      readClientMedia(orgId, filename),
+      prisma.message.findFirst({ where: { mediaFile: filename, conversation: { organizationId: orgId } }, select: { mediaMimeType: true, mediaName: true } }),
+    ]);
+    if (!contents || !message) {
+      reply.code(404);
+      return { message: "Fichier introuvable." };
+    }
+    return reply.headers(clientMediaResponseHeaders(message.mediaMimeType, message.mediaName, filename)).send(contents);
   });
 
   // Route temporaire (Phase 4) : permet à un humain de répondre manuellement

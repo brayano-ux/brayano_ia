@@ -92,3 +92,34 @@ describe("orders section in the assistant prompt", () => {
     expect(prompt).toContain("- order :");
   });
 });
+
+describe("sections added by the product improvements", () => {
+  it("adds nothing optional when nothing is provided", () => {
+    const prompt = buildSystemPrompt({ ...baseSettings, products: [] });
+    expect(prompt).not.toContain("HORAIRES D'OUVERTURE");
+    expect(prompt).not.toContain("CORRECTIONS DU PROPRIÉTAIRE");
+    expect(prompt).not.toContain("EXEMPLES D'ÉCHANGES RÉUSSIS");
+    expect(prompt).not.toContain("MESSAGE D'ACCUEIL DÉJÀ ENVOYÉ");
+  });
+
+  it("always forbids confirming a payment from a photo", () => {
+    const prompt = buildSystemPrompt({ ...baseSettings, products: [] });
+    expect(prompt).toContain("PHOTOS ET DOCUMENTS REÇUS");
+    expect(prompt).toContain("Ne confirme JAMAIS un paiement");
+  });
+
+  it("places the owner's corrections after the company's instructions", () => {
+    const prompt = buildSystemPrompt({
+      ...baseSettings,
+      products: [],
+      hoursSection: "HORAIRES D'OUVERTURE\n\nL'entreprise est FERMÉE.",
+      correctionsSection: "CORRECTIONS DU PROPRIÉTAIRE (PRIORITAIRES)\n- Règle de l'entreprise : vouvoyer.",
+      examplesSection: "EXEMPLES D'ÉCHANGES RÉUSSIS DE CETTE ENTREPRISE\n\nExemple 1",
+      welcomeSent: true,
+    });
+    expect(prompt).toContain("L'entreprise est FERMÉE.");
+    expect(prompt.indexOf("INSTRUCTIONS SPÉCIFIQUES")).toBeLessThan(prompt.indexOf("CORRECTIONS DU PROPRIÉTAIRE"));
+    expect(prompt).toContain("MESSAGE D'ACCUEIL DÉJÀ ENVOYÉ");
+    expect(prompt).toContain("Exemple 1");
+  });
+});

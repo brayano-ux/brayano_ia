@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { prisma } from "../database/client.js";
 import { NotFoundError } from "../shared/errors.js";
+import type { ActionOutcome } from "../appointments/appointments.service.js";
 import { buildOrderCancellationEmail, buildOrderEmail, notifyOrganizationAdmins } from "../notifications/owner-notifications.js";
 import {
   decideOrder,
@@ -116,7 +117,7 @@ export async function applyAiOrder(
   request: OrderRequest,
   context: OrderContext,
   now = new Date(),
-): Promise<{ appendToReply: string | null; replaceReply: string | null } | null> {
+): Promise<ActionOutcome | null> {
   try {
     if (request.action === "cancel") {
       return await applyOrderCancellation(context);
@@ -131,7 +132,7 @@ export async function applyAiOrder(
       fallbackName: context.contactName,
       fallbackPhone: context.contactPhone,
     });
-    if (decision.kind !== "create") return describeOrderOutcome(decision);
+    if (decision.kind !== "create") return { ...describeOrderOutcome(decision), kind: decision.kind };
 
     // Idempotence : la même commande répétée par l'IA ne crée pas de doublon.
     const signature = orderSignature(decision.items);
@@ -145,7 +146,7 @@ export async function applyAiOrder(
       select: { items: true },
     });
     if (recent.some((order) => orderSignature(order.items as Array<{ productId: string; quantity: number }>) === signature)) {
-      return describeOrderOutcome({ kind: "already_created" });
+      return { ...describeOrderOutcome({ kind: "already_created" }), kind: "already_created" };
     }
 
     await prisma.order.create({
@@ -173,14 +174,14 @@ export async function applyAiOrder(
         notes: decision.notes,
       }),
     );
-    return describeOrderOutcome(decision);
+    return { ...describeOrderOutcome(decision), kind: "create" };
   } catch (error) {
     console.error(`❌ [orders:${context.organizationId}] Échec de l'enregistrement de la commande :`, error);
     return null;
   }
 }
 
-async function applyOrderCancellation(context: OrderContext) {
+async function applyOrderCancellation(context: OrderContext): Promise<ActionOutcome> {
   const orders = await prisma.order.findMany({
     where: { organizationId: context.organizationId, contactJid: context.contactJid },
     orderBy: { createdAt: "desc" },
@@ -195,7 +196,7 @@ async function applyOrderCancellation(context: OrderContext) {
       data: { status: "CANCELLED" },
     });
     if (updated.count === 0) {
-      return describeOrderOutcome({ kind: "cancel_too_late", orderId: decision.orderId, status: "CONFIRMED" });
+      return { ...describeOrderOutcome({ kind: "cancel_too_late", orderId: decision.orderId, status: "CONFIRMED" }), kind: "cancel_too_late" };
     }
   }
   if (decision.kind === "cancel" || decision.kind === "cancel_too_late") {
@@ -211,5 +212,5 @@ async function applyOrderCancellation(context: OrderContext) {
       }),
     );
   }
-  return describeOrderOutcome(decision);
+  return { ...describeOrderOutcome(decision), kind: decision.kind };
 }

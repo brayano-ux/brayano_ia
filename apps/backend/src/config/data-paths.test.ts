@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { defaultProductImageDir } from "./data-paths.js";
+import { defaultClientMediaDir, defaultProductImageDir } from "./data-paths.js";
 
 describe("defaultProductImageDir", () => {
   it("puts the photos next to the WhatsApp sessions, whatever the disk is mounted on", () => {
@@ -15,5 +15,16 @@ describe("defaultProductImageDir", () => {
   it("keeps the historical local folder when the sessions are in a relative folder (development)", () => {
     expect(defaultProductImageDir("./wa-session")).toBe("./uploads/products");
     expect(defaultProductImageDir("wa-session")).toBe("./uploads/products");
+  });
+});
+
+describe("defaultClientMediaDir", () => {
+  it("keeps client files on the persistent disk, next to the sessions", () => {
+    expect(defaultClientMediaDir("/data/wa-session")).toBe("/data/client-media");
+    expect(defaultClientMediaDir("/var/data/wa-session/")).toBe("/var/data/client-media");
+  });
+
+  it("uses a local folder in development", () => {
+    expect(defaultClientMediaDir("./wa-session")).toBe("./uploads/client-media");
   });
 });

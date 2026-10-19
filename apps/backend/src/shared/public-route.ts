@@ -1,5 +1,7 @@
 const signedProductImagePath = /^\/media\/products\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.(?:jpg|png|webp)(?:\?.*)?$/i;
 
+const signedClientMediaPath = /^\/media\/client\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.[a-z0-9]{2,5}(?:\?.*)?$/i;
+
 export function isPublicRoute(url: string) {
   return url === "/"
     || url === "/login"
@@ -11,5 +13,6 @@ export function isPublicRoute(url: string) {
     || url === "/billing/plans"
     || url === "/billing/campay/callback"
     || url.startsWith("/billing/campay/callback?")
-    || signedProductImagePath.test(url);
+    || signedProductImagePath.test(url)
+    || signedClientMediaPath.test(url);
 }

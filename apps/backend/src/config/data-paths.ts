@@ -10,3 +10,9 @@ export function defaultProductImageDir(whatsappAuthDir: string): string {
   if (!path.isAbsolute(whatsappAuthDir)) return "./uploads/products";
   return path.join(path.dirname(path.resolve(whatsappAuthDir)), "product-images");
 }
+
+/** Photos et documents reçus de clients : même principe, sur le disque persistant à côté des sessions WhatsApp. */
+export function defaultClientMediaDir(whatsappAuthDir: string): string {
+  if (!path.isAbsolute(whatsappAuthDir)) return "./uploads/client-media";
+  return path.join(path.dirname(path.resolve(whatsappAuthDir)), "client-media");
+}

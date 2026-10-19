@@ -8,7 +8,7 @@
  * une promesse que bloquer une réponse légitime.
  */
 
-export type UnbackedClaim = "booking_confirmed" | "booking_cancelled" | "order_recorded" | "order_cancelled";
+export type UnbackedClaim = "booking_confirmed" | "booking_cancelled" | "order_recorded" | "order_cancelled" | "payment_confirmed";
 
 const BOOKING_CONFIRMED =
   /(?:rendez[\s-]?vous|rdv|r[ée]servation|cr[ée]neau)[^.!?\n]{0,60}?(?:confirmé(?:e|es|s)?(?![\p{L}])|enregistré(?:e|es|s)?(?![\p{L}])|r[ée]servé(?:e|es|s)?(?![\p{L}])|programmé(?:e|es|s)?(?![\p{L}])|reprogrammé(?:e|es|s)?(?![\p{L}])|d[ée]placé(?:e|es|s)?(?![\p{L}])|noté(?:e|es|s)?(?![\p{L}]))|(?:appointment|booking)[^.!?\n]{0,40}?(?:confirmed|booked|scheduled|rescheduled|moved)(?![\p{L}])/giu;
@@ -17,6 +17,20 @@ const BOOKING_CANCELLED =
 const ORDER_RECORDED =
   /commande[^.!?\n]{0,60}?(?:enregistré(?:e|es|s)?(?![\p{L}])|validé(?:e|es|s)?(?![\p{L}])|confirmé(?:e|es|s)?(?![\p{L}])|noté(?:e|es|s)?(?![\p{L}])|prise en compte)|order[^.!?\n]{0,40}?(?:recorded|placed|confirmed|registered)(?![\p{L}])/giu;
 const ORDER_CANCELLED = /commande[^.!?\n]{0,60}?annulé(?:e|es|s)?(?![\p{L}])|order[^.!?\n]{0,40}?cancell?ed(?![\p{L}])/giu;
+
+/** Seul le propriétaire peut confirmer un paiement : l'IA ne le voit jamais dans son compte Mobile Money. */
+const PAYMENT_CONFIRMED =
+  /(?:paiement|virement|transfert|versement|d[ée]p[ôo]t|payment|transfer|deposit)[^.!?\n]{0,50}?(?:re[çc]u(?:e|es|s)?(?![\p{L}])|confirm[ée](?:e|es|s)?(?![\p{L}])|valid[ée](?:e|es|s)?(?![\p{L}])|received|confirmed|verified)|(?:bien\s+)?(?:re[çc]u|confirm[ée]|valid[ée]|received|confirmed|verified)[^.!?\n]{0,25}?(?:votre|le|ce|your|the)\s+(?:paiement|virement|transfert|versement|d[ée]p[ôo]t|payment|transfer|deposit)/giu;
+
+/** Une phrase conditionnelle ou future (« dès que votre paiement sera confirmé ») n'affirme rien. */
+const CONDITIONAL = /\b(?:d[èe]s que|une fois|quand|lorsque|apr[èe]s|si|d[èe]s|tant que|until|once|when|after|if|as soon as|va|vont|allons|sera|seront|will)\b|v[ée]rifi/i;
+
+function claimsPayment(text: string): boolean {
+  return text.split(/(?<=[.!?\n])/).some((sentence) => {
+    PAYMENT_CONFIRMED.lastIndex = 0;
+    return PAYMENT_CONFIRMED.test(sentence) && !NEGATION.test(sentence) && !CONDITIONAL.test(sentence);
+  });
+}
 
 /** « le rendez-vous n'est pas encore confirmé » ne doit pas compter comme une promesse. */
 const NEGATION = /\b(?:pas|jamais|non|ni|not|never|no)\b|n['’]/i;
@@ -46,6 +60,8 @@ export function findUnbackedClaims(input: ClaimCheckInput): UnbackedClaim[] {
   const found: UnbackedClaim[] = [];
   const { reply } = input;
 
+  if (claimsPayment(reply)) found.push("payment_confirmed");
+
   if (input.agendaEnabled && !input.booking) {
     if (!input.hasUpcomingAppointment && claims(BOOKING_CONFIRMED, reply)) found.push("booking_confirmed");
     if (input.hasUpcomingAppointment && claims(BOOKING_CANCELLED, reply)) found.push("booking_cancelled");
@@ -66,6 +82,8 @@ const CORRECTIONS: Record<UnbackedClaim, string> = {
     'Tu as écrit que la commande était enregistrée alors que "order" était null : rien n\'a été enregistré. Si le client a confirmé sa commande, renseigne "order" avec "create" ; sinon ne dis pas qu\'elle est enregistrée et demande ce qui manque.',
   order_cancelled:
     'Tu as écrit que la commande était annulée alors que "order" était null : rien n\'a été annulé. Si le client veut annuler, renseigne "order" avec {"action":"cancel"} ; sinon ne dis pas qu\'elle est annulée.',
+  payment_confirmed:
+    "Tu as écrit qu'un paiement était reçu ou confirmé. Tu ne peux JAMAIS confirmer un paiement : tu ne vois pas le compte de l'entreprise. Dis seulement que tu as bien reçu la photo ou le message, que l'équipe va vérifier le paiement et qu'elle reviendra vers le client.",
 };
 
 /** Texte ajouté au prompt pour la nouvelle tentative. */
@@ -82,6 +100,8 @@ const NOTICES: Record<UnbackedClaim, string> = {
     "⚠️ Je n'ai pas pu enregistrer cette commande. Pouvez-vous me la confirmer à nouveau ? / I couldn't record that order. Could you confirm it again?",
   order_cancelled:
     "⚠️ Cette commande n'a pas été annulée. Souhaitez-vous que je l'annule ? / That order has not been cancelled. Would you like me to cancel it?",
+  payment_confirmed:
+    "⚠️ Je ne peux pas confirmer un paiement moi-même : l'équipe va le vérifier et vous répondre. / I can't confirm a payment myself: our team will check it and get back to you.",
 };
 
 /** Dernier recours si la nouvelle tentative contient encore une promesse non tenue : on le dit honnêtement. */

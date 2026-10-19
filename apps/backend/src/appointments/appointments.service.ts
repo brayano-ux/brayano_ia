@@ -272,6 +272,13 @@ Règles :
   return { section, config, serviceLabel: row.serviceLabel };
 }
 
+/** Résultat d'une action demandée par l'IA : texte à ajouter ou à substituer à la réponse, et ce qui s'est réellement passé. */
+export interface ActionOutcome {
+  appendToReply: string | null;
+  replaceReply: string | null;
+  kind: string;
+}
+
 export interface BookingContext {
   organizationId: string;
   conversationId: string;
@@ -289,7 +296,7 @@ export async function applyAiBooking(
   request: BookingRequest,
   context: BookingContext,
   now = new Date(),
-): Promise<{ appendToReply: string | null; replaceReply: string | null } | null> {
+): Promise<ActionOutcome | null> {
   try {
     const decision = await runInAgendaTransaction(context.organizationId, async (tx) => {
       const referenceDate = request.date ?? formatLocalDate(now, agenda.config.timezone);
@@ -347,7 +354,7 @@ export async function applyAiBooking(
         }),
       );
     }
-    return describeBookingOutcome(decision, agenda.config.timezone);
+    return { ...describeBookingOutcome(decision, agenda.config.timezone), kind: decision.kind };
   } catch (error) {
     console.error(`❌ [agenda:${context.organizationId}] Échec de la réservation IA :`, error);
     return null;

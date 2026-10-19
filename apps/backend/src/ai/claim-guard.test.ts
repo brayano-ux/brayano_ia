@@ -61,3 +61,34 @@ describe("claim texts", () => {
     expect(describeUnbackedClaims(["order_recorded"])).toContain("Je n'ai pas pu enregistrer cette commande");
   });
 });
+
+describe("payment confirmation claims", () => {
+  const base = { agendaEnabled: false, ordersEnabled: false, hasUpcomingAppointment: false, hasRecentOrder: false, hasOpenNewOrder: false };
+
+  it.each([
+    "Votre paiement a bien été reçu, merci !",
+    "Paiement confirmé, nous préparons votre commande.",
+    "J'ai bien reçu votre paiement de 15 000 FCFA.",
+    "Your payment has been received.",
+    "Le virement est validé.",
+  ])("flags « %s »", (reply) => {
+    expect(findUnbackedClaims({ ...base, reply })).toContain("payment_confirmed");
+  });
+
+  it.each([
+    "J'ai bien reçu votre photo. L'équipe va vérifier votre paiement et vous répondre.",
+    "Je n'ai pas reçu votre paiement pour le moment.",
+    "Dès que votre paiement sera confirmé, nous livrons.",
+    "Une fois le paiement reçu par l'équipe, nous préparons la commande.",
+    "Vous pouvez payer par Orange Money ou MTN MoMo.",
+    "Le paiement s'effectue à la livraison, en espèces.",
+    "Je ne peux pas confirmer le paiement moi-même.",
+  ])("does not flag « %s »", (reply) => {
+    expect(findUnbackedClaims({ ...base, reply })).not.toContain("payment_confirmed");
+  });
+
+  it("gives a correction and an honest notice", () => {
+    expect(buildClaimCorrection(["payment_confirmed"])).toContain("JAMAIS confirmer un paiement");
+    expect(describeUnbackedClaims(["payment_confirmed"])).toContain("l'équipe va le vérifier");
+  });
+});
