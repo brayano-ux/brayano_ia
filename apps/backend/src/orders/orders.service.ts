@@ -115,13 +115,20 @@ export async function updateOrderStatus(organizationId: string, orderId: string,
 }
 
 /** Section de prompt : présente seulement si les commandes sont activées ET le catalogue non vide. */
-export async function loadOrderPrompt(organizationId: string, contactJid?: string): Promise<string | null> {
+export async function loadOrderPrompt(
+  organizationId: string,
+  contactJid?: string,
+  /** Simulateur de l'agent : commande « fictive » du testeur à la place de celle d'un vrai client. */
+  override?: { latest: { items: Array<{ quantity: number; name: string }>; total: number | null } | null },
+): Promise<string | null> {
   const settings = await prisma.orderSettings.findUnique({ where: { organizationId } });
   if (!settings?.enabled) return null;
   const products = await prisma.product.count({ where: { organizationId, active: true } });
   if (products === 0) return null;
 
-  const latest = contactJid ? await findLatestOpenOrder(organizationId, contactJid) : null;
+  const latest = override
+    ? override.latest && { ...override.latest, status: "NEW" as const, createdAt: new Date(), deliveryAddress: "" }
+    : contactJid ? await findLatestOpenOrder(organizationId, contactJid) : null;
   const items = latest ? (latest.items as Array<{ quantity: number; name: string }>) : [];
   const current = latest
     ? `Commande en cours de CE client : ${items.map((item) => `${item.quantity} × ${item.name}`).join(", ")}${latest.total != null ? ` (total ${formatAmount(latest.total)})` : ""} — statut : ${STATUS_LABEL[latest.status as ContactOrder["status"]]}.`
@@ -159,6 +166,27 @@ export interface OrderContext {
   contactJid: string;
   contactName?: string | null | undefined;
   contactPhone?: string | null | undefined;
+}
+
+/**
+ * Simulation (testeur de l'agent) : ce que l'IA ferait avec cette commande, SANS rien enregistrer ni envoyer d'email.
+ */
+export async function previewAiOrder(
+  request: OrderRequest,
+  organizationId: string,
+  simulatedLatest: { items: Array<{ quantity: number; name: string }>; total: number | null } | null,
+) {
+  if (request.action === "cancel") {
+    const decision = decideOrderCancellation(simulatedLatest ? [{ id: "simulated", status: "NEW", createdAt: new Date() }] : []);
+    return { decision, outcome: { ...describeOrderOutcome(decision), kind: decision.kind }, order: null as null | { items: Array<{ quantity: number; name: string }>; total: number | null; address: string } };
+  }
+  const catalog = await prisma.product.findMany({ where: { organizationId, active: true }, select: { id: true, name: true, price: true } });
+  const decision = decideOrder({ request, catalog, fallbackName: "Client test", fallbackPhone: null });
+  return {
+    decision,
+    outcome: { ...describeOrderOutcome(decision), kind: decision.kind },
+    order: decision.kind === "create" ? { items: decision.items.map((line) => ({ quantity: line.quantity, name: line.name })), total: decision.total, address: decision.address } : null,
+  };
 }
 
 /** Ne lève jamais : en cas d'erreur la réponse WhatsApp part quand même (retourne null). */

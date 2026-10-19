@@ -71,7 +71,7 @@ export function buildDisconnectAlert(details: OrganizationDetails, outage: Conne
       "",
       describeOrganization(details),
       "",
-      "À faire : prévenir le client afin qu'il ouvre son tableau de bord, onglet WhatsApp, clique sur « Connecter » puis scanne le QR code avec le téléphone du numéro.",
+      "À faire : prévenir le client afin qu'il ouvre son tableau de bord, onglet WhatsApp, clique sur « Connexion par QR code » puis scanne le QR code avec le téléphone du numéro.",
     ].join("\n"),
   };
 }
@@ -101,7 +101,7 @@ export function buildClientDisconnectEmail(details: OrganizationDetails, outage:
       "",
       "Pour le reconnecter :",
       "  1. Ouvrez votre tableau de bord, onglet WhatsApp.",
-      "  2. Cliquez sur « Connecter ».",
+      "  2. Cliquez sur « Connexion par QR code » (ou sur « Utiliser un code d'association » si vous préférez saisir un code).",
       "  3. Sur le téléphone du numéro : WhatsApp, Appareils liés, Lier un appareil, puis scannez le QR code affiché.",
       dashboard,
       support,

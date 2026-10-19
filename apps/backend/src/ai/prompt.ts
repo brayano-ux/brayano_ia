@@ -297,6 +297,7 @@ avant ou après, avec exactement cette structure :
   "nextAction": "continue",
   "leadData": {},
   "productId": "",
+  "productIds": [],
   "imageUrl": "https://example.com/image.jpg"
 }
 
@@ -312,6 +313,7 @@ RÈGLES JSON
 - nextAction : "continue", "handoff" ou "stop".
 - leadData : objet contenant uniquement les données connues.
 - productId : identifiant d’un produit actif du catalogue, uniquement pour joindre sa photo à une demande explicite du prospect; sinon chaîne vide.
+- productIds : liste d'identifiants de produits du catalogue quand le prospect demande les photos de PLUSIEURS produits (3 photos au maximum seront envoyées, choisis les plus pertinentes) ; sinon liste vide ou absente.
 - imageUrl : URL d'image facultative à envoyer au prospect, uniquement si elle est utile et valide.
 ${settings.agenda ? '- booking : null, ou une demande de rendez-vous {"action":"book"|"reschedule"|"cancel","date":"AAAA-MM-JJ","time":"HH:mm","service":"…"} (voir la section PRISE DE RENDEZ-VOUS).\n' : ""}${settings.orders ? '- order : null, ou une commande confirmée {"action":"create","items":[{"productId":"…","quantity":1}],"customerName":"…","address":"…"} ou {"action":"cancel"} pour annuler la commande du client (voir la section PRISE DE COMMANDE).\n' : ""}
 Cohérence obligatoire :

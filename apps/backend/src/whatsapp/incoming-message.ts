@@ -32,6 +32,7 @@ import {
   buildProductDetailsMessage,
   buildProductImageCaption,
   resolveRequestedProductImage,
+  resolveRequestedProductPhotos,
 } from "../products/product-image-selection.js";
 import { listProductsForAssistant } from "../products/products.service.js";
 import type { IncomingWhatsAppMessage, WhatsAppProvider } from "./whatsapp.types.js";
@@ -405,15 +406,21 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
 
     await waitForConfiguredDelay(replyStartedAt, settings.responseDelaySeconds, context.wait);
 
-    const imageUrl = resolveRequestedProductImage({
-      message: message.text,
-      productId: aiReply.productId,
-      products,
-      legacyImageUrl: aiReply.imageUrl,
-      configuredLegacyImageUrl: settings.agentImageUrl,
-    });
+    // Photos demandées par le client : produits du catalogue uniquement (jamais une URL inventée par le modèle).
+    // Une photo REÇUE du client ([Photo reçue]) n'est pas une demande de photo.
+    const requestText = message.media ? message.media.caption ?? "" : message.text;
+    const photoProducts = resolveRequestedProductPhotos({ message: requestText, productId: aiReply.productId, productIds: aiReply.productIds, products });
+    const legacyImageUrl = photoProducts.length
+      ? null
+      : resolveRequestedProductImage({
+          message: requestText,
+          productId: aiReply.productId,
+          products,
+          legacyImageUrl: aiReply.imageUrl,
+          configuredLegacyImageUrl: settings.agentImageUrl,
+        });
 
-    const selectedProduct = products.find((product) => product.id === aiReply.productId && product.imageUrl === imageUrl);
+    const selectedProduct = photoProducts.length === 1 ? photoProducts[0]! : null;
     const outboundText = selectedProduct
       ? buildProductDetailsMessage(aiReply.reply, selectedProduct)
       : aiReply.reply;
@@ -462,14 +469,14 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
         textToSend = `${textToSend}\n\n${describeUnbackedClaims(unbackedClaims)}`;
       }
 
-      if (imageUrl) {
-        if (selectedProduct) {
-          await instance.sendMessage(message.fromJid, textToSend);
-          await instance.sendImage(message.fromJid, imageUrl, buildProductImageCaption(selectedProduct));
-        } else {
-          await instance.sendImage(message.fromJid, imageUrl, aiReply.reply);
-          if (textToSend !== outboundText) await instance.sendMessage(message.fromJid, textToSend);
+      if (photoProducts.length) {
+        await instance.sendMessage(message.fromJid, textToSend);
+        for (const product of photoProducts) {
+          await instance.sendImage(message.fromJid, product.imageUrl, buildProductImageCaption(product));
         }
+      } else if (legacyImageUrl) {
+        await instance.sendImage(message.fromJid, legacyImageUrl, aiReply.reply);
+        if (textToSend !== outboundText) await instance.sendMessage(message.fromJid, textToSend);
       } else {
         await instance.sendMessage(message.fromJid, textToSend);
       }
@@ -486,8 +493,9 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
           qualificationStatus: aiReply.qualificationStatus,
           needsHuman: aiReply.needsHuman,
           nextAction: aiReply.nextAction,
-          ...(selectedProduct ? { productName: selectedProduct.name } : {}),
-          imageSent: Boolean(imageUrl),
+          ...(photoProducts.length ? { productNames: photoProducts.map((product) => product.name) } : {}),
+          imageSent: Boolean(photoProducts.length || legacyImageUrl),
+          photosSent: photoProducts.length + (legacyImageUrl ? 1 : 0),
           actions,
           claimRetried,
           claimsUnresolved: unbackedClaims,
