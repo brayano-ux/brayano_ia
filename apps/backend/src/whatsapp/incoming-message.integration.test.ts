@@ -134,6 +134,27 @@ describe.skipIf(!integrationEnabled)("traitement d'un message entrant (base rée
     });
   });
 
+  describe("STOP", () => {
+    it("n'envoie plus de relances ni de messages groupés au client qui écrit STOP, et le confirme sans appeler l'IA", async () => {
+      const { organization } = await createTestOrganization();
+      const calls = installScriptedAi([aiReply()]);
+      const whatsapp = new FakeWhatsApp();
+
+      await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "STOP"));
+
+      expect(calls).toHaveLength(0);
+      expect(whatsapp.sent[0]?.text).toContain("Bien noté");
+      expect((await prisma.contact.findFirstOrThrow()).optedOut).toBe(true);
+    });
+
+    it("ne prend pas pour un désabonnement un message qui contient une vraie demande", async () => {
+      const { organization } = await createTestOrganization();
+      installScriptedAi([aiReply({ reply: "Voici la robe." })]);
+      await deliver(organization.id, new FakeWhatsApp(), inbound(JID_NUMBER, "Stop, montrez-moi plutôt la robe rouge s'il vous plaît, merci beaucoup"));
+      expect((await prisma.contact.findFirstOrThrow()).optedOut).toBe(false);
+    });
+  });
+
   describe("photos et documents reçus", () => {
     const photo = (caption?: string) => ({
       text: caption ?? "[Photo reçue]",

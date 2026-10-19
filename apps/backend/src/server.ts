@@ -5,6 +5,8 @@ import { configAssistantRoute } from "./config-assistant/config-assistant.route.
 import { adminRoute } from "./routes/admin.route.js";
 import { aiCorrectionsRoute } from "./ai/corrections.route.js";
 import { statsRoute } from "./analytics/stats.route.js";
+import { broadcastsRoute } from "./broadcasts/broadcasts.route.js";
+import { startBackgroundJobs } from "./jobs/runner.js";
 import { aiSettingsRoute } from "./routes/ai-settings.route.js";
 import { aiTestRoute } from "./routes/ai-test.route.js";
 import { authRoute, requireAuth } from "./routes/auth.route.js";
@@ -142,6 +144,7 @@ async function buildServer() {
   await app.register(aiTestRoute);
   await app.register(aiCorrectionsRoute);
   await app.register(statsRoute);
+  await app.register(broadcastsRoute);
   await app.register(routingRoute);
   await app.register(whatsappRoute);
   await app.register(conversationsRoute);
@@ -162,6 +165,7 @@ async function start() {
   try {
     await app.listen({ port: env.PORT, host: "0.0.0.0" });
     app.log.info(`🚀 Brayano AI backend démarré sur ${env.APP_URL}`);
+    startBackgroundJobs();
   } catch (err) {
     app.log.error(err);
     process.exit(1);

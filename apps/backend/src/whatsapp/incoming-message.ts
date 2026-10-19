@@ -5,6 +5,8 @@ import { buildSystemPrompt } from "../ai/prompt.js";
 import { loadMemorySections } from "../ai/memory.service.js";
 import { classifyByCaption, describeMediaKindLabel, type MediaAnalysis, type MediaKind } from "../ai/media-analysis.js";
 import { decideWelcome } from "../ai/welcome.js";
+import { isOptOutRequest, OPT_OUT_CONFIRMATION } from "../ai/opt-out.js";
+import { setContactOptOut } from "../contacts/contacts.service.js";
 import {
   advanceConversationStage,
   getRecentHistoryForAi,
@@ -191,6 +193,19 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
         caption: message.media?.caption ?? null,
         received,
       });
+    }
+
+    // « STOP » : plus de relances ni de messages groupés pour ce contact (il peut toujours écrire et obtenir une réponse).
+    if (!message.media && isOptOutRequest(message.text)) {
+      await setContactOptOut(organizationId, conversation.contactId, true);
+      console.log(`🔕 [org:${organizationId}] Le contact demande à ne plus recevoir de relances.`);
+      if (conversation.aiEnabled && conversation.status === "OPEN") {
+        await withConversationSendLock(conversation.id, async () => {
+          await instance.sendMessage(message.fromJid, OPT_OUT_CONFIRMATION);
+          await recordOutboundMessage({ conversationId: conversation.id, text: OPT_OUT_CONFIRMATION, author: "AI", aiMeta: { kind: "opt_out" } });
+        });
+      }
+      return;
     }
 
     const shouldReactivateAi =
