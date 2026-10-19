@@ -198,6 +198,11 @@ export async function restoreWhatsAppConnections(): Promise<void> {
   }
 }
 
+/** Réservé aux tests et aux démonstrations locales : branche un faux numéro WhatsApp sur une entreprise. */
+export function registerWhatsAppProviderForTests(organizationId: string, provider: WhatsAppProvider): void {
+  providers.set(organizationId, provider);
+}
+
 export function getWhatsAppAccountStatus(organizationId: string): WhatsAppConnectionStatus {
   return providers.get(organizationId)?.getStatus() ?? "DISCONNECTED";
 }

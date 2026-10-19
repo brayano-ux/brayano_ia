@@ -95,6 +95,8 @@ describe.skipIf(!integrationEnabled)("traitement d'un message entrant (base rée
       expect(whatsapp.sent.map((item) => item.text)).toEqual(["Bienvenue chez Salon Éclat 👋", "La coupe coûte 5 000 FCFA.", "Oui, samedi."]);
       expect(calls[0]?.systemPrompt).toContain("MESSAGE D'ACCUEIL DÉJÀ ENVOYÉ");
       expect(calls[1]?.systemPrompt).not.toContain("MESSAGE D'ACCUEIL DÉJÀ ENVOYÉ");
+      // Le dernier tour vu par l'IA est bien la question du client (l'accueil est placé devant).
+      expect(calls[0]?.history).toEqual([{ role: "assistant", content: "Bienvenue chez Salon Éclat 👋" }, { role: "user", content: "Combien coûte la coupe ?" }]);
     });
 
     it("n'envoie rien de plus quand aucun accueil n'est configuré", async () => {

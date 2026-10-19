@@ -3,7 +3,7 @@ import { initAuthFlow, logoutUser } from "./features/auth/auth.js";
 import { loadOrganizations } from "./features/organizations/organizations.js";
 import { initNavigation, registerLeaveGuard, setView, UNSAVED_CHANGES_MESSAGE, updateRealtimeHeader } from "./features/navigation/navigation.js";
 import { initOverview, refreshOverview } from "./features/overview/overview.js";
-import { initInbox, renderInbox, openConversation, bindInboxRefresh } from "./features/inbox/inbox.js";
+import { initInbox, loadInbox, openConversation, bindInboxRefresh } from "./features/inbox/inbox.js";
 import { hasUnsavedAgentChanges, initAgent, loadSettings } from "./features/agent/agent.js";
 import { initDelaySettings, loadDelaySettings } from "./features/settings/delay-settings.js";
 import { initRoutingSettings, loadRoutingConfig } from "./features/settings/routing-settings.js";
@@ -12,6 +12,9 @@ import { initWhatsapp, loadWhatsApp } from "./features/whatsapp/whatsapp.js";
 import { initProducts, loadProducts } from "./features/products/products.js";
 import { hasUnsavedAgendaChanges, initAppointments, loadAppointments } from "./features/appointments/appointments.js";
 import { initOrders, loadOrders } from "./features/orders/orders.js";
+import { initBroadcasts, loadBroadcastsView } from "./features/broadcasts/broadcasts.js";
+import { initTeamSettings, loadTeam } from "./features/settings/team-settings.js";
+import { loadRole } from "./features/navigation/roles.js";
 import { initConfigAssistant } from "./features/config-assistant/config-assistant.js";
 import { readSession } from "./services/storage.js";
 import { isNetworkError } from "./services/api.js";
@@ -29,14 +32,16 @@ async function refreshAll() {
 
 const viewLoaders = {
   overview: refreshAll,
-  inbox: renderInbox,
+  inbox: () => loadInbox(),
   agent: loadSettings,
   products: loadProducts,
   appointments: loadAppointments,
   orders: loadOrders,
+  broadcasts: loadBroadcastsView,
   settings: () => {
     loadDelaySettings();
     loadRoutingConfig();
+    loadTeam();
   },
   whatsapp: loadWhatsApp,
 };
@@ -52,6 +57,7 @@ function renderUserCard() {
 
 async function onAuthenticated() {
   renderUserCard();
+  await loadRole();
   try {
     await loadOrganizations(refreshAll);
   } catch (error) {
@@ -88,6 +94,8 @@ function bootstrap() {
   initProducts();
   initAppointments();
   initOrders();
+  initBroadcasts();
+  initTeamSettings();
   initDelaySettings();
   initRoutingSettings();
   initWhatsapp();

@@ -4,20 +4,18 @@
     <div>
       <p class="eyebrow">RELATION CLIENT</p>
       <h1>Boîte de réception</h1>
-      <p class="muted">Suivez et reprenez la main sur vos conversations.</p>
+      <p class="muted">Suivez vos clients, répondez-leur et reprenez la main quand il le faut.</p>
     </div>
-    <span class="pill"><i aria-hidden="true"></i> Synchronisation active</span>
+    <span class="pill" id="inbox-live-pill"><i aria-hidden="true"></i> Mise à jour automatique</span>
   </div>
 
   <div class="inbox-layout">
     <section class="panel inbox-panel">
       <div class="inbox-toolbar">
         <strong id="inbox-total">Conversations</strong>
-        <button class="ghost-button">
-          Toutes
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-        </button>
+        <input id="inbox-search" class="inbox-search" type="search" placeholder="Rechercher…" aria-label="Chercher une conversation" autocomplete="off" />
       </div>
+      <div id="inbox-stage-filters" class="stage-filters" role="tablist" aria-label="Filtrer par étiquette"></div>
       <div id="all-conversations" class="conversation-list" aria-label="Liste des conversations"></div>
     </section>
 

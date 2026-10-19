@@ -1,0 +1,22 @@
+/* ============================================================
+   MESSAGES GROUPÉS
+============================================================ */
+.broadcast-safety { display: grid; gap: var(--space-2); margin-bottom: var(--space-5); background: var(--info-bg); border-color: transparent; font-size: var(--text-sm); }
+.broadcast-safety ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; color: var(--ink-2); }
+.broadcast-layout { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: var(--space-5); align-items: start; }
+.broadcast-form { display: grid; gap: var(--space-4); }
+.broadcast-audience { display: grid; gap: var(--space-3); margin: 0; padding: 0; border: 0; }
+.broadcast-stages { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.broadcast-stages label { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid var(--line); border-radius: var(--radius-full); font-size: var(--text-sm); font-weight: 600; cursor: pointer; }
+.broadcast-stages label:has(input:checked) { background: var(--brand-50); border-color: var(--brand-200); color: var(--brand-700); }
+.bc-window { max-width: 240px; }
+.broadcast-preview { padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--success-bg); color: var(--success); font-size: var(--text-sm); line-height: 1.5; }
+.broadcast-preview.blocked { background: var(--warning-bg); color: var(--warning); }
+.broadcast-history { display: grid; gap: var(--space-3); }
+.bc-list { display: grid; gap: var(--space-3); }
+.bc-item { display: grid; gap: var(--space-2); padding: var(--space-4); border: 1px solid var(--line); border-radius: var(--radius-md); }
+.bc-item header, .bc-item footer { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; }
+.bc-text { font-size: var(--text-sm); white-space: pre-wrap; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.bc-progress { height: 8px; border-radius: var(--radius-full); background: var(--line-soft); overflow: hidden; }
+.bc-progress i { display: block; height: 100%; background: var(--brand-500); transition: width 0.4s var(--ease); }
+@media (max-width: 1099px) { .broadcast-layout { grid-template-columns: minmax(0, 1fr); } }

@@ -54,3 +54,17 @@ MESSAGE D'ACCUEIL DÉJÀ ENVOYÉ
 Le message d'accueil de l'entreprise vient d'être envoyé au client, juste avant ta réponse.
 Ne le répète pas, ne te présente pas et ne salue pas à nouveau : réponds directement à sa demande.
 `.trim();
+
+/**
+ * Le message d'accueil est enregistré avant d'appeler l'IA : dans l'historique il arrive donc APRÈS le message du client.
+ * Pour que le modèle réponde bien au client, on remet l'accueil devant les messages du client (la conversation se lit
+ * alors « accueil, puis question du client », et le dernier tour est celui du client).
+ */
+export function placeWelcomeBeforeClientMessages<T extends { role: "user" | "assistant"; content: string }>(history: T[], welcomeText: string): T[] {
+  const last = history[history.length - 1];
+  if (!last || last.role !== "assistant" || last.content !== welcomeText) return history;
+  const rest = history.slice(0, -1);
+  let firstClientTurn = rest.length;
+  while (firstClientTurn > 0 && rest[firstClientTurn - 1]!.role === "user") firstClientTurn -= 1;
+  return [...rest.slice(0, firstClientTurn), last, ...rest.slice(firstClientTurn)];
+}

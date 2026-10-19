@@ -3,6 +3,9 @@ import { $, $$, escapeHtml, showToast } from "../../utils/dom.js";
 import { getState, setState } from "../../state/store.js";
 import { APP_CONFIG } from "../../config.js";
 import { applyPlatformSuspension } from "../suspension/suspension.js";
+import { initLearning, loadLearning } from "./learning.js";
+import { initHoursSettings, fillHoursSettings, readHoursSettings, hoursSnapshot, validateHours } from "./hours-settings.js";
+import { initTester } from "./tester.js";
 
 /**
  * Feature "Agent IA" : configuration de la base de connaissances
@@ -45,6 +48,7 @@ export async function loadSettings() {
     renderAgentImagePreview(settings.agentImageUrl || "");
     $("#system-prompt").value = settings.systemPrompt || "";
     $("#welcome-message").value = settings.welcomeMessage || "";
+    fillHoursSettings(settings);
 
     $$('input[name="qualification-field"]').forEach((input) => {
       input.checked = qualificationFields.includes(input.value);
@@ -53,6 +57,7 @@ export async function loadSettings() {
     markClean();
     refreshAgentChrome();
     loadFeatureStates();
+    loadLearning();
   } catch (error) {
     showToast(error.message, "error");
   }
@@ -86,6 +91,8 @@ async function saveSettings(event) {
   event.preventDefault();
   if (!$("#agent-name").value.trim()) return focusInvalid("identity", "#agent-name", "Donnez un nom à votre agent.");
   if (!$("#system-prompt").value.trim()) return focusInvalid("behavior", "#system-prompt", "Les instructions de l'agent sont obligatoires.");
+  const hoursError = validateHours();
+  if (hoursError) return focusInvalid("hours", "#bh-rows", hoursError);
   const saveButton = $("#save-agent");
   saveButton.disabled = true;
   try {
@@ -104,6 +111,7 @@ async function saveSettings(event) {
         systemPrompt: $("#system-prompt").value,
         welcomeMessage: $("#welcome-message").value,
         qualificationFields,
+        ...readHoursSettings(),
       }),
     });
     markClean();
@@ -140,69 +148,6 @@ function createQualificationField() {
   showToast("Champ ajouté et coché.", "success");
 }
 
-function renderAgentTestHistory() {
-  const container = $("#agent-test-messages");
-  const { agentTestHistory } = getState();
-
-  if (!agentTestHistory.length) {
-    container.innerHTML = '<div class="empty-state">Écrivez un premier message pour simuler un prospect.</div>';
-    return;
-  }
-
-  container.innerHTML = "";
-  agentTestHistory.forEach((message) => {
-    const bubble = document.createElement("div");
-    bubble.className = `agent-test-bubble ${message.role === "user" ? "prospect" : "agent"}`;
-    bubble.textContent = message.content;
-    container.appendChild(bubble);
-  });
-  container.scrollTop = container.scrollHeight;
-}
-
-function clearAgentTest() {
-  setState({ agentTestHistory: [] });
-  $("#agent-test-result").classList.add("hidden");
-  renderAgentTestHistory();
-}
-
-async function testAgentReply(event) {
-  event.preventDefault();
-  const input = $("#agent-test-input");
-  const button = $("#agent-test-send");
-  const message = input.value.trim();
-  if (!message) return;
-
-  button.disabled = true;
-  input.disabled = true;
-  const history = [...getState().agentTestHistory, { role: "user", content: message }];
-  setState({ agentTestHistory: history });
-  renderAgentTestHistory();
-  input.value = "";
-
-  try {
-    const result = await api(`/organizations/${getState().organizationId}/ai-test/reply`, {
-      method: "POST",
-      body: JSON.stringify({ message, history: history.slice(0, -1) }),
-    });
-    setState({ agentTestHistory: [...history, { role: "assistant", content: result.reply }] });
-    renderAgentTestHistory();
-
-    const resultPanel = $("#agent-test-result");
-    resultPanel.classList.remove("hidden");
-    const selectedProduct = result.productName ? ` | Produit retenu : ${result.productName}` : "";
-    resultPanel.textContent = `Qualification : ${result.qualificationStatus} | Score : ${result.leadScore}/100 | Action : ${result.nextAction}${selectedProduct}`;
-  } catch (error) {
-    setState({ agentTestHistory: history.slice(0, -1) });
-    renderAgentTestHistory();
-    showToast(error.message || "Impossible de tester l'agent.", "error");
-  } finally {
-    button.disabled = false;
-    input.disabled = false;
-    input.focus();
-  }
-}
-
-
 /* ------------------------------------------------------------------
    Refonte de la page : onglets, état, complétude, modèles, fonctions
 ------------------------------------------------------------------- */
@@ -222,6 +167,7 @@ function snapshot() {
     $("#agent-name").value, $("#business-info").value, $("#agent-image-url").value, $("#system-prompt").value,
     $("#welcome-message").value, $("#global-ai-enabled").checked,
     $$('input[name="qualification-field"]:checked, .custom-qualification-field:checked').map((input) => input.value).sort(),
+    hoursSnapshot(),
   ]);
 }
 
@@ -242,6 +188,8 @@ function setActiveTab(tab) {
     button.setAttribute("aria-selected", String(active));
   });
   $$(".agent-pane").forEach((pane) => pane.classList.toggle("hidden", pane.dataset.agentPane !== tab));
+  // L'onglet « Apprentissage » est hors du formulaire principal : on cache alors le formulaire (sinon il reste une carte vide).
+  $("#agent-form").classList.toggle("hidden", tab === "learning");
 }
 
 function focusInvalid(tab, selector, message) {
@@ -366,13 +314,6 @@ function initAgentChrome() {
     }
   });
 
-  $$(".agent-suggestion").forEach((button) => {
-    button.onclick = () => {
-      $("#agent-test-input").value = button.textContent;
-      $("#agent-test-form").requestSubmit();
-    };
-  });
-
   document.addEventListener("keydown", (event) => {
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s" && !$("#agent-view").classList.contains("hidden")) {
       event.preventDefault();
@@ -400,6 +341,7 @@ export function initAgent() {
       createQualificationField();
     }
   };
-  $("#agent-test-form").onsubmit = testAgentReply;
-  $("#clear-agent-test").onclick = clearAgentTest;
+  initHoursSettings();
+  initLearning();
+  initTester();
 }

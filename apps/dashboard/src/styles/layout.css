@@ -117,3 +117,7 @@
   .tab-item.active { color: var(--brand-600); }
   .tab-item.active .icon { stroke-width: 2.1; }
 }
+
+/* ----- Rôles : un employé ne voit pas les réglages réservés au propriétaire ----- */
+.role-agent .admin-only { display: none !important; }
+.role-agent .appointments-layout { grid-template-columns: minmax(0, 1fr); }

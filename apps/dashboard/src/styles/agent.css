@@ -117,3 +117,44 @@
   .agent-feature .ghost-button { width: 100%; }
   .agent-save-area { width: 100%; justify-content: space-between; }
 }
+
+/* ----- Horaires et relances ----- */
+.bh-details { display: grid; gap: var(--space-4); transition: opacity 0.2s var(--ease); }
+.bh-details.is-off { opacity: 0.45; pointer-events: none; }
+.bh-rows { display: grid; gap: var(--space-2); }
+.bh-row { display: grid; gap: var(--space-2); padding: var(--space-2) var(--space-3); border: 1px solid var(--line-soft); border-radius: var(--radius-md); background: var(--surface-2); }
+.bh-row .agenda-range input { min-height: 40px; padding: 6px 8px; text-align: center; }
+.bh-row .agenda-range input::-webkit-calendar-picker-indicator { display: none; }
+.bh-section { padding-top: var(--space-5); border-top: 1px solid var(--line-soft); }
+.bh-section h2 { font-size: var(--text-lg); }
+@media (min-width: 640px) { .bh-row { grid-template-columns: 110px minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: var(--space-4); } }
+
+/* ----- Apprentissage ----- */
+.agent-learning { padding: var(--space-6); }
+.learning-add { display: grid; gap: var(--space-3); padding: var(--space-4); border: 1px dashed var(--line); border-radius: var(--radius-md); background: var(--surface-2); }
+.learning-list { display: grid; gap: var(--space-3); }
+.learning-item { display: grid; gap: var(--space-2); padding: var(--space-4); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); }
+.learning-item.is-off { opacity: 0.6; }
+.learning-when { font-size: var(--text-sm); color: var(--muted); }
+.learning-when strong { color: var(--ink); }
+.learning-answer { padding: var(--space-3); border-radius: var(--radius-sm); background: var(--success-bg); color: var(--ink); font-size: var(--text-sm); white-space: pre-wrap; }
+.learning-wrong { font-size: var(--text-xs); }
+.learning-item footer { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; }
+.learning-actions { display: flex; gap: var(--space-1); flex-wrap: wrap; }
+
+/* ----- Testeur : fichiers, effets, état simulé ----- */
+.agent-test-turn { display: grid; gap: var(--space-2); justify-items: start; }
+.agent-test-bubble.has-image { display: grid; gap: 6px; }
+.agent-test-bubble.has-image img { max-width: 220px; max-height: 220px; border-radius: 10px; object-fit: cover; }
+.test-media-tag { display: inline-block; margin-bottom: 4px; padding: 2px 8px; border-radius: var(--radius-full); background: rgba(255, 255, 255, 0.22); font-size: var(--text-xs); font-weight: 700; }
+.test-effects { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; max-width: 92%; }
+.test-effects li { padding: 6px 10px; border-radius: var(--radius-sm); background: var(--info-bg); color: var(--info); font-size: var(--text-xs); font-weight: 600; line-height: 1.4; }
+.test-effects li.effect-booking, .test-effects li.effect-order { background: var(--success-bg); color: var(--success); }
+.test-effects li.effect-handoff, .test-effects li.effect-claim, .test-effects li.effect-file { background: var(--warning-bg); color: var(--warning); }
+.agent-test-state { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.agent-test-state span { padding: 4px 10px; border-radius: var(--radius-full); background: var(--brand-50); color: var(--brand-700); font-size: var(--text-xs); font-weight: 700; }
+.agent-test-attach { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); font-size: var(--text-xs); }
+.chip-button { min-height: 32px; padding: 0 12px; border: 1px solid var(--line); border-radius: var(--radius-full); background: var(--surface); font-size: var(--text-xs); font-weight: 600; color: var(--ink-2); transition: var(--transition); }
+.chip-button:hover:not(:disabled) { border-color: var(--brand-200); background: var(--brand-50); color: var(--brand-700); }
+.chip-button:disabled { opacity: 0.5; cursor: not-allowed; }
+@media (max-width: 639px) { .agent-learning { padding: var(--space-4); } }

@@ -4,7 +4,7 @@ import { buildBusinessHoursPrompt } from "../ai/business-hours.js";
 import { buildSystemPrompt } from "../ai/prompt.js";
 import { loadMemorySections } from "../ai/memory.service.js";
 import { classifyByCaption, describeMediaKindLabel, type MediaAnalysis, type MediaKind } from "../ai/media-analysis.js";
-import { decideWelcome } from "../ai/welcome.js";
+import { decideWelcome, placeWelcomeBeforeClientMessages } from "../ai/welcome.js";
 import { isOptOutRequest, OPT_OUT_CONFIRMATION } from "../ai/opt-out.js";
 import { setContactOptOut } from "../contacts/contacts.service.js";
 import {
@@ -294,7 +294,8 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
       examplesSection: memory.examples,
       welcomeSent,
     });
-    const history = await getRecentHistoryForAi(conversation.id);
+    const recentHistory = await getRecentHistoryForAi(conversation.id);
+    const history = welcomeSent && welcomeDecision.welcome ? placeWelcomeBeforeClientMessages(recentHistory, welcomeDecision.welcome) : recentHistory;
     let aiReply = await getAiOrchestrator().getReply(conversation.id, systemPrompt, history);
 
     // Garde-fou : le modèle dit « rendez-vous confirmé / annulé », « commande enregistrée / annulée »

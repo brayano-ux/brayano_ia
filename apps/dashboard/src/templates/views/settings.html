@@ -4,7 +4,7 @@
     <div>
       <p class="eyebrow">CONFIGURATION</p>
       <h1>Paramètres</h1>
-      <p class="muted">Réglez le délai de réponse de l'agent et le routage de vos prospects.</p>
+      <p class="muted">Réglez le délai de réponse de l’agent, votre équipe et le routage de vos prospects.</p>
     </div>
     <button class="primary" id="save-settings">Enregistrer</button>
   </div>
@@ -41,6 +41,26 @@
         </label>
       </div>
     </form>
+
+
+    <!-- ============ Équipe ============ -->
+    <section class="panel settings-card team-settings" aria-labelledby="team-title">
+      <div class="settings-card-head">
+        <h2 id="team-title">Votre équipe</h2>
+        <p class="muted">Ajoutez des employés qui partagent la boîte de réception : ils répondent aux clients, suivent les commandes et les rendez-vous. Ils ne peuvent ni modifier l’agent, ni le catalogue, ni le numéro WhatsApp.</p>
+      </div>
+      <div id="team-list" class="team-list" aria-live="polite"><div class="empty-state">Chargement…</div></div>
+      <form id="team-form" class="team-form">
+        <h3>Ajouter un employé</h3>
+        <div class="team-form-grid">
+          <label><span class="field-label">Nom</span><input id="team-name" type="text" maxlength="80" required placeholder="Ex. Awa" /></label>
+          <label><span class="field-label">Email de connexion</span><input id="team-email" type="email" required placeholder="awa@exemple.com" autocomplete="off" /></label>
+          <label><span class="field-label">Mot de passe (8 caractères minimum)</span><input id="team-password" type="text" minlength="8" maxlength="100" required autocomplete="off" /></label>
+        </div>
+        <p class="field-hint">Communiquez-lui son email et son mot de passe : il se connecte sur la même page que vous.</p>
+        <div class="form-actions"><button type="submit" class="primary">Ajouter l’employé</button></div>
+      </form>
+    </section>
 
     <!-- ============ Zones et responsables ============ -->
     <section class="routing-settings" aria-labelledby="routing-title">
