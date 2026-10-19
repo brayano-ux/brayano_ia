@@ -156,3 +156,18 @@ export type OrderSettings = Prisma.OrderSettingsModel
  * 
  */
 export type Order = Prisma.OrderModel
+/**
+ * Model AiCorrection
+ * Correction du propriétaire : « dans ce cas, réponds comme ça ». Injectée dans le prompt de CETTE entreprise seulement.
+ */
+export type AiCorrection = Prisma.AiCorrectionModel
+/**
+ * Model Broadcast
+ * 
+ */
+export type Broadcast = Prisma.BroadcastModel
+/**
+ * Model BroadcastRecipient
+ * 
+ */
+export type BroadcastRecipient = Prisma.BroadcastRecipientModel

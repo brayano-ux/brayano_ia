@@ -73,7 +73,10 @@ export const ModelName = {
   AppointmentSettings: 'AppointmentSettings',
   Appointment: 'Appointment',
   OrderSettings: 'OrderSettings',
-  Order: 'Order'
+  Order: 'Order',
+  AiCorrection: 'AiCorrection',
+  Broadcast: 'Broadcast',
+  BroadcastRecipient: 'BroadcastRecipient'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -118,6 +121,13 @@ export const AiSettingsScalarFieldEnum = {
   qualificationFields: 'qualificationFields',
   aiEnabled: 'aiEnabled',
   responseDelaySeconds: 'responseDelaySeconds',
+  businessHoursEnabled: 'businessHoursEnabled',
+  businessHours: 'businessHours',
+  businessTimezone: 'businessTimezone',
+  closedMessage: 'closedMessage',
+  followUpEnabled: 'followUpEnabled',
+  followUpDelayHours: 'followUpDelayHours',
+  followUpMax: 'followUpMax',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -182,6 +192,7 @@ export const UserScalarFieldEnum = {
   passwordHash: 'passwordHash',
   name: 'name',
   role: 'role',
+  active: 'active',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -264,6 +275,8 @@ export const ContactScalarFieldEnum = {
   organizationId: 'organizationId',
   whatsappJid: 'whatsappJid',
   displayName: 'displayName',
+  optedOut: 'optedOut',
+  optedOutAt: 'optedOutAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -281,6 +294,13 @@ export const ConversationScalarFieldEnum = {
   leadScore: 'leadScore',
   leadData: 'leadData',
   summary: 'summary',
+  stage: 'stage',
+  stageLocked: 'stageLocked',
+  paymentCheckPending: 'paymentCheckPending',
+  lastInboundAt: 'lastInboundAt',
+  lastReadAt: 'lastReadAt',
+  followUpCount: 'followUpCount',
+  lastFollowUpAt: 'lastFollowUpAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -310,6 +330,10 @@ export const MessageScalarFieldEnum = {
   type: 'type',
   content: 'content',
   externalId: 'externalId',
+  mediaFile: 'mediaFile',
+  mediaMimeType: 'mediaMimeType',
+  mediaName: 'mediaName',
+  aiMeta: 'aiMeta',
   createdAt: 'createdAt'
 } as const
 
@@ -448,12 +472,59 @@ export const OrderScalarFieldEnum = {
   items: 'items',
   total: 'total',
   status: 'status',
+  paymentStatus: 'paymentStatus',
+  paymentMethod: 'paymentMethod',
+  paymentNote: 'paymentNote',
+  paidAt: 'paidAt',
   source: 'source',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
+
+
+export const AiCorrectionScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  question: 'question',
+  wrongReply: 'wrongReply',
+  correctReply: 'correctReply',
+  active: 'active',
+  usedCount: 'usedCount',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AiCorrectionScalarFieldEnum = (typeof AiCorrectionScalarFieldEnum)[keyof typeof AiCorrectionScalarFieldEnum]
+
+
+export const BroadcastScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  text: 'text',
+  status: 'status',
+  total: 'total',
+  sentCount: 'sentCount',
+  failedCount: 'failedCount',
+  createdAt: 'createdAt',
+  finishedAt: 'finishedAt'
+} as const
+
+export type BroadcastScalarFieldEnum = (typeof BroadcastScalarFieldEnum)[keyof typeof BroadcastScalarFieldEnum]
+
+
+export const BroadcastRecipientScalarFieldEnum = {
+  id: 'id',
+  broadcastId: 'broadcastId',
+  contactId: 'contactId',
+  jid: 'jid',
+  status: 'status',
+  error: 'error',
+  sentAt: 'sentAt'
+} as const
+
+export type BroadcastRecipientScalarFieldEnum = (typeof BroadcastRecipientScalarFieldEnum)[keyof typeof BroadcastRecipientScalarFieldEnum]
 
 
 export const SortOrder = {

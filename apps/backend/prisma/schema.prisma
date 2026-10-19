@@ -14,27 +14,29 @@ model Organization {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  users             User[]
-  whatsappAccounts  WhatsAppAccount[]
-  contacts          Contact[]
-  conversations     Conversation[]
-  aiSettings        AiSettings?
-  locations         Location[]
-  responsibleAgents Responsible[]
-  routingSettings   OrganizationRoutingSettings?
-  prospectLeads     ProspectLead[]
-  products          Product[]
-  appointmentSettings AppointmentSettings?
-  appointments      Appointment[]
-  orderSettings     OrderSettings?
-  orders            Order[]
-  billingPayments   BillingPayment[]
-  billingSubscription BillingSubscription?
-  freeAiResponsesRemaining Int @default(0) @map("free_ai_responses_remaining")
-  trialUpgradeEmailSentAt DateTime? @map("trial_upgrade_email_sent_at")
-  platformSuspended       Boolean   @default(false) @map("platform_suspended")
-  suspensionReason        String?   @map("suspension_reason")
-  suspendedAt             DateTime? @map("suspended_at")
+  users                    User[]
+  whatsappAccounts         WhatsAppAccount[]
+  contacts                 Contact[]
+  conversations            Conversation[]
+  aiSettings               AiSettings?
+  locations                Location[]
+  responsibleAgents        Responsible[]
+  routingSettings          OrganizationRoutingSettings?
+  prospectLeads            ProspectLead[]
+  products                 Product[]
+  appointmentSettings      AppointmentSettings?
+  appointments             Appointment[]
+  orderSettings            OrderSettings?
+  orders                   Order[]
+  aiCorrections            AiCorrection[]
+  broadcasts               Broadcast[]
+  billingPayments          BillingPayment[]
+  billingSubscription      BillingSubscription?
+  freeAiResponsesRemaining Int                          @default(0) @map("free_ai_responses_remaining")
+  trialUpgradeEmailSentAt  DateTime?                    @map("trial_upgrade_email_sent_at")
+  platformSuspended        Boolean                      @default(false) @map("platform_suspended")
+  suspensionReason         String?                      @map("suspension_reason")
+  suspendedAt              DateTime?                    @map("suspended_at")
 
   @@map("organizations")
 }
@@ -50,6 +52,13 @@ model AiSettings {
   qualificationFields  Json?    @map("qualification_fields")
   aiEnabled            Boolean  @default(true) @map("ai_enabled")
   responseDelaySeconds Int      @default(3) @map("response_delay_seconds")
+  businessHoursEnabled Boolean  @default(false) @map("business_hours_enabled")
+  businessHours        Json?    @map("business_hours")
+  businessTimezone     String   @default("Africa/Douala") @map("business_timezone")
+  closedMessage        String?  @map("closed_message")
+  followUpEnabled      Boolean  @default(false) @map("follow_up_enabled")
+  followUpDelayHours   Int      @default(24) @map("follow_up_delay_hours")
+  followUpMax          Int      @default(1) @map("follow_up_max")
   createdAt            DateTime @default(now()) @map("created_at")
   updatedAt            DateTime @updatedAt @map("updated_at")
 
@@ -108,16 +117,16 @@ model BillingPayment {
 }
 
 model BillingSubscription {
-  id             String                    @id @default(uuid())
-  organizationId String                    @unique @map("organization_id")
-  plan           String
-  messageLimit   Int                       @map("message_limit")
-  messagesUsed   Int                       @default(0) @map("messages_used")
-  periodStartedAt DateTime                 @default(now()) @map("period_started_at")
-  status         BillingSubscriptionStatus @default(ACTIVE)
-  startedAt      DateTime                  @default(now()) @map("started_at")
-  expiresAt      DateTime                  @map("expires_at")
-  updatedAt      DateTime                  @updatedAt @map("updated_at")
+  id              String                    @id @default(uuid())
+  organizationId  String                    @unique @map("organization_id")
+  plan            String
+  messageLimit    Int                       @map("message_limit")
+  messagesUsed    Int                       @default(0) @map("messages_used")
+  periodStartedAt DateTime                  @default(now()) @map("period_started_at")
+  status          BillingSubscriptionStatus @default(ACTIVE)
+  startedAt       DateTime                  @default(now()) @map("started_at")
+  expiresAt       DateTime                  @map("expires_at")
+  updatedAt       DateTime                  @updatedAt @map("updated_at")
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
@@ -136,6 +145,7 @@ model User {
   passwordHash   String   @map("password_hash")
   name           String
   role           UserRole @default(ADMIN)
+  active         Boolean  @default(true)
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 
@@ -210,15 +220,15 @@ enum WhatsAppAccountStatus {
 }
 
 model WhatsAppAccount {
-  id             String                @id @default(uuid())
-  organizationId String                @map("organization_id")
-  phoneNumber    String?               @map("phone_number")
-  status         WhatsAppAccountStatus @default(DISCONNECTED)
-  lastConnectedAt      DateTime?       @map("last_connected_at")
-  lastDisconnectedAt   DateTime?       @map("last_disconnected_at")
-  lastDisconnectReason String?         @map("last_disconnect_reason")
-  createdAt      DateTime              @default(now()) @map("created_at")
-  updatedAt      DateTime              @updatedAt @map("updated_at")
+  id                   String                @id @default(uuid())
+  organizationId       String                @map("organization_id")
+  phoneNumber          String?               @map("phone_number")
+  status               WhatsAppAccountStatus @default(DISCONNECTED)
+  lastConnectedAt      DateTime?             @map("last_connected_at")
+  lastDisconnectedAt   DateTime?             @map("last_disconnected_at")
+  lastDisconnectReason String?               @map("last_disconnect_reason")
+  createdAt            DateTime              @default(now()) @map("created_at")
+  updatedAt            DateTime              @updatedAt @map("updated_at")
 
   organization Organization @relation(fields: [organizationId], references: [id])
 
@@ -227,15 +237,18 @@ model WhatsAppAccount {
 }
 
 model Contact {
-  id             String   @id @default(uuid())
-  organizationId String   @map("organization_id")
-  whatsappJid    String   @map("whatsapp_jid")
-  displayName    String?  @map("display_name")
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+  id             String    @id @default(uuid())
+  organizationId String    @map("organization_id")
+  whatsappJid    String    @map("whatsapp_jid")
+  displayName    String?   @map("display_name")
+  optedOut       Boolean   @default(false) @map("opted_out")
+  optedOutAt     DateTime? @map("opted_out_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
 
-  organization  Organization   @relation(fields: [organizationId], references: [id])
-  conversations Conversation[]
+  organization        Organization         @relation(fields: [organizationId], references: [id])
+  conversations       Conversation[]
+  broadcastRecipients BroadcastRecipient[]
 
   @@unique([organizationId, whatsappJid])
   @@index([organizationId])
@@ -246,6 +259,13 @@ enum ConversationStatus {
   OPEN
   HUMAN_HANDOFF
   CLOSED
+}
+
+enum ConversationStage {
+  NEW
+  INTERESTED
+  ORDERED
+  CALLBACK
 }
 
 enum QualificationStatus {
@@ -264,6 +284,13 @@ model Conversation {
   leadScore           Int?                @map("lead_score")
   leadData            Json?               @map("lead_data")
   summary             String?
+  stage               ConversationStage   @default(NEW)
+  stageLocked         Boolean             @default(false) @map("stage_locked")
+  paymentCheckPending Boolean             @default(false) @map("payment_check_pending")
+  lastInboundAt       DateTime?           @map("last_inbound_at")
+  lastReadAt          DateTime?           @map("last_read_at")
+  followUpCount       Int                 @default(0) @map("follow_up_count")
+  lastFollowUpAt      DateTime?           @map("last_follow_up_at")
   createdAt           DateTime            @default(now()) @map("created_at")
   updatedAt           DateTime            @updatedAt @map("updated_at")
 
@@ -275,6 +302,7 @@ model Conversation {
 
   @@index([organizationId])
   @@index([contactId])
+  @@index([organizationId, stage])
   @@map("conversations")
 }
 
@@ -322,12 +350,17 @@ model Message {
   type           MessageType      @default(TEXT)
   content        String
   externalId     String?          @map("external_id")
+  mediaFile      String?          @map("media_file")
+  mediaMimeType  String?          @map("media_mime_type")
+  mediaName      String?          @map("media_name")
+  aiMeta         Json?            @map("ai_meta")
   createdAt      DateTime         @default(now()) @map("created_at")
 
   conversation Conversation @relation(fields: [conversationId], references: [id])
 
   @@unique([externalId])
   @@index([conversationId])
+  @@index([conversationId, createdAt])
   @@map("messages")
 }
 
@@ -455,20 +488,20 @@ enum AppointmentSource {
 }
 
 model AppointmentSettings {
-  id                  String   @id @default(uuid())
-  organizationId      String   @unique @map("organization_id")
-  enabled             Boolean  @default(false)
-  timezone            String   @default("Africa/Douala")
-  slotMinutes         Int      @default(30) @map("slot_minutes")
-  bufferMinutes       Int      @default(0) @map("buffer_minutes")
-  capacity            Int      @default(1)
-  minNoticeMinutes    Int      @default(60) @map("min_notice_minutes")
-  horizonDays         Int      @default(30) @map("horizon_days")
-  workingHours        Json     @map("working_hours")
-  closedDates         Json?    @map("closed_dates")
-  serviceLabel        String?  @map("service_label")
-  createdAt           DateTime @default(now()) @map("created_at")
-  updatedAt           DateTime @updatedAt @map("updated_at")
+  id               String   @id @default(uuid())
+  organizationId   String   @unique @map("organization_id")
+  enabled          Boolean  @default(false)
+  timezone         String   @default("Africa/Douala")
+  slotMinutes      Int      @default(30) @map("slot_minutes")
+  bufferMinutes    Int      @default(0) @map("buffer_minutes")
+  capacity         Int      @default(1)
+  minNoticeMinutes Int      @default(60) @map("min_notice_minutes")
+  horizonDays      Int      @default(30) @map("horizon_days")
+  workingHours     Json     @map("working_hours")
+  closedDates      Json?    @map("closed_dates")
+  serviceLabel     String?  @map("service_label")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
@@ -496,6 +529,11 @@ model Appointment {
   @@index([organizationId, startsAt])
   @@index([organizationId, contactJid, status])
   @@map("appointments")
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
 }
 
 enum OrderStatus {
@@ -529,6 +567,10 @@ model Order {
   items           Json
   total           Int?
   status          OrderStatus       @default(NEW)
+  paymentStatus   PaymentStatus     @default(UNPAID) @map("payment_status")
+  paymentMethod   String?           @map("payment_method")
+  paymentNote     String?           @map("payment_note")
+  paidAt          DateTime?         @map("paid_at")
   source          AppointmentSource @default(AI)
   createdAt       DateTime          @default(now()) @map("created_at")
   updatedAt       DateTime          @updatedAt @map("updated_at")
@@ -538,4 +580,69 @@ model Order {
   @@index([organizationId, createdAt])
   @@index([organizationId, contactJid])
   @@map("orders")
+}
+
+/// Correction du propriétaire : « dans ce cas, réponds comme ça ». Injectée dans le prompt de CETTE entreprise seulement.
+model AiCorrection {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  question       String
+  wrongReply     String?  @map("wrong_reply")
+  correctReply   String   @map("correct_reply")
+  active         Boolean  @default(true)
+  usedCount      Int      @default(0) @map("used_count")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, active])
+  @@map("ai_corrections")
+}
+
+enum BroadcastStatus {
+  SENDING
+  DONE
+  CANCELLED
+}
+
+enum BroadcastRecipientStatus {
+  PENDING
+  SENT
+  FAILED
+  SKIPPED
+}
+
+model Broadcast {
+  id             String          @id @default(uuid())
+  organizationId String          @map("organization_id")
+  text           String
+  status         BroadcastStatus @default(SENDING)
+  total          Int             @default(0)
+  sentCount      Int             @default(0) @map("sent_count")
+  failedCount    Int             @default(0) @map("failed_count")
+  createdAt      DateTime        @default(now()) @map("created_at")
+  finishedAt     DateTime?       @map("finished_at")
+
+  organization Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  recipients   BroadcastRecipient[]
+
+  @@index([organizationId, createdAt])
+  @@map("broadcasts")
+}
+
+model BroadcastRecipient {
+  id          String                   @id @default(uuid())
+  broadcastId String                   @map("broadcast_id")
+  contactId   String                   @map("contact_id")
+  jid         String
+  status      BroadcastRecipientStatus @default(PENDING)
+  error       String?
+  sentAt      DateTime?                @map("sent_at")
+
+  broadcast Broadcast @relation(fields: [broadcastId], references: [id], onDelete: Cascade)
+  contact   Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@index([broadcastId, status])
+  @@map("broadcast_recipients")
 }

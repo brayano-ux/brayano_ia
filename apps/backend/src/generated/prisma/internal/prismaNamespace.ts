@@ -419,7 +419,10 @@ export const ModelName = {
   AppointmentSettings: 'AppointmentSettings',
   Appointment: 'Appointment',
   OrderSettings: 'OrderSettings',
-  Order: 'Order'
+  Order: 'Order',
+  AiCorrection: 'AiCorrection',
+  Broadcast: 'Broadcast',
+  BroadcastRecipient: 'BroadcastRecipient'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -435,7 +438,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "organization" | "aiSettings" | "product" | "billingPayment" | "billingSubscription" | "user" | "allowedEmail" | "signupVerification" | "passwordResetVerification" | "session" | "whatsAppAccount" | "contact" | "conversation" | "aiRun" | "message" | "location" | "responsible" | "organizationRoutingSettings" | "prospectLead" | "appointmentSettings" | "appointment" | "orderSettings" | "order"
+    modelProps: "organization" | "aiSettings" | "product" | "billingPayment" | "billingSubscription" | "user" | "allowedEmail" | "signupVerification" | "passwordResetVerification" | "session" | "whatsAppAccount" | "contact" | "conversation" | "aiRun" | "message" | "location" | "responsible" | "organizationRoutingSettings" | "prospectLead" | "appointmentSettings" | "appointment" | "orderSettings" | "order" | "aiCorrection" | "broadcast" | "broadcastRecipient"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2141,6 +2144,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    AiCorrection: {
+      payload: Prisma.$AiCorrectionPayload<ExtArgs>
+      fields: Prisma.AiCorrectionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AiCorrectionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiCorrectionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AiCorrectionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiCorrectionPayload>
+        }
+        findFirst: {
+          args: Prisma.AiCorrectionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiCorrectionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AiCorrectionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiCorrectionPayload>
+        }
+        findMany: {
+          args: Prisma.AiCorrectionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiCorrectionPayload>[]
+        }
+        create: {
+          args: Prisma.AiCorrectionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiCorrectionPayload>
+        }
+        createMany: {
+          args: Prisma.AiCorrectionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AiCorrectionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiCorrectionPayload>[]
+        }
+        delete: {
+          args: Prisma.AiCorrectionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiCorrectionPayload>
+        }
+        update: {
+          args: Prisma.AiCorrectionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiCorrectionPayload>
+        }
+        deleteMany: {
+          args: Prisma.AiCorrectionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AiCorrectionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AiCorrectionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiCorrectionPayload>[]
+        }
+        upsert: {
+          args: Prisma.AiCorrectionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiCorrectionPayload>
+        }
+        aggregate: {
+          args: Prisma.AiCorrectionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAiCorrection>
+        }
+        groupBy: {
+          args: Prisma.AiCorrectionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AiCorrectionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AiCorrectionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AiCorrectionCountAggregateOutputType> | number
+        }
+      }
+    }
+    Broadcast: {
+      payload: Prisma.$BroadcastPayload<ExtArgs>
+      fields: Prisma.BroadcastFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.BroadcastFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BroadcastPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.BroadcastFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BroadcastPayload>
+        }
+        findFirst: {
+          args: Prisma.BroadcastFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BroadcastPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.BroadcastFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BroadcastPayload>
+        }
+        findMany: {
+          args: Prisma.BroadcastFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BroadcastPayload>[]
+        }
+        create: {
+          args: Prisma.BroadcastCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BroadcastPayload>
+        }
+        createMany: {
+          args: Prisma.BroadcastCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.BroadcastCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BroadcastPayload>[]
+        }
+        delete: {
+          args: Prisma.BroadcastDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BroadcastPayload>
+        }
+        update: {
+          args: Prisma.BroadcastUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BroadcastPayload>
+        }
+        deleteMany: {
+          args: Prisma.BroadcastDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.BroadcastUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.BroadcastUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BroadcastPayload>[]
+        }
+        upsert: {
+          args: Prisma.BroadcastUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BroadcastPayload>
+        }
+        aggregate: {
+          args: Prisma.BroadcastAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBroadcast>
+        }
+        groupBy: {
+          args: Prisma.BroadcastGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BroadcastGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.BroadcastCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BroadcastCountAggregateOutputType> | number
+        }
+      }
+    }
+    BroadcastRecipient: {
+      payload: Prisma.$BroadcastRecipientPayload<ExtArgs>
+      fields: Prisma.BroadcastRecipientFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.BroadcastRecipientFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BroadcastRecipientPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.BroadcastRecipientFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BroadcastRecipientPayload>
+        }
+        findFirst: {
+          args: Prisma.BroadcastRecipientFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BroadcastRecipientPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.BroadcastRecipientFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BroadcastRecipientPayload>
+        }
+        findMany: {
+          args: Prisma.BroadcastRecipientFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BroadcastRecipientPayload>[]
+        }
+        create: {
+          args: Prisma.BroadcastRecipientCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BroadcastRecipientPayload>
+        }
+        createMany: {
+          args: Prisma.BroadcastRecipientCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.BroadcastRecipientCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BroadcastRecipientPayload>[]
+        }
+        delete: {
+          args: Prisma.BroadcastRecipientDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BroadcastRecipientPayload>
+        }
+        update: {
+          args: Prisma.BroadcastRecipientUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BroadcastRecipientPayload>
+        }
+        deleteMany: {
+          args: Prisma.BroadcastRecipientDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.BroadcastRecipientUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.BroadcastRecipientUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BroadcastRecipientPayload>[]
+        }
+        upsert: {
+          args: Prisma.BroadcastRecipientUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BroadcastRecipientPayload>
+        }
+        aggregate: {
+          args: Prisma.BroadcastRecipientAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBroadcastRecipient>
+        }
+        groupBy: {
+          args: Prisma.BroadcastRecipientGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BroadcastRecipientGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.BroadcastRecipientCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BroadcastRecipientCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2206,6 +2431,13 @@ export const AiSettingsScalarFieldEnum = {
   qualificationFields: 'qualificationFields',
   aiEnabled: 'aiEnabled',
   responseDelaySeconds: 'responseDelaySeconds',
+  businessHoursEnabled: 'businessHoursEnabled',
+  businessHours: 'businessHours',
+  businessTimezone: 'businessTimezone',
+  closedMessage: 'closedMessage',
+  followUpEnabled: 'followUpEnabled',
+  followUpDelayHours: 'followUpDelayHours',
+  followUpMax: 'followUpMax',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2270,6 +2502,7 @@ export const UserScalarFieldEnum = {
   passwordHash: 'passwordHash',
   name: 'name',
   role: 'role',
+  active: 'active',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2352,6 +2585,8 @@ export const ContactScalarFieldEnum = {
   organizationId: 'organizationId',
   whatsappJid: 'whatsappJid',
   displayName: 'displayName',
+  optedOut: 'optedOut',
+  optedOutAt: 'optedOutAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2369,6 +2604,13 @@ export const ConversationScalarFieldEnum = {
   leadScore: 'leadScore',
   leadData: 'leadData',
   summary: 'summary',
+  stage: 'stage',
+  stageLocked: 'stageLocked',
+  paymentCheckPending: 'paymentCheckPending',
+  lastInboundAt: 'lastInboundAt',
+  lastReadAt: 'lastReadAt',
+  followUpCount: 'followUpCount',
+  lastFollowUpAt: 'lastFollowUpAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2398,6 +2640,10 @@ export const MessageScalarFieldEnum = {
   type: 'type',
   content: 'content',
   externalId: 'externalId',
+  mediaFile: 'mediaFile',
+  mediaMimeType: 'mediaMimeType',
+  mediaName: 'mediaName',
+  aiMeta: 'aiMeta',
   createdAt: 'createdAt'
 } as const
 
@@ -2536,12 +2782,59 @@ export const OrderScalarFieldEnum = {
   items: 'items',
   total: 'total',
   status: 'status',
+  paymentStatus: 'paymentStatus',
+  paymentMethod: 'paymentMethod',
+  paymentNote: 'paymentNote',
+  paidAt: 'paidAt',
   source: 'source',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
+
+
+export const AiCorrectionScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  question: 'question',
+  wrongReply: 'wrongReply',
+  correctReply: 'correctReply',
+  active: 'active',
+  usedCount: 'usedCount',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AiCorrectionScalarFieldEnum = (typeof AiCorrectionScalarFieldEnum)[keyof typeof AiCorrectionScalarFieldEnum]
+
+
+export const BroadcastScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  text: 'text',
+  status: 'status',
+  total: 'total',
+  sentCount: 'sentCount',
+  failedCount: 'failedCount',
+  createdAt: 'createdAt',
+  finishedAt: 'finishedAt'
+} as const
+
+export type BroadcastScalarFieldEnum = (typeof BroadcastScalarFieldEnum)[keyof typeof BroadcastScalarFieldEnum]
+
+
+export const BroadcastRecipientScalarFieldEnum = {
+  id: 'id',
+  broadcastId: 'broadcastId',
+  contactId: 'contactId',
+  jid: 'jid',
+  status: 'status',
+  error: 'error',
+  sentAt: 'sentAt'
+} as const
+
+export type BroadcastRecipientScalarFieldEnum = (typeof BroadcastRecipientScalarFieldEnum)[keyof typeof BroadcastRecipientScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -2746,6 +3039,20 @@ export type ListEnumQualificationStatusFieldRefInput<$PrismaModel> = FieldRefInp
 
 
 /**
+ * Reference to a field of type 'ConversationStage'
+ */
+export type EnumConversationStageFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ConversationStage'>
+    
+
+
+/**
+ * Reference to a field of type 'ConversationStage[]'
+ */
+export type ListEnumConversationStageFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ConversationStage[]'>
+    
+
+
+/**
  * Reference to a field of type 'MessageDirection'
  */
 export type EnumMessageDirectionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MessageDirection'>
@@ -2868,6 +3175,48 @@ export type EnumOrderStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$Pris
  * Reference to a field of type 'OrderStatus[]'
  */
 export type ListEnumOrderStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OrderStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'PaymentStatus'
+ */
+export type EnumPaymentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'PaymentStatus[]'
+ */
+export type ListEnumPaymentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'BroadcastStatus'
+ */
+export type EnumBroadcastStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BroadcastStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'BroadcastStatus[]'
+ */
+export type ListEnumBroadcastStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BroadcastStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'BroadcastRecipientStatus'
+ */
+export type EnumBroadcastRecipientStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BroadcastRecipientStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'BroadcastRecipientStatus[]'
+ */
+export type ListEnumBroadcastRecipientStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BroadcastRecipientStatus[]'>
     
 
 
@@ -3058,6 +3407,9 @@ export type GlobalOmitConfig = {
   appointment?: Prisma.AppointmentOmit
   orderSettings?: Prisma.OrderSettingsOmit
   order?: Prisma.OrderOmit
+  aiCorrection?: Prisma.AiCorrectionOmit
+  broadcast?: Prisma.BroadcastOmit
+  broadcastRecipient?: Prisma.BroadcastRecipientOmit
 }
 
 /* Types for Logging */

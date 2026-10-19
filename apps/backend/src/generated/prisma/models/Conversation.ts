@@ -28,10 +28,12 @@ export type AggregateConversation = {
 
 export type ConversationAvgAggregateOutputType = {
   leadScore: number | null
+  followUpCount: number | null
 }
 
 export type ConversationSumAggregateOutputType = {
   leadScore: number | null
+  followUpCount: number | null
 }
 
 export type ConversationMinAggregateOutputType = {
@@ -43,6 +45,13 @@ export type ConversationMinAggregateOutputType = {
   qualificationStatus: $Enums.QualificationStatus | null
   leadScore: number | null
   summary: string | null
+  stage: $Enums.ConversationStage | null
+  stageLocked: boolean | null
+  paymentCheckPending: boolean | null
+  lastInboundAt: Date | null
+  lastReadAt: Date | null
+  followUpCount: number | null
+  lastFollowUpAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -56,6 +65,13 @@ export type ConversationMaxAggregateOutputType = {
   qualificationStatus: $Enums.QualificationStatus | null
   leadScore: number | null
   summary: string | null
+  stage: $Enums.ConversationStage | null
+  stageLocked: boolean | null
+  paymentCheckPending: boolean | null
+  lastInboundAt: Date | null
+  lastReadAt: Date | null
+  followUpCount: number | null
+  lastFollowUpAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -70,6 +86,13 @@ export type ConversationCountAggregateOutputType = {
   leadScore: number
   leadData: number
   summary: number
+  stage: number
+  stageLocked: number
+  paymentCheckPending: number
+  lastInboundAt: number
+  lastReadAt: number
+  followUpCount: number
+  lastFollowUpAt: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -78,10 +101,12 @@ export type ConversationCountAggregateOutputType = {
 
 export type ConversationAvgAggregateInputType = {
   leadScore?: true
+  followUpCount?: true
 }
 
 export type ConversationSumAggregateInputType = {
   leadScore?: true
+  followUpCount?: true
 }
 
 export type ConversationMinAggregateInputType = {
@@ -93,6 +118,13 @@ export type ConversationMinAggregateInputType = {
   qualificationStatus?: true
   leadScore?: true
   summary?: true
+  stage?: true
+  stageLocked?: true
+  paymentCheckPending?: true
+  lastInboundAt?: true
+  lastReadAt?: true
+  followUpCount?: true
+  lastFollowUpAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -106,6 +138,13 @@ export type ConversationMaxAggregateInputType = {
   qualificationStatus?: true
   leadScore?: true
   summary?: true
+  stage?: true
+  stageLocked?: true
+  paymentCheckPending?: true
+  lastInboundAt?: true
+  lastReadAt?: true
+  followUpCount?: true
+  lastFollowUpAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -120,6 +159,13 @@ export type ConversationCountAggregateInputType = {
   leadScore?: true
   leadData?: true
   summary?: true
+  stage?: true
+  stageLocked?: true
+  paymentCheckPending?: true
+  lastInboundAt?: true
+  lastReadAt?: true
+  followUpCount?: true
+  lastFollowUpAt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -221,6 +267,13 @@ export type ConversationGroupByOutputType = {
   leadScore: number | null
   leadData: runtime.JsonValue | null
   summary: string | null
+  stage: $Enums.ConversationStage
+  stageLocked: boolean
+  paymentCheckPending: boolean
+  lastInboundAt: Date | null
+  lastReadAt: Date | null
+  followUpCount: number
+  lastFollowUpAt: Date | null
   createdAt: Date
   updatedAt: Date
   _count: ConversationCountAggregateOutputType | null
@@ -258,6 +311,13 @@ export type ConversationWhereInput = {
   leadScore?: Prisma.IntNullableFilter<"Conversation"> | number | null
   leadData?: Prisma.JsonNullableFilter<"Conversation">
   summary?: Prisma.StringNullableFilter<"Conversation"> | string | null
+  stage?: Prisma.EnumConversationStageFilter<"Conversation"> | $Enums.ConversationStage
+  stageLocked?: Prisma.BoolFilter<"Conversation"> | boolean
+  paymentCheckPending?: Prisma.BoolFilter<"Conversation"> | boolean
+  lastInboundAt?: Prisma.DateTimeNullableFilter<"Conversation"> | Date | string | null
+  lastReadAt?: Prisma.DateTimeNullableFilter<"Conversation"> | Date | string | null
+  followUpCount?: Prisma.IntFilter<"Conversation"> | number
+  lastFollowUpAt?: Prisma.DateTimeNullableFilter<"Conversation"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Conversation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Conversation"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
@@ -277,6 +337,13 @@ export type ConversationOrderByWithRelationInput = {
   leadScore?: Prisma.SortOrderInput | Prisma.SortOrder
   leadData?: Prisma.SortOrderInput | Prisma.SortOrder
   summary?: Prisma.SortOrderInput | Prisma.SortOrder
+  stage?: Prisma.SortOrder
+  stageLocked?: Prisma.SortOrder
+  paymentCheckPending?: Prisma.SortOrder
+  lastInboundAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastReadAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  followUpCount?: Prisma.SortOrder
+  lastFollowUpAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   organization?: Prisma.OrganizationOrderByWithRelationInput
@@ -299,6 +366,13 @@ export type ConversationWhereUniqueInput = Prisma.AtLeast<{
   leadScore?: Prisma.IntNullableFilter<"Conversation"> | number | null
   leadData?: Prisma.JsonNullableFilter<"Conversation">
   summary?: Prisma.StringNullableFilter<"Conversation"> | string | null
+  stage?: Prisma.EnumConversationStageFilter<"Conversation"> | $Enums.ConversationStage
+  stageLocked?: Prisma.BoolFilter<"Conversation"> | boolean
+  paymentCheckPending?: Prisma.BoolFilter<"Conversation"> | boolean
+  lastInboundAt?: Prisma.DateTimeNullableFilter<"Conversation"> | Date | string | null
+  lastReadAt?: Prisma.DateTimeNullableFilter<"Conversation"> | Date | string | null
+  followUpCount?: Prisma.IntFilter<"Conversation"> | number
+  lastFollowUpAt?: Prisma.DateTimeNullableFilter<"Conversation"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Conversation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Conversation"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
@@ -318,6 +392,13 @@ export type ConversationOrderByWithAggregationInput = {
   leadScore?: Prisma.SortOrderInput | Prisma.SortOrder
   leadData?: Prisma.SortOrderInput | Prisma.SortOrder
   summary?: Prisma.SortOrderInput | Prisma.SortOrder
+  stage?: Prisma.SortOrder
+  stageLocked?: Prisma.SortOrder
+  paymentCheckPending?: Prisma.SortOrder
+  lastInboundAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastReadAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  followUpCount?: Prisma.SortOrder
+  lastFollowUpAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ConversationCountOrderByAggregateInput
@@ -340,6 +421,13 @@ export type ConversationScalarWhereWithAggregatesInput = {
   leadScore?: Prisma.IntNullableWithAggregatesFilter<"Conversation"> | number | null
   leadData?: Prisma.JsonNullableWithAggregatesFilter<"Conversation">
   summary?: Prisma.StringNullableWithAggregatesFilter<"Conversation"> | string | null
+  stage?: Prisma.EnumConversationStageWithAggregatesFilter<"Conversation"> | $Enums.ConversationStage
+  stageLocked?: Prisma.BoolWithAggregatesFilter<"Conversation"> | boolean
+  paymentCheckPending?: Prisma.BoolWithAggregatesFilter<"Conversation"> | boolean
+  lastInboundAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Conversation"> | Date | string | null
+  lastReadAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Conversation"> | Date | string | null
+  followUpCount?: Prisma.IntWithAggregatesFilter<"Conversation"> | number
+  lastFollowUpAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Conversation"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Conversation"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Conversation"> | Date | string
 }
@@ -352,6 +440,13 @@ export type ConversationCreateInput = {
   leadScore?: number | null
   leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: string | null
+  stage?: $Enums.ConversationStage
+  stageLocked?: boolean
+  paymentCheckPending?: boolean
+  lastInboundAt?: Date | string | null
+  lastReadAt?: Date | string | null
+  followUpCount?: number
+  lastFollowUpAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutConversationsInput
@@ -371,6 +466,13 @@ export type ConversationUncheckedCreateInput = {
   leadScore?: number | null
   leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: string | null
+  stage?: $Enums.ConversationStage
+  stageLocked?: boolean
+  paymentCheckPending?: boolean
+  lastInboundAt?: Date | string | null
+  lastReadAt?: Date | string | null
+  followUpCount?: number
+  lastFollowUpAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutConversationInput
@@ -386,6 +488,13 @@ export type ConversationUpdateInput = {
   leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stage?: Prisma.EnumConversationStageFieldUpdateOperationsInput | $Enums.ConversationStage
+  stageLocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paymentCheckPending?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastInboundAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  followUpCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lastFollowUpAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutConversationsNestedInput
@@ -405,6 +514,13 @@ export type ConversationUncheckedUpdateInput = {
   leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stage?: Prisma.EnumConversationStageFieldUpdateOperationsInput | $Enums.ConversationStage
+  stageLocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paymentCheckPending?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastInboundAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  followUpCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lastFollowUpAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   messages?: Prisma.MessageUncheckedUpdateManyWithoutConversationNestedInput
@@ -422,6 +538,13 @@ export type ConversationCreateManyInput = {
   leadScore?: number | null
   leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: string | null
+  stage?: $Enums.ConversationStage
+  stageLocked?: boolean
+  paymentCheckPending?: boolean
+  lastInboundAt?: Date | string | null
+  lastReadAt?: Date | string | null
+  followUpCount?: number
+  lastFollowUpAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -434,6 +557,13 @@ export type ConversationUpdateManyMutationInput = {
   leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stage?: Prisma.EnumConversationStageFieldUpdateOperationsInput | $Enums.ConversationStage
+  stageLocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paymentCheckPending?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastInboundAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  followUpCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lastFollowUpAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -448,6 +578,13 @@ export type ConversationUncheckedUpdateManyInput = {
   leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stage?: Prisma.EnumConversationStageFieldUpdateOperationsInput | $Enums.ConversationStage
+  stageLocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paymentCheckPending?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastInboundAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  followUpCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lastFollowUpAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -472,12 +609,20 @@ export type ConversationCountOrderByAggregateInput = {
   leadScore?: Prisma.SortOrder
   leadData?: Prisma.SortOrder
   summary?: Prisma.SortOrder
+  stage?: Prisma.SortOrder
+  stageLocked?: Prisma.SortOrder
+  paymentCheckPending?: Prisma.SortOrder
+  lastInboundAt?: Prisma.SortOrder
+  lastReadAt?: Prisma.SortOrder
+  followUpCount?: Prisma.SortOrder
+  lastFollowUpAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type ConversationAvgOrderByAggregateInput = {
   leadScore?: Prisma.SortOrder
+  followUpCount?: Prisma.SortOrder
 }
 
 export type ConversationMaxOrderByAggregateInput = {
@@ -489,6 +634,13 @@ export type ConversationMaxOrderByAggregateInput = {
   qualificationStatus?: Prisma.SortOrder
   leadScore?: Prisma.SortOrder
   summary?: Prisma.SortOrder
+  stage?: Prisma.SortOrder
+  stageLocked?: Prisma.SortOrder
+  paymentCheckPending?: Prisma.SortOrder
+  lastInboundAt?: Prisma.SortOrder
+  lastReadAt?: Prisma.SortOrder
+  followUpCount?: Prisma.SortOrder
+  lastFollowUpAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -502,12 +654,20 @@ export type ConversationMinOrderByAggregateInput = {
   qualificationStatus?: Prisma.SortOrder
   leadScore?: Prisma.SortOrder
   summary?: Prisma.SortOrder
+  stage?: Prisma.SortOrder
+  stageLocked?: Prisma.SortOrder
+  paymentCheckPending?: Prisma.SortOrder
+  lastInboundAt?: Prisma.SortOrder
+  lastReadAt?: Prisma.SortOrder
+  followUpCount?: Prisma.SortOrder
+  lastFollowUpAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type ConversationSumOrderByAggregateInput = {
   leadScore?: Prisma.SortOrder
+  followUpCount?: Prisma.SortOrder
 }
 
 export type ConversationScalarRelationFilter = {
@@ -620,6 +780,10 @@ export type NullableIntFieldUpdateOperationsInput = {
   divide?: number
 }
 
+export type EnumConversationStageFieldUpdateOperationsInput = {
+  set?: $Enums.ConversationStage
+}
+
 export type ConversationCreateNestedOneWithoutAiRunsInput = {
   create?: Prisma.XOR<Prisma.ConversationCreateWithoutAiRunsInput, Prisma.ConversationUncheckedCreateWithoutAiRunsInput>
   connectOrCreate?: Prisma.ConversationCreateOrConnectWithoutAiRunsInput
@@ -672,6 +836,13 @@ export type ConversationCreateWithoutOrganizationInput = {
   leadScore?: number | null
   leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: string | null
+  stage?: $Enums.ConversationStage
+  stageLocked?: boolean
+  paymentCheckPending?: boolean
+  lastInboundAt?: Date | string | null
+  lastReadAt?: Date | string | null
+  followUpCount?: number
+  lastFollowUpAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   contact: Prisma.ContactCreateNestedOneWithoutConversationsInput
@@ -689,6 +860,13 @@ export type ConversationUncheckedCreateWithoutOrganizationInput = {
   leadScore?: number | null
   leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: string | null
+  stage?: $Enums.ConversationStage
+  stageLocked?: boolean
+  paymentCheckPending?: boolean
+  lastInboundAt?: Date | string | null
+  lastReadAt?: Date | string | null
+  followUpCount?: number
+  lastFollowUpAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutConversationInput
@@ -735,6 +913,13 @@ export type ConversationScalarWhereInput = {
   leadScore?: Prisma.IntNullableFilter<"Conversation"> | number | null
   leadData?: Prisma.JsonNullableFilter<"Conversation">
   summary?: Prisma.StringNullableFilter<"Conversation"> | string | null
+  stage?: Prisma.EnumConversationStageFilter<"Conversation"> | $Enums.ConversationStage
+  stageLocked?: Prisma.BoolFilter<"Conversation"> | boolean
+  paymentCheckPending?: Prisma.BoolFilter<"Conversation"> | boolean
+  lastInboundAt?: Prisma.DateTimeNullableFilter<"Conversation"> | Date | string | null
+  lastReadAt?: Prisma.DateTimeNullableFilter<"Conversation"> | Date | string | null
+  followUpCount?: Prisma.IntFilter<"Conversation"> | number
+  lastFollowUpAt?: Prisma.DateTimeNullableFilter<"Conversation"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Conversation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Conversation"> | Date | string
 }
@@ -747,6 +932,13 @@ export type ConversationCreateWithoutContactInput = {
   leadScore?: number | null
   leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: string | null
+  stage?: $Enums.ConversationStage
+  stageLocked?: boolean
+  paymentCheckPending?: boolean
+  lastInboundAt?: Date | string | null
+  lastReadAt?: Date | string | null
+  followUpCount?: number
+  lastFollowUpAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutConversationsInput
@@ -764,6 +956,13 @@ export type ConversationUncheckedCreateWithoutContactInput = {
   leadScore?: number | null
   leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: string | null
+  stage?: $Enums.ConversationStage
+  stageLocked?: boolean
+  paymentCheckPending?: boolean
+  lastInboundAt?: Date | string | null
+  lastReadAt?: Date | string | null
+  followUpCount?: number
+  lastFollowUpAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutConversationInput
@@ -805,6 +1004,13 @@ export type ConversationCreateWithoutAiRunsInput = {
   leadScore?: number | null
   leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: string | null
+  stage?: $Enums.ConversationStage
+  stageLocked?: boolean
+  paymentCheckPending?: boolean
+  lastInboundAt?: Date | string | null
+  lastReadAt?: Date | string | null
+  followUpCount?: number
+  lastFollowUpAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutConversationsInput
@@ -823,6 +1029,13 @@ export type ConversationUncheckedCreateWithoutAiRunsInput = {
   leadScore?: number | null
   leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: string | null
+  stage?: $Enums.ConversationStage
+  stageLocked?: boolean
+  paymentCheckPending?: boolean
+  lastInboundAt?: Date | string | null
+  lastReadAt?: Date | string | null
+  followUpCount?: number
+  lastFollowUpAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutConversationInput
@@ -853,6 +1066,13 @@ export type ConversationUpdateWithoutAiRunsInput = {
   leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stage?: Prisma.EnumConversationStageFieldUpdateOperationsInput | $Enums.ConversationStage
+  stageLocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paymentCheckPending?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastInboundAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  followUpCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lastFollowUpAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutConversationsNestedInput
@@ -871,6 +1091,13 @@ export type ConversationUncheckedUpdateWithoutAiRunsInput = {
   leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stage?: Prisma.EnumConversationStageFieldUpdateOperationsInput | $Enums.ConversationStage
+  stageLocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paymentCheckPending?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastInboundAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  followUpCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lastFollowUpAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   messages?: Prisma.MessageUncheckedUpdateManyWithoutConversationNestedInput
@@ -885,6 +1112,13 @@ export type ConversationCreateWithoutMessagesInput = {
   leadScore?: number | null
   leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: string | null
+  stage?: $Enums.ConversationStage
+  stageLocked?: boolean
+  paymentCheckPending?: boolean
+  lastInboundAt?: Date | string | null
+  lastReadAt?: Date | string | null
+  followUpCount?: number
+  lastFollowUpAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutConversationsInput
@@ -903,6 +1137,13 @@ export type ConversationUncheckedCreateWithoutMessagesInput = {
   leadScore?: number | null
   leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: string | null
+  stage?: $Enums.ConversationStage
+  stageLocked?: boolean
+  paymentCheckPending?: boolean
+  lastInboundAt?: Date | string | null
+  lastReadAt?: Date | string | null
+  followUpCount?: number
+  lastFollowUpAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   aiRuns?: Prisma.AiRunUncheckedCreateNestedManyWithoutConversationInput
@@ -933,6 +1174,13 @@ export type ConversationUpdateWithoutMessagesInput = {
   leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stage?: Prisma.EnumConversationStageFieldUpdateOperationsInput | $Enums.ConversationStage
+  stageLocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paymentCheckPending?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastInboundAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  followUpCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lastFollowUpAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutConversationsNestedInput
@@ -951,6 +1199,13 @@ export type ConversationUncheckedUpdateWithoutMessagesInput = {
   leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stage?: Prisma.EnumConversationStageFieldUpdateOperationsInput | $Enums.ConversationStage
+  stageLocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paymentCheckPending?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastInboundAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  followUpCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lastFollowUpAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   aiRuns?: Prisma.AiRunUncheckedUpdateManyWithoutConversationNestedInput
@@ -965,6 +1220,13 @@ export type ConversationCreateWithoutProspectLeadsInput = {
   leadScore?: number | null
   leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: string | null
+  stage?: $Enums.ConversationStage
+  stageLocked?: boolean
+  paymentCheckPending?: boolean
+  lastInboundAt?: Date | string | null
+  lastReadAt?: Date | string | null
+  followUpCount?: number
+  lastFollowUpAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutConversationsInput
@@ -983,6 +1245,13 @@ export type ConversationUncheckedCreateWithoutProspectLeadsInput = {
   leadScore?: number | null
   leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: string | null
+  stage?: $Enums.ConversationStage
+  stageLocked?: boolean
+  paymentCheckPending?: boolean
+  lastInboundAt?: Date | string | null
+  lastReadAt?: Date | string | null
+  followUpCount?: number
+  lastFollowUpAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutConversationInput
@@ -1013,6 +1282,13 @@ export type ConversationUpdateWithoutProspectLeadsInput = {
   leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stage?: Prisma.EnumConversationStageFieldUpdateOperationsInput | $Enums.ConversationStage
+  stageLocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paymentCheckPending?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastInboundAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  followUpCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lastFollowUpAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutConversationsNestedInput
@@ -1031,6 +1307,13 @@ export type ConversationUncheckedUpdateWithoutProspectLeadsInput = {
   leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stage?: Prisma.EnumConversationStageFieldUpdateOperationsInput | $Enums.ConversationStage
+  stageLocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paymentCheckPending?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastInboundAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  followUpCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lastFollowUpAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   messages?: Prisma.MessageUncheckedUpdateManyWithoutConversationNestedInput
@@ -1046,6 +1329,13 @@ export type ConversationCreateManyOrganizationInput = {
   leadScore?: number | null
   leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: string | null
+  stage?: $Enums.ConversationStage
+  stageLocked?: boolean
+  paymentCheckPending?: boolean
+  lastInboundAt?: Date | string | null
+  lastReadAt?: Date | string | null
+  followUpCount?: number
+  lastFollowUpAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1058,6 +1348,13 @@ export type ConversationUpdateWithoutOrganizationInput = {
   leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stage?: Prisma.EnumConversationStageFieldUpdateOperationsInput | $Enums.ConversationStage
+  stageLocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paymentCheckPending?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastInboundAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  followUpCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lastFollowUpAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   contact?: Prisma.ContactUpdateOneRequiredWithoutConversationsNestedInput
@@ -1075,6 +1372,13 @@ export type ConversationUncheckedUpdateWithoutOrganizationInput = {
   leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stage?: Prisma.EnumConversationStageFieldUpdateOperationsInput | $Enums.ConversationStage
+  stageLocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paymentCheckPending?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastInboundAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  followUpCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lastFollowUpAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   messages?: Prisma.MessageUncheckedUpdateManyWithoutConversationNestedInput
@@ -1091,6 +1395,13 @@ export type ConversationUncheckedUpdateManyWithoutOrganizationInput = {
   leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stage?: Prisma.EnumConversationStageFieldUpdateOperationsInput | $Enums.ConversationStage
+  stageLocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paymentCheckPending?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastInboundAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  followUpCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lastFollowUpAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1104,6 +1415,13 @@ export type ConversationCreateManyContactInput = {
   leadScore?: number | null
   leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: string | null
+  stage?: $Enums.ConversationStage
+  stageLocked?: boolean
+  paymentCheckPending?: boolean
+  lastInboundAt?: Date | string | null
+  lastReadAt?: Date | string | null
+  followUpCount?: number
+  lastFollowUpAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1116,6 +1434,13 @@ export type ConversationUpdateWithoutContactInput = {
   leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stage?: Prisma.EnumConversationStageFieldUpdateOperationsInput | $Enums.ConversationStage
+  stageLocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paymentCheckPending?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastInboundAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  followUpCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lastFollowUpAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutConversationsNestedInput
@@ -1133,6 +1458,13 @@ export type ConversationUncheckedUpdateWithoutContactInput = {
   leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stage?: Prisma.EnumConversationStageFieldUpdateOperationsInput | $Enums.ConversationStage
+  stageLocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paymentCheckPending?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastInboundAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  followUpCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lastFollowUpAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   messages?: Prisma.MessageUncheckedUpdateManyWithoutConversationNestedInput
@@ -1149,6 +1481,13 @@ export type ConversationUncheckedUpdateManyWithoutContactInput = {
   leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stage?: Prisma.EnumConversationStageFieldUpdateOperationsInput | $Enums.ConversationStage
+  stageLocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paymentCheckPending?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastInboundAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  followUpCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lastFollowUpAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1212,6 +1551,13 @@ export type ConversationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   leadScore?: boolean
   leadData?: boolean
   summary?: boolean
+  stage?: boolean
+  stageLocked?: boolean
+  paymentCheckPending?: boolean
+  lastInboundAt?: boolean
+  lastReadAt?: boolean
+  followUpCount?: boolean
+  lastFollowUpAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -1232,6 +1578,13 @@ export type ConversationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   leadScore?: boolean
   leadData?: boolean
   summary?: boolean
+  stage?: boolean
+  stageLocked?: boolean
+  paymentCheckPending?: boolean
+  lastInboundAt?: boolean
+  lastReadAt?: boolean
+  followUpCount?: boolean
+  lastFollowUpAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -1248,6 +1601,13 @@ export type ConversationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   leadScore?: boolean
   leadData?: boolean
   summary?: boolean
+  stage?: boolean
+  stageLocked?: boolean
+  paymentCheckPending?: boolean
+  lastInboundAt?: boolean
+  lastReadAt?: boolean
+  followUpCount?: boolean
+  lastFollowUpAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -1264,11 +1624,18 @@ export type ConversationSelectScalar = {
   leadScore?: boolean
   leadData?: boolean
   summary?: boolean
+  stage?: boolean
+  stageLocked?: boolean
+  paymentCheckPending?: boolean
+  lastInboundAt?: boolean
+  lastReadAt?: boolean
+  followUpCount?: boolean
+  lastFollowUpAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ConversationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "contactId" | "aiEnabled" | "status" | "qualificationStatus" | "leadScore" | "leadData" | "summary" | "createdAt" | "updatedAt", ExtArgs["result"]["conversation"]>
+export type ConversationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "contactId" | "aiEnabled" | "status" | "qualificationStatus" | "leadScore" | "leadData" | "summary" | "stage" | "stageLocked" | "paymentCheckPending" | "lastInboundAt" | "lastReadAt" | "followUpCount" | "lastFollowUpAt" | "createdAt" | "updatedAt", ExtArgs["result"]["conversation"]>
 export type ConversationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   contact?: boolean | Prisma.ContactDefaultArgs<ExtArgs>
@@ -1305,6 +1672,13 @@ export type $ConversationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     leadScore: number | null
     leadData: runtime.JsonValue | null
     summary: string | null
+    stage: $Enums.ConversationStage
+    stageLocked: boolean
+    paymentCheckPending: boolean
+    lastInboundAt: Date | null
+    lastReadAt: Date | null
+    followUpCount: number
+    lastFollowUpAt: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["conversation"]>
@@ -1744,6 +2118,13 @@ export interface ConversationFieldRefs {
   readonly leadScore: Prisma.FieldRef<"Conversation", 'Int'>
   readonly leadData: Prisma.FieldRef<"Conversation", 'Json'>
   readonly summary: Prisma.FieldRef<"Conversation", 'String'>
+  readonly stage: Prisma.FieldRef<"Conversation", 'ConversationStage'>
+  readonly stageLocked: Prisma.FieldRef<"Conversation", 'Boolean'>
+  readonly paymentCheckPending: Prisma.FieldRef<"Conversation", 'Boolean'>
+  readonly lastInboundAt: Prisma.FieldRef<"Conversation", 'DateTime'>
+  readonly lastReadAt: Prisma.FieldRef<"Conversation", 'DateTime'>
+  readonly followUpCount: Prisma.FieldRef<"Conversation", 'Int'>
+  readonly lastFollowUpAt: Prisma.FieldRef<"Conversation", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Conversation", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Conversation", 'DateTime'>
 }
