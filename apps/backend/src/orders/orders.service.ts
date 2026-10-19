@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { prisma } from "../database/client.js";
 import { NotFoundError } from "../shared/errors.js";
+import { setPaymentCheckPending } from "../conversations/conversations.service.js";
 import type { ActionOutcome } from "../appointments/appointments.service.js";
 import { buildOrderCancellationEmail, buildOrderEmail, notifyOrganizationAdmins } from "../notifications/owner-notifications.js";
 import {
@@ -40,12 +41,60 @@ export async function updateOrderSettings(organizationId: string, input: { enabl
 
 export const orderStatusSchema = z.enum(["NEW", "CONFIRMED", "DELIVERED", "CANCELLED"]);
 
-export async function listOrders(organizationId: string, status?: string) {
-  return prisma.order.findMany({
-    where: { organizationId, ...(status ? { status: status as never } : {}) },
+export const paymentStatusSchema = z.enum(["UNPAID", "PAID"]);
+export const PAYMENT_METHODS = ["Orange Money", "MTN MoMo", "Espèces", "Virement", "Autre"] as const;
+
+/**
+ * Commandes de l'entreprise. `proofReceived` : le client a envoyé une capture de paiement pas encore vérifiée
+ * (l'assistant ne confirme jamais un paiement : c'est au propriétaire de le marquer « Payée »).
+ */
+export async function listOrders(organizationId: string, filters: { status?: string | undefined; payment?: "UNPAID" | "PAID" | undefined } = {}) {
+  const orders = await prisma.order.findMany({
+    where: {
+      organizationId,
+      ...(filters.status ? { status: filters.status as never } : {}),
+      ...(filters.payment ? { paymentStatus: filters.payment } : {}),
+    },
     orderBy: { createdAt: "desc" },
     take: 300,
   });
+  const conversationIds = [...new Set(orders.filter((order) => order.paymentStatus === "UNPAID" && order.conversationId).map((order) => order.conversationId!))];
+  const flagged = conversationIds.length
+    ? new Set(
+        (await prisma.conversation.findMany({ where: { id: { in: conversationIds }, organizationId, paymentCheckPending: true }, select: { id: true } })).map((conversation) => conversation.id),
+      )
+    : new Set<string>();
+  return orders.map((order) => ({
+    ...order,
+    proofReceived: order.paymentStatus === "UNPAID" && order.status !== "CANCELLED" && Boolean(order.conversationId && flagged.has(order.conversationId)),
+  }));
+}
+
+/** Le propriétaire marque une commande payée (ou non payée). Efface le signalement « preuve de paiement à vérifier » quand plus rien n'est en attente. */
+export async function updateOrderPayment(
+  organizationId: string,
+  orderId: string,
+  input: { paymentStatus: "UNPAID" | "PAID"; paymentMethod?: string | undefined; paymentNote?: string | undefined },
+) {
+  const found = await prisma.order.findFirst({ where: { id: orderId, organizationId } });
+  if (!found) throw new NotFoundError("Commande introuvable.");
+  const paid = input.paymentStatus === "PAID";
+  const order = await prisma.order.update({
+    where: { id: orderId },
+    data: {
+      paymentStatus: input.paymentStatus,
+      paidAt: paid ? (found.paidAt ?? new Date()) : null,
+      paymentMethod: paid ? input.paymentMethod?.trim() || found.paymentMethod : null,
+      paymentNote: paid ? input.paymentNote?.trim() || found.paymentNote : null,
+    },
+  });
+  if (paid && order.conversationId) {
+    const stillWaiting = await prisma.order.count({
+      where: { organizationId, conversationId: order.conversationId, paymentStatus: "UNPAID", status: { not: "CANCELLED" } },
+    });
+    if (stillWaiting === 0) await setPaymentCheckPending(order.conversationId, false);
+  }
+  return order;
 }
 
 /** État des commandes d'un client, pour détecter les promesses non tenues de l'IA. */

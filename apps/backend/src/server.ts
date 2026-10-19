@@ -3,6 +3,8 @@ import { env } from "./config/env.js";
 import { appointmentsRoute } from "./appointments/appointments.route.js";
 import { configAssistantRoute } from "./config-assistant/config-assistant.route.js";
 import { adminRoute } from "./routes/admin.route.js";
+import { aiCorrectionsRoute } from "./ai/corrections.route.js";
+import { statsRoute } from "./analytics/stats.route.js";
 import { aiSettingsRoute } from "./routes/ai-settings.route.js";
 import { aiTestRoute } from "./routes/ai-test.route.js";
 import { authRoute, requireAuth } from "./routes/auth.route.js";
@@ -138,6 +140,8 @@ async function buildServer() {
   await app.register(configAssistantRoute);
   await app.register(aiSettingsRoute);
   await app.register(aiTestRoute);
+  await app.register(aiCorrectionsRoute);
+  await app.register(statsRoute);
   await app.register(routingRoute);
   await app.register(whatsappRoute);
   await app.register(conversationsRoute);
