@@ -33,6 +33,12 @@ export type AiSettings = Prisma.AiSettingsModel
  */
 export type Product = Prisma.ProductModel
 /**
+ * Model ProductImage
+ * Copie de la photo d'un produit dans la base : si le disque du serveur est vidé (redéploiement sans disque
+ * persistant), la photo est reconstituée depuis cette table au lieu d'être perdue.
+ */
+export type ProductImage = Prisma.ProductImageModel
+/**
  * Model BillingPayment
  * 
  */

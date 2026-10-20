@@ -90,6 +90,13 @@ async function prepareReceivedMedia(organizationId: string, message: IncomingWha
   return { stored, kind, summary, isDocument, aiMeta: { mediaKind: kind, mediaSummary: summary, mediaNote: note, mediaStored: Boolean(stored) } };
 }
 
+/** Message honnête envoyé au client quand une photo n'a pas pu partir (le propriétaire le voit dans le journal). */
+export function describeUnsentPhotos(productNames: string[]): string {
+  const plural = productNames.length > 1;
+  const detail = productNames.length ? ` (${productNames.join(", ")})` : "";
+  return `📷 Je n'arrive pas à envoyer ${plural ? "les photos" : "la photo"}${detail} pour le moment. Notre équipe ${plural ? "vous les" : "vous la"} transmettra dès que possible.`;
+}
+
 function jidToPhone(jid: string) {
   return jid.endsWith("@s.whatsapp.net") ? jid.split("@")[0] ?? null : null;
 }
@@ -470,14 +477,38 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
         textToSend = `${textToSend}\n\n${describeUnbackedClaims(unbackedClaims)}`;
       }
 
+      // Une photo qui ne part pas ne doit jamais laisser le client sans réponse : le texte part toujours,
+      // et on prévient honnêtement le client si une photo manque.
+      let imagesFailed = 0;
       if (photoProducts.length) {
         await instance.sendMessage(message.fromJid, textToSend);
+        const failedNames: string[] = [];
         for (const product of photoProducts) {
-          await instance.sendImage(message.fromJid, product.imageUrl, buildProductImageCaption(product));
+          try {
+            await instance.sendImage(message.fromJid, product.imageUrl, buildProductImageCaption(product));
+          } catch (error) {
+            console.error(`❌ [org:${organizationId}] Photo du produit « ${product.name} » non envoyée :`, error instanceof Error ? error.message : error);
+            failedNames.push(product.name);
+          }
+        }
+        imagesFailed = failedNames.length;
+        if (failedNames.length) {
+          await instance.sendMessage(message.fromJid, describeUnsentPhotos(failedNames));
         }
       } else if (legacyImageUrl) {
-        await instance.sendImage(message.fromJid, legacyImageUrl, aiReply.reply);
-        if (textToSend !== outboundText) await instance.sendMessage(message.fromJid, textToSend);
+        let imageSent = true;
+        try {
+          await instance.sendImage(message.fromJid, legacyImageUrl, aiReply.reply);
+        } catch (error) {
+          imageSent = false;
+          imagesFailed = 1;
+          console.error(`❌ [org:${organizationId}] Image non envoyée :`, error instanceof Error ? error.message : error);
+        }
+        if (!imageSent) {
+          await instance.sendMessage(message.fromJid, `${textToSend}\n\n${describeUnsentPhotos([])}`);
+        } else if (textToSend !== outboundText) {
+          await instance.sendMessage(message.fromJid, textToSend);
+        }
       } else {
         await instance.sendMessage(message.fromJid, textToSend);
       }
@@ -496,7 +527,8 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
           nextAction: aiReply.nextAction,
           ...(photoProducts.length ? { productNames: photoProducts.map((product) => product.name) } : {}),
           imageSent: Boolean(photoProducts.length || legacyImageUrl),
-          photosSent: photoProducts.length + (legacyImageUrl ? 1 : 0),
+          photosSent: photoProducts.length + (legacyImageUrl ? 1 : 0) - imagesFailed,
+          ...(imagesFailed ? { imagesFailed } : {}),
           actions,
           claimRetried,
           claimsUnresolved: unbackedClaims,

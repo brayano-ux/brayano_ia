@@ -39,6 +39,8 @@ export class FakeWhatsApp implements WhatsAppProvider {
   sent: SentMessage[] = [];
   status: WhatsAppConnectionStatus = "CONNECTED";
   failNextSend = false;
+  /** Simule une photo qui ne part pas (fichier introuvable, lien refusé…) : les `n` prochains envois d'image échouent. */
+  failImages = 0;
   async connect() {}
   async disconnect() {}
   getStatus() { return this.status; }
@@ -47,7 +49,9 @@ export class FakeWhatsApp implements WhatsAppProvider {
     if (this.failNextSend) { this.failNextSend = false; throw new Error("send failed"); }
     this.sent.push({ kind: "text", jid, text });
   }
-  async sendImage(jid: string, imageUrl: string, caption?: string) { this.sent.push({ kind: "image", jid, text: caption ?? "", imageUrl }); }
+  async sendImage(jid: string, imageUrl: string, caption?: string) {
+    if (this.failImages > 0) { this.failImages -= 1; throw new Error("image download failed"); }
+    this.sent.push({ kind: "image", jid, text: caption ?? "", imageUrl }); }
   onMessage() {}
   onConnectionUpdate() {}
 }

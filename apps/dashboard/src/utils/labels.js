@@ -85,6 +85,7 @@ export function describeAiMeta(meta) {
     const names = Array.isArray(meta.productNames) && meta.productNames.length ? ` (${meta.productNames.join(", ")})` : "";
     lines.push(`Photo${meta.photosSent > 1 ? "s" : ""} envoyée${meta.photosSent > 1 ? "s" : ""}${names}.`);
   }
+  if (meta.imagesFailed) lines.push(`${meta.imagesFailed} photo${meta.imagesFailed > 1 ? "s n'ont" : " n'a"} pas pu être envoyée${meta.imagesFailed > 1 ? "s" : ""} : le client en a été informé. Vérifiez la photo du produit.`);
   if (meta.welcomeSent) lines.push("Le message d'accueil a été envoyé juste avant.");
   if (meta.closedHours) lines.push("Votre entreprise était fermée : l'assistant l'a pris en compte.");
   if (meta.correctionsUsed) lines.push(`${meta.correctionsUsed} de vos corrections appliquée${meta.correctionsUsed > 1 ? "s" : ""}.`);

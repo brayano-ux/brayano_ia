@@ -54,6 +54,7 @@ export const ModelName = {
   Organization: 'Organization',
   AiSettings: 'AiSettings',
   Product: 'Product',
+  ProductImage: 'ProductImage',
   BillingPayment: 'BillingPayment',
   BillingSubscription: 'BillingSubscription',
   User: 'User',
@@ -104,7 +105,8 @@ export const OrganizationScalarFieldEnum = {
   trialUpgradeEmailSentAt: 'trialUpgradeEmailSentAt',
   platformSuspended: 'platformSuspended',
   suspensionReason: 'suspensionReason',
-  suspendedAt: 'suspendedAt'
+  suspendedAt: 'suspendedAt',
+  whatsappNumber: 'whatsappNumber'
 } as const
 
 export type OrganizationScalarFieldEnum = (typeof OrganizationScalarFieldEnum)[keyof typeof OrganizationScalarFieldEnum]
@@ -149,6 +151,17 @@ export const ProductScalarFieldEnum = {
 } as const
 
 export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum]
+
+
+export const ProductImageScalarFieldEnum = {
+  productId: 'productId',
+  organizationId: 'organizationId',
+  mimeType: 'mimeType',
+  data: 'data',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProductImageScalarFieldEnum = (typeof ProductImageScalarFieldEnum)[keyof typeof ProductImageScalarFieldEnum]
 
 
 export const BillingPaymentScalarFieldEnum = {
@@ -214,6 +227,7 @@ export const SignupVerificationScalarFieldEnum = {
   email: 'email',
   name: 'name',
   companyName: 'companyName',
+  whatsappNumber: 'whatsappNumber',
   passwordHash: 'passwordHash',
   codeHash: 'codeHash',
   expiresAt: 'expiresAt',

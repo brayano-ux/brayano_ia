@@ -8,11 +8,12 @@ const dir = fs.mkdtempSync(path.join(os.tmpdir(), "product-images-"));
 const mocks = vi.hoisted(() => ({
   findFirst: vi.fn(),
   update: vi.fn(),
+  upsertImage: vi.fn(),
   env: { PRODUCT_IMAGE_DIR: "", MEDIA_SIGNING_SECRET: "test-secret-0123456789", MEDIA_URL_TTL_SECONDS: 3600 },
 }));
 mocks.env.PRODUCT_IMAGE_DIR = dir;
 vi.mock("../config/env.js", () => ({ env: mocks.env }));
-vi.mock("../database/client.js", () => ({ prisma: { product: { findFirst: mocks.findFirst, update: mocks.update } } }));
+vi.mock("../database/client.js", () => ({ prisma: { product: { findFirst: mocks.findFirst, update: mocks.update }, productImage: { upsert: mocks.upsertImage } } }));
 
 import { saveProductImage } from "./products.service.js";
 
@@ -29,6 +30,7 @@ describe("saveProductImage with compression", () => {
     fs.rmSync(path.join(dir, ORG), { recursive: true, force: true });
     mocks.findFirst.mockResolvedValue({ id: PRODUCT, organizationId: ORG });
     mocks.update.mockImplementation(async ({ data }) => ({ id: PRODUCT, ...data }));
+    mocks.upsertImage.mockResolvedValue({});
     vi.spyOn(console, "log").mockImplementation(() => undefined);
     vi.spyOn(console, "warn").mockImplementation(() => undefined);
   });

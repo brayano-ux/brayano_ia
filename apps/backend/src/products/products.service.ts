@@ -182,6 +182,14 @@ export async function saveProductImage(
   const imageUrl = `${publicBaseUrl.replace(/\/$/, "")}/media/products/${organizationId}/${filename}?t=${token}`;
   let updatedProduct;
   try {
+    // Copie dans la base d'abord : la photo survit ainsi à un disque vidé (voir readProductImage).
+    const bytes = new Uint8Array(prepared.contents);
+    const mimeTypeStored = resolveProductImageMimeType(filename)!;
+    await prisma.productImage.upsert({
+      where: { productId },
+      create: { productId, organizationId, mimeType: mimeTypeStored, data: bytes },
+      update: { organizationId, mimeType: mimeTypeStored, data: bytes },
+    });
     updatedProduct = await prisma.product.update({ where: { id: productId }, data: { imageUrl } });
   } catch (error) {
     await fs.rm(destination, { force: true });
@@ -200,12 +208,65 @@ async function removeProductImageFiles(organizationId: string, productId: string
   );
 }
 
+/**
+ * Lit la photo d'un produit : sur le disque d'abord, sinon dans la copie gardée en base (puis remet le fichier sur
+ * le disque). Un redéploiement sur un serveur sans disque persistant ne fait donc plus disparaître les photos.
+ */
 export async function readProductImage(organizationId: string, filename: string) {
   if (!/^[0-9a-f-]{36}\.(jpg|png|webp)$/i.test(filename)) return null;
+  const mimeType = resolveProductImageMimeType(filename);
   const filePath = path.join(productImageDirectory(organizationId), filename);
   try {
-    return { contents: await fs.readFile(filePath), mimeType: resolveProductImageMimeType(filename) };
+    return { contents: await fs.readFile(filePath), mimeType };
   } catch {
-    return null;
+    // Fichier absent : on tente la copie en base.
   }
+
+  const productId = filename.slice(0, 36);
+  const stored = await prisma.productImage.findFirst({ where: { productId, organizationId } }).catch(() => null);
+  if (!stored || stored.mimeType !== mimeType) return null;
+
+  const contents = Buffer.from(stored.data);
+  try {
+    await fs.mkdir(path.dirname(filePath), { recursive: true });
+    const temporaryFile = path.join(path.dirname(filePath), `${randomUUID()}.tmp`);
+    await fs.writeFile(temporaryFile, contents, { flag: "wx" });
+    await fs.rename(temporaryFile, filePath);
+  } catch (error) {
+    console.warn("⚠️  Photo produit reconstituée depuis la base mais non réécrite sur le disque :", error instanceof Error ? error.message : error);
+  }
+  return { contents, mimeType };
+}
+
+/**
+ * Au démarrage : garde en base une copie des photos qui n'existent encore que sur le disque (produits créés avant
+ * l'ajout de cette sécurité). Sans effet pour les photos déjà copiées. Ne lève jamais.
+ */
+export async function backfillProductImageCopies(): Promise<{ copied: number; missingOnDisk: number }> {
+  const result = { copied: 0, missingOnDisk: 0 };
+  try {
+    const products = await prisma.product.findMany({
+      where: { imageUrl: { not: null }, image: { is: null } },
+      select: { id: true, organizationId: true, imageUrl: true },
+    });
+    for (const product of products) {
+      const filename = product.imageUrl ? product.imageUrl.split("?")[0]!.split("/").at(-1) ?? "" : "";
+      if (!new RegExp(`^${product.id}\\.(jpg|png|webp)$`, "i").test(filename)) continue; // photo hébergée ailleurs : rien à copier
+      try {
+        const contents = await fs.readFile(path.join(productImageDirectory(product.organizationId), filename));
+        const bytes = new Uint8Array(contents);
+        await prisma.productImage.upsert({
+          where: { productId: product.id },
+          create: { productId: product.id, organizationId: product.organizationId, mimeType: resolveProductImageMimeType(filename)!, data: bytes },
+          update: {},
+        });
+        result.copied += 1;
+      } catch {
+        result.missingOnDisk += 1;
+      }
+    }
+  } catch (error) {
+    console.error("❌ Copie de sécurité des photos produits ignorée :", error);
+  }
+  return result;
 }

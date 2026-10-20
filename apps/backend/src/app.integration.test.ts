@@ -2,6 +2,10 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vites
 
 const hoisted = vi.hoisted(() => {
   process.env.CLIENT_MEDIA_DIR = `/tmp/brayano-test-app-media-${process.pid}`;
+  process.env.SMTP_HOST = "smtp.example.com";
+  process.env.SMTP_USER = "user@example.com";
+  process.env.SMTP_PASSWORD = "secret";
+  process.env.SMTP_FROM = "noreply@example.com";
   return { sent: [] as Array<{ organizationId: string; jid: string; text: string }>, connected: true };
 });
 
@@ -14,6 +18,9 @@ vi.mock("./whatsapp/whatsapp.registry.js", async (importOriginal) => {
   };
 });
 
+vi.mock("nodemailer", () => ({ default: { createTransport: () => ({ sendMail: async () => ({}) }) } }));
+
+import { createHash } from "node:crypto";
 import { rmSync } from "node:fs";
 import type { FastifyInstance } from "fastify";
 import { buildServer } from "./app.js";
@@ -276,6 +283,66 @@ describe.skipIf(!integrationEnabled)("API complète (HTTP, base réelle)", () =>
 
       const cancelled = await app.inject({ method: "POST", url: `${base}/${created.json().broadcast.id}/cancel`, headers: authed(token) });
       expect(cancelled.json().broadcast.status).toBe("CANCELLED");
+    });
+  });
+  describe("numéro WhatsApp de l'entreprise", () => {
+    const registration = (extra: Record<string, unknown> = {}) => ({ name: "Awa", companyName: "Boutique Awa", email: "awa@example.com", password: PASSWORD, ...extra });
+    let registerCounter = 0;
+    const register = (payload: Record<string, unknown>) => {
+      registerCounter += 1;
+      return app.inject({ method: "POST", url: "/register", headers: { "x-forwarded-for": `172.16.0.${registerCounter}` }, payload });
+    };
+
+    it("l'inscription exige un numéro WhatsApp valide et le garde jusqu'à la création du compte", async () => {
+      expect((await register(registration())).statusCode).toBe(400);
+      const invalid = await register(registration({ whatsappNumber: "12345" }));
+      expect(invalid.statusCode).toBe(400);
+      expect(invalid.json().message).toMatch(/WhatsApp/);
+
+      const accepted = await register(registration({ whatsappNumber: "+237 6 90 00 00 00" }));
+      expect(accepted.statusCode).toBe(200);
+      expect(await prisma.signupVerification.findUnique({ where: { email: "awa@example.com" } })).toMatchObject({ whatsappNumber: "237690000000" });
+      expect(await prisma.organization.count()).toBe(0); // pas de compte avant le code
+
+      await prisma.signupVerification.update({ where: { email: "awa@example.com" }, data: { codeHash: createHash("sha256").update("123456").digest("hex") } });
+      const verified = await app.inject({ method: "POST", url: "/register/verify", headers: { "x-forwarded-for": "172.16.1.1" }, payload: { email: "awa@example.com", code: "123456" } });
+      expect(verified.statusCode).toBe(200);
+      const organization = await prisma.organization.findUniqueOrThrow({ where: { id: verified.json().organizationId } });
+      expect(organization.whatsappNumber).toBe("237690000000");
+
+      const status = await app.inject({ method: "GET", url: `/organizations/${organization.id}/whatsapp/status`, headers: authed(verified.json().token) });
+      expect(status.json()).toMatchObject({ declaredNumber: "237690000000", declaredDisplay: "+237 6 90 00 00 00", connectedNumber: null, numberMatches: null });
+    });
+
+    it("un numéro saisi sans indicatif reçoit celui du Cameroun", async () => {
+      expect((await register(registration({ whatsappNumber: "690 00 00 01" }))).statusCode).toBe(200);
+      expect(await prisma.signupVerification.findUnique({ where: { email: "awa@example.com" } })).toMatchObject({ whatsappNumber: "237690000001" });
+    });
+
+    it("un ancien compte sans numéro peut l'ajouter, et on voit si le téléphone relié est un autre numéro", async () => {
+      const { organization, token } = await setup();
+      const before = await app.inject({ method: "GET", url: `/organizations/${organization.id}/whatsapp/status`, headers: authed(token) });
+      expect(before.json()).toMatchObject({ declaredNumber: null });
+
+      const bad = await app.inject({ method: "PUT", url: `/organizations/${organization.id}/whatsapp/number`, headers: authed(token), payload: { phoneNumber: "abc" } });
+      expect(bad.statusCode).toBe(400);
+
+      const saved = await app.inject({ method: "PUT", url: `/organizations/${organization.id}/whatsapp/number`, headers: authed(token), payload: { phoneNumber: "699 00 00 02" } });
+      expect(saved.statusCode).toBe(200);
+      expect(saved.json()).toMatchObject({ declaredNumber: "237699000002", numberMatches: null });
+
+      await prisma.whatsAppAccount.create({ data: { organizationId: organization.id, phoneNumber: "237699000002", status: "CONNECTED" } });
+      expect((await app.inject({ method: "GET", url: `/organizations/${organization.id}/whatsapp/status`, headers: authed(token) })).json()).toMatchObject({ connectedNumber: "237699000002", numberMatches: true });
+      await prisma.whatsAppAccount.updateMany({ where: { organizationId: organization.id }, data: { phoneNumber: "237677000000" } });
+      expect((await app.inject({ method: "GET", url: `/organizations/${organization.id}/whatsapp/status`, headers: authed(token) })).json()).toMatchObject({ connectedNumber: "237677000000", numberMatches: false });
+    });
+
+    it("un employé ne peut pas changer le numéro de l'entreprise", async () => {
+      const { organization, token } = await setup();
+      await app.inject({ method: "POST", url: `/organizations/${organization.id}/team`, headers: authed(token), payload: { name: "Fatou", email: "fatou@example.com", password: PASSWORD } });
+      const agent = await login("fatou@example.com");
+      const response = await app.inject({ method: "PUT", url: `/organizations/${organization.id}/whatsapp/number`, headers: authed(agent.token), payload: { phoneNumber: "690000009" } });
+      expect(response.statusCode).toBe(403);
     });
   });
 });
