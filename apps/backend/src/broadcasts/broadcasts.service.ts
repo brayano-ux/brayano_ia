@@ -1,13 +1,15 @@
 import { withConversationSendLock } from "../conversations/conversation-send-lock.js";
 import { prisma } from "../database/client.js";
 import { NotFoundError, ValidationError } from "../shared/errors.js";
-import { BROADCAST_LIMITS, checkBroadcastQuota, pickDelayMs, withOptOutFooter } from "./broadcast-rules.js";
+import { BROADCAST_LIMITS, pickDelayMs, planBroadcastBatch, withOptOutFooter } from "./broadcast-rules.js";
 
 export type BroadcastStage = "NEW" | "INTERESTED" | "ORDERED" | "CALLBACK";
 
 export interface AudienceFilter {
   stages?: BroadcastStage[] | undefined;
   windowDays?: number | undefined;
+  /** Texte du message : les clients qui l'ont déjà reçu (mot pour mot) récemment sont exclus, pour envoyer un grand groupe par lots. */
+  text?: string | undefined;
 }
 
 export interface BroadcastDeps {
@@ -22,11 +24,32 @@ function windowStart(windowDays: number | undefined, now: Date) {
   return new Date(now.getTime() - days * 24 * 3600_000);
 }
 
+function normalizeText(text: string) {
+  return text.trim().replace(/\s+/g, " ").toLowerCase();
+}
+
+/** Contacts qui ont déjà reçu ce même message (casse et espaces ignorés) dans les derniers jours. */
+async function contactsAlreadyReceived(organizationId: string, text: string, now: Date) {
+  const since = new Date(now.getTime() - BROADCAST_LIMITS.sameMessageWindowDays * 24 * 3600_000);
+  const wanted = normalizeText(text);
+  const broadcasts = await prisma.broadcast.findMany({
+    where: { organizationId, createdAt: { gte: since } },
+    select: { text: true, recipients: { where: { status: "SENT" }, select: { contactId: true } } },
+  });
+  const received = new Set<string>();
+  for (const broadcast of broadcasts) {
+    if (normalizeText(broadcast.text) !== wanted) continue;
+    for (const recipient of broadcast.recipients) received.add(recipient.contactId);
+  }
+  return received;
+}
+
 /**
  * Clients qui peuvent recevoir un message groupé : ils ont écrit à l'entreprise récemment (ils la connaissent),
  * n'ont pas écrit STOP, et ont un vrai numéro WhatsApp. Un client = une ligne même s'il a plusieurs conversations.
+ * Avec `filter.text`, ceux qui ont déjà reçu ce message exact sont écartés (`alreadyReceived` les compte).
  */
-export async function findAudience(organizationId: string, filter: AudienceFilter = {}, now = new Date()) {
+export async function findAudienceDetailed(organizationId: string, filter: AudienceFilter = {}, now = new Date()) {
   const conversations = await prisma.conversation.findMany({
     where: {
       organizationId,
@@ -44,7 +67,16 @@ export async function findAudience(organizationId: string, filter: AudienceFilte
       byContact.set(conversation.contactId, { contactId: conversation.contactId, conversationId: conversation.id, jid: conversation.contact.whatsappJid, name: conversation.contact.displayName });
     }
   }
-  return [...byContact.values()];
+  const everyone = [...byContact.values()];
+  if (!filter.text || !normalizeText(filter.text)) return { audience: everyone, alreadyReceived: 0 };
+
+  const received = await contactsAlreadyReceived(organizationId, filter.text, now);
+  const audience = everyone.filter((entry) => !received.has(entry.contactId));
+  return { audience, alreadyReceived: everyone.length - audience.length };
+}
+
+export async function findAudience(organizationId: string, filter: AudienceFilter = {}, now = new Date()) {
+  return (await findAudienceDetailed(organizationId, filter, now)).audience;
 }
 
 async function quotaState(organizationId: string, now: Date) {
@@ -57,12 +89,23 @@ async function quotaState(organizationId: string, now: Date) {
 }
 
 export async function previewBroadcast(organizationId: string, filter: AudienceFilter = {}, now = new Date()) {
-  const audience = await findAudience(organizationId, filter, now);
-  const quota = checkBroadcastQuota({ recipients: audience.length, ...(await quotaState(organizationId, now)) });
+  const { audience, alreadyReceived } = await findAudienceDetailed(organizationId, filter, now);
+  const plan = planBroadcastBatch({ eligible: audience.length, ...(await quotaState(organizationId, now)) });
+  const reason = !plan.ok && audience.length === 0 && alreadyReceived > 0
+    ? `Les ${alreadyReceived} client${alreadyReceived > 1 ? "s" : ""} ciblé${alreadyReceived > 1 ? "s" : ""} ont déjà reçu ce message.`
+    : plan.reason;
   return {
-    recipients: audience.length,
-    sample: audience.slice(0, 5).map((entry) => entry.name || entry.jid.split("@")[0]),
-    ...quota,
+    /** Combien de clients recevront CET envoi. */
+    recipients: plan.batchSize,
+    /** Combien de clients au total pourraient le recevoir (ceux qui l'ont déjà reçu sont exclus). */
+    eligible: audience.length,
+    /** Combien resteront pour un prochain envoi du même message. */
+    remaining: plan.remaining,
+    alreadyReceived,
+    sample: audience.slice(0, Math.min(5, plan.batchSize)).map((entry) => entry.name || entry.jid.split("@")[0]),
+    ok: plan.ok,
+    remainingToday: plan.remainingToday,
+    ...(reason ? { reason } : {}),
     limits: {
       maxRecipientsPerBroadcast: BROADCAST_LIMITS.maxRecipientsPerBroadcast,
       maxPerDay: BROADCAST_LIMITS.maxPerDay,
@@ -71,7 +114,10 @@ export async function previewBroadcast(organizationId: string, filter: AudienceF
   };
 }
 
-/** Prépare l'envoi : vérifie les limites, enregistre les destinataires. L'envoi réel est fait par runBroadcast. */
+/**
+ * Prépare l'envoi : vérifie les limites et enregistre les destinataires du lot (les plus récents d'abord).
+ * Si le groupe dépasse un lot, seul le premier lot part : renvoyer le même message envoie le lot suivant.
+ */
 export async function createBroadcast(organizationId: string, input: { text: string } & AudienceFilter, now = new Date()) {
   const text = input.text.trim();
   if (!text) throw new ValidationError("Écrivez le message à envoyer.");
@@ -80,16 +126,19 @@ export async function createBroadcast(organizationId: string, input: { text: str
   const running = await prisma.broadcast.count({ where: { organizationId, status: "SENDING" } });
   if (running > 0) throw new ValidationError("Un envoi est déjà en cours. Attendez qu'il se termine ou annulez-le.");
 
-  const audience = await findAudience(organizationId, input, now);
-  const quota = checkBroadcastQuota({ recipients: audience.length, ...(await quotaState(organizationId, now)) });
-  if (!quota.ok) throw new ValidationError(quota.reason ?? "Envoi impossible.");
+  const { audience, alreadyReceived } = await findAudienceDetailed(organizationId, { ...input, text }, now);
+  const plan = planBroadcastBatch({ eligible: audience.length, ...(await quotaState(organizationId, now)) });
+  if (!plan.ok) {
+    throw new ValidationError(audience.length === 0 && alreadyReceived > 0 ? "Tous les clients ciblés ont déjà reçu ce message." : plan.reason ?? "Envoi impossible.");
+  }
+  const batch = audience.slice(0, plan.batchSize);
 
   return prisma.broadcast.create({
     data: {
       organizationId,
       text,
-      total: audience.length,
-      recipients: { create: audience.map((entry) => ({ contactId: entry.contactId, jid: entry.jid })) },
+      total: batch.length,
+      recipients: { create: batch.map((entry) => ({ contactId: entry.contactId, jid: entry.jid })) },
     },
   });
 }

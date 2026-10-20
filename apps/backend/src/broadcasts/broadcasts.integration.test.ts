@@ -75,7 +75,7 @@ describe.skipIf(!integrationEnabled)("messages groupés (base réelle)", () => {
       const { organization } = await createTestOrganization();
       for (let index = 0; index < 3; index += 1) await seedClient(organization.id);
       const preview = await previewBroadcast(organization.id, {}, NOW);
-      expect(preview).toMatchObject({ recipients: 3, ok: true, remainingToday: 100, limits: { maxRecipientsPerBroadcast: 50, maxPerDay: 100 } });
+      expect(preview).toMatchObject({ recipients: 3, eligible: 3, remaining: 0, alreadyReceived: 0, ok: true, remainingToday: 100, limits: { maxRecipientsPerBroadcast: 50, maxPerDay: 100 } });
     });
 
     it("refuse un message vide, trop long, ou sans destinataire", async () => {
@@ -85,10 +85,58 @@ describe.skipIf(!integrationEnabled)("messages groupés (base réelle)", () => {
       await expect(createBroadcast(organization.id, { text: "Promo" }, NOW)).rejects.toThrow("Aucun client");
     });
 
-    it("refuse plus de 50 clients dans un même envoi", async () => {
+    it("avec plus de 50 clients, le premier envoi part aux 50 plus récents au lieu d'être bloqué", async () => {
       const { organization } = await createTestOrganization();
-      for (let index = 0; index < 51; index += 1) await seedClient(organization.id);
-      await expect(createBroadcast(organization.id, { text: "Promo" }, NOW)).rejects.toThrow("limité à 50 clients");
+      const clients = [];
+      for (let index = 0; index < 60; index += 1) clients.push(await seedClient(organization.id, { daysSinceMessage: 1 + index / 100 }));
+      const preview = await previewBroadcast(organization.id, { text: "Promo" }, NOW);
+      expect(preview).toMatchObject({ ok: true, eligible: 60, recipients: 50, remaining: 10 });
+
+      const broadcast = await createBroadcast(organization.id, { text: "Promo" }, NOW);
+      expect(broadcast.total).toBe(50);
+      const recipients = await prisma.broadcastRecipient.findMany({ where: { broadcastId: broadcast.id } });
+      const chosen = new Set(recipients.map((recipient) => recipient.contactId));
+      expect(chosen.size).toBe(50);
+      for (const client of clients.slice(0, 50)) expect(chosen.has(client.contact.id)).toBe(true); // les plus récents
+      for (const client of clients.slice(50)) expect(chosen.has(client.contact.id)).toBe(false);
+    });
+
+    it("renvoyer le même message envoie le lot suivant, sans doublon", async () => {
+      const { organization } = await createTestOrganization();
+      for (let index = 0; index < 60; index += 1) await seedClient(organization.id, { daysSinceMessage: 1 + index / 100 });
+      const first = await createBroadcast(organization.id, { text: "Promo du jour" }, NOW);
+      await runBroadcast(first.id, makeDeps().deps);
+      expect(await prisma.broadcast.findUnique({ where: { id: first.id } })).toMatchObject({ status: "DONE", sentCount: 50 });
+
+      const preview = await previewBroadcast(organization.id, { text: "  promo   DU jour " }, NOW); // même texte, autre mise en forme
+      expect(preview).toMatchObject({ ok: true, eligible: 10, recipients: 10, remaining: 0, alreadyReceived: 50 });
+
+      const second = await createBroadcast(organization.id, { text: "Promo du jour" }, NOW);
+      expect(second.total).toBe(10);
+      const secondDeps = makeDeps();
+      await runBroadcast(second.id, secondDeps.deps);
+      const firstJids = new Set((await prisma.broadcastRecipient.findMany({ where: { broadcastId: first.id } })).map((recipient) => recipient.jid));
+      expect(secondDeps.sent.every((entry) => !firstJids.has(entry.jid))).toBe(true);
+
+      const third = previewBroadcast(organization.id, { text: "Promo du jour" }, NOW);
+      await expect(third).resolves.toMatchObject({ ok: false, eligible: 0, alreadyReceived: 60, reason: expect.stringContaining("ont déjà reçu ce message") });
+      await expect(createBroadcast(organization.id, { text: "Promo du jour" }, NOW)).rejects.toThrow("déjà reçu ce message");
+    });
+
+    it("un message différent est envoyé à tout le monde, même à ceux qui ont reçu le précédent", async () => {
+      const { organization } = await createTestOrganization();
+      for (let index = 0; index < 5; index += 1) await seedClient(organization.id);
+      const first = await createBroadcast(organization.id, { text: "Promo A" }, NOW);
+      await runBroadcast(first.id, makeDeps().deps);
+      expect(await previewBroadcast(organization.id, { text: "Promo B" }, NOW)).toMatchObject({ ok: true, recipients: 5, alreadyReceived: 0 });
+    });
+
+    it("un client qui n'a pas reçu le message (envoi annulé ou en échec) peut encore le recevoir", async () => {
+      const { organization } = await createTestOrganization();
+      for (let index = 0; index < 3; index += 1) await seedClient(organization.id);
+      const first = await createBroadcast(organization.id, { text: "Promo" }, NOW);
+      await cancelBroadcast(organization.id, first.id);
+      expect(await previewBroadcast(organization.id, { text: "Promo" }, NOW)).toMatchObject({ ok: true, recipients: 3, alreadyReceived: 0 });
     });
 
     it("refuse un second envoi tant que le premier est en cours", async () => {
@@ -98,15 +146,29 @@ describe.skipIf(!integrationEnabled)("messages groupés (base réelle)", () => {
       await expect(createBroadcast(organization.id, { text: "Promo 2" }, NOW)).rejects.toThrow("déjà en cours");
     });
 
-    it("applique la limite de 100 messages par jour", async () => {
-      const { organization } = await createTestOrganization();
-      const earlier = await prisma.broadcast.create({ data: { organizationId: organization.id, text: "Ancien", status: "DONE", total: 90, sentCount: 90 } });
-      const contact = await prisma.contact.create({ data: { organizationId: organization.id, whatsappJid: "237600000000@s.whatsapp.net" } });
+    async function sentToday(organizationId: string, count: number) {
+      const earlier = await prisma.broadcast.create({ data: { organizationId, text: "Ancien", status: "DONE", total: count, sentCount: count } });
+      const contact = await prisma.contact.create({ data: { organizationId, whatsappJid: "237600000000@s.whatsapp.net" } });
       await prisma.broadcastRecipient.createMany({
-        data: Array.from({ length: 90 }, () => ({ broadcastId: earlier.id, contactId: contact.id, jid: contact.whatsappJid, status: "SENT" as const, sentAt: new Date(NOW.getTime() - 3600_000) })),
+        data: Array.from({ length: count }, () => ({ broadcastId: earlier.id, contactId: contact.id, jid: contact.whatsappJid, status: "SENT" as const, sentAt: new Date(NOW.getTime() - 3600_000) })),
       });
+    }
+
+    it("réduit le lot à ce qu'il reste de la limite de 100 messages par 24 h", async () => {
+      const { organization } = await createTestOrganization();
+      await sentToday(organization.id, 90);
       for (let index = 0; index < 11; index += 1) await seedClient(organization.id);
+      expect(await previewBroadcast(organization.id, { text: "Promo" }, NOW)).toMatchObject({ ok: true, eligible: 11, recipients: 10, remaining: 1, remainingToday: 10 });
+      const broadcast = await createBroadcast(organization.id, { text: "Promo" }, NOW);
+      expect(broadcast.total).toBe(10);
+    });
+
+    it("explique quand les 100 messages par 24 h sont atteints", async () => {
+      const { organization } = await createTestOrganization();
+      await sentToday(organization.id, 100);
+      await seedClient(organization.id);
       await expect(createBroadcast(organization.id, { text: "Promo" }, NOW)).rejects.toThrow("Limite de 100 messages");
+      expect(await previewBroadcast(organization.id, { text: "Promo" }, NOW)).toMatchObject({ ok: false, recipients: 0, eligible: 1, remaining: 1 });
     });
   });
 

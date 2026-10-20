@@ -17,6 +17,8 @@ const STATUS = {
 let previewTimer = null;
 let progressTimer = null;
 let previewState = null;
+/** Un envoi est en cours : le suivant doit attendre (un seul à la fois, pour protéger le numéro). */
+let sending = false;
 
 const base = () => `/organizations/${getState().organizationId}/broadcasts`;
 
@@ -24,34 +26,45 @@ function selectedStages() {
   return $$("#bc-stages input:checked").map((input) => input.value);
 }
 
-function audienceQuery() {
-  const params = new URLSearchParams({ days: $("#bc-window").value });
+function audienceBody() {
   const stages = selectedStages();
-  if (stages.length) params.set("stages", stages.join(","));
-  return params.toString();
+  return { windowDays: Number($("#bc-window").value), ...(stages.length ? { stages } : {}), text: $("#bc-text").value };
+}
+
+const plural = (count, word) => `${count} ${word}${count > 1 ? "s" : ""}`;
+
+function describePreview(preview) {
+  const sample = preview.sample.length ? ` (ex. ${preview.sample.map(escapeHtml).join(", ")}${preview.recipients > preview.sample.length ? "…" : ""})` : "";
+  if (!preview.ok) return `<span>${escapeHtml(preview.reason || "Envoi impossible pour le moment.")}</span>`;
+
+  const lines = [`<strong>${plural(preview.recipients, "client")} recevr${preview.recipients > 1 ? "ont" : "a"} ce message maintenant</strong>${sample}`];
+  if (preview.remaining > 0) {
+    lines.push(`<span>Vous avez ${plural(preview.eligible, "client")} éligible${preview.eligible > 1 ? "s" : ""} : par sécurité, un envoi part par lots. Il en restera <b>${preview.remaining}</b>. Quand ce lot est terminé, cliquez de nouveau sur « Envoyer » avec <b>le même message</b> : il partira aux suivants, sans doublon.</span>`);
+  } else if (preview.alreadyReceived > 0) {
+    lines.push(`<span>${plural(preview.alreadyReceived, "autre")} client${preview.alreadyReceived > 1 ? "s l'ont" : " l'a"} déjà reçu : ${preview.alreadyReceived > 1 ? "ils sont exclus" : "il est exclu"}.</span>`);
+  }
+  lines.push(`<span>Il restera ${Math.max(0, preview.remainingToday - preview.recipients)} message(s) possible(s) aujourd'hui.</span>`);
+  return lines.join("<br />");
 }
 
 async function refreshPreview() {
   const box = $("#bc-preview");
+  const button = $("#bc-send");
   try {
-    const { preview } = await api(`${base()}/preview?${audienceQuery()}`);
+    const { preview } = await api(`${base()}/preview`, { method: "POST", body: JSON.stringify(audienceBody()) });
     previewState = preview;
     $("#bc-max-per").textContent = preview.limits.maxRecipientsPerBroadcast;
     $("#bc-max-day").textContent = preview.limits.maxPerDay;
-    const sample = preview.sample.length ? ` (ex. ${preview.sample.map(escapeHtml).join(", ")}${preview.recipients > preview.sample.length ? "…" : ""})` : "";
-    const blocked = !preview.ok;
-    box.className = `broadcast-preview${blocked ? " blocked" : ""}`;
-    box.innerHTML = preview.recipients === 0
-      ? "Aucun client éligible avec ces critères. Élargissez la période ou changez les étiquettes."
-      : blocked
-        ? `<strong>${preview.recipients} destinataire${preview.recipients > 1 ? "s" : ""}</strong>${sample}<br /><span>${escapeHtml(preview.reason || "Envoi impossible pour le moment.")}</span>`
-        : `<strong>${preview.recipients} destinataire${preview.recipients > 1 ? "s" : ""}</strong>${sample}<br /><span>Il restera ${preview.remainingToday - preview.recipients} message(s) possible(s) aujourd'hui.</span>`;
-    $("#bc-send").disabled = blocked || preview.recipients === 0;
+    box.className = `broadcast-preview${preview.ok ? "" : " blocked"}`;
+    box.innerHTML = describePreview(preview) + (sending && preview.ok ? "<br /><span><b>Un envoi est en cours.</b> Attendez qu'il soit terminé pour envoyer le lot suivant.</span>" : "");
+    button.disabled = !preview.ok || sending;
+    button.textContent = preview.ok ? `Envoyer à ${plural(preview.recipients, "client")}` : "Envoyer";
   } catch (error) {
     previewState = null;
     box.className = "broadcast-preview blocked";
     box.textContent = error.message;
-    $("#bc-send").disabled = true;
+    button.disabled = true;
+    button.textContent = "Envoyer";
   }
 }
 
@@ -83,6 +96,7 @@ export async function loadBroadcasts() {
   if (!getState().organizationId) return;
   try {
     const { broadcasts } = await api(base());
+    sending = broadcasts.some((item) => item.status === "SENDING");
     $("#bc-list").innerHTML = broadcasts.length ? broadcasts.map(itemMarkup).join("") : '<div class="empty-state">Aucun envoi pour le moment.</div>';
     $$("[data-cancel]", $("#bc-list")).forEach((button) => {
       button.onclick = () => cancel(button.dataset.cancel);
@@ -96,9 +110,9 @@ export async function loadBroadcasts() {
   }
 }
 
-export function loadBroadcastsView() {
-  void refreshPreview();
-  return loadBroadcasts();
+export async function loadBroadcastsView() {
+  await loadBroadcasts();
+  await refreshPreview();
 }
 
 async function cancel(id) {
@@ -118,16 +132,16 @@ async function send(event) {
   const text = $("#bc-text").value.trim();
   if (!text) return showToast("Écrivez le message à envoyer.", "error");
   const count = previewState?.recipients ?? 0;
-  if (!count) return showToast("Aucun destinataire pour ces critères.", "error");
-  if (!window.confirm(`Envoyer ce message à ${count} client${count > 1 ? "s" : ""} ?\n\nL'envoi se fait lentement (quelques secondes entre chaque message) et ne peut pas être rappelé.`)) return;
+  if (!count) return showToast(previewState?.reason || "Aucun destinataire pour ces critères.", "error");
+  const rest = previewState.remaining > 0 ? `\n\nIl restera ${previewState.remaining} client${previewState.remaining > 1 ? "s" : ""} : vous pourrez renvoyer le même message ensuite.` : "";
+  if (!window.confirm(`Envoyer ce message à ${count} client${count > 1 ? "s" : ""} ?${rest}\n\nL'envoi se fait lentement (quelques secondes entre chaque message) et ne peut pas être rappelé.`)) return;
   const button = $("#bc-send");
   button.disabled = true;
   try {
     const stages = selectedStages();
     await api(base(), { method: "POST", body: JSON.stringify({ text, windowDays: Number($("#bc-window").value), ...(stages.length ? { stages } : {}) }) });
-    $("#bc-text").value = "";
-    $("#bc-counter").textContent = "0 / 1000 caractères";
-    showToast("Envoi lancé. Suivez sa progression à droite.", "success");
+    // Le texte est gardé : pour un grand groupe, il suffit de renvoyer le même message pour le lot suivant.
+    showToast(previewState?.remaining ? "Envoi lancé. Quand il est terminé, renvoyez le même message pour les clients restants." : "Envoi lancé. Suivez sa progression à droite.", "success");
     await loadBroadcasts();
     await refreshPreview();
   } catch (error) {
@@ -142,5 +156,6 @@ export function initBroadcasts() {
   $("#bc-window").addEventListener("change", schedulePreview);
   $("#bc-text").addEventListener("input", (event) => {
     $("#bc-counter").textContent = `${event.target.value.length} / ${event.target.maxLength} caractères`;
+    schedulePreview();
   });
 }

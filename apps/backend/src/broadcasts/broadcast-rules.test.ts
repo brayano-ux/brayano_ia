@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BROADCAST_LIMITS, checkBroadcastQuota, pickDelayMs, withOptOutFooter } from "./broadcast-rules.js";
+import { BROADCAST_LIMITS, pickDelayMs, planBroadcastBatch, withOptOutFooter } from "./broadcast-rules.js";
 
 describe("withOptOutFooter", () => {
   it("ajoute toujours la mention STOP", () => {
@@ -17,23 +17,30 @@ describe("pickDelayMs", () => {
   });
 });
 
-describe("checkBroadcastQuota", () => {
-  it("accepte un envoi raisonnable", () => {
-    expect(checkBroadcastQuota({ recipients: 20, sentLast24h: 0, pendingNow: 0 })).toEqual({ ok: true, remainingToday: 100 });
+describe("planBroadcastBatch", () => {
+  it("envoie tout quand le groupe tient dans un lot", () => {
+    expect(planBroadcastBatch({ eligible: 20, sentLast24h: 0, pendingNow: 0 })).toEqual({ ok: true, batchSize: 20, remaining: 0, remainingToday: 100 });
   });
 
-  it("refuse un envoi vide ou trop gros", () => {
-    expect(checkBroadcastQuota({ recipients: 0, sentLast24h: 0, pendingNow: 0 }).ok).toBe(false);
-    const tooMany = checkBroadcastQuota({ recipients: 51, sentLast24h: 0, pendingNow: 0 });
-    expect(tooMany.ok).toBe(false);
-    expect(tooMany.reason).toContain("50 clients");
+  it("découpe en lots de 50 au lieu de bloquer quand le groupe est plus grand", () => {
+    expect(planBroadcastBatch({ eligible: 130, sentLast24h: 0, pendingNow: 0 })).toEqual({ ok: true, batchSize: 50, remaining: 80, remainingToday: 100 });
+    expect(planBroadcastBatch({ eligible: 51, sentLast24h: 0, pendingNow: 0 })).toMatchObject({ ok: true, batchSize: 50, remaining: 1 });
   });
 
-  it("tient compte de ce qui est déjà parti ou en cours aujourd'hui", () => {
-    const result = checkBroadcastQuota({ recipients: 40, sentLast24h: 50, pendingNow: 20 });
-    expect(result.ok).toBe(false);
-    expect(result.remainingToday).toBe(30);
-    expect(result.reason).toContain("il en reste 30");
-    expect(checkBroadcastQuota({ recipients: 30, sentLast24h: 50, pendingNow: 20 }).ok).toBe(true);
+  it("refuse seulement un envoi vide", () => {
+    const result = planBroadcastBatch({ eligible: 0, sentLast24h: 0, pendingNow: 0 });
+    expect(result).toMatchObject({ ok: false, batchSize: 0 });
+    expect(result.reason).toContain("Aucun client");
+  });
+
+  it("réduit le lot à ce qu'il reste de la limite des 24 h", () => {
+    const result = planBroadcastBatch({ eligible: 40, sentLast24h: 50, pendingNow: 20 });
+    expect(result).toEqual({ ok: true, batchSize: 30, remaining: 10, remainingToday: 30 });
+  });
+
+  it("explique quand la limite des 24 h est atteinte", () => {
+    const result = planBroadcastBatch({ eligible: 40, sentLast24h: 80, pendingNow: 20 });
+    expect(result).toMatchObject({ ok: false, batchSize: 0, remaining: 40, remainingToday: 0 });
+    expect(result.reason).toContain("Limite de 100 messages");
   });
 });
