@@ -43,8 +43,10 @@ function schedulePoll() {
 export async function loadWhatsApp({ silent = false } = {}) {
   try {
     const orgId = getState().organizationId;
-    const { status } = await api(`/organizations/${orgId}/whatsapp/status`);
+    const info = await api(`/organizations/${orgId}/whatsapp/status`);
+    const { status } = info;
     const connected = status === "CONNECTED";
+    renderNumberInfo(info);
     let pairingCode = null;
 
     if (status === "QR_PENDING") {
@@ -56,7 +58,9 @@ export async function loadWhatsApp({ silent = false } = {}) {
     }
 
     $("#wa-title").textContent = connected ? "WhatsApp connecté" : pairingCode ? "Saisissez le code dans WhatsApp" : status === "QR_PENDING" ? "Scannez le QR code" : "WhatsApp déconnecté";
-    $("#wa-description").textContent = connected ? "Votre numéro WhatsApp est relié : l'assistant répond aux messages de vos clients." : DEFAULT_DESCRIPTION;
+    $("#wa-description").textContent = connected
+      ? `Votre numéro WhatsApp est relié${info.connectedNumber ? ` (+${info.connectedNumber})` : ""} : l'assistant répond aux messages de vos clients.`
+      : DEFAULT_DESCRIPTION;
     $("#qr-status").textContent = connected ? "Connecté" : pairingCode ? "Code prêt" : status === "QR_PENDING" ? "QR disponible" : "En attente";
     $("#qr-status").className = `pill ${connected ? "" : "warning"}`;
     $("#disconnect-wa").classList.toggle("hidden", !connected);
@@ -107,6 +111,39 @@ export async function loadWhatsApp({ silent = false } = {}) {
     if (!silent) showToast(error.message, "error");
     // Erreur réseau passagère pendant une connexion : on réessaie.
     if (silent && Date.now() < waitingUntil && whatsappViewVisible()) schedulePoll();
+  }
+}
+
+/** Numéro de l'entreprise : champ pré-rempli (sans écraser une saisie en cours) et alerte si le téléphone relié est un autre numéro. */
+function renderNumberInfo(info) {
+  const input = $("#wa-number-input");
+  if (input && document.activeElement !== input && input.dataset.dirty !== "1") input.value = info.declaredDisplay || "";
+  const pairing = $("#pairing-phone");
+  if (pairing && !pairing.value && info.declaredDisplay) pairing.value = info.declaredDisplay;
+
+  const warning = $("#wa-number-warning");
+  if (!warning) return;
+  const mismatch = info.numberMatches === false;
+  warning.classList.toggle("hidden", !mismatch);
+  warning.textContent = mismatch
+    ? `Le téléphone relié (+${info.connectedNumber}) n'est pas le numéro de votre entreprise (${info.declaredDisplay}). Vérifiez que vous avez lié le bon téléphone, ou corrigez le numéro ci-dessus.`
+    : "";
+}
+
+async function saveWhatsAppNumber() {
+  const input = $("#wa-number-input");
+  const button = $("#wa-number-save");
+  try {
+    button.disabled = true;
+    const info = await api(`/organizations/${getState().organizationId}/whatsapp/number`, { method: "PUT", body: JSON.stringify({ phoneNumber: input.value }) });
+    input.dataset.dirty = "0";
+    renderNumberInfo(info);
+    $("#pairing-phone").value = info.declaredDisplay || $("#pairing-phone").value;
+    showToast("Numéro WhatsApp enregistré.", "success");
+  } catch (error) {
+    showToast(error.message, "error");
+  } finally {
+    button.disabled = false;
   }
 }
 
@@ -174,4 +211,12 @@ export function initWhatsapp() {
   };
   $("#pairing-code-form").onsubmit = connectWhatsAppWithCode;
   $("#disconnect-wa").onclick = disconnectWhatsApp;
+  $("#wa-number-save").onclick = saveWhatsAppNumber;
+  $("#wa-number-input").addEventListener("input", (event) => { event.target.dataset.dirty = "1"; });
+  $("#wa-number-input").addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      void saveWhatsAppNumber();
+    }
+  });
 }

@@ -11,6 +11,7 @@
 export type * from './models/Organization.js'
 export type * from './models/AiSettings.js'
 export type * from './models/Product.js'
+export type * from './models/ProductImage.js'
 export type * from './models/BillingPayment.js'
 export type * from './models/BillingSubscription.js'
 export type * from './models/User.js'

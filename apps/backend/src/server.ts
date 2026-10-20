@@ -2,6 +2,7 @@ import { env } from "./config/env.js";
 import { backfillConversationTracking } from "./conversations/backfill.js";
 import { buildServer } from "./app.js";
 import { startBackgroundJobs } from "./jobs/runner.js";
+import { backfillProductImageCopies } from "./products/products.service.js";
 import { warnIfProductImagesAreEphemeral } from "./shared/storage-check.js";
 
 async function start() {
@@ -15,6 +16,8 @@ async function start() {
     backfillConversationTracking()
       .then((result) => result.lastInbound + result.ordered + result.interested > 0 && app.log.info(result, "Suivi des conversations rattrapé"))
       .catch((error) => app.log.error(error, "Rattrapage du suivi des conversations ignoré"));
+    backfillProductImageCopies()
+      .then((result) => result.copied + result.missingOnDisk > 0 && app.log.info(result, "Copie de sécurité des photos produits"));
   } catch (err) {
     app.log.error(err);
     process.exit(1);

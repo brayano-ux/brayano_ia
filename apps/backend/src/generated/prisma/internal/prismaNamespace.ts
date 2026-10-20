@@ -400,6 +400,7 @@ export const ModelName = {
   Organization: 'Organization',
   AiSettings: 'AiSettings',
   Product: 'Product',
+  ProductImage: 'ProductImage',
   BillingPayment: 'BillingPayment',
   BillingSubscription: 'BillingSubscription',
   User: 'User',
@@ -438,7 +439,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "organization" | "aiSettings" | "product" | "billingPayment" | "billingSubscription" | "user" | "allowedEmail" | "signupVerification" | "passwordResetVerification" | "session" | "whatsAppAccount" | "contact" | "conversation" | "aiRun" | "message" | "location" | "responsible" | "organizationRoutingSettings" | "prospectLead" | "appointmentSettings" | "appointment" | "orderSettings" | "order" | "aiCorrection" | "broadcast" | "broadcastRecipient"
+    modelProps: "organization" | "aiSettings" | "product" | "productImage" | "billingPayment" | "billingSubscription" | "user" | "allowedEmail" | "signupVerification" | "passwordResetVerification" | "session" | "whatsAppAccount" | "contact" | "conversation" | "aiRun" | "message" | "location" | "responsible" | "organizationRoutingSettings" | "prospectLead" | "appointmentSettings" | "appointment" | "orderSettings" | "order" | "aiCorrection" | "broadcast" | "broadcastRecipient"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -661,6 +662,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.ProductCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ProductCountAggregateOutputType> | number
+        }
+      }
+    }
+    ProductImage: {
+      payload: Prisma.$ProductImagePayload<ExtArgs>
+      fields: Prisma.ProductImageFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ProductImageFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductImagePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ProductImageFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductImagePayload>
+        }
+        findFirst: {
+          args: Prisma.ProductImageFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductImagePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ProductImageFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductImagePayload>
+        }
+        findMany: {
+          args: Prisma.ProductImageFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductImagePayload>[]
+        }
+        create: {
+          args: Prisma.ProductImageCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductImagePayload>
+        }
+        createMany: {
+          args: Prisma.ProductImageCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ProductImageCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductImagePayload>[]
+        }
+        delete: {
+          args: Prisma.ProductImageDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductImagePayload>
+        }
+        update: {
+          args: Prisma.ProductImageUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductImagePayload>
+        }
+        deleteMany: {
+          args: Prisma.ProductImageDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ProductImageUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ProductImageUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductImagePayload>[]
+        }
+        upsert: {
+          args: Prisma.ProductImageUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductImagePayload>
+        }
+        aggregate: {
+          args: Prisma.ProductImageAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateProductImage>
+        }
+        groupBy: {
+          args: Prisma.ProductImageGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProductImageGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ProductImageCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProductImageCountAggregateOutputType> | number
         }
       }
     }
@@ -2414,7 +2489,8 @@ export const OrganizationScalarFieldEnum = {
   trialUpgradeEmailSentAt: 'trialUpgradeEmailSentAt',
   platformSuspended: 'platformSuspended',
   suspensionReason: 'suspensionReason',
-  suspendedAt: 'suspendedAt'
+  suspendedAt: 'suspendedAt',
+  whatsappNumber: 'whatsappNumber'
 } as const
 
 export type OrganizationScalarFieldEnum = (typeof OrganizationScalarFieldEnum)[keyof typeof OrganizationScalarFieldEnum]
@@ -2459,6 +2535,17 @@ export const ProductScalarFieldEnum = {
 } as const
 
 export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum]
+
+
+export const ProductImageScalarFieldEnum = {
+  productId: 'productId',
+  organizationId: 'organizationId',
+  mimeType: 'mimeType',
+  data: 'data',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProductImageScalarFieldEnum = (typeof ProductImageScalarFieldEnum)[keyof typeof ProductImageScalarFieldEnum]
 
 
 export const BillingPaymentScalarFieldEnum = {
@@ -2524,6 +2611,7 @@ export const SignupVerificationScalarFieldEnum = {
   email: 'email',
   name: 'name',
   companyName: 'companyName',
+  whatsappNumber: 'whatsappNumber',
   passwordHash: 'passwordHash',
   codeHash: 'codeHash',
   expiresAt: 'expiresAt',
@@ -2951,6 +3039,20 @@ export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'J
  * Reference to a field of type 'QueryMode'
  */
 export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+/**
+ * Reference to a field of type 'Bytes'
+ */
+export type BytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes'>
+    
+
+
+/**
+ * Reference to a field of type 'Bytes[]'
+ */
+export type ListBytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes[]'>
     
 
 
@@ -3387,6 +3489,7 @@ export type GlobalOmitConfig = {
   organization?: Prisma.OrganizationOmit
   aiSettings?: Prisma.AiSettingsOmit
   product?: Prisma.ProductOmit
+  productImage?: Prisma.ProductImageOmit
   billingPayment?: Prisma.BillingPaymentOmit
   billingSubscription?: Prisma.BillingSubscriptionOmit
   user?: Prisma.UserOmit

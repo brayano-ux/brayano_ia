@@ -44,6 +44,7 @@ export type OrganizationMinAggregateOutputType = {
   platformSuspended: boolean | null
   suspensionReason: string | null
   suspendedAt: Date | null
+  whatsappNumber: string | null
 }
 
 export type OrganizationMaxAggregateOutputType = {
@@ -56,6 +57,7 @@ export type OrganizationMaxAggregateOutputType = {
   platformSuspended: boolean | null
   suspensionReason: string | null
   suspendedAt: Date | null
+  whatsappNumber: string | null
 }
 
 export type OrganizationCountAggregateOutputType = {
@@ -68,6 +70,7 @@ export type OrganizationCountAggregateOutputType = {
   platformSuspended: number
   suspensionReason: number
   suspendedAt: number
+  whatsappNumber: number
   _all: number
 }
 
@@ -90,6 +93,7 @@ export type OrganizationMinAggregateInputType = {
   platformSuspended?: true
   suspensionReason?: true
   suspendedAt?: true
+  whatsappNumber?: true
 }
 
 export type OrganizationMaxAggregateInputType = {
@@ -102,6 +106,7 @@ export type OrganizationMaxAggregateInputType = {
   platformSuspended?: true
   suspensionReason?: true
   suspendedAt?: true
+  whatsappNumber?: true
 }
 
 export type OrganizationCountAggregateInputType = {
@@ -114,6 +119,7 @@ export type OrganizationCountAggregateInputType = {
   platformSuspended?: true
   suspensionReason?: true
   suspendedAt?: true
+  whatsappNumber?: true
   _all?: true
 }
 
@@ -213,6 +219,7 @@ export type OrganizationGroupByOutputType = {
   platformSuspended: boolean
   suspensionReason: string | null
   suspendedAt: Date | null
+  whatsappNumber: string | null
   _count: OrganizationCountAggregateOutputType | null
   _avg: OrganizationAvgAggregateOutputType | null
   _sum: OrganizationSumAggregateOutputType | null
@@ -248,6 +255,7 @@ export type OrganizationWhereInput = {
   platformSuspended?: Prisma.BoolFilter<"Organization"> | boolean
   suspensionReason?: Prisma.StringNullableFilter<"Organization"> | string | null
   suspendedAt?: Prisma.DateTimeNullableFilter<"Organization"> | Date | string | null
+  whatsappNumber?: Prisma.StringNullableFilter<"Organization"> | string | null
   users?: Prisma.UserListRelationFilter
   whatsappAccounts?: Prisma.WhatsAppAccountListRelationFilter
   contacts?: Prisma.ContactListRelationFilter
@@ -278,6 +286,7 @@ export type OrganizationOrderByWithRelationInput = {
   platformSuspended?: Prisma.SortOrder
   suspensionReason?: Prisma.SortOrderInput | Prisma.SortOrder
   suspendedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  whatsappNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   users?: Prisma.UserOrderByRelationAggregateInput
   whatsappAccounts?: Prisma.WhatsAppAccountOrderByRelationAggregateInput
   contacts?: Prisma.ContactOrderByRelationAggregateInput
@@ -311,6 +320,7 @@ export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
   platformSuspended?: Prisma.BoolFilter<"Organization"> | boolean
   suspensionReason?: Prisma.StringNullableFilter<"Organization"> | string | null
   suspendedAt?: Prisma.DateTimeNullableFilter<"Organization"> | Date | string | null
+  whatsappNumber?: Prisma.StringNullableFilter<"Organization"> | string | null
   users?: Prisma.UserListRelationFilter
   whatsappAccounts?: Prisma.WhatsAppAccountListRelationFilter
   contacts?: Prisma.ContactListRelationFilter
@@ -341,6 +351,7 @@ export type OrganizationOrderByWithAggregationInput = {
   platformSuspended?: Prisma.SortOrder
   suspensionReason?: Prisma.SortOrderInput | Prisma.SortOrder
   suspendedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  whatsappNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.OrganizationCountOrderByAggregateInput
   _avg?: Prisma.OrganizationAvgOrderByAggregateInput
   _max?: Prisma.OrganizationMaxOrderByAggregateInput
@@ -361,6 +372,7 @@ export type OrganizationScalarWhereWithAggregatesInput = {
   platformSuspended?: Prisma.BoolWithAggregatesFilter<"Organization"> | boolean
   suspensionReason?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
   suspendedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Organization"> | Date | string | null
+  whatsappNumber?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
 }
 
 export type OrganizationCreateInput = {
@@ -373,6 +385,7 @@ export type OrganizationCreateInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
@@ -403,6 +416,7 @@ export type OrganizationUncheckedCreateInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
@@ -433,6 +447,7 @@ export type OrganizationUpdateInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
@@ -463,6 +478,7 @@ export type OrganizationUncheckedUpdateInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -493,6 +509,7 @@ export type OrganizationCreateManyInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
 }
 
 export type OrganizationUpdateManyMutationInput = {
@@ -505,6 +522,7 @@ export type OrganizationUpdateManyMutationInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type OrganizationUncheckedUpdateManyInput = {
@@ -517,6 +535,7 @@ export type OrganizationUncheckedUpdateManyInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type OrganizationCountOrderByAggregateInput = {
@@ -529,6 +548,7 @@ export type OrganizationCountOrderByAggregateInput = {
   platformSuspended?: Prisma.SortOrder
   suspensionReason?: Prisma.SortOrder
   suspendedAt?: Prisma.SortOrder
+  whatsappNumber?: Prisma.SortOrder
 }
 
 export type OrganizationAvgOrderByAggregateInput = {
@@ -545,6 +565,7 @@ export type OrganizationMaxOrderByAggregateInput = {
   platformSuspended?: Prisma.SortOrder
   suspensionReason?: Prisma.SortOrder
   suspendedAt?: Prisma.SortOrder
+  whatsappNumber?: Prisma.SortOrder
 }
 
 export type OrganizationMinOrderByAggregateInput = {
@@ -557,6 +578,7 @@ export type OrganizationMinOrderByAggregateInput = {
   platformSuspended?: Prisma.SortOrder
   suspensionReason?: Prisma.SortOrder
   suspendedAt?: Prisma.SortOrder
+  whatsappNumber?: Prisma.SortOrder
 }
 
 export type OrganizationSumOrderByAggregateInput = {
@@ -858,6 +880,7 @@ export type OrganizationCreateWithoutAiSettingsInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
@@ -887,6 +910,7 @@ export type OrganizationUncheckedCreateWithoutAiSettingsInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
@@ -932,6 +956,7 @@ export type OrganizationUpdateWithoutAiSettingsInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
@@ -961,6 +986,7 @@ export type OrganizationUncheckedUpdateWithoutAiSettingsInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -990,6 +1016,7 @@ export type OrganizationCreateWithoutProductsInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
@@ -1019,6 +1046,7 @@ export type OrganizationUncheckedCreateWithoutProductsInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1064,6 +1092,7 @@ export type OrganizationUpdateWithoutProductsInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
@@ -1093,6 +1122,7 @@ export type OrganizationUncheckedUpdateWithoutProductsInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1122,6 +1152,7 @@ export type OrganizationCreateWithoutBillingPaymentsInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
@@ -1151,6 +1182,7 @@ export type OrganizationUncheckedCreateWithoutBillingPaymentsInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1196,6 +1228,7 @@ export type OrganizationUpdateWithoutBillingPaymentsInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
@@ -1225,6 +1258,7 @@ export type OrganizationUncheckedUpdateWithoutBillingPaymentsInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1254,6 +1288,7 @@ export type OrganizationCreateWithoutBillingSubscriptionInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
@@ -1283,6 +1318,7 @@ export type OrganizationUncheckedCreateWithoutBillingSubscriptionInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1328,6 +1364,7 @@ export type OrganizationUpdateWithoutBillingSubscriptionInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
@@ -1357,6 +1394,7 @@ export type OrganizationUncheckedUpdateWithoutBillingSubscriptionInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1386,6 +1424,7 @@ export type OrganizationCreateWithoutUsersInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutOrganizationInput
@@ -1415,6 +1454,7 @@ export type OrganizationUncheckedCreateWithoutUsersInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1460,6 +1500,7 @@ export type OrganizationUpdateWithoutUsersInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutOrganizationNestedInput
@@ -1489,6 +1530,7 @@ export type OrganizationUncheckedUpdateWithoutUsersInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1518,6 +1560,7 @@ export type OrganizationCreateWithoutWhatsappAccountsInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutOrganizationInput
@@ -1547,6 +1590,7 @@ export type OrganizationUncheckedCreateWithoutWhatsappAccountsInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1592,6 +1636,7 @@ export type OrganizationUpdateWithoutWhatsappAccountsInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutOrganizationNestedInput
@@ -1621,6 +1666,7 @@ export type OrganizationUncheckedUpdateWithoutWhatsappAccountsInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1650,6 +1696,7 @@ export type OrganizationCreateWithoutContactsInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutOrganizationInput
@@ -1679,6 +1726,7 @@ export type OrganizationUncheckedCreateWithoutContactsInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1724,6 +1772,7 @@ export type OrganizationUpdateWithoutContactsInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutOrganizationNestedInput
@@ -1753,6 +1802,7 @@ export type OrganizationUncheckedUpdateWithoutContactsInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1782,6 +1832,7 @@ export type OrganizationCreateWithoutConversationsInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
@@ -1811,6 +1862,7 @@ export type OrganizationUncheckedCreateWithoutConversationsInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1856,6 +1908,7 @@ export type OrganizationUpdateWithoutConversationsInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
@@ -1885,6 +1938,7 @@ export type OrganizationUncheckedUpdateWithoutConversationsInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1914,6 +1968,7 @@ export type OrganizationCreateWithoutLocationsInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
@@ -1943,6 +1998,7 @@ export type OrganizationUncheckedCreateWithoutLocationsInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1988,6 +2044,7 @@ export type OrganizationUpdateWithoutLocationsInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
@@ -2017,6 +2074,7 @@ export type OrganizationUncheckedUpdateWithoutLocationsInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2046,6 +2104,7 @@ export type OrganizationCreateWithoutResponsibleAgentsInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
@@ -2075,6 +2134,7 @@ export type OrganizationUncheckedCreateWithoutResponsibleAgentsInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2120,6 +2180,7 @@ export type OrganizationUpdateWithoutResponsibleAgentsInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
@@ -2149,6 +2210,7 @@ export type OrganizationUncheckedUpdateWithoutResponsibleAgentsInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2178,6 +2240,7 @@ export type OrganizationCreateWithoutRoutingSettingsInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
@@ -2207,6 +2270,7 @@ export type OrganizationUncheckedCreateWithoutRoutingSettingsInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2252,6 +2316,7 @@ export type OrganizationUpdateWithoutRoutingSettingsInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
@@ -2281,6 +2346,7 @@ export type OrganizationUncheckedUpdateWithoutRoutingSettingsInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2310,6 +2376,7 @@ export type OrganizationCreateWithoutProspectLeadsInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
@@ -2339,6 +2406,7 @@ export type OrganizationUncheckedCreateWithoutProspectLeadsInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2384,6 +2452,7 @@ export type OrganizationUpdateWithoutProspectLeadsInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
@@ -2413,6 +2482,7 @@ export type OrganizationUncheckedUpdateWithoutProspectLeadsInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2442,6 +2512,7 @@ export type OrganizationCreateWithoutAppointmentSettingsInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
@@ -2471,6 +2542,7 @@ export type OrganizationUncheckedCreateWithoutAppointmentSettingsInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2516,6 +2588,7 @@ export type OrganizationUpdateWithoutAppointmentSettingsInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
@@ -2545,6 +2618,7 @@ export type OrganizationUncheckedUpdateWithoutAppointmentSettingsInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2574,6 +2648,7 @@ export type OrganizationCreateWithoutAppointmentsInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
@@ -2603,6 +2678,7 @@ export type OrganizationUncheckedCreateWithoutAppointmentsInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2648,6 +2724,7 @@ export type OrganizationUpdateWithoutAppointmentsInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
@@ -2677,6 +2754,7 @@ export type OrganizationUncheckedUpdateWithoutAppointmentsInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2706,6 +2784,7 @@ export type OrganizationCreateWithoutOrderSettingsInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
@@ -2735,6 +2814,7 @@ export type OrganizationUncheckedCreateWithoutOrderSettingsInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2780,6 +2860,7 @@ export type OrganizationUpdateWithoutOrderSettingsInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
@@ -2809,6 +2890,7 @@ export type OrganizationUncheckedUpdateWithoutOrderSettingsInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2838,6 +2920,7 @@ export type OrganizationCreateWithoutOrdersInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
@@ -2867,6 +2950,7 @@ export type OrganizationUncheckedCreateWithoutOrdersInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2912,6 +2996,7 @@ export type OrganizationUpdateWithoutOrdersInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
@@ -2941,6 +3026,7 @@ export type OrganizationUncheckedUpdateWithoutOrdersInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2970,6 +3056,7 @@ export type OrganizationCreateWithoutAiCorrectionsInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
@@ -2999,6 +3086,7 @@ export type OrganizationUncheckedCreateWithoutAiCorrectionsInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
@@ -3044,6 +3132,7 @@ export type OrganizationUpdateWithoutAiCorrectionsInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
@@ -3073,6 +3162,7 @@ export type OrganizationUncheckedUpdateWithoutAiCorrectionsInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -3102,6 +3192,7 @@ export type OrganizationCreateWithoutBroadcastsInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
@@ -3131,6 +3222,7 @@ export type OrganizationUncheckedCreateWithoutBroadcastsInput = {
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
@@ -3176,6 +3268,7 @@ export type OrganizationUpdateWithoutBroadcastsInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
@@ -3205,6 +3298,7 @@ export type OrganizationUncheckedUpdateWithoutBroadcastsInput = {
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -3373,6 +3467,7 @@ export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   platformSuspended?: boolean
   suspensionReason?: boolean
   suspendedAt?: boolean
+  whatsappNumber?: boolean
   users?: boolean | Prisma.Organization$usersArgs<ExtArgs>
   whatsappAccounts?: boolean | Prisma.Organization$whatsappAccountsArgs<ExtArgs>
   contacts?: boolean | Prisma.Organization$contactsArgs<ExtArgs>
@@ -3404,6 +3499,7 @@ export type OrganizationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   platformSuspended?: boolean
   suspensionReason?: boolean
   suspendedAt?: boolean
+  whatsappNumber?: boolean
 }, ExtArgs["result"]["organization"]>
 
 export type OrganizationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -3416,6 +3512,7 @@ export type OrganizationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   platformSuspended?: boolean
   suspensionReason?: boolean
   suspendedAt?: boolean
+  whatsappNumber?: boolean
 }, ExtArgs["result"]["organization"]>
 
 export type OrganizationSelectScalar = {
@@ -3428,9 +3525,10 @@ export type OrganizationSelectScalar = {
   platformSuspended?: boolean
   suspensionReason?: boolean
   suspendedAt?: boolean
+  whatsappNumber?: boolean
 }
 
-export type OrganizationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "createdAt" | "updatedAt" | "freeAiResponsesRemaining" | "trialUpgradeEmailSentAt" | "platformSuspended" | "suspensionReason" | "suspendedAt", ExtArgs["result"]["organization"]>
+export type OrganizationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "createdAt" | "updatedAt" | "freeAiResponsesRemaining" | "trialUpgradeEmailSentAt" | "platformSuspended" | "suspensionReason" | "suspendedAt" | "whatsappNumber", ExtArgs["result"]["organization"]>
 export type OrganizationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   users?: boolean | Prisma.Organization$usersArgs<ExtArgs>
   whatsappAccounts?: boolean | Prisma.Organization$whatsappAccountsArgs<ExtArgs>
@@ -3487,6 +3585,7 @@ export type $OrganizationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     platformSuspended: boolean
     suspensionReason: string | null
     suspendedAt: Date | null
+    whatsappNumber: string | null
   }, ExtArgs["result"]["organization"]>
   composites: {}
 }
@@ -3937,6 +4036,7 @@ export interface OrganizationFieldRefs {
   readonly platformSuspended: Prisma.FieldRef<"Organization", 'Boolean'>
   readonly suspensionReason: Prisma.FieldRef<"Organization", 'String'>
   readonly suspendedAt: Prisma.FieldRef<"Organization", 'DateTime'>
+  readonly whatsappNumber: Prisma.FieldRef<"Organization", 'String'>
 }
     
 

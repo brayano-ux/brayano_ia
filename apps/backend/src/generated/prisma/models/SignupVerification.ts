@@ -39,6 +39,7 @@ export type SignupVerificationMinAggregateOutputType = {
   email: string | null
   name: string | null
   companyName: string | null
+  whatsappNumber: string | null
   passwordHash: string | null
   codeHash: string | null
   expiresAt: Date | null
@@ -54,6 +55,7 @@ export type SignupVerificationMaxAggregateOutputType = {
   email: string | null
   name: string | null
   companyName: string | null
+  whatsappNumber: string | null
   passwordHash: string | null
   codeHash: string | null
   expiresAt: Date | null
@@ -69,6 +71,7 @@ export type SignupVerificationCountAggregateOutputType = {
   email: number
   name: number
   companyName: number
+  whatsappNumber: number
   passwordHash: number
   codeHash: number
   expiresAt: number
@@ -94,6 +97,7 @@ export type SignupVerificationMinAggregateInputType = {
   email?: true
   name?: true
   companyName?: true
+  whatsappNumber?: true
   passwordHash?: true
   codeHash?: true
   expiresAt?: true
@@ -109,6 +113,7 @@ export type SignupVerificationMaxAggregateInputType = {
   email?: true
   name?: true
   companyName?: true
+  whatsappNumber?: true
   passwordHash?: true
   codeHash?: true
   expiresAt?: true
@@ -124,6 +129,7 @@ export type SignupVerificationCountAggregateInputType = {
   email?: true
   name?: true
   companyName?: true
+  whatsappNumber?: true
   passwordHash?: true
   codeHash?: true
   expiresAt?: true
@@ -226,6 +232,7 @@ export type SignupVerificationGroupByOutputType = {
   email: string
   name: string
   companyName: string
+  whatsappNumber: string | null
   passwordHash: string
   codeHash: string
   expiresAt: Date
@@ -264,6 +271,7 @@ export type SignupVerificationWhereInput = {
   email?: Prisma.StringFilter<"SignupVerification"> | string
   name?: Prisma.StringFilter<"SignupVerification"> | string
   companyName?: Prisma.StringFilter<"SignupVerification"> | string
+  whatsappNumber?: Prisma.StringNullableFilter<"SignupVerification"> | string | null
   passwordHash?: Prisma.StringFilter<"SignupVerification"> | string
   codeHash?: Prisma.StringFilter<"SignupVerification"> | string
   expiresAt?: Prisma.DateTimeFilter<"SignupVerification"> | Date | string
@@ -279,6 +287,7 @@ export type SignupVerificationOrderByWithRelationInput = {
   email?: Prisma.SortOrder
   name?: Prisma.SortOrder
   companyName?: Prisma.SortOrder
+  whatsappNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
   codeHash?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
@@ -297,6 +306,7 @@ export type SignupVerificationWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.SignupVerificationWhereInput | Prisma.SignupVerificationWhereInput[]
   name?: Prisma.StringFilter<"SignupVerification"> | string
   companyName?: Prisma.StringFilter<"SignupVerification"> | string
+  whatsappNumber?: Prisma.StringNullableFilter<"SignupVerification"> | string | null
   passwordHash?: Prisma.StringFilter<"SignupVerification"> | string
   codeHash?: Prisma.StringFilter<"SignupVerification"> | string
   expiresAt?: Prisma.DateTimeFilter<"SignupVerification"> | Date | string
@@ -312,6 +322,7 @@ export type SignupVerificationOrderByWithAggregationInput = {
   email?: Prisma.SortOrder
   name?: Prisma.SortOrder
   companyName?: Prisma.SortOrder
+  whatsappNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
   codeHash?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
@@ -335,6 +346,7 @@ export type SignupVerificationScalarWhereWithAggregatesInput = {
   email?: Prisma.StringWithAggregatesFilter<"SignupVerification"> | string
   name?: Prisma.StringWithAggregatesFilter<"SignupVerification"> | string
   companyName?: Prisma.StringWithAggregatesFilter<"SignupVerification"> | string
+  whatsappNumber?: Prisma.StringNullableWithAggregatesFilter<"SignupVerification"> | string | null
   passwordHash?: Prisma.StringWithAggregatesFilter<"SignupVerification"> | string
   codeHash?: Prisma.StringWithAggregatesFilter<"SignupVerification"> | string
   expiresAt?: Prisma.DateTimeWithAggregatesFilter<"SignupVerification"> | Date | string
@@ -350,6 +362,7 @@ export type SignupVerificationCreateInput = {
   email: string
   name: string
   companyName: string
+  whatsappNumber?: string | null
   passwordHash: string
   codeHash: string
   expiresAt: Date | string
@@ -365,6 +378,7 @@ export type SignupVerificationUncheckedCreateInput = {
   email: string
   name: string
   companyName: string
+  whatsappNumber?: string | null
   passwordHash: string
   codeHash: string
   expiresAt: Date | string
@@ -380,6 +394,7 @@ export type SignupVerificationUpdateInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   companyName?: Prisma.StringFieldUpdateOperationsInput | string
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   codeHash?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -395,6 +410,7 @@ export type SignupVerificationUncheckedUpdateInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   companyName?: Prisma.StringFieldUpdateOperationsInput | string
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   codeHash?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -410,6 +426,7 @@ export type SignupVerificationCreateManyInput = {
   email: string
   name: string
   companyName: string
+  whatsappNumber?: string | null
   passwordHash: string
   codeHash: string
   expiresAt: Date | string
@@ -425,6 +442,7 @@ export type SignupVerificationUpdateManyMutationInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   companyName?: Prisma.StringFieldUpdateOperationsInput | string
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   codeHash?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -440,6 +458,7 @@ export type SignupVerificationUncheckedUpdateManyInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   companyName?: Prisma.StringFieldUpdateOperationsInput | string
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   codeHash?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -455,6 +474,7 @@ export type SignupVerificationCountOrderByAggregateInput = {
   email?: Prisma.SortOrder
   name?: Prisma.SortOrder
   companyName?: Prisma.SortOrder
+  whatsappNumber?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
   codeHash?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
@@ -474,6 +494,7 @@ export type SignupVerificationMaxOrderByAggregateInput = {
   email?: Prisma.SortOrder
   name?: Prisma.SortOrder
   companyName?: Prisma.SortOrder
+  whatsappNumber?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
   codeHash?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
@@ -489,6 +510,7 @@ export type SignupVerificationMinOrderByAggregateInput = {
   email?: Prisma.SortOrder
   name?: Prisma.SortOrder
   companyName?: Prisma.SortOrder
+  whatsappNumber?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
   codeHash?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
@@ -510,6 +532,7 @@ export type SignupVerificationSelect<ExtArgs extends runtime.Types.Extensions.In
   email?: boolean
   name?: boolean
   companyName?: boolean
+  whatsappNumber?: boolean
   passwordHash?: boolean
   codeHash?: boolean
   expiresAt?: boolean
@@ -525,6 +548,7 @@ export type SignupVerificationSelectCreateManyAndReturn<ExtArgs extends runtime.
   email?: boolean
   name?: boolean
   companyName?: boolean
+  whatsappNumber?: boolean
   passwordHash?: boolean
   codeHash?: boolean
   expiresAt?: boolean
@@ -540,6 +564,7 @@ export type SignupVerificationSelectUpdateManyAndReturn<ExtArgs extends runtime.
   email?: boolean
   name?: boolean
   companyName?: boolean
+  whatsappNumber?: boolean
   passwordHash?: boolean
   codeHash?: boolean
   expiresAt?: boolean
@@ -555,6 +580,7 @@ export type SignupVerificationSelectScalar = {
   email?: boolean
   name?: boolean
   companyName?: boolean
+  whatsappNumber?: boolean
   passwordHash?: boolean
   codeHash?: boolean
   expiresAt?: boolean
@@ -565,7 +591,7 @@ export type SignupVerificationSelectScalar = {
   updatedAt?: boolean
 }
 
-export type SignupVerificationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "name" | "companyName" | "passwordHash" | "codeHash" | "expiresAt" | "lastSentAt" | "attempts" | "verifiedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["signupVerification"]>
+export type SignupVerificationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "name" | "companyName" | "whatsappNumber" | "passwordHash" | "codeHash" | "expiresAt" | "lastSentAt" | "attempts" | "verifiedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["signupVerification"]>
 
 export type $SignupVerificationPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "SignupVerification"
@@ -575,6 +601,7 @@ export type $SignupVerificationPayload<ExtArgs extends runtime.Types.Extensions.
     email: string
     name: string
     companyName: string
+    whatsappNumber: string | null
     passwordHash: string
     codeHash: string
     expiresAt: Date
@@ -1010,6 +1037,7 @@ export interface SignupVerificationFieldRefs {
   readonly email: Prisma.FieldRef<"SignupVerification", 'String'>
   readonly name: Prisma.FieldRef<"SignupVerification", 'String'>
   readonly companyName: Prisma.FieldRef<"SignupVerification", 'String'>
+  readonly whatsappNumber: Prisma.FieldRef<"SignupVerification", 'String'>
   readonly passwordHash: Prisma.FieldRef<"SignupVerification", 'String'>
   readonly codeHash: Prisma.FieldRef<"SignupVerification", 'String'>
   readonly expiresAt: Prisma.FieldRef<"SignupVerification", 'DateTime'>

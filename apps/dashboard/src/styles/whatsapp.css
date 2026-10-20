@@ -41,3 +41,10 @@
   .connect-card .primary { width: 100%; }
   .qr-placeholder { min-height: 240px; padding: var(--space-4); }
 }
+
+/* ----- Numéro WhatsApp de l'entreprise ----- */
+.wa-number { display: grid; gap: var(--space-2); width: 100%; max-width: 380px; text-align: left; }
+.wa-number label { font-size: var(--text-sm); font-weight: 700; }
+.wa-number-row { display: flex; gap: var(--space-2); }
+.wa-number-row input { flex: 1; min-width: 0; }
+.wa-number-warning { padding: var(--space-3); border-radius: var(--radius-sm); background: var(--warning-bg); color: var(--warning); font-size: var(--text-sm); line-height: 1.5; }

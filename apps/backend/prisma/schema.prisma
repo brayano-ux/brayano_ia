@@ -37,6 +37,7 @@ model Organization {
   platformSuspended        Boolean                      @default(false) @map("platform_suspended")
   suspensionReason         String?                      @map("suspension_reason")
   suspendedAt              DateTime?                    @map("suspended_at")
+  whatsappNumber           String?                      @map("whatsapp_number")
 
   @@map("organizations")
 }
@@ -79,10 +80,25 @@ model Product {
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  image        ProductImage?
 
   @@index([organizationId, active])
   @@map("products")
+}
+
+/// Copie de la photo d'un produit dans la base : si le disque du serveur est vidé (redéploiement sans disque
+/// persistant), la photo est reconstituée depuis cette table au lieu d'être perdue.
+model ProductImage {
+  productId      String   @id @map("product_id")
+  organizationId String   @map("organization_id")
+  mimeType       String   @map("mime_type")
+  data           Bytes
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_images")
 }
 
 enum BillingPaymentStatus {
@@ -165,18 +181,19 @@ model AllowedEmail {
 }
 
 model SignupVerification {
-  id           String    @id @default(uuid())
-  email        String    @unique
-  name         String
-  companyName  String    @map("company_name")
-  passwordHash String    @map("password_hash")
-  codeHash     String    @map("code_hash")
-  expiresAt    DateTime  @map("expires_at")
-  lastSentAt   DateTime  @map("last_sent_at")
-  attempts     Int       @default(0)
-  verifiedAt   DateTime? @map("verified_at")
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
+  id             String    @id @default(uuid())
+  email          String    @unique
+  name           String
+  companyName    String    @map("company_name")
+  whatsappNumber String?   @map("whatsapp_number")
+  passwordHash   String    @map("password_hash")
+  codeHash       String    @map("code_hash")
+  expiresAt      DateTime  @map("expires_at")
+  lastSentAt     DateTime  @map("last_sent_at")
+  attempts       Int       @default(0)
+  verifiedAt     DateTime? @map("verified_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
 
   @@index([expiresAt])
   @@map("signup_verifications")

@@ -37,7 +37,7 @@ export function logoutUser(mode = "login") {
   clearSession();
   $(".app-shell").classList.add("hidden");
   $("#login-screen").classList.remove("hidden");
-  ["#login-email", "#login-password", "#register-name", "#register-company", "#register-email", "#register-password", "#register-verification-code"]
+  ["#login-email", "#login-password", "#register-name", "#register-company", "#register-whatsapp", "#register-email", "#register-password", "#register-verification-code"]
     .forEach((selector) => {
       const field = $(selector);
       if (field) field.value = "";
@@ -168,6 +168,7 @@ export function initAuthFlow(onAuthenticated) {
       const payload = {
         name: $("#register-name").value,
         companyName: $("#register-company").value,
+        whatsappNumber: $("#register-whatsapp").value,
         email: $("#register-email").value,
         password: $("#register-password").value,
       };

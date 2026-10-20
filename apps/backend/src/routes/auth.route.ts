@@ -1,3 +1,4 @@
+import { normalizeWhatsAppNumber } from "../shared/phone.js";
 import type { FastifyInstance } from "fastify";
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import nodemailer from "nodemailer";
@@ -13,6 +14,9 @@ const loginSchema = z.object({
 const registerSchema = z.object({
   name: z.string().min(2, "Le nom est requis."),
   companyName: z.string().min(2, "Le nom de l'entreprise est requis."),
+  whatsappNumber: z
+    .string({ required_error: "Le numéro WhatsApp de l'entreprise est requis." })
+    .refine((value) => normalizeWhatsAppNumber(value) !== null, "Numéro WhatsApp invalide : indiquez-le avec l'indicatif du pays (ex. +237 6 90 00 00 00)."),
   email: z.string().email("Adresse email invalide."),
   password: z.string().min(8, "Le mot de passe doit contenir au moins 8 caractères."),
 });
@@ -327,6 +331,7 @@ export async function authRoute(app: FastifyInstance) {
     const email = parsed.data.email.trim().toLowerCase();
     const name = parsed.data.name.trim();
     const companyName = parsed.data.companyName.trim();
+    const whatsappNumber = normalizeWhatsAppNumber(parsed.data.whatsappNumber)!;
 
     try {
       const existingUser = await prisma.user.findUnique({ where: { email } }).catch(() => null);
@@ -348,6 +353,7 @@ export async function authRoute(app: FastifyInstance) {
         update: {
           name,
           companyName,
+          whatsappNumber,
           passwordHash: hashPassword(parsed.data.password),
           codeHash: hashToken(code),
           expiresAt: new Date(Date.now() + 10 * 60_000),
@@ -359,6 +365,7 @@ export async function authRoute(app: FastifyInstance) {
           email,
           name,
           companyName,
+          whatsappNumber,
           passwordHash: hashPassword(parsed.data.password),
           codeHash: hashToken(code),
           expiresAt: new Date(Date.now() + 10 * 60_000),
@@ -406,7 +413,7 @@ export async function authRoute(app: FastifyInstance) {
 
     try {
       const organization = await prisma.$transaction(async (tx) => {
-        const createdOrganization = await tx.organization.create({ data: { name: verification.companyName, freeAiResponsesRemaining: 15 } });
+        const createdOrganization = await tx.organization.create({ data: { name: verification.companyName, whatsappNumber: verification.whatsappNumber, freeAiResponsesRemaining: 15 } });
         const createdUser = await tx.user.create({
           data: {
             organizationId: createdOrganization.id,

@@ -168,6 +168,36 @@ describe.skipIf(!integrationEnabled)("traitement d'un message entrant (base rée
       expect(whatsapp.sent.slice(1).map((item) => item.text)).toEqual(["Robe · 10 000 FCFA", "Sac · 10 000 FCFA", "Chapeau · 10 000 FCFA"]);
     });
 
+    it("quand la photo ne part pas, le client reçoit quand même le texte et une explication honnête", async () => {
+      const { organization } = await createTestOrganization();
+      const { robe } = await seedProducts(organization.id);
+      installScriptedAi([aiReply({ reply: "Voici la robe.", productId: robe.id })]);
+      const whatsapp = new FakeWhatsApp();
+      whatsapp.failImages = 1;
+
+      await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "Vous avez la photo de la robe ?"));
+
+      expect(whatsapp.sent.map((item) => item.kind)).toEqual(["text", "text"]);
+      expect(whatsapp.sent[0]?.text).toContain("Voici la robe.");
+      expect(whatsapp.sent[1]?.text).toMatch(/n'arrive pas à envoyer la photo \(Robe\)/);
+      const reply = await prisma.message.findFirst({ where: { direction: "OUTBOUND" }, orderBy: { createdAt: "desc" } });
+      expect(reply?.aiMeta).toMatchObject({ photosSent: 0, imagesFailed: 1 });
+    });
+
+    it("avec plusieurs photos, seules celles qui échouent sont signalées", async () => {
+      const { organization } = await createTestOrganization();
+      const { robe, sac } = await seedProducts(organization.id);
+      installScriptedAi([aiReply({ reply: "Voici nos modèles.", productIds: [robe.id, sac.id] })]);
+      const whatsapp = new FakeWhatsApp();
+      whatsapp.failImages = 1;
+
+      await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "Montrez-moi la robe et le sac en photo"));
+
+      expect(whatsapp.sent.map((item) => item.kind)).toEqual(["text", "image", "text"]);
+      expect(whatsapp.sent[1]?.text).toBe("Sac · 10 000 FCFA");
+      expect(whatsapp.sent[2]?.text).toMatch(/la photo \(Robe\)/);
+    });
+
     it("n'envoie pas de photo quand le client n'en a pas demandé, même si le modèle en propose une", async () => {
       const { organization } = await createTestOrganization();
       const { robe } = await seedProducts(organization.id);

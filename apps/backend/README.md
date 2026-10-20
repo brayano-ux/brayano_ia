@@ -102,6 +102,10 @@ curl.exe -X POST http://localhost:3000/organizations/<orgId>/conversations/<id>/
 - Les tâches de fond (relances, reprise des envois, nettoyage des fichiers) tournent toutes les 5 minutes ; `BACKGROUND_JOBS=false` les coupe.
 - Au démarrage, `prisma db push` ajoute les nouvelles colonnes (aucune donnée n'est supprimée).
 
+- **Numéro WhatsApp à l'inscription** : le formulaire demande le numéro de l'entreprise (`whatsappNumber`, avec indicatif ; un mobile camerounais à 9 chiffres reçoit `+237`). Il est gardé dans `organizations.whatsapp_number`, pré-remplit la connexion par code d'association, et la page WhatsApp prévient si le téléphone relié est un autre numéro. Les anciens comptes l'ajoutent depuis la page WhatsApp (`PUT /organizations/:id/whatsapp/number`).
+- **Photos de produits durables** : chaque photo est copiée dans la base (`product_images`) en plus du disque. Après un redéploiement sans disque persistant, elle est reconstituée à la demande ; au démarrage, les photos qui n'existent que sur le disque sont copiées en base. Si une photo ne peut malgré tout pas partir, le client reçoit le texte et un message honnête, et le journal « Pourquoi cette réponse ? » le signale. Les photos et documents **reçus des clients** restent sur le disque (`CLIENT_MEDIA_DIR`).
+- **Disque persistant (Render)** : les sessions WhatsApp (`WHATSAPP_AUTH_DIR`, par défaut `/data/wa-session`) ne sont conservées entre deux redémarrages que si un disque est monté sur `/data`. Sans disque, il faut relier le numéro à chaque redémarrage.
+
 ### Tester avec une vraie base
 ```bash
 INTEGRATION_DB=1 DATABASE_URL=postgresql://.../base_de_test npm test

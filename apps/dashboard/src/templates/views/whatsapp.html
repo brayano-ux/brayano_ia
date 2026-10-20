@@ -18,6 +18,15 @@
       <h2 id="wa-title">WhatsApp déconnecté</h2>
       <p id="wa-description" class="muted">Connectez WhatsApp en scannant le QR code ou en recevant un code d'association.</p>
 
+      <div class="wa-number">
+        <label for="wa-number-input">Numéro WhatsApp de votre entreprise</label>
+        <div class="wa-number-row">
+          <input id="wa-number-input" type="tel" inputmode="tel" autocomplete="tel" placeholder="+237 6 90 00 00 00" />
+          <button type="button" class="ghost-button" id="wa-number-save">Enregistrer</button>
+        </div>
+        <p id="wa-number-warning" class="wa-number-warning hidden" role="alert"></p>
+      </div>
+
       <button class="primary" id="connect-wa" type="button">Connexion par QR code</button>
       <button class="text-button" id="show-pairing-form" type="button" aria-expanded="false" aria-controls="pairing-code-form">Utiliser un code d'association</button>
       <form id="pairing-code-form" class="pairing-form hidden">

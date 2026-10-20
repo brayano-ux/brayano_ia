@@ -91,7 +91,7 @@ describe("auth security configuration", () => {
     const { authRoute } = await import("./auth.route.js");
     await app.register(authRoute);
     const organizationCreate = vi.fn(async ({ data }: any) => {
-      expect(data).toMatchObject({ name: "Example company", freeAiResponsesRemaining: 15 });
+      expect(data).toMatchObject({ name: "Example company", whatsappNumber: "237690000000", freeAiResponsesRemaining: 15 });
       return { id: "org-trial", name: data.name };
     });
     prismaMock.user.findUnique.mockResolvedValue(null);
@@ -101,6 +101,7 @@ describe("auth security configuration", () => {
         email: "new.person@example.com",
         name: "Example Owner",
         companyName: "Example company",
+        whatsappNumber: "237690000000",
         passwordHash: "password-hash",
         codeHash: createHash("sha256").update("123456").digest("hex"),
         expiresAt: new Date(Date.now() + 600_000),
@@ -113,6 +114,7 @@ describe("auth security configuration", () => {
       payload: {
         name: "Example Owner",
         companyName: "Example company",
+        whatsappNumber: "+237 690 00 00 00",
         email: "new.person@example.com",
         password: "StrongPassword123",
       },
@@ -120,7 +122,7 @@ describe("auth security configuration", () => {
 
     expect(signupResponse.statusCode).toBe(200);
     expect(JSON.parse(signupResponse.payload)).toMatchObject({ verificationRequired: true, email: "new.person@example.com" });
-    expect(prismaMock.signupVerification.upsert).toHaveBeenCalled();
+    expect(prismaMock.signupVerification.upsert).toHaveBeenCalledWith(expect.objectContaining({ create: expect.objectContaining({ whatsappNumber: "237690000000" }) }));
     expect(organizationCreate).not.toHaveBeenCalled();
 
     prismaMock.$transaction.mockImplementationOnce(async (callback: any) => callback({
@@ -140,6 +142,27 @@ describe("auth security configuration", () => {
     expect(organizationCreate).toHaveBeenCalledTimes(1);
   });
 
+  it.each([
+    ["absent", undefined],
+    ["trop court", "12345"],
+    ["avec des lettres", "+237 69a 00 00 00"],
+  ])("refuse l'inscription quand le numéro WhatsApp est %s", async (_label, whatsappNumber) => {
+    const app = Fastify();
+    const { authRoute } = await import("./auth.route.js");
+    await app.register(authRoute);
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/register",
+      headers: { "x-forwarded-for": `198.51.100.${Math.floor(Math.random() * 200)}` },
+      payload: { name: "Example Owner", companyName: "Example company", email: "no.number@example.com", password: "StrongPassword123", ...(whatsappNumber ? { whatsappNumber } : {}) },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(JSON.parse(response.payload).message).toMatch(/WhatsApp/);
+    expect(prismaMock.signupVerification.upsert).not.toHaveBeenCalled();
+  });
+
   it("requires email verification for the former hardcoded admin address too", async () => {
     const app = Fastify();
     const { authRoute } = await import("./auth.route.js");
@@ -153,6 +176,7 @@ describe("auth security configuration", () => {
       payload: {
         name: "Admin Owner",
         companyName: "Admin Company",
+        whatsappNumber: "690000000",
         email: "admin@brayano.ai",
         password: "StrongPassword123",
       },
