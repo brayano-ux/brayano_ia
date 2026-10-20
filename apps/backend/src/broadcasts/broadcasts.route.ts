@@ -10,6 +10,13 @@ const stageSchema = z.enum(["NEW", "INTERESTED", "ORDERED", "CALLBACK"]);
 const audienceQuerySchema = z.object({
   stages: z.string().optional().transform((value) => (value ? value.split(",").filter(Boolean) : [])).pipe(z.array(stageSchema).max(4)),
   days: z.coerce.number().int().min(1).max(BROADCAST_LIMITS.maxWindowDays).optional(),
+  text: z.string().max(BROADCAST_LIMITS.maxTextLength).optional(),
+});
+
+const previewBodySchema = z.object({
+  stages: z.array(stageSchema).max(4).optional(),
+  windowDays: z.number().int().min(1).max(BROADCAST_LIMITS.maxWindowDays).optional(),
+  text: z.string().max(BROADCAST_LIMITS.maxTextLength).optional(),
 });
 
 const createSchema = z.object({
@@ -33,7 +40,15 @@ export async function broadcastsRoute(app: FastifyInstance) {
     const { orgId } = request.params as { orgId: string };
     const parsed = audienceQuerySchema.safeParse(request.query ?? {});
     if (!parsed.success) throw new ValidationError("Critères invalides.");
-    return { preview: await previewBroadcast(orgId, { stages: parsed.data.stages, windowDays: parsed.data.days }) };
+    return { preview: await previewBroadcast(orgId, { stages: parsed.data.stages, windowDays: parsed.data.days, text: parsed.data.text }) };
+  });
+
+  // Même aperçu, avec le texte dans le corps de la requête (un long message ne tient pas toujours dans une adresse).
+  app.post("/organizations/:orgId/broadcasts/preview", async (request) => {
+    const { orgId } = request.params as { orgId: string };
+    const parsed = previewBodySchema.safeParse(request.body ?? {});
+    if (!parsed.success) throw new ValidationError("Critères invalides.");
+    return { preview: await previewBroadcast(orgId, parsed.data) };
   });
 
   app.post("/organizations/:orgId/broadcasts", async (request) => {

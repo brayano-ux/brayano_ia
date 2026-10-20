@@ -258,6 +258,22 @@ describe.skipIf(!integrationEnabled)("API complète (HTTP, base réelle)", () =>
   });
 
   describe("messages groupés", () => {
+    it("plus de 50 clients : le bouton n'est plus bloqué, l'envoi part par lots de 50", async () => {
+      const { organization, token } = await setup();
+      for (let index = 0; index < 60; index += 1) {
+        const contact = await prisma.contact.create({ data: { organizationId: organization.id, whatsappJid: `2376600${String(index).padStart(5, "0")}@s.whatsapp.net` } });
+        await prisma.conversation.create({ data: { organizationId: organization.id, contactId: contact.id, lastInboundAt: new Date(Date.now() - index * 60_000) } });
+      }
+      const base = `/organizations/${organization.id}/broadcasts`;
+      const preview = await app.inject({ method: "POST", url: `${base}/preview`, headers: authed(token), payload: { text: "Promo lot" } });
+      expect(preview.statusCode).toBe(200);
+      expect(preview.json().preview).toMatchObject({ ok: true, eligible: 60, recipients: 50, remaining: 10 });
+
+      const created = await app.inject({ method: "POST", url: base, headers: authed(token), payload: { text: "Promo lot" } });
+      expect(created.statusCode).toBe(200);
+      expect(created.json().broadcast.total).toBe(50);
+    });
+
     it("annonce combien de clients seront contactés, refuse sans WhatsApp, puis envoie", async () => {
       const { organization, token } = await setup();
       for (const number of ["1", "2"]) {
