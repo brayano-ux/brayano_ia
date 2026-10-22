@@ -13,6 +13,8 @@ const envSchema = z.object({
   PRODUCT_IMAGE_DIR: z.string().optional(),
   CLIENT_MEDIA_DIR: z.string().optional(),
   CLIENT_MEDIA_RETENTION_DAYS: z.coerce.number().int().min(7).max(3650).default(90),
+  /** Applique les forfaits : essai de 100 messages, quota mensuel, fonctions réservées. Éteint par défaut : l'assistant reste illimité. */
+  BILLING_ENFORCED: z.enum(["true", "false"]).default("false").transform((value) => value === "true"),
   BACKGROUND_JOBS: z.enum(["true", "false"]).default("true").transform((value) => value === "true"),
   CORS_ALLOWED_ORIGINS: z.string().default("http://localhost:5173,http://localhost:3000,http://localhost:4173"),
   PAYMENT_PROVIDER: z.enum(["campay", "manual"]).default("campay"),

@@ -1,6 +1,7 @@
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { prisma } from "../database/client.js";
 import { setAiOrchestratorForTests } from "../ai/ai.factory.js";
+import { setBillingEnforcedForTests } from "../billing/subscription.service.js";
 import { aiReply, createTestOrganization, disconnectTestDatabase, installScriptedAi, integrationEnabled, resetDatabase } from "../test-support/integration.js";
 import { resetFollowUpFailuresForTests, runFollowUps } from "./follow-ups.js";
 
@@ -46,7 +47,7 @@ describe.skipIf(!integrationEnabled)("relances automatiques (base réelle)", () 
     await resetDatabase();
     resetFollowUpFailuresForTests();
   });
-  afterAll(async () => { await disconnectTestDatabase(); });
+  afterAll(async () => { setBillingEnforcedForTests(null); await disconnectTestDatabase(); });
 
   async function enable(organizationId: string, data: Record<string, unknown> = {}) {
     await prisma.aiSettings.update({ where: { organizationId }, data: { followUpEnabled: true, followUpDelayHours: 24, followUpMax: 1, ...data } });
@@ -172,5 +173,48 @@ describe.skipIf(!integrationEnabled)("relances automatiques (base réelle)", () 
     const { deps, sent } = makeDeps();
     await runFollowUps(deps);
     expect(sent.map((entry) => entry.organizationId)).toEqual([first.organization.id]);
+  });
+
+  describe("forfaits", () => {
+    beforeEach(() => setBillingEnforcedForTests(true));
+
+    it("forfait Essentiel : pas de relance (fonction du Pro), et l'IA n'est même pas appelée", async () => {
+      const { organization } = await createTestOrganization();
+      await enable(organization.id);
+      await prisma.billingSubscription.create({ data: { organizationId: organization.id, plan: "starter", messageLimit: 1000, expiresAt: new Date(NOW.getTime() + 20 * 24 * 3600_000), periodStartedAt: hoursAgo(48) } });
+      await seed(organization.id);
+      const calls = installScriptedAi([aiReply({ reply: "Relance" })]);
+      const { deps, sent } = makeDeps();
+      expect((await runFollowUps(deps)).sent).toBe(0);
+      expect(calls).toHaveLength(0);
+      expect(sent).toHaveLength(0);
+    });
+
+    it("forfait Pro : la relance part et compte comme un message de l'assistant", async () => {
+      const { organization } = await createTestOrganization();
+      await enable(organization.id);
+      await prisma.billingSubscription.create({ data: { organizationId: organization.id, plan: "pro", messageLimit: 5000, expiresAt: new Date(Date.now() + 20 * 24 * 3600_000), periodStartedAt: new Date(Date.now() - 24 * 3600_000) } });
+      await seed(organization.id);
+      installScriptedAi([aiReply({ reply: "Toujours intéressé par la robe ?" })]);
+      const { deps } = makeDeps();
+      expect((await runFollowUps(deps)).sent).toBe(1);
+      expect((await prisma.billingSubscription.findUniqueOrThrow({ where: { organizationId: organization.id } })).messagesUsed).toBe(1);
+    });
+
+    it("quota atteint : pas de relance ; si l'IA répond SKIP ou plante, le message est rendu", async () => {
+      const { organization } = await createTestOrganization();
+      await enable(organization.id);
+      await prisma.billingSubscription.create({ data: { organizationId: organization.id, plan: "pro", messageLimit: 1, messagesUsed: 1, expiresAt: new Date(Date.now() + 20 * 24 * 3600_000), periodStartedAt: new Date(Date.now() - 24 * 3600_000) } });
+      await seed(organization.id);
+      const calls = installScriptedAi([aiReply({ reply: "Relance" })]);
+      const { deps } = makeDeps();
+      expect((await runFollowUps(deps)).sent).toBe(0);
+      expect(calls).toHaveLength(0);
+
+      await prisma.billingSubscription.update({ where: { organizationId: organization.id }, data: { messageLimit: 5, messagesUsed: 0 } });
+      installScriptedAi([aiReply({ reply: "SKIP" })]);
+      expect((await runFollowUps(deps)).sent).toBe(0);
+      expect((await prisma.billingSubscription.findUniqueOrThrow({ where: { organizationId: organization.id } })).messagesUsed).toBe(0);
+    });
   });
 });

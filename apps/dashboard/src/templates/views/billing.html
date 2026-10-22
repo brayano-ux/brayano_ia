@@ -1,0 +1,43 @@
+<!-- VIEW: BILLING -->
+<section id="billing-view" class="view hidden">
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">ABONNEMENT</p>
+      <h1>Mon forfait</h1>
+      <p class="muted">Choisissez le forfait qui correspond à votre activité et payez par Mobile Money (Orange Money ou MTN MoMo).</p>
+    </div>
+  </div>
+
+  <section id="billing-status" class="panel billing-status" aria-live="polite"><div class="empty-state">Chargement…</div></section>
+
+  <h2 class="billing-title">Les forfaits</h2>
+  <div id="billing-plans" class="billing-plans"></div>
+  <p class="muted billing-note">
+    <strong>Un « message » = une réponse envoyée par l'assistant à un client</strong> (photos et relances comprises). Les messages que vous écrivez vous-même ne sont jamais comptés.
+    Le compteur repart à zéro chaque mois. Un forfait dure 30 jours.
+    <span id="billing-support"></span>
+  </p>
+
+  <div id="billing-pay" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="billing-pay-title">
+    <div class="modal-card">
+      <button type="button" class="modal-close" id="billing-pay-close" aria-label="Fermer">×</button>
+      <h2 id="billing-pay-title">Payer</h2>
+      <p class="muted" id="billing-pay-amount"></p>
+      <form id="billing-pay-form" class="billing-pay-form">
+        <label>
+          <span class="field-label">Votre numéro Orange Money ou MTN MoMo</span>
+          <input id="billing-pay-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="6 90 00 00 00" required />
+          <small class="field-hint">Vous recevrez une demande de paiement sur ce téléphone : il suffit de la valider avec votre code secret.</small>
+        </label>
+        <div class="form-actions">
+          <button type="submit" class="primary" id="billing-pay-submit">Payer maintenant</button>
+          <button type="button" class="text-button" id="billing-pay-cancel">Annuler</button>
+        </div>
+      </form>
+      <div id="billing-pay-wait" class="billing-pay-wait hidden" aria-live="polite">
+        <div class="billing-spinner" aria-hidden="true"></div>
+        <p id="billing-pay-wait-text"></p>
+      </div>
+    </div>
+  </div>
+</section>

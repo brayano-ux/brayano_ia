@@ -20,3 +20,10 @@ export class ValidationError extends AppError {
     super(message, 400, "VALIDATION_ERROR");
   }
 }
+
+/** Fonction ou quota non inclus dans le forfait de l'entreprise (402 : le tableau de bord propose alors de changer de forfait). */
+export class PlanLimitError extends AppError {
+  constructor(message: string) {
+    super(message, 402, "PLAN_LIMIT");
+  }
+}

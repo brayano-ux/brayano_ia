@@ -1,3 +1,4 @@
+import { getOrganizationFeatures, releaseAiResponse, reserveAiResponse, type AiResponseEntitlement } from "../billing/subscription.service.js";
 import { getAiOrchestrator } from "../ai/ai.factory.js";
 import { buildBusinessHoursPrompt, isGoodTimeToFollowUp, type BusinessHoursConfig } from "../ai/business-hours.js";
 import { buildFollowUpInstruction, FOLLOW_UP_SKIP, isDueForFollowUp } from "../ai/follow-up.js";
@@ -65,6 +66,9 @@ export async function runFollowUps(deps: JobDeps): Promise<FollowUpRunResult> {
     const settings = conversation.organization.aiSettings;
     if (!settings) continue;
     const organizationId = conversation.organizationId;
+    // Message du forfait réservé pour cette relance : rendu si elle ne part pas.
+    let reservation: Extract<AiResponseEntitlement, { allowed: true }> | null = null;
+    let delivered = false;
     try {
       const lastMessage = conversation.messages[0] ?? null;
       const due = isDueForFollowUp(
@@ -80,6 +84,12 @@ export async function runFollowUps(deps: JobDeps): Promise<FollowUpRunResult> {
       if ((sentPerOrganization.get(organizationId) ?? 0) >= MAX_FOLLOW_UPS_PER_RUN_PER_ORGANIZATION) { result.skipped += 1; continue; }
       const failedAt = failures.get(conversation.id);
       if (failedAt && now.getTime() - failedAt < RETRY_AFTER_FAILURE_MS) { result.skipped += 1; continue; }
+
+      // Forfait : les relances sont réservées aux forfaits qui les incluent, et comptent comme un message de l'assistant.
+      if (!(await getOrganizationFeatures(organizationId)).followUps) { result.skipped += 1; continue; }
+      const entitlement = await reserveAiResponse(organizationId);
+      if (!entitlement.allowed) { result.skipped += 1; continue; }
+      reservation = entitlement;
 
       const followUpNumber = conversation.followUpCount + 1;
       const lastClientMessage = await prisma.message.findFirst({
@@ -142,6 +152,7 @@ export async function runFollowUps(deps: JobDeps): Promise<FollowUpRunResult> {
         return true;
       });
       if (sent) {
+        delivered = true;
         result.sent += 1;
         sentPerOrganization.set(organizationId, (sentPerOrganization.get(organizationId) ?? 0) + 1);
         console.log(`🔔 [org:${organizationId}] Relance ${followUpNumber} envoyée.`);
@@ -153,6 +164,10 @@ export async function runFollowUps(deps: JobDeps): Promise<FollowUpRunResult> {
       failures.set(conversation.id, now.getTime());
       console.error(`❌ [org:${organizationId}] Relance ignorée pour la conversation ${conversation.id} :`, error);
       result.skipped += 1;
+    } finally {
+      if (reservation && !delivered) {
+        await releaseAiResponse(organizationId, reservation).catch((error) => console.error(`❌ [org:${organizationId}] Message du forfait non rendu :`, error));
+      }
     }
   }
   return result;

@@ -106,6 +106,21 @@ curl.exe -X POST http://localhost:3000/organizations/<orgId>/conversations/<id>/
 - **Photos de produits durables** : chaque photo est copiée dans la base (`product_images`) en plus du disque. Après un redéploiement sans disque persistant, elle est reconstituée à la demande ; au démarrage, les photos qui n'existent que sur le disque sont copiées en base. Si une photo ne peut malgré tout pas partir, le client reçoit le texte et un message honnête, et le journal « Pourquoi cette réponse ? » le signale. Les photos et documents **reçus des clients** restent sur le disque (`CLIENT_MEDIA_DIR`).
 - **Disque persistant (Render)** : les sessions WhatsApp (`WHATSAPP_AUTH_DIR`, par défaut `/data/wa-session`) ne sont conservées entre deux redémarrages que si un disque est monté sur `/data`. Sans disque, il faut relier le numéro à chaque redémarrage.
 
+### 8. Forfaits et messages de l'assistant
+
+Un « message » = une réponse envoyée par l'assistant à un client (photos et relances comprises). Essai gratuit : 100 messages à l'inscription.
+
+| Forfait | Prix / 30 jours | Messages | Messages en masse | Relances | Employés |
+|---|---|---|---|---|---|
+| Essentiel | 10 000 FCFA | 1 000 | non | non | 0 |
+| Pro | 20 000 FCFA | 5 000 | oui | oui | 3 |
+| Business | 50 000 FCFA | 15 000 | oui | oui | 10 |
+
+- Définition unique : `src/billing/billing-plans.ts` (la page d'accueil doit afficher les mêmes prix : un test le vérifie).
+- `BILLING_ENFORCED=false` (défaut) : les messages sont comptés mais rien n'est bloqué. `true` : sans message restant, l'assistant ne répond plus (le propriétaire est prévenu par email, au plus une fois par jour) ; messages en masse, relances et employés suivent le forfait (erreur 402).
+- Avant de passer à `true`, donner un forfait aux clients existants : `POST /admin/organizations/:orgId/subscription` avec `{ "plan": "pro", "days": 30 }` (en-tête d'administration de la plateforme). `GET /admin/organizations` montre l'état de chacun.
+- Paiement Mobile Money via Campay (page « Mon forfait » du tableau de bord). En mode démonstration (`demo.campay.net`), aucun forfait n'est activé.
+
 ### Tester avec une vraie base
 ```bash
 INTEGRATION_DB=1 DATABASE_URL=postgresql://.../base_de_test npm test

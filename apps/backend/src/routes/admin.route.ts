@@ -8,7 +8,10 @@ import {
   unsuspendOrganization,
 } from "../organizations/platform-suspension.service.js";
 import { getPlatformAdminEmails } from "../organizations/platform-admins.js";
-import { ValidationError } from "../shared/errors.js";
+import { getBillingPlan } from "../billing/billing-plans.js";
+import { getOrganizationBillingStatus } from "../billing/subscription.service.js";
+import { prisma } from "../database/client.js";
+import { NotFoundError, ValidationError } from "../shared/errors.js";
 import { getWhatsAppAccountStatus } from "../whatsapp/whatsapp.registry.js";
 import { requireAuth } from "./auth.route.js";
 
@@ -56,19 +59,51 @@ export async function adminRoute(app: FastifyInstance) {
   app.get("/admin/organizations", async () => {
     const organizations = await listOrganizationsForAdmin();
     return {
-      organizations: organizations.map(({ whatsappAccounts, ...organization }) => ({
-        ...organization,
-        // État en direct du serveur (la base peut dater d'avant un redémarrage).
-        whatsapp: {
-          status: getWhatsAppAccountStatus(organization.id),
-          phoneNumber: whatsappAccounts[0]?.phoneNumber ?? null,
-          updatedAt: whatsappAccounts[0]?.updatedAt ?? null,
-          lastConnectedAt: whatsappAccounts[0]?.lastConnectedAt ?? null,
-          lastDisconnectedAt: whatsappAccounts[0]?.lastDisconnectedAt ?? null,
-          lastDisconnectReason: whatsappAccounts[0]?.lastDisconnectReason ?? null,
-        },
+      organizations: await Promise.all(organizations.map(async ({ whatsappAccounts, ...organization }) => {
+        const billing = await getOrganizationBillingStatus(organization.id).catch(() => null);
+        return {
+          ...organization,
+          // Forfait et messages utilisés (l'essai gratuit apparaît comme « Essai gratuit »).
+          billing: billing && {
+            plan: billing.plan, planName: billing.planName, status: billing.status,
+            messagesUsed: billing.messagesUsed, messageLimit: billing.messageLimit, expiresAt: billing.expiresAt,
+          },
+          // État en direct du serveur (la base peut dater d'avant un redémarrage).
+          whatsapp: {
+            status: getWhatsAppAccountStatus(organization.id),
+            phoneNumber: whatsappAccounts[0]?.phoneNumber ?? null,
+            updatedAt: whatsappAccounts[0]?.updatedAt ?? null,
+            lastConnectedAt: whatsappAccounts[0]?.lastConnectedAt ?? null,
+            lastDisconnectedAt: whatsappAccounts[0]?.lastDisconnectedAt ?? null,
+            lastDisconnectReason: whatsappAccounts[0]?.lastDisconnectReason ?? null,
+          },
+        };
       })),
     };
+  });
+
+  // Abonnement activé à la main (paiement reçu hors Campay, geste commercial, essai prolongé…).
+  app.post("/admin/organizations/:orgId/subscription", async (request) => {
+    const { orgId } = request.params as { orgId: string };
+    const parsed = z.object({ plan: z.string().min(1, "Le forfait est requis."), days: z.number().int().min(1).max(366).optional() }).safeParse(request.body ?? {});
+    if (!parsed.success) throw new ValidationError(parsed.error.issues[0]?.message);
+    let plan;
+    try {
+      plan = getBillingPlan(parsed.data.plan);
+    } catch {
+      throw new ValidationError("Forfait inconnu : choisissez essentiel, pro ou business.");
+    }
+    const organization = await prisma.organization.findUnique({ where: { id: orgId }, select: { id: true } });
+    if (!organization) throw new NotFoundError("Entreprise introuvable.");
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + (parsed.data.days ?? 30) * 24 * 3600_000);
+    await prisma.billingSubscription.upsert({
+      where: { organizationId: orgId },
+      create: { organizationId: orgId, plan: plan.key, messageLimit: plan.messages, messagesUsed: 0, periodStartedAt: now, status: "ACTIVE", startedAt: now, expiresAt },
+      update: { plan: plan.key, messageLimit: plan.messages, messagesUsed: 0, periodStartedAt: now, status: "ACTIVE", expiresAt },
+    });
+    await prisma.organization.update({ where: { id: orgId }, data: { quotaNoticeAt: null } });
+    return { organizationId: orgId, billing: await getOrganizationBillingStatus(orgId) };
   });
 
   app.post("/admin/organizations/:orgId/suspend", async (request) => {

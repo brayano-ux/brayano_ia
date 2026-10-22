@@ -2487,6 +2487,7 @@ export const OrganizationScalarFieldEnum = {
   updatedAt: 'updatedAt',
   freeAiResponsesRemaining: 'freeAiResponsesRemaining',
   trialUpgradeEmailSentAt: 'trialUpgradeEmailSentAt',
+  quotaNoticeAt: 'quotaNoticeAt',
   platformSuspended: 'platformSuspended',
   suspensionReason: 'suspensionReason',
   suspendedAt: 'suspendedAt',

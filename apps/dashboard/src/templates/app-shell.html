@@ -15,6 +15,7 @@
     <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
     <symbol id="i-selector" viewBox="0 0 24 24"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></symbol>
     <symbol id="i-megaphone" viewBox="0 0 24 24"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></symbol>
+    <symbol id="i-card" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></symbol>
     <symbol id="i-close" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
   </defs>
 </svg>
@@ -51,6 +52,7 @@
     </nav>
 
     <div class="sidebar-bottom">
+      <button class="nav-item admin-only" data-view="billing"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-card"/></svg><span>Mon forfait</span></button>
       <button class="nav-item admin-only" data-view="settings"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-settings"/></svg><span>Paramètres</span></button>
       <div class="user-card">
         <span class="avatar" id="user-avatar">AD</span>
@@ -73,6 +75,7 @@
       </div>
     </header>
     <div id="platform-suspension-banner" class="platform-banner hidden" role="alert"></div>
+    <div id="billing-banner" class="billing-banner hidden" role="status"></div>
     <div id="views-root" class="views-root"></div>
   </main>
 

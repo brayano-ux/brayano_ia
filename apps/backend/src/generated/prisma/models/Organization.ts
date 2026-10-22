@@ -41,6 +41,7 @@ export type OrganizationMinAggregateOutputType = {
   updatedAt: Date | null
   freeAiResponsesRemaining: number | null
   trialUpgradeEmailSentAt: Date | null
+  quotaNoticeAt: Date | null
   platformSuspended: boolean | null
   suspensionReason: string | null
   suspendedAt: Date | null
@@ -54,6 +55,7 @@ export type OrganizationMaxAggregateOutputType = {
   updatedAt: Date | null
   freeAiResponsesRemaining: number | null
   trialUpgradeEmailSentAt: Date | null
+  quotaNoticeAt: Date | null
   platformSuspended: boolean | null
   suspensionReason: string | null
   suspendedAt: Date | null
@@ -67,6 +69,7 @@ export type OrganizationCountAggregateOutputType = {
   updatedAt: number
   freeAiResponsesRemaining: number
   trialUpgradeEmailSentAt: number
+  quotaNoticeAt: number
   platformSuspended: number
   suspensionReason: number
   suspendedAt: number
@@ -90,6 +93,7 @@ export type OrganizationMinAggregateInputType = {
   updatedAt?: true
   freeAiResponsesRemaining?: true
   trialUpgradeEmailSentAt?: true
+  quotaNoticeAt?: true
   platformSuspended?: true
   suspensionReason?: true
   suspendedAt?: true
@@ -103,6 +107,7 @@ export type OrganizationMaxAggregateInputType = {
   updatedAt?: true
   freeAiResponsesRemaining?: true
   trialUpgradeEmailSentAt?: true
+  quotaNoticeAt?: true
   platformSuspended?: true
   suspensionReason?: true
   suspendedAt?: true
@@ -116,6 +121,7 @@ export type OrganizationCountAggregateInputType = {
   updatedAt?: true
   freeAiResponsesRemaining?: true
   trialUpgradeEmailSentAt?: true
+  quotaNoticeAt?: true
   platformSuspended?: true
   suspensionReason?: true
   suspendedAt?: true
@@ -216,6 +222,7 @@ export type OrganizationGroupByOutputType = {
   updatedAt: Date
   freeAiResponsesRemaining: number
   trialUpgradeEmailSentAt: Date | null
+  quotaNoticeAt: Date | null
   platformSuspended: boolean
   suspensionReason: string | null
   suspendedAt: Date | null
@@ -252,6 +259,7 @@ export type OrganizationWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
   freeAiResponsesRemaining?: Prisma.IntFilter<"Organization"> | number
   trialUpgradeEmailSentAt?: Prisma.DateTimeNullableFilter<"Organization"> | Date | string | null
+  quotaNoticeAt?: Prisma.DateTimeNullableFilter<"Organization"> | Date | string | null
   platformSuspended?: Prisma.BoolFilter<"Organization"> | boolean
   suspensionReason?: Prisma.StringNullableFilter<"Organization"> | string | null
   suspendedAt?: Prisma.DateTimeNullableFilter<"Organization"> | Date | string | null
@@ -283,6 +291,7 @@ export type OrganizationOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   freeAiResponsesRemaining?: Prisma.SortOrder
   trialUpgradeEmailSentAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  quotaNoticeAt?: Prisma.SortOrderInput | Prisma.SortOrder
   platformSuspended?: Prisma.SortOrder
   suspensionReason?: Prisma.SortOrderInput | Prisma.SortOrder
   suspendedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -317,6 +326,7 @@ export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
   freeAiResponsesRemaining?: Prisma.IntFilter<"Organization"> | number
   trialUpgradeEmailSentAt?: Prisma.DateTimeNullableFilter<"Organization"> | Date | string | null
+  quotaNoticeAt?: Prisma.DateTimeNullableFilter<"Organization"> | Date | string | null
   platformSuspended?: Prisma.BoolFilter<"Organization"> | boolean
   suspensionReason?: Prisma.StringNullableFilter<"Organization"> | string | null
   suspendedAt?: Prisma.DateTimeNullableFilter<"Organization"> | Date | string | null
@@ -348,6 +358,7 @@ export type OrganizationOrderByWithAggregationInput = {
   updatedAt?: Prisma.SortOrder
   freeAiResponsesRemaining?: Prisma.SortOrder
   trialUpgradeEmailSentAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  quotaNoticeAt?: Prisma.SortOrderInput | Prisma.SortOrder
   platformSuspended?: Prisma.SortOrder
   suspensionReason?: Prisma.SortOrderInput | Prisma.SortOrder
   suspendedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -369,6 +380,7 @@ export type OrganizationScalarWhereWithAggregatesInput = {
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Organization"> | Date | string
   freeAiResponsesRemaining?: Prisma.IntWithAggregatesFilter<"Organization"> | number
   trialUpgradeEmailSentAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Organization"> | Date | string | null
+  quotaNoticeAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Organization"> | Date | string | null
   platformSuspended?: Prisma.BoolWithAggregatesFilter<"Organization"> | boolean
   suspensionReason?: Prisma.StringNullableWithAggregatesFilter<"Organization"> | string | null
   suspendedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Organization"> | Date | string | null
@@ -382,6 +394,7 @@ export type OrganizationCreateInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -413,6 +426,7 @@ export type OrganizationUncheckedCreateInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -444,6 +458,7 @@ export type OrganizationUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -475,6 +490,7 @@ export type OrganizationUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -506,6 +522,7 @@ export type OrganizationCreateManyInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -519,6 +536,7 @@ export type OrganizationUpdateManyMutationInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -532,6 +550,7 @@ export type OrganizationUncheckedUpdateManyInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -545,6 +564,7 @@ export type OrganizationCountOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
   freeAiResponsesRemaining?: Prisma.SortOrder
   trialUpgradeEmailSentAt?: Prisma.SortOrder
+  quotaNoticeAt?: Prisma.SortOrder
   platformSuspended?: Prisma.SortOrder
   suspensionReason?: Prisma.SortOrder
   suspendedAt?: Prisma.SortOrder
@@ -562,6 +582,7 @@ export type OrganizationMaxOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
   freeAiResponsesRemaining?: Prisma.SortOrder
   trialUpgradeEmailSentAt?: Prisma.SortOrder
+  quotaNoticeAt?: Prisma.SortOrder
   platformSuspended?: Prisma.SortOrder
   suspensionReason?: Prisma.SortOrder
   suspendedAt?: Prisma.SortOrder
@@ -575,6 +596,7 @@ export type OrganizationMinOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
   freeAiResponsesRemaining?: Prisma.SortOrder
   trialUpgradeEmailSentAt?: Prisma.SortOrder
+  quotaNoticeAt?: Prisma.SortOrder
   platformSuspended?: Prisma.SortOrder
   suspensionReason?: Prisma.SortOrder
   suspendedAt?: Prisma.SortOrder
@@ -877,6 +899,7 @@ export type OrganizationCreateWithoutAiSettingsInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -907,6 +930,7 @@ export type OrganizationUncheckedCreateWithoutAiSettingsInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -953,6 +977,7 @@ export type OrganizationUpdateWithoutAiSettingsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -983,6 +1008,7 @@ export type OrganizationUncheckedUpdateWithoutAiSettingsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1013,6 +1039,7 @@ export type OrganizationCreateWithoutProductsInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -1043,6 +1070,7 @@ export type OrganizationUncheckedCreateWithoutProductsInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -1089,6 +1117,7 @@ export type OrganizationUpdateWithoutProductsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1119,6 +1148,7 @@ export type OrganizationUncheckedUpdateWithoutProductsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1149,6 +1179,7 @@ export type OrganizationCreateWithoutBillingPaymentsInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -1179,6 +1210,7 @@ export type OrganizationUncheckedCreateWithoutBillingPaymentsInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -1225,6 +1257,7 @@ export type OrganizationUpdateWithoutBillingPaymentsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1255,6 +1288,7 @@ export type OrganizationUncheckedUpdateWithoutBillingPaymentsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1285,6 +1319,7 @@ export type OrganizationCreateWithoutBillingSubscriptionInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -1315,6 +1350,7 @@ export type OrganizationUncheckedCreateWithoutBillingSubscriptionInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -1361,6 +1397,7 @@ export type OrganizationUpdateWithoutBillingSubscriptionInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1391,6 +1428,7 @@ export type OrganizationUncheckedUpdateWithoutBillingSubscriptionInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1421,6 +1459,7 @@ export type OrganizationCreateWithoutUsersInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -1451,6 +1490,7 @@ export type OrganizationUncheckedCreateWithoutUsersInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -1497,6 +1537,7 @@ export type OrganizationUpdateWithoutUsersInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1527,6 +1568,7 @@ export type OrganizationUncheckedUpdateWithoutUsersInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1557,6 +1599,7 @@ export type OrganizationCreateWithoutWhatsappAccountsInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -1587,6 +1630,7 @@ export type OrganizationUncheckedCreateWithoutWhatsappAccountsInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -1633,6 +1677,7 @@ export type OrganizationUpdateWithoutWhatsappAccountsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1663,6 +1708,7 @@ export type OrganizationUncheckedUpdateWithoutWhatsappAccountsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1693,6 +1739,7 @@ export type OrganizationCreateWithoutContactsInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -1723,6 +1770,7 @@ export type OrganizationUncheckedCreateWithoutContactsInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -1769,6 +1817,7 @@ export type OrganizationUpdateWithoutContactsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1799,6 +1848,7 @@ export type OrganizationUncheckedUpdateWithoutContactsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1829,6 +1879,7 @@ export type OrganizationCreateWithoutConversationsInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -1859,6 +1910,7 @@ export type OrganizationUncheckedCreateWithoutConversationsInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -1905,6 +1957,7 @@ export type OrganizationUpdateWithoutConversationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1935,6 +1988,7 @@ export type OrganizationUncheckedUpdateWithoutConversationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1965,6 +2019,7 @@ export type OrganizationCreateWithoutLocationsInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -1995,6 +2050,7 @@ export type OrganizationUncheckedCreateWithoutLocationsInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -2041,6 +2097,7 @@ export type OrganizationUpdateWithoutLocationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2071,6 +2128,7 @@ export type OrganizationUncheckedUpdateWithoutLocationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2101,6 +2159,7 @@ export type OrganizationCreateWithoutResponsibleAgentsInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -2131,6 +2190,7 @@ export type OrganizationUncheckedCreateWithoutResponsibleAgentsInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -2177,6 +2237,7 @@ export type OrganizationUpdateWithoutResponsibleAgentsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2207,6 +2268,7 @@ export type OrganizationUncheckedUpdateWithoutResponsibleAgentsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2237,6 +2299,7 @@ export type OrganizationCreateWithoutRoutingSettingsInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -2267,6 +2330,7 @@ export type OrganizationUncheckedCreateWithoutRoutingSettingsInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -2313,6 +2377,7 @@ export type OrganizationUpdateWithoutRoutingSettingsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2343,6 +2408,7 @@ export type OrganizationUncheckedUpdateWithoutRoutingSettingsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2373,6 +2439,7 @@ export type OrganizationCreateWithoutProspectLeadsInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -2403,6 +2470,7 @@ export type OrganizationUncheckedCreateWithoutProspectLeadsInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -2449,6 +2517,7 @@ export type OrganizationUpdateWithoutProspectLeadsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2479,6 +2548,7 @@ export type OrganizationUncheckedUpdateWithoutProspectLeadsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2509,6 +2579,7 @@ export type OrganizationCreateWithoutAppointmentSettingsInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -2539,6 +2610,7 @@ export type OrganizationUncheckedCreateWithoutAppointmentSettingsInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -2585,6 +2657,7 @@ export type OrganizationUpdateWithoutAppointmentSettingsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2615,6 +2688,7 @@ export type OrganizationUncheckedUpdateWithoutAppointmentSettingsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2645,6 +2719,7 @@ export type OrganizationCreateWithoutAppointmentsInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -2675,6 +2750,7 @@ export type OrganizationUncheckedCreateWithoutAppointmentsInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -2721,6 +2797,7 @@ export type OrganizationUpdateWithoutAppointmentsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2751,6 +2828,7 @@ export type OrganizationUncheckedUpdateWithoutAppointmentsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2781,6 +2859,7 @@ export type OrganizationCreateWithoutOrderSettingsInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -2811,6 +2890,7 @@ export type OrganizationUncheckedCreateWithoutOrderSettingsInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -2857,6 +2937,7 @@ export type OrganizationUpdateWithoutOrderSettingsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2887,6 +2968,7 @@ export type OrganizationUncheckedUpdateWithoutOrderSettingsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2917,6 +2999,7 @@ export type OrganizationCreateWithoutOrdersInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -2947,6 +3030,7 @@ export type OrganizationUncheckedCreateWithoutOrdersInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -2993,6 +3077,7 @@ export type OrganizationUpdateWithoutOrdersInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3023,6 +3108,7 @@ export type OrganizationUncheckedUpdateWithoutOrdersInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3053,6 +3139,7 @@ export type OrganizationCreateWithoutAiCorrectionsInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -3083,6 +3170,7 @@ export type OrganizationUncheckedCreateWithoutAiCorrectionsInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -3129,6 +3217,7 @@ export type OrganizationUpdateWithoutAiCorrectionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3159,6 +3248,7 @@ export type OrganizationUncheckedUpdateWithoutAiCorrectionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3189,6 +3279,7 @@ export type OrganizationCreateWithoutBroadcastsInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -3219,6 +3310,7 @@ export type OrganizationUncheckedCreateWithoutBroadcastsInput = {
   updatedAt?: Date | string
   freeAiResponsesRemaining?: number
   trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
   platformSuspended?: boolean
   suspensionReason?: string | null
   suspendedAt?: Date | string | null
@@ -3265,6 +3357,7 @@ export type OrganizationUpdateWithoutBroadcastsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3295,6 +3388,7 @@ export type OrganizationUncheckedUpdateWithoutBroadcastsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
   trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3464,6 +3558,7 @@ export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   updatedAt?: boolean
   freeAiResponsesRemaining?: boolean
   trialUpgradeEmailSentAt?: boolean
+  quotaNoticeAt?: boolean
   platformSuspended?: boolean
   suspensionReason?: boolean
   suspendedAt?: boolean
@@ -3496,6 +3591,7 @@ export type OrganizationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   updatedAt?: boolean
   freeAiResponsesRemaining?: boolean
   trialUpgradeEmailSentAt?: boolean
+  quotaNoticeAt?: boolean
   platformSuspended?: boolean
   suspensionReason?: boolean
   suspendedAt?: boolean
@@ -3509,6 +3605,7 @@ export type OrganizationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   updatedAt?: boolean
   freeAiResponsesRemaining?: boolean
   trialUpgradeEmailSentAt?: boolean
+  quotaNoticeAt?: boolean
   platformSuspended?: boolean
   suspensionReason?: boolean
   suspendedAt?: boolean
@@ -3522,13 +3619,14 @@ export type OrganizationSelectScalar = {
   updatedAt?: boolean
   freeAiResponsesRemaining?: boolean
   trialUpgradeEmailSentAt?: boolean
+  quotaNoticeAt?: boolean
   platformSuspended?: boolean
   suspensionReason?: boolean
   suspendedAt?: boolean
   whatsappNumber?: boolean
 }
 
-export type OrganizationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "createdAt" | "updatedAt" | "freeAiResponsesRemaining" | "trialUpgradeEmailSentAt" | "platformSuspended" | "suspensionReason" | "suspendedAt" | "whatsappNumber", ExtArgs["result"]["organization"]>
+export type OrganizationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "createdAt" | "updatedAt" | "freeAiResponsesRemaining" | "trialUpgradeEmailSentAt" | "quotaNoticeAt" | "platformSuspended" | "suspensionReason" | "suspendedAt" | "whatsappNumber", ExtArgs["result"]["organization"]>
 export type OrganizationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   users?: boolean | Prisma.Organization$usersArgs<ExtArgs>
   whatsappAccounts?: boolean | Prisma.Organization$whatsappAccountsArgs<ExtArgs>
@@ -3582,6 +3680,7 @@ export type $OrganizationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     updatedAt: Date
     freeAiResponsesRemaining: number
     trialUpgradeEmailSentAt: Date | null
+    quotaNoticeAt: Date | null
     platformSuspended: boolean
     suspensionReason: string | null
     suspendedAt: Date | null
@@ -4033,6 +4132,7 @@ export interface OrganizationFieldRefs {
   readonly updatedAt: Prisma.FieldRef<"Organization", 'DateTime'>
   readonly freeAiResponsesRemaining: Prisma.FieldRef<"Organization", 'Int'>
   readonly trialUpgradeEmailSentAt: Prisma.FieldRef<"Organization", 'DateTime'>
+  readonly quotaNoticeAt: Prisma.FieldRef<"Organization", 'DateTime'>
   readonly platformSuspended: Prisma.FieldRef<"Organization", 'Boolean'>
   readonly suspensionReason: Prisma.FieldRef<"Organization", 'String'>
   readonly suspendedAt: Prisma.FieldRef<"Organization", 'DateTime'>

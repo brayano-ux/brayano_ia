@@ -1,3 +1,4 @@
+import { TRIAL } from "../billing/billing-plans.js";
 import { normalizeWhatsAppNumber } from "../shared/phone.js";
 import type { FastifyInstance } from "fastify";
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
@@ -413,7 +414,7 @@ export async function authRoute(app: FastifyInstance) {
 
     try {
       const organization = await prisma.$transaction(async (tx) => {
-        const createdOrganization = await tx.organization.create({ data: { name: verification.companyName, whatsappNumber: verification.whatsappNumber, freeAiResponsesRemaining: 15 } });
+        const createdOrganization = await tx.organization.create({ data: { name: verification.companyName, whatsappNumber: verification.whatsappNumber, freeAiResponsesRemaining: TRIAL.messages } });
         const createdUser = await tx.user.create({
           data: {
             organizationId: createdOrganization.id,

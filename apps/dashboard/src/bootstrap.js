@@ -8,6 +8,7 @@ const templatePaths = [
   "./templates/views/appointments.html",
   "./templates/views/orders.html",
   "./templates/views/broadcasts.html",
+  "./templates/views/billing.html",
   "./templates/views/settings.html",
   "./templates/views/whatsapp.html",
 ];

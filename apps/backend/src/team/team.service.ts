@@ -1,3 +1,4 @@
+import { assertCanAddTeamMember } from "../billing/subscription.service.js";
 import { prisma } from "../database/client.js";
 import { hashPassword } from "../routes/auth.route.js";
 import { NotFoundError, ValidationError } from "../shared/errors.js";
@@ -14,6 +15,7 @@ export async function listTeam(organizationId: string) {
 export async function addAgent(organizationId: string, input: { name: string; email: string; password: string }) {
   const email = input.email.trim().toLowerCase();
   const count = await prisma.user.count({ where: { organizationId } });
+  await assertCanAddTeamMember(organizationId, await prisma.user.count({ where: { organizationId, role: "AGENT" } }));
   if (count >= MAX_TEAM_MEMBERS) throw new ValidationError(`Votre équipe est limitée à ${MAX_TEAM_MEMBERS} personnes.`);
   const existing = await prisma.user.findUnique({ where: { email }, select: { id: true } });
   if (existing) throw new ValidationError("Cette adresse email est déjà utilisée par un autre compte.");

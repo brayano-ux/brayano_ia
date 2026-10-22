@@ -14,6 +14,7 @@ import { prisma } from "../database/client.js";
 import { recordInboundMessage } from "../conversations/conversations.service.js";
 import { processIncomingMessage } from "./incoming-message.js";
 import { setAiOrchestratorForTests } from "../ai/ai.factory.js";
+import { setBillingEnforcedForTests } from "../billing/subscription.service.js";
 import type { MediaAnalysis } from "../ai/media-analysis.js";
 import {
   aiReply, createTestOrganization, deliver, disconnectTestDatabase, FakeWhatsApp, inbound, installScriptedAi, integrationEnabled, resetDatabase,
@@ -429,6 +430,75 @@ describe.skipIf(!integrationEnabled)("traitement d'un message entrant (base rée
       expect(prompt).toContain("à partir de 8 000 FCFA");
       expect(prompt).not.toContain("655 00 00 07");
       expect(prompt).not.toContain("MAUVAIS EXEMPLE");
+    });
+  });
+
+  describe("forfaits : messages de l'assistant", () => {
+    beforeEach(() => setBillingEnforcedForTests(true));
+    afterAll(() => setBillingEnforcedForTests(null));
+
+    async function orgWithCredits(credits: number) {
+      const { organization } = await createTestOrganization();
+      await prisma.organization.update({ where: { id: organization.id }, data: { freeAiResponsesRemaining: credits } });
+      return organization;
+    }
+    const credits = async (organizationId: string) => (await prisma.organization.findUniqueOrThrow({ where: { id: organizationId } })).freeAiResponsesRemaining;
+
+    it("sans message restant, l'assistant se tait, le message du client est gardé et le propriétaire est prévenu une seule fois", async () => {
+      const organization = await orgWithCredits(0);
+      const calls = installScriptedAi([aiReply()]);
+      const whatsapp = new FakeWhatsApp();
+
+      await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "Bonjour, vous livrez ?"));
+      await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "Il y a quelqu'un ?"));
+      await flushEmails();
+
+      expect(calls).toHaveLength(0); // l'IA n'est même pas appelée : aucun coût
+      expect(whatsapp.sent).toHaveLength(0);
+      expect(await prisma.message.count({ where: { direction: "INBOUND" } })).toBe(2);
+      expect(hoisted.sentEmails).toHaveLength(1);
+      expect(hoisted.sentEmails[0]).toMatchObject({ subject: expect.stringContaining("essai gratuit est terminé") });
+    });
+
+    it("avec 2 messages d'essai : répond deux fois, décompte chaque réponse, puis se tait", async () => {
+      const organization = await orgWithCredits(2);
+      installScriptedAi([aiReply({ reply: "Oui, nous livrons." })]);
+      const whatsapp = new FakeWhatsApp();
+
+      await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "Vous livrez ?"));
+      expect(await credits(organization.id)).toBe(1);
+      await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "À Akwa ?"));
+      expect(await credits(organization.id)).toBe(0);
+      await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "Et le dimanche ?"));
+      await flushEmails();
+
+      expect(whatsapp.sent.map((item) => item.text)).toEqual(["Oui, nous livrons.", "Oui, nous livrons."]);
+      expect(hoisted.sentEmails).toHaveLength(1);
+    });
+
+    it("une panne de l'IA ne coûte aucun message au client", async () => {
+      const organization = await orgWithCredits(3);
+      installScriptedAi([aiReply({ reply: "Désolé, une erreur est survenue.", intent: "erreur_traitement" })]);
+      await deliver(organization.id, new FakeWhatsApp(), inbound(JID_NUMBER, "Bonjour, je voudrais un prix"));
+      expect(await credits(organization.id)).toBe(3);
+    });
+
+    it("un message d'accueil seul (simple « bonjour ») ne coûte rien", async () => {
+      const organization = await orgWithCredits(3);
+      await prisma.aiSettings.update({ where: { organizationId: organization.id }, data: { welcomeMessage: "Bienvenue 👋" } });
+      installScriptedAi([aiReply()]);
+      const whatsapp = new FakeWhatsApp();
+      await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "Bonjour"));
+      expect(whatsapp.sent.map((item) => item.text)).toEqual(["Bienvenue 👋"]);
+      expect(await credits(organization.id)).toBe(3);
+    });
+
+    it("avec un forfait actif, chaque réponse est comptée dans le quota du mois", async () => {
+      const { organization } = await createTestOrganization();
+      await prisma.billingSubscription.create({ data: { organizationId: organization.id, plan: "starter", messageLimit: 1000, expiresAt: new Date(Date.now() + 20 * 24 * 3600_000) } });
+      installScriptedAi([aiReply()]);
+      await deliver(organization.id, new FakeWhatsApp(), inbound(JID_NUMBER, "Bonjour, quel est le prix ?"));
+      expect((await prisma.billingSubscription.findUniqueOrThrow({ where: { organizationId: organization.id } })).messagesUsed).toBe(1);
     });
   });
 });
