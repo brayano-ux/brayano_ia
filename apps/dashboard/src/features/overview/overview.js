@@ -121,7 +121,7 @@ export function renderRecent(onSelectConversation) {
 export async function refreshOverview(onSelectConversation) {
   const orgId = getState().organizationId;
   if (!orgId) return;
-  const orgLabel = $("#org-select").selectedOptions[0]?.textContent || "Brayano";
+  const orgLabel = $("#org-select").selectedOptions[0]?.textContent || "Brayano IA";
   $("#current-org").textContent = orgLabel;
   $("#org-initial").textContent = orgLabel[0]?.toUpperCase() || "B";
   updateRealtimeHeader();

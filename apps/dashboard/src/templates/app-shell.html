@@ -24,9 +24,9 @@
   <div id="sidebar-overlay" class="sidebar-overlay"></div>
 
   <aside id="sidebar" class="sidebar" aria-label="Navigation principale">
-    <a class="brand" href="#" aria-label="Brayano AI">
-      <span class="brand-mark" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><use href="#i-sparkles"/></svg></span>
-      <span class="brand-name">brayano<span class="brand-accent">.</span></span>
+    <a class="brand" href="#" aria-label="Brayano IA">
+      <img class="brand-logo" src="../assets/logo-mark.png" alt="" width="40" height="38" />
+      <span class="brand-name">Brayano <span class="brand-accent">IA</span></span>
     </a>
 
     <label class="org-picker">
@@ -68,7 +68,7 @@
     <header class="topbar">
       <div class="topbar-start">
         <button id="mobile-menu-trigger" class="mobile-menu-trigger icon-button" aria-label="Ouvrir le menu" type="button"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-menu"/></svg></button>
-        <div class="breadcrumb">Centre de pilotage <span>/</span> <strong id="current-org">Brayano</strong></div>
+        <div class="breadcrumb">Centre de pilotage <span>/</span> <strong id="current-org">Brayano IA</strong></div>
       </div>
       <div class="top-actions">
         <span class="system-status"><span class="live-dot"></span><span class="system-status-text">Système opérationnel</span></span>
@@ -86,6 +86,31 @@
     <button class="tab-item" data-view="orders"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bag"/></svg><span>Commandes</span></button>
     <button class="tab-item" id="tab-more" type="button"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-grid"/></svg><span>Plus</span></button>
   </nav>
+
+  <!-- Aide : WhatsApp du support + assistant intelligent -->
+  <div class="help-dock">
+    <section id="help-panel" class="help-panel hidden" role="dialog" aria-label="Assistant d'aide Brayano IA">
+      <header class="help-head">
+        <img src="../assets/logo-mark.png" alt="" width="30" height="29" />
+        <div class="help-head-text"><strong>Assistant d'aide</strong><small>Il connaît toute la configuration de Brayano IA</small></div>
+        <button type="button" class="help-icon-button" id="help-reset" title="Nouvelle discussion" aria-label="Nouvelle discussion"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></button>
+        <button type="button" class="help-icon-button" id="help-close" aria-label="Fermer"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-close"/></svg></button>
+      </header>
+      <div id="help-messages" class="help-messages" aria-live="polite"></div>
+      <div id="help-chips" class="help-chips"></div>
+      <form id="help-form" class="help-form">
+        <textarea id="help-input" rows="1" maxlength="1000" placeholder="Posez votre question…" aria-label="Votre question"></textarea>
+        <button type="submit" class="help-send" id="help-send" aria-label="Envoyer"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></svg></button>
+      </form>
+      <p class="help-foot">Une réponse ne vous convient pas ? <a id="help-panel-wa" href="https://wa.me/237683260520" target="_blank" rel="noopener">Écrivez-nous sur WhatsApp</a></p>
+    </section>
+    <a id="help-wa" class="help-fab help-fab-wa" href="https://wa.me/237683260520" target="_blank" rel="noopener" aria-label="Écrire au support sur WhatsApp" title="Écrire au support sur WhatsApp">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.2 14c-.2.6-1.3 1.2-1.8 1.2-.5.1-1.1.1-3.6-.9-3-1.3-4.9-4.4-5-4.6-.2-.2-1.2-1.6-1.2-3s.7-2.1 1-2.4c.3-.3.6-.3.8-.3h.6c.2 0 .5-.1.7.5.2.6.9 2.1.9 2.3.1.2.1.4 0 .6-.1.2-.2.4-.4.6l-.5.6c-.2.2-.4.4-.2.8.2.4 1 1.6 2.1 2.6 1.4 1.2 2.6 1.6 3 1.8.4.2.6.2.8-.1.2-.3 1-1.1 1.3-1.5.3-.4.5-.3.9-.2l2 1c.4.2.6.3.7.4.1.3.1.8-.1 1.4z"/></svg>
+    </a>
+    <button type="button" id="help-toggle" class="help-fab help-fab-ai admin-only" aria-expanded="false" aria-controls="help-panel">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sparkles"/></svg><span>Besoin d'aide ?</span>
+    </button>
+  </div>
 </div>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>

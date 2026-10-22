@@ -44,14 +44,14 @@ export async function loadOrganizations(onOrganizationReady) {
     : visibleOrganizations[0].id;
   const organizationName = visibleOrganizations.find((org) => org.id === organizationId)?.name
     || visibleOrganizations[0].name
-    || "Brayano";
+    || "Brayano IA";
 
   setState({ organizationId, organizationName, organizations });
   writeOrganizationId(organizationId);
   select.value = organizationId;
 
   select.onchange = () => {
-    const nextName = organizations.find((org) => org.id === select.value)?.name || "Brayano";
+    const nextName = organizations.find((org) => org.id === select.value)?.name || "Brayano IA";
     setState({ organizationId: select.value, organizationName: nextName });
     writeOrganizationId(select.value);
     onOrganizationReady();

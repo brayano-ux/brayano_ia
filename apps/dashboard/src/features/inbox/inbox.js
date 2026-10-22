@@ -104,7 +104,7 @@ export function updateBadges(conversations) {
     badge.classList.toggle("is-zero", unread === 0);
     badge.title = unread ? `${unread} conversation${unread > 1 ? "s" : ""} avec un nouveau message` : "Aucun nouveau message";
   }
-  document.title = `${unread ? `(${unread}) ` : ""}Brayano AI — Centre de pilotage`;
+  document.title = `${unread ? `(${unread}) ` : ""}Brayano IA — Centre de pilotage`;
 }
 
 /** Prévient (une seule fois) quand un client écrit alors qu'on regarde autre chose. */

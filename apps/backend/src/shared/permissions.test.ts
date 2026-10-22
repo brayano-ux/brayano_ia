@@ -60,6 +60,7 @@ describe("isAllowedForRole", () => {
     ["PUT", `${org}/ai-corrections/abc`],
     ["DELETE", `${org}/ai-corrections/abc`],
     ["POST", `${org}/config-assistant/analyze`],
+    ["POST", `${org}/support-assistant/chat`],
     ["PUT", `${org}/routing/fallback`],
     ["POST", `${org}/responsibles`],
     ["GET", "/billing/account"],
