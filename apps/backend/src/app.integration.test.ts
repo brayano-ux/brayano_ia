@@ -26,8 +26,10 @@ import { rmSync } from "node:fs";
 import type { FastifyInstance } from "fastify";
 import { buildServer } from "./app.js";
 import { setBillingEnforcedForTests } from "./billing/subscription.service.js";
+import { resetSupportRateLimitForTests, setSupportProvidersForTests } from "./support-assistant/support-assistant.js";
 import { prisma } from "./database/client.js";
 import { saveClientMedia } from "./media/client-media.service.js";
+import { hashPassword } from "./routes/auth.route.js";
 import { createTestOrganization, disconnectTestDatabase, integrationEnabled, resetDatabase } from "./test-support/integration.js";
 
 const PASSWORD = "motdepasse123";
@@ -426,6 +428,85 @@ describe.skipIf(!integrationEnabled)("API complète (HTTP, base réelle)", () =>
       const list = await app.inject({ method: "GET", url: "/admin/organizations", headers: ADMIN });
       expect(list.json().organizations[0].billing).toMatchObject({ plan: "pro", messagesUsed: 0, messageLimit: 5000 });
       expect((await app.inject({ method: "GET", url: "/billing/account", headers: authed(token) })).json()).toMatchObject({ plan: "pro", amount: 20000 });
+    });
+  });
+  describe("assistant d'aide du tableau de bord", () => {
+    const prompts: string[] = [];
+    const histories: Array<Array<{ role: string; content: string }>> = [];
+    let failing = false;
+    const fakeProvider = {
+      name: "fake",
+      async generateResponse(input: { systemPrompt: string; history: Array<{ role: string; content: string }> }) {
+        if (failing) throw new Error("API en panne");
+        prompts.push(input.systemPrompt);
+        histories.push(input.history);
+        return { rawText: JSON.stringify({ reply: "Allez dans la page « WhatsApp ».", openView: "whatsapp" }), latencyMs: 1 };
+      },
+      async transcribeAudio() { return ""; },
+    };
+    beforeEach(() => {
+      prompts.length = 0; histories.length = 0; failing = false;
+      resetSupportRateLimitForTests();
+      setSupportProvidersForTests([fakeProvider]);
+    });
+    afterAll(() => setSupportProvidersForTests(null));
+    const chat = (orgId: string, token: string | undefined, payload: unknown) =>
+      app.inject({ method: "POST", url: `/organizations/${orgId}/support-assistant/chat`, headers: authed(token), payload: payload as object });
+
+    it("répond avec la base de connaissances et la situation réelle du compte", async () => {
+      hoisted.connected = false;
+      const { organization, token } = await setup();
+      await prisma.product.create({ data: { organizationId: organization.id, name: "Robe", description: "Robe rouge" } });
+      const response = await chat(organization.id, token, { messages: [{ role: "user", content: "Comment connecter mon WhatsApp ?" }] });
+      expect(response.statusCode).toBe(200);
+      expect(response.json()).toEqual({ reply: "Allez dans la page « WhatsApp ».", openView: "whatsapp" });
+      expect(prompts[0]).toContain("Appareils liés");
+      expect(prompts[0]).toContain("WhatsApp : NON connecté");
+      expect(prompts[0]).toContain("Produits : 1 (dont 1 disponibles)");
+      expect(prompts[0]).toContain("Entreprise : Salon Éclat");
+      expect(histories[0]).toEqual([{ role: "user", content: "Comment connecter mon WhatsApp ?" }]);
+    });
+
+    it("garde le fil de la discussion et signale le blocage du forfait", async () => {
+      const { organization, token } = await setup();
+      setBillingEnforcedForTests(true);
+      try {
+        await chat(organization.id, token, { messages: [
+          { role: "user", content: "L'agent ne répond plus" },
+          { role: "assistant", content: "Avez-vous encore des messages ?" },
+          { role: "user", content: "Je ne sais pas" },
+        ] });
+      } finally { setBillingEnforcedForTests(false); }
+      expect(histories[0]).toHaveLength(3);
+      expect(prompts[0]).toContain("ATTENTION : l'agent est actuellement bloqué");
+    });
+
+    it("refuse les employés, les inconnus, une autre entreprise et une demande vide", async () => {
+      const { organization, token } = await setup();
+      const other = await createTestOrganization("Autre", { email: "other@example.com", password: PASSWORD });
+      const otherLogin = await login("other@example.com");
+      const messages = [{ role: "user", content: "Bonjour" }];
+      expect((await app.inject({ method: "POST", url: `/organizations/${organization.id}/support-assistant/chat`, payload: { messages } })).statusCode).toBe(401);
+      expect((await chat(organization.id, otherLogin.token, { messages })).statusCode).toBeGreaterThanOrEqual(403);
+      expect((await chat(other.organization.id, token, { messages })).statusCode).toBeGreaterThanOrEqual(403);
+      expect((await chat(organization.id, token, { messages: [] })).statusCode).toBe(400);
+      expect((await chat(organization.id, token, { messages: [{ role: "user", content: "   " }] })).statusCode).toBe(400);
+      expect((await chat(organization.id, token, { messages: [{ role: "user", content: "Q" }, { role: "assistant", content: "R" }] })).statusCode).toBe(400);
+      await prisma.user.create({ data: { organizationId: organization.id, email: "agent@example.com", passwordHash: hashPassword(PASSWORD), name: "Awa", role: "AGENT" } });
+      const agent = await login("agent@example.com");
+      expect((await chat(organization.id, agent.token, { messages })).statusCode).toBe(403);
+      expect(prompts).toHaveLength(0);
+    });
+
+    it("explique honnêtement quand l'IA est en panne, et limite le nombre de questions", async () => {
+      const { organization, token } = await setup();
+      failing = true;
+      const down = await chat(organization.id, token, { messages: [{ role: "user", content: "Bonjour" }] });
+      expect(down.statusCode).toBe(502);
+      expect(down.json().message).toContain("+237 683 26 05 20");
+      failing = false;
+      for (let i = 0; i < 39; i++) await chat(organization.id, token, { messages: [{ role: "user", content: "Bonjour" }] });
+      expect((await chat(organization.id, token, { messages: [{ role: "user", content: "Bonjour" }] })).statusCode).toBe(429);
     });
   });
 });

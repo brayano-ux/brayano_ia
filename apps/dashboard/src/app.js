@@ -13,6 +13,7 @@ import { initProducts, loadProducts } from "./features/products/products.js";
 import { hasUnsavedAgendaChanges, initAppointments, loadAppointments } from "./features/appointments/appointments.js";
 import { initOrders, loadOrders } from "./features/orders/orders.js";
 import { initBroadcasts, loadBroadcastsView } from "./features/broadcasts/broadcasts.js";
+import { initHelp } from "./features/help/help.js";
 import { initBilling, loadBilling, refreshBillingBanner } from "./features/billing/billing.js";
 import { initTeamSettings, loadTeam } from "./features/settings/team-settings.js";
 import { loadRole } from "./features/navigation/roles.js";
@@ -98,6 +99,7 @@ function bootstrap() {
   initOrders();
   initBroadcasts();
   initBilling();
+  initHelp();
   initTeamSettings();
   initDelaySettings();
   initRoutingSettings();

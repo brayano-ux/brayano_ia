@@ -7,6 +7,7 @@
 .auth-card { width: min(100%, 440px); display: grid; gap: var(--space-5); padding: var(--space-8); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-xl); box-shadow: var(--shadow-md); }
 
 .auth-brand { display: flex; align-items: center; gap: 10px; font-size: 1.3rem; font-weight: 800; letter-spacing: -0.03em; }
+.auth-brand .brand-logo { height: 38px; width: auto; flex: none; }
 .brand-glyph { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(145deg, var(--brand-500), var(--brand-700)); color: #fff; font-size: 1rem; font-weight: 800; letter-spacing: 0; }
 .auth-subtitle { font-size: var(--text-2xl); font-weight: 800; letter-spacing: -0.025em; }
 .auth-help { font-size: var(--text-sm); color: var(--muted); }
@@ -37,6 +38,7 @@
   .auth-aside { display: flex; flex-direction: column; justify-content: space-between; gap: var(--space-8); padding: var(--space-10) 56px; color: #fff; background: radial-gradient(120% 90% at 0% 0%, #5b50e8 0%, #3d33b5 45%, #1f1b5c 100%); }
   .auth-aside .auth-brand { color: #fff; }
   .auth-aside .brand-glyph { background: rgba(255, 255, 255, 0.18); }
+  .auth-aside .brand-logo { background: #fff; border-radius: 10px; padding: 3px 5px; }
   .auth-aside .brand-accent { color: #b9b4ff; }
   .auth-aside-body { display: grid; gap: var(--space-5); max-width: 460px; }
   .auth-aside-body h2 { color: #fff; font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.2; }
