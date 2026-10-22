@@ -37,8 +37,14 @@
   <header class="top">
     <div class="wrap">
       <a class="logo" href="./" aria-label="Brayano IA, accueil"><img src="assets/logo-mark.png" alt="" width="40" height="38" /><span>Brayano <b>IA</b></span></a>
-      <nav aria-label="Accès rapide">
-        <a class="top-link hide-sm" href="#tarifs">Tarifs</a>
+      <nav class="top-links" aria-label="Sections de la page">
+        <a href="#fonctions">Fonctions</a><a href="#comment">Comment ça marche</a><a href="#apercu">Aperçu</a><a href="#tarifs">Tarifs</a><a href="#questions">Questions</a>
+      </nav>
+      <nav class="top-actions" aria-label="Accès rapide">
+        <details class="menu">
+          <summary aria-label="Ouvrir le menu">Menu</summary>
+          <div class="menu-list"><a href="#fonctions">Fonctions</a><a href="#comment">Comment ça marche</a><a href="#apercu">Aperçu</a><a href="#tarifs">Tarifs</a><a href="#questions">Questions</a></div>
+        </details>
         <a class="btn btn-ghost" href="app/">Se connecter</a>
         <a class="btn btn-primary hide-sm" href="app/?inscription">Créer mon compte</a>
       </nav>
@@ -78,8 +84,23 @@
       </div>
     </div>
 
+    <!-- ================= Vous reconnaissez-vous ? ================= -->
+    <section id="probleme">
+      <div class="wrap">
+        <p class="kicker">Vous reconnaissez-vous ?</p>
+        <h2>Vendre sur WhatsApp, c'est beau… mais ça ne s'arrête jamais</h2>
+        <div class="pains">
+          <article class="pain"><span aria-hidden="true">😴</span><h3>Vous répondez à 23 h… ou vous ne répondez pas</h3><p>Le client écrit le soir, vous dormez. Le lendemain, il est déjà parti.</p></article>
+          <article class="pain"><span aria-hidden="true">💸</span><h3>Un client sans réponse achète ailleurs</h3><p>Sur WhatsApp, celui qui répond le premier fait la vente.</p></article>
+          <article class="pain"><span aria-hidden="true">🔁</span><h3>Toujours les mêmes questions</h3><p>« C'est combien ? », « Vous êtes où ? », « Vous ouvrez à quelle heure ? » : cinquante fois par jour.</p></article>
+          <article class="pain"><span aria-hidden="true">📝</span><h3>Impossible de tout suivre</h3><p>Qui a commandé ? Qui devait revenir ? Tout est perdu dans les discussions.</p></article>
+        </div>
+        <p class="pain-solution">Brayano IA s'en occupe. <strong>Vous, vous vendez.</strong></p>
+      </div>
+    </section>
+
     <!-- ================= Comment ça marche ================= -->
-    <section id="comment">
+    <section id="comment" class="band">
       <div class="wrap">
         <p class="kicker">Simple</p>
         <h2>Prêt en 3 étapes</h2>
@@ -92,6 +113,76 @@
       </div>
     </section>
 
+    <!-- ================= Exemples par métier ================= -->
+    <section id="exemples">
+      <div class="wrap">
+        <p class="kicker">Concrètement</p>
+        <h2>Voici ce que vos clients reçoivent</h2>
+        <p class="sub">Choisissez votre activité : ce sont des exemples de vraies conversations.</p>
+        <div class="tabs">
+          <input type="radio" name="metier" id="m1" checked /><input type="radio" name="metier" id="m2" /><input type="radio" name="metier" id="m3" /><input type="radio" name="metier" id="m4" />
+          <div class="tab-labels" role="group" aria-label="Choisir une activité">
+            <label for="m1">👗 Boutique</label><label for="m2">💇 Salon</label><label for="m3">🍽️ Restaurant</label><label for="m4">🏥 Clinique</label>
+          </div>
+          <div class="tab-panels">
+            <div class="tab-panel p1">
+              <p class="tab-text"><strong>Boutique :</strong> le client demande un article, l'assistant donne le prix, envoie la photo et note la commande avec l'adresse de livraison.</p>
+              <div class="phone"><div class="screen">
+                <div class="bar"><div class="av">BA</div><div><strong>Boutique Awa</strong><small>assistant en ligne</small></div></div>
+                <div class="chat">
+                  <div class="b in">Bonjour, vous avez la robe rouge en taille M ?<small>10:24</small></div>
+                  <div class="b out">Bonjour 😊 Oui, la robe rouge en M est disponible : 12 000 FCFA. Je vous envoie la photo ?<small>10:24 ✓✓</small></div>
+                  <div class="b in">Oui, et je la prends. Livraison à Bonamoussadi.<small>10:25</small></div>
+                  <div class="b out">Parfait ! Votre commande est enregistrée 🙏<small>10:25 ✓✓</small></div>
+                  <div class="done">✓ Commande notée pour vous</div>
+                </div>
+              </div></div>
+            </div>
+            <div class="tab-panel p2">
+              <p class="tab-text"><strong>Salon :</strong> l'assistant propose seulement les créneaux libres de votre agenda et enregistre le rendez-vous.</p>
+              <div class="phone"><div class="screen">
+                <div class="bar"><div class="av">SB</div><div><strong>Salon Belle Époque</strong><small>assistant en ligne</small></div></div>
+                <div class="chat">
+                  <div class="b in">Bonsoir, je voudrais des tresses samedi.<small>21:12</small></div>
+                  <div class="b out">Bonsoir 😊 Samedi, il me reste 10 h ou 14 h. Lequel vous arrange ?<small>21:12 ✓✓</small></div>
+                  <div class="b in">14 h c'est bien.<small>21:13</small></div>
+                  <div class="b out">C'est noté : samedi à 14 h. À samedi ! 💇<small>21:13 ✓✓</small></div>
+                  <div class="done">✓ Rendez-vous noté dans l'agenda</div>
+                </div>
+              </div></div>
+            </div>
+            <div class="tab-panel p3">
+              <p class="tab-text"><strong>Restaurant :</strong> prix du plat, zones de livraison, frais : l'assistant répond et prend la commande.</p>
+              <div class="phone"><div class="screen">
+                <div class="bar"><div class="av">CM</div><div><strong>Chez Mama</strong><small>assistant en ligne</small></div></div>
+                <div class="chat">
+                  <div class="b in">Vous livrez à Bonapriso ? Le poulet DG c'est combien ?<small>12:05</small></div>
+                  <div class="b out">Oui, on livre à Bonapriso : 1 000 FCFA. Le poulet DG est à 3 500 FCFA. Je vous en prépare combien ?<small>12:05 ✓✓</small></div>
+                  <div class="b in">2 s'il vous plaît.<small>12:06</small></div>
+                  <div class="b out">Parfait : 2 poulets DG = 7 000 FCFA + 1 000 de livraison. Commande enregistrée 🙏<small>12:06 ✓✓</small></div>
+                  <div class="done">✓ Commande notée pour vous</div>
+                </div>
+              </div></div>
+            </div>
+            <div class="tab-panel p4">
+              <p class="tab-text"><strong>Clinique :</strong> horaires, informations pratiques… et quand le client veut une personne, l'assistant vous passe la main et vous prévient.</p>
+              <div class="phone"><div class="screen">
+                <div class="bar"><div class="av">CS</div><div><strong>Clinique Saint-Luc</strong><small>assistant en ligne</small></div></div>
+                <div class="chat">
+                  <div class="b in">Vous êtes ouverts dimanche ?<small>18:40</small></div>
+                  <div class="b out">Nous sommes ouverts du lundi au samedi, de 8 h à 18 h. Le dimanche, nous sommes fermés. Souhaitez-vous un rendez-vous ?<small>18:40 ✓✓</small></div>
+                  <div class="b in">Je veux parler à quelqu'un de l'accueil.<small>18:41</small></div>
+                  <div class="b out">Bien sûr. Je préviens l'équipe : une personne va vous répondre très vite.<small>18:41 ✓✓</small></div>
+                  <div class="done">✋ Vous êtes prévenu par email</div>
+                </div>
+              </div></div>
+            </div>
+          </div>
+        </div>
+        <p class="note">Exemples réalistes. Les réponses de votre assistant s'appuient sur vos produits, vos prix et vos horaires.</p>
+      </div>
+    </section>
+
     <!-- ================= Fonctions ================= -->
     <section id="fonctions" class="band">
       <div class="wrap">
@@ -99,7 +190,8 @@
         <h2>Il travaille pendant que vous vous occupez du reste</h2>
         <div class="cards">
           <article class="card"><div class="ico" aria-hidden="true">💬</div><h3>Répond à vos clients, jour et nuit</h3><p>Prix, disponibilité, adresse, horaires : vos clients ont une réponse tout de suite.</p></article>
-          <article class="card"><div class="ico" aria-hidden="true">🛍️</div><h3>Note les commandes et les rendez-vous</h3><p>Tout arrive dans votre tableau de bord, et vous êtes prévenu par email.</p></article>
+          <article class="card"><div class="ico" aria-hidden="true">🛍️</div><h3>Note les commandes</h3><p>Produit, quantité, adresse : tout arrive dans votre tableau de bord, et vous êtes prévenu par email.</p></article>
+          <article class="card"><div class="ico" aria-hidden="true">📅</div><h3>Gère vos rendez-vous</h3><p>Il propose vos créneaux libres, enregistre le rendez-vous et évite les doubles réservations.</p></article>
           <article class="card"><div class="ico" aria-hidden="true">📷</div><h3>Envoie les photos de vos produits</h3><p>Le client demande à voir ? L'assistant envoie la photo avec le prix.</p></article>
           <article class="card new"><div class="ico" aria-hidden="true">📣</div><h3>Messages en masse en 1 clic</h3><p>Une réduction, un nouveau produit : vous l'écrivez une fois, il part à vos clients.</p><span class="tag">NOUVEAU</span></article>
           <article class="card new"><div class="ico" aria-hidden="true">🔔</div><h3>Relance les clients qui ne répondent plus</h3><p>Un client intéressé a disparu ? L'assistant lui écrit un petit message poli.</p><span class="tag">NOUVEAU</span></article>
@@ -107,12 +199,36 @@
           <article class="card"><div class="ico" aria-hidden="true">🏷️</div><h3>Suit vos clients pour vous</h3><p>Nouveau, intéressé, a commandé, à rappeler : vous voyez qui attend quoi.</p></article>
           <article class="card"><div class="ico" aria-hidden="true">👥</div><h3>Vos employés dans la même boîte</h3><p>Chacun a sa connexion et répond aux clients, sans toucher à vos réglages.</p></article>
           <article class="card"><div class="ico" aria-hidden="true">🗣️</div><h3>Comprend vos clients</h3><p>Il répond en français, en anglais ou en pidgin, même quand le client envoie un vocal.</p></article>
+          <article class="card"><div class="ico" aria-hidden="true">🧠</div><h3>Apprend de vos corrections</h3><p>Une réponse pas parfaite ? Corrigez-la en un clic : il s'en souvient pour les questions semblables.</p></article>
+          <article class="card"><div class="ico" aria-hidden="true">🛡️</div><h3>Protège votre numéro</h3><p>Réponses espacées, envois en petits lots, et un client qui écrit « STOP » n'est plus jamais contacté.</p></article>
         </div>
       </div>
     </section>
 
+    <!-- ================= Aperçu du tableau de bord ================= -->
+    <section id="apercu">
+      <div class="wrap">
+        <p class="kicker">Votre tableau de bord</p>
+        <h2>Tout ce qui se passe, au même endroit</h2>
+        <p class="sub">Sur votre téléphone ou votre ordinateur. Voici de vraies captures d'écran.</p>
+        <div class="tabs shots">
+          <input type="radio" name="ecran" id="e1" checked /><input type="radio" name="ecran" id="e2" /><input type="radio" name="ecran" id="e3" /><input type="radio" name="ecran" id="e4" />
+          <div class="tab-labels" role="group" aria-label="Choisir un écran">
+            <label for="e1">📊 Vue d'ensemble</label><label for="e2">💬 Conversations</label><label for="e3">✨ Votre agent</label><label for="e4">📣 Messages groupés</label>
+          </div>
+          <div class="tab-panels">
+            <figure class="tab-panel p1"><div class="frame"><i></i><i></i><i></i></div><img src="assets/screens/vue-ensemble.webp" width="1200" height="758" loading="lazy" alt="Vue d'ensemble : conversations actives, réponses de l'agent, commandes et temps gagné" /><figcaption>Les chiffres de votre journée : messages, commandes, rendez-vous et temps gagné.</figcaption></figure>
+            <figure class="tab-panel p2"><div class="frame"><i></i><i></i><i></i></div><img src="assets/screens/conversations.webp" width="1200" height="758" loading="lazy" alt="Boîte de réception avec les conversations des clients et la commande enregistrée par l'assistant" /><figcaption>Chaque client, sa conversation et son étiquette. Vous reprenez la main quand vous voulez.</figcaption></figure>
+            <figure class="tab-panel p3"><div class="frame"><i></i><i></i><i></i></div><img src="assets/screens/agent.webp" width="1200" height="758" loading="lazy" alt="Page de réglage de l'agent avec le testeur de conversation" /><figcaption>Vous dites à l'agent ce que vous vendez, puis vous le testez avant d'annoncer votre numéro.</figcaption></figure>
+            <figure class="tab-panel p4"><div class="frame"><i></i><i></i><i></i></div><img src="assets/screens/messages-groupes.webp" width="1200" height="758" loading="lazy" alt="Envoi d'un message groupé à ses clients" /><figcaption>Une promotion à tous vos clients en un clic, sans risquer de faire bloquer votre numéro.</figcaption></figure>
+          </div>
+        </div>
+        <div class="help-note"><span aria-hidden="true">🆘</span><p><strong>Vous n'êtes jamais seul.</strong> Un assistant d'aide est intégré au tableau de bord : posez-lui vos questions de configuration, il vous guide pas à pas. Et un bouton WhatsApp vous met en contact avec nous.</p></div>
+      </div>
+    </section>
+
     <!-- ================= Pour qui ================= -->
-    <section id="pour-qui">
+    <section id="pour-qui" class="band">
       <div class="wrap">
         <p class="kicker">Pour qui ?</p>
         <h2>Pour tous ceux qui vendent sur WhatsApp</h2>
@@ -180,6 +296,11 @@
           <details><summary>Puis-je répondre moi-même à un client ?</summary><p>Oui, à tout moment, depuis le tableau de bord ou depuis votre téléphone. Quand vous reprenez la conversation, l'assistant se met en pause pour ce client.</p></details>
           <details><summary>Et s'il ne sait pas répondre ?</summary><p>Il ne devine pas. Il le dit honnêtement au client, passe la main et vous prévient par email pour que vous puissiez répondre.</p></details>
           <details><summary>En quelle langue répond-il ?</summary><p>Dans la langue de votre client : français, anglais ou pidgin.</p></details>
+          <details><summary>Qui voit mes conversations ?</summary><p>Vous et les employés que vous ajoutez, dans votre tableau de bord. L'assistant d'aide du tableau de bord, lui, ne lit jamais vos conversations avec vos clients.</p></details>
+          <details><summary>Mon numéro risque-t-il d'être bloqué par WhatsApp ?</summary><p>Brayano IA se relie à WhatsApp comme WhatsApp Web (ce n'est pas l'outil officiel de Meta). Nous réduisons les risques : réponses espacées de quelques secondes, messages en masse par petits lots et seulement aux clients qui vous ont déjà écrit, « STOP » toujours respecté. Aucun outil ne peut promettre un risque zéro : n'envoyez pas de messages à des inconnus.</p></details>
+          <details><summary>Que se passe-t-il quand mes 100 messages gratuits sont terminés ?</summary><p>Vous choisissez un forfait pour continuer. Vos conversations restent dans votre tableau de bord et vous pouvez toujours répondre vous-même.</p></details>
+          <details><summary>Comment je paie ?</summary><p>Par Orange Money ou MTN MoMo, depuis la page « Mon forfait » : vous validez la demande sur votre téléphone. Chaque forfait dure 30 jours, sans engagement.</p></details>
+          <details><summary>Et si je n'y arrive pas tout seul ?</summary><p>L'assistant d'aide du tableau de bord répond à vos questions de configuration à toute heure. Et vous pouvez nous écrire sur WhatsApp : le forfait Business comprend même une aide à l'installation.</p></details>
           <details><summary>Combien ça coûte ?</summary><p>Essentiel : 10&nbsp;000 FCFA par mois, Pro : 20&nbsp;000 FCFA, Business : 50&nbsp;000 FCFA (voir les <a href="#tarifs">tarifs</a>). Vous commencez par 100 messages gratuits. Une question ? Écrivez-nous sur WhatsApp au +237 683 26 05 20.</p></details>
         </div>
       </div>
@@ -201,10 +322,45 @@
   </main>
 
   <footer>
-    <div class="wrap">
-      <p><a href="app/">Se connecter</a> · WhatsApp <a href="https://wa.me/237683260520" rel="noopener">+237 683 26 05 20</a></p>
-      <p style="margin-top:6px">© Brayano IA</p>
+    <div class="wrap foot">
+      <div class="foot-brand">
+        <a class="logo" href="./" aria-label="Brayano IA, accueil"><img src="assets/logo-mark.png" alt="" width="40" height="38" /><span>Brayano <b>IA</b></span></a>
+        <p>L'assistant WhatsApp qui répond à vos clients, note vos commandes et vos rendez-vous, et relance ceux qui ne répondent plus.</p>
+      </div>
+      <div class="foot-col">
+        <h3>La page</h3>
+        <a href="#fonctions">Fonctions</a><a href="#comment">Comment ça marche</a><a href="#tarifs">Tarifs</a><a href="#questions">Questions</a>
+      </div>
+      <div class="foot-col">
+        <h3>Votre compte</h3>
+        <a href="app/">Se connecter</a><a href="app/?inscription">Créer mon compte</a>
+      </div>
+      <div class="foot-col">
+        <h3>Nous écrire</h3>
+        <a href="https://wa.me/237683260520?text=Bonjour%2C%20j%27ai%20une%20question%20sur%20Brayano%20IA" rel="noopener">WhatsApp : +237 683 26 05 20</a>
+        <span>Réponse en général dans la journée</span>
+      </div>
+    </div>
+    <div class="wrap foot-legal">
+      <p>© Brayano IA · Fait au Cameroun 🇨🇲</p>
+      <p>Brayano IA est un service indépendant. WhatsApp est une marque de Meta : Brayano IA n'est ni affilié à WhatsApp ni approuvé par WhatsApp.</p>
     </div>
   </footer>
+
+  <!-- Barre d'action sur téléphone -->
+  <div class="sticky-cta">
+    <a class="btn btn-primary" href="app/?inscription">Créer mon compte gratuit</a>
+    <a class="sticky-wa" href="https://wa.me/237683260520?text=Bonjour%2C%20je%20veux%20essayer%20Brayano%20IA" rel="noopener" aria-label="Écrire sur WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.2 14c-.2.6-1.3 1.2-1.8 1.2-.5.1-1.1.1-3.6-.9-3-1.3-4.9-4.4-5-4.6-.2-.2-1.2-1.6-1.2-3s.7-2.1 1-2.4c.3-.3.6-.3.8-.3h.6c.2 0 .5-.1.7.5.2.6.9 2.1.9 2.3.1.2.1.4 0 .6-.1.2-.2.4-.4.6l-.5.6c-.2.2-.4.4-.2.8.2.4 1 1.6 2.1 2.6 1.4 1.2 2.6 1.6 3 1.8.4.2.6.2.8-.1.2-.3 1-1.1 1.3-1.5.3-.4.5-.3.9-.2l2 1c.4.2.6.3.7.4.1.3.1.8-.1 1.4z"/></svg></a>
+  </div>
+
+  <script>
+    // Ferme le menu du haut après un clic sur un lien (téléphone).
+    document.querySelectorAll(".menu-list a").forEach(function (link) {
+      link.addEventListener("click", function () { link.closest("details").removeAttribute("open"); });
+    });
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"SoftwareApplication","name":"Brayano IA","applicationCategory":"BusinessApplication","operatingSystem":"Web","description":"Assistant WhatsApp qui répond aux clients, note les commandes et les rendez-vous, et relance les clients qui ne répondent plus.","url":"https://brayanoia.onrender.com/","offers":[{"@type":"Offer","name":"Essentiel","price":"10000","priceCurrency":"XAF"},{"@type":"Offer","name":"Pro","price":"20000","priceCurrency":"XAF"},{"@type":"Offer","name":"Business","price":"50000","priceCurrency":"XAF"}]}
+  </script>
 </body>
 </html>
