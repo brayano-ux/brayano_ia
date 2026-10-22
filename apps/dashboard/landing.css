@@ -60,6 +60,7 @@ a { color: inherit; }
 h1 { margin-top: 18px; font-size: clamp(2.1rem, 7.4vw, 3.6rem); line-height: 1.06; font-weight: 800; letter-spacing: -1.2px; }
 h1 em { font-style: normal; color: var(--blue); }
 .lead { margin-top: 20px; font-size: clamp(1.0625rem, 3.6vw, 1.3125rem); color: var(--muted); max-width: 34em; font-weight: 500; }
+.lead strong { color: #0e9444; font-weight: 800; }
 .cta-row { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 14px; }
 .note { margin-top: 16px; font-size: .9375rem; color: var(--muted); font-weight: 600; }
 
