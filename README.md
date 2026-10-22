@@ -33,7 +33,7 @@ Pour la prévisualiser pendant que le backend tourne sur le port 3000 :
 ```bash
 python -m http.server 4173 --directory apps/dashboard
 ```
-Puis ouvrir `http://localhost:4173`. Le dashboard utilise l'API `http://localhost:3000` par défaut ; cette URL peut être remplacée avec `localStorage.setItem("brayano_api", "http://...")`.
+Puis ouvrir `http://localhost:4173/` (page d'accueil) ou `http://localhost:4173/app/` (tableau de bord). Le dashboard utilise l'API `http://localhost:3000` par défaut ; cette URL peut être remplacée avec `localStorage.setItem("brayano_api", "http://...")`.
 
 ## Livraison Render
 

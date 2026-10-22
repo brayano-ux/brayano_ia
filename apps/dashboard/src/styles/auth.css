@@ -55,3 +55,6 @@
   .auth-card { padding: var(--space-6) var(--space-5); }
   .auth-subtitle { font-size: var(--text-xl); }
 }
+
+.auth-home { justify-self: center; font-size: var(--text-sm); font-weight: 600; color: var(--muted); text-decoration: none; }
+.auth-home:hover { color: var(--brand-600); text-decoration: underline; }
