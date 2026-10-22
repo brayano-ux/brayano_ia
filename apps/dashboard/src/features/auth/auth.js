@@ -230,6 +230,9 @@ export function initAuthFlow(onAuthenticated) {
     }
   };
 
+  // Lien « Créer mon compte » de la page d'accueil : ouvre directement l'inscription.
+  if (new URLSearchParams(window.location.search).has("inscription")) showAuthMode("register");
+
   if (isAuthenticated()) {
     showDashboard();
     api("/me")
