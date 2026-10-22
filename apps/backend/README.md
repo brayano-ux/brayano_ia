@@ -121,6 +121,15 @@ Un « message » = une réponse envoyée par l'assistant à un client (photos et
 - Avant de passer à `true`, donner un forfait aux clients existants : `POST /admin/organizations/:orgId/subscription` avec `{ "plan": "pro", "days": 30 }` (en-tête d'administration de la plateforme). `GET /admin/organizations` montre l'état de chacun.
 - Paiement Mobile Money via Campay (page « Mon forfait » du tableau de bord). En mode démonstration (`demo.campay.net`), aucun forfait n'est activé.
 
+### 9. Assistant d'aide du tableau de bord
+
+Bouton « Besoin d'aide ? » (propriétaire uniquement) : un assistant IA répond aux questions de configuration. Il utilise la même clé IA que l'agent (`GEMINI_API_KEY`, ou le fournisseur choisi par `LLM_PROVIDER`, avec secours automatique).
+
+- Route : `POST /organizations/:orgId/support-assistant/chat` avec `{ "messages": [{ "role": "user", "content": "…" }] }` → `{ "reply": "…", "openView": "whatsapp" | null }`. 40 questions par heure et par entreprise.
+- Ce qu'il sait : `src/support-assistant/knowledge.ts` (toutes les pages et tous les réglages). **À mettre à jour quand une page ou un réglage change** ; un test vérifie déjà que les prix et quantités des forfaits y sont identiques à `billing-plans.ts`.
+- Il reçoit aussi une photographie du compte (WhatsApp connecté ? fiche remplie ? produits ? forfait et messages restants ?) pour diagnostiquer. Il ne lit aucune conversation de client et ne modifie rien.
+- L'icône WhatsApp verte du tableau de bord ouvre une discussion avec le support (`supportWhatsapp` dans `apps/dashboard/src/config.js`).
+
 ### Tester avec une vraie base
 ```bash
 INTEGRATION_DB=1 DATABASE_URL=postgresql://.../base_de_test npm test

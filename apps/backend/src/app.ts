@@ -2,6 +2,7 @@ import Fastify from "fastify";
 import { env } from "./config/env.js";
 import { appointmentsRoute } from "./appointments/appointments.route.js";
 import { configAssistantRoute } from "./config-assistant/config-assistant.route.js";
+import { supportAssistantRoute } from "./support-assistant/support-assistant.route.js";
 import { adminRoute } from "./routes/admin.route.js";
 import { aiCorrectionsRoute } from "./ai/corrections.route.js";
 import { statsRoute } from "./analytics/stats.route.js";
@@ -148,6 +149,7 @@ export async function buildServer(options: { restoreConnections?: boolean } = {}
   await app.register(appointmentsRoute);
   await app.register(ordersRoute);
   await app.register(configAssistantRoute);
+  await app.register(supportAssistantRoute);
   await app.register(aiSettingsRoute);
   await app.register(aiTestRoute);
   await app.register(aiCorrectionsRoute);

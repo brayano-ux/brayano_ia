@@ -7,7 +7,7 @@ import { readOrganizationId } from "../services/storage.js";
  */
 const state = {
   organizationId: readOrganizationId(),
-  organizationName: "Brayano",
+  organizationName: "Brayano IA",
   organizations: [],
   conversations: [],
   commercialMetrics: [],
