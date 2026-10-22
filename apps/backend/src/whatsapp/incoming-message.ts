@@ -27,6 +27,7 @@ import { prisma } from "../database/client.js";
 import { deleteClientMediaFile, saveClientMedia, type StoredClientMedia } from "../media/client-media.service.js";
 import { buildHandoffEmail, buildMediaReceivedEmail, notifyOrganizationAdmins } from "../notifications/owner-notifications.js";
 import { getPlatformSuspension } from "../organizations/platform-suspension.service.js";
+import { notifyQuotaReached, releaseAiResponse, reserveAiResponse, type AiResponseEntitlement } from "../billing/subscription.service.js";
 import { registerQualifiedLead } from "../lead-routing/lead-routing.service.js";
 import {
   buildProductDetailsMessage,
@@ -156,6 +157,9 @@ function readLeadName(leadData: unknown): string | null {
  */
 export async function processIncomingMessage(context: IncomingMessageContext, message: IncomingWhatsAppMessage): Promise<void> {
   const { organizationId, instance } = context;
+  // Message de l'assistant réservé dans le forfait : rendu (finally) si la réponse n'est finalement pas partie.
+  let reservation: Extract<AiResponseEntitlement, { allowed: true }> | null = null;
+  let replyDelivered = false;
   try {
     if (message.audio) {
       const transcription = await getAiOrchestrator().transcribeAudio(message.audio);
@@ -269,6 +273,16 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
         return;
       }
     }
+
+    // Forfait : un message de l'assistant est compté avant d'appeler l'IA. Sans forfait valable (quand les forfaits sont
+    // appliqués), l'assistant se tait, le message du client reste dans la boîte et le propriétaire est prévenu.
+    const entitlement = await reserveAiResponse(organizationId);
+    if (!entitlement.allowed) {
+      console.log(`💸 [org:${organizationId}] L'assistant ne répond pas (${entitlement.reason}) : le propriétaire est prévenu.`);
+      void notifyQuotaReached(organizationId, entitlement.reason);
+      return;
+    }
+    reservation = entitlement;
 
     const products = await listProductsForAssistant(organizationId);
     // L'agenda est optionnel : toute erreur ici ne doit jamais empêcher la réponse.
@@ -545,6 +559,8 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
       console.log(`[org:${organizationId}] Réponse IA ignorée : un humain a pris le relais avant l’envoi.`);
       return;
     }
+    // Une réponse d'excuse de l'IA en panne ne compte pas dans le forfait.
+    replyDelivered = aiReply.intent !== "erreur_traitement";
 
     // Étiquette de suivi (Nouveau → Intéressé → A commandé / À rappeler).
     const converted = actions.some((action) =>
@@ -567,6 +583,10 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
     }
   } catch (error) {
     console.error(`❌ [org:${organizationId}] Échec du traitement du message entrant :`, error);
+  } finally {
+    if (reservation && !replyDelivered) {
+      await releaseAiResponse(organizationId, reservation).catch((error) => console.error(`❌ [org:${organizationId}] Message du forfait non rendu :`, error));
+    }
   }
 }
 

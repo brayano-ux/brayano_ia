@@ -2,6 +2,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vites
 
 const hoisted = vi.hoisted(() => {
   process.env.CLIENT_MEDIA_DIR = `/tmp/brayano-test-app-media-${process.pid}`;
+  process.env.PLATFORM_ADMIN_TOKEN = "admin-token-admin-token-admin-token-0123";
   process.env.SMTP_HOST = "smtp.example.com";
   process.env.SMTP_USER = "user@example.com";
   process.env.SMTP_PASSWORD = "secret";
@@ -24,6 +25,7 @@ import { createHash } from "node:crypto";
 import { rmSync } from "node:fs";
 import type { FastifyInstance } from "fastify";
 import { buildServer } from "./app.js";
+import { setBillingEnforcedForTests } from "./billing/subscription.service.js";
 import { prisma } from "./database/client.js";
 import { saveClientMedia } from "./media/client-media.service.js";
 import { createTestOrganization, disconnectTestDatabase, integrationEnabled, resetDatabase } from "./test-support/integration.js";
@@ -359,6 +361,71 @@ describe.skipIf(!integrationEnabled)("API complète (HTTP, base réelle)", () =>
       const agent = await login("fatou@example.com");
       const response = await app.inject({ method: "PUT", url: `/organizations/${organization.id}/whatsapp/number`, headers: authed(agent.token), payload: { phoneNumber: "690000009" } });
       expect(response.statusCode).toBe(403);
+    });
+  });
+
+  describe("forfaits", () => {
+    afterAll(() => setBillingEnforcedForTests(null));
+    const ADMIN = { authorization: "Bearer admin-token-admin-token-admin-token-0123" };
+
+    it("la liste des forfaits est publique et montre l'essai et les trois forfaits", async () => {
+      const response = await app.inject({ method: "GET", url: "/billing/plans" });
+      expect(response.statusCode).toBe(200);
+      const body = response.json();
+      expect(body.plans.map((plan: { name: string; amount: number }) => [plan.name, plan.amount])).toEqual([["Essentiel", 10000], ["Pro", 20000], ["Business", 50000]]);
+      expect(body.trial).toMatchObject({ messages: 100 });
+    });
+
+    it("le propriétaire voit son essai ; un employé n'a pas accès à la facturation", async () => {
+      const { organization, token } = await setup();
+      await prisma.organization.update({ where: { id: organization.id }, data: { freeAiResponsesRemaining: 100 } });
+      const account = await app.inject({ method: "GET", url: "/billing/account", headers: authed(token) });
+      expect(account.json()).toMatchObject({ plan: "trial", planName: "Essai gratuit", remainingMessages: 100, messageLimit: 100, enforced: false, blocked: false });
+
+      await app.inject({ method: "POST", url: `/organizations/${organization.id}/team`, headers: authed(token), payload: { name: "Fatou", email: "fatou@example.com", password: PASSWORD } });
+      const agent = await login("fatou@example.com");
+      expect((await app.inject({ method: "GET", url: "/billing/account", headers: authed(agent.token) })).statusCode).toBe(403);
+    });
+
+    it("forfaits appliqués : l'Essentiel n'ouvre ni messages en masse ni employés (402), le Pro oui", async () => {
+      const { organization, token } = await setup();
+      setBillingEnforcedForTests(true);
+      const expiresAt = new Date(Date.now() + 20 * 24 * 3600_000);
+      await prisma.billingSubscription.create({ data: { organizationId: organization.id, plan: "starter", messageLimit: 1000, expiresAt } });
+
+      const blocked = await app.inject({ method: "POST", url: `/organizations/${organization.id}/broadcasts/preview`, headers: authed(token), payload: { text: "Promo" } });
+      expect(blocked.statusCode).toBe(402);
+      expect(blocked.json()).toMatchObject({ error: "PLAN_LIMIT", message: expect.stringContaining("forfait Pro") });
+      const team = await app.inject({ method: "POST", url: `/organizations/${organization.id}/team`, headers: authed(token), payload: { name: "Fatou", email: "fatou@example.com", password: PASSWORD } });
+      expect(team.statusCode).toBe(402);
+      // L'historique reste consultable même sans la fonction.
+      expect((await app.inject({ method: "GET", url: `/organizations/${organization.id}/broadcasts`, headers: authed(token) })).statusCode).toBe(200);
+
+      await prisma.billingSubscription.update({ where: { organizationId: organization.id }, data: { plan: "pro", messageLimit: 5000 } });
+      expect((await app.inject({ method: "POST", url: `/organizations/${organization.id}/broadcasts/preview`, headers: authed(token), payload: { text: "Promo" } })).statusCode).toBe(200);
+      expect((await app.inject({ method: "POST", url: `/organizations/${organization.id}/team`, headers: authed(token), payload: { name: "Fatou", email: "fatou@example.com", password: PASSWORD } })).statusCode).toBe(200);
+    });
+
+    it("l'administrateur de la plateforme active un forfait à la main (paiement reçu hors ligne)", async () => {
+      const { organization, token } = await setup();
+      await prisma.organization.update({ where: { id: organization.id }, data: { quotaNoticeAt: new Date() } });
+      const url = `/admin/organizations/${organization.id}/subscription`;
+
+      expect((await app.inject({ method: "POST", url, payload: { plan: "pro" } })).statusCode).toBe(401);
+      expect((await app.inject({ method: "POST", url, headers: authed(token), payload: { plan: "pro" } })).statusCode).toBe(403); // un propriétaire d'entreprise n'est pas administrateur
+      expect((await app.inject({ method: "POST", url, headers: ADMIN, payload: { plan: "gratuit" } })).statusCode).toBe(400);
+      expect((await app.inject({ method: "POST", url: "/admin/organizations/inconnue/subscription", headers: ADMIN, payload: { plan: "pro" } })).statusCode).toBe(404);
+
+      const granted = await app.inject({ method: "POST", url, headers: ADMIN, payload: { plan: "Pro", days: 45 } });
+      expect(granted.statusCode).toBe(200);
+      expect(granted.json().billing).toMatchObject({ plan: "pro", planName: "Pro", status: "ACTIVE", messageLimit: 5000, messagesUsed: 0 });
+      expect((await prisma.organization.findUniqueOrThrow({ where: { id: organization.id } })).quotaNoticeAt).toBeNull();
+      const days = ((await prisma.billingSubscription.findUniqueOrThrow({ where: { organizationId: organization.id } })).expiresAt.getTime() - Date.now()) / (24 * 3600_000);
+      expect(Math.round(days)).toBe(45);
+
+      const list = await app.inject({ method: "GET", url: "/admin/organizations", headers: ADMIN });
+      expect(list.json().organizations[0].billing).toMatchObject({ plan: "pro", messagesUsed: 0, messageLimit: 5000 });
+      expect((await app.inject({ method: "GET", url: "/billing/account", headers: authed(token) })).json()).toMatchObject({ plan: "pro", amount: 20000 });
     });
   });
 });

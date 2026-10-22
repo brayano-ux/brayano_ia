@@ -6,7 +6,7 @@ import { api } from "../../services/api.js";
  * Rôles : le propriétaire (ADMIN) voit tout ; un employé (AGENT) répond aux clients et suit commandes et rendez-vous.
  * Le serveur applique les mêmes limites (shared/permissions.ts) : masquer ici n'est qu'un confort d'affichage.
  */
-export const ADMIN_ONLY_VIEWS = ["agent", "products", "broadcasts", "whatsapp", "settings"];
+export const ADMIN_ONLY_VIEWS = ["agent", "products", "broadcasts", "whatsapp", "billing", "settings"];
 
 export function isAgentRole() {
   return document.body.classList.contains("role-agent");

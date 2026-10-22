@@ -1,5 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
+import { assertFeature } from "../billing/subscription.service.js";
 import { ValidationError } from "../shared/errors.js";
 import { getWhatsAppAccountStatus, sendWhatsAppMessageForOrg } from "../whatsapp/whatsapp.registry.js";
 import { BROADCAST_LIMITS } from "./broadcast-rules.js";
@@ -38,6 +39,7 @@ export async function broadcastsRoute(app: FastifyInstance) {
 
   app.get("/organizations/:orgId/broadcasts/preview", async (request) => {
     const { orgId } = request.params as { orgId: string };
+    await assertFeature(orgId, "broadcasts");
     const parsed = audienceQuerySchema.safeParse(request.query ?? {});
     if (!parsed.success) throw new ValidationError("Critères invalides.");
     return { preview: await previewBroadcast(orgId, { stages: parsed.data.stages, windowDays: parsed.data.days, text: parsed.data.text }) };
@@ -46,6 +48,7 @@ export async function broadcastsRoute(app: FastifyInstance) {
   // Même aperçu, avec le texte dans le corps de la requête (un long message ne tient pas toujours dans une adresse).
   app.post("/organizations/:orgId/broadcasts/preview", async (request) => {
     const { orgId } = request.params as { orgId: string };
+    await assertFeature(orgId, "broadcasts");
     const parsed = previewBodySchema.safeParse(request.body ?? {});
     if (!parsed.success) throw new ValidationError("Critères invalides.");
     return { preview: await previewBroadcast(orgId, parsed.data) };
@@ -53,6 +56,7 @@ export async function broadcastsRoute(app: FastifyInstance) {
 
   app.post("/organizations/:orgId/broadcasts", async (request) => {
     const { orgId } = request.params as { orgId: string };
+    await assertFeature(orgId, "broadcasts");
     const parsed = createSchema.safeParse(request.body);
     if (!parsed.success) throw new ValidationError(parsed.error.issues[0]?.message);
     if (!whatsappBroadcastDeps.isConnected(orgId)) throw new ValidationError("Connectez d'abord votre WhatsApp (onglet WhatsApp) avant d'envoyer des messages.");

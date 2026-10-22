@@ -143,6 +143,20 @@ export function buildMediaReceivedEmail(input: {
   };
 }
 
+/** L'assistant ne peut plus répondre : plus de messages dans le forfait (ou essai terminé, abonnement expiré). */
+export function buildQuotaReachedEmail(input: { organizationName: string; reason: "trial_exhausted" | "subscription_expired" | "message_quota_exhausted" }) {
+  const what = {
+    trial_exhausted: { subject: "⚠️ Votre essai gratuit est terminé : l'assistant ne répond plus", line: "Votre essai gratuit (100 messages de l'assistant) est terminé." },
+    message_quota_exhausted: { subject: "⚠️ Vous avez utilisé tous les messages de votre forfait : l'assistant ne répond plus", line: "Vous avez utilisé tous les messages de l'assistant inclus dans votre forfait pour cette période." },
+    subscription_expired: { subject: "⚠️ Votre abonnement est terminé : l'assistant ne répond plus", line: "Votre abonnement est arrivé à son terme." },
+  }[input.reason];
+  const url = env.CLIENT_DASHBOARD_URL ? env.CLIENT_DASHBOARD_URL.replace(/\/+$/, "") : null;
+  return {
+    subject: what.subject,
+    text: `Bonjour,\n\n${what.line} L'assistant de ${input.organizationName} ne répond donc plus automatiquement à vos clients.\n\nVos clients peuvent toujours vous écrire et vous pouvez leur répondre vous-même depuis l'onglet Conversations de votre tableau de bord.\n\nPour réactiver l'assistant, ouvrez la page « Mon forfait » et choisissez un forfait.${url ? `\n\nMon forfait : ${url}` : ""}\n\nNous vous envoyons ce message une fois par jour au maximum.`,
+  };
+}
+
 /**
  * Envoie un email à tous les administrateurs de l'entreprise.
  * Ne lève jamais : une notification ne doit jamais perturber la conversation WhatsApp.

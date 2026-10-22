@@ -91,7 +91,7 @@ describe("auth security configuration", () => {
     const { authRoute } = await import("./auth.route.js");
     await app.register(authRoute);
     const organizationCreate = vi.fn(async ({ data }: any) => {
-      expect(data).toMatchObject({ name: "Example company", whatsappNumber: "237690000000", freeAiResponsesRemaining: 15 });
+      expect(data).toMatchObject({ name: "Example company", whatsappNumber: "237690000000", freeAiResponsesRemaining: 100 });
       return { id: "org-trial", name: data.name };
     });
     prismaMock.user.findUnique.mockResolvedValue(null);

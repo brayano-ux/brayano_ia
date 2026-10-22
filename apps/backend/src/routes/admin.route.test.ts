@@ -22,8 +22,15 @@ vi.mock("../organizations/platform-suspension.service.js", () => ({
   listOrganizationsForAdmin: mocks.list,
 }));
 
+vi.mock("../billing/subscription.service.js", () => ({
+  getOrganizationBillingStatus: vi.fn(async () => ({
+    plan: "trial", planName: "Essai gratuit", status: "ACTIVE", messagesUsed: 10, messageLimit: 100, expiresAt: null,
+  })),
+}));
+
 import { adminRoute } from "./admin.route.js";
 
+const billing = { plan: "trial", planName: "Essai gratuit", status: "ACTIVE", messagesUsed: 10, messageLimit: 100, expiresAt: null };
 const auth = { authorization: `Bearer ${"t".repeat(40)}` };
 
 async function buildApp() {
@@ -84,10 +91,11 @@ describe("platform admin routes", () => {
     const response = await app.inject({ method: "GET", url: "/admin/organizations", headers: auth });
     expect(JSON.parse(response.payload)).toEqual({
       organizations: [
-        { id: "org-1", platformSuspended: true, whatsapp: { status: "CONNECTED", phoneNumber: "237600000000", updatedAt, ...history } },
+        { id: "org-1", platformSuspended: true, billing, whatsapp: { status: "CONNECTED", phoneNumber: "237600000000", updatedAt, ...history } },
         {
           id: "org-2",
           platformSuspended: false,
+          billing,
           whatsapp: { status: "DISCONNECTED", phoneNumber: null, updatedAt: null, lastConnectedAt: null, lastDisconnectedAt: null, lastDisconnectReason: null },
         },
       ],

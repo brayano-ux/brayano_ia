@@ -13,6 +13,7 @@ import { initProducts, loadProducts } from "./features/products/products.js";
 import { hasUnsavedAgendaChanges, initAppointments, loadAppointments } from "./features/appointments/appointments.js";
 import { initOrders, loadOrders } from "./features/orders/orders.js";
 import { initBroadcasts, loadBroadcastsView } from "./features/broadcasts/broadcasts.js";
+import { initBilling, loadBilling, refreshBillingBanner } from "./features/billing/billing.js";
 import { initTeamSettings, loadTeam } from "./features/settings/team-settings.js";
 import { loadRole } from "./features/navigation/roles.js";
 import { initConfigAssistant } from "./features/config-assistant/config-assistant.js";
@@ -27,7 +28,7 @@ import { showToast } from "./utils/dom.js";
  */
 
 async function refreshAll() {
-  await Promise.all([refreshOverview(openConversation), loadPlatformSuspension()]);
+  await Promise.all([refreshOverview(openConversation), loadPlatformSuspension(), refreshBillingBanner()]);
 }
 
 const viewLoaders = {
@@ -38,6 +39,7 @@ const viewLoaders = {
   appointments: loadAppointments,
   orders: loadOrders,
   broadcasts: loadBroadcastsView,
+  billing: loadBilling,
   settings: () => {
     loadDelaySettings();
     loadRoutingConfig();
@@ -95,6 +97,7 @@ function bootstrap() {
   initAppointments();
   initOrders();
   initBroadcasts();
+  initBilling();
   initTeamSettings();
   initDelaySettings();
   initRoutingSettings();

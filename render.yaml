@@ -38,6 +38,10 @@ services:
         sync: false
       - key: BILLING_PAGE_URL
         sync: false
+      # Mettre "true" pour appliquer les forfaits (l'assistant se tait quand les messages sont épuisés).
+      # Avant : donner un forfait aux clients déjà inscrits (POST /admin/organizations/:id/subscription).
+      - key: BILLING_ENFORCED
+        value: "false"
       - key: PLATFORM_ADMIN_EMAILS
         sync: false
       - key: PLATFORM_ADMIN_TOKEN

@@ -2,7 +2,8 @@ import type { FastifyInstance } from "fastify";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { env } from "../config/env.js";
-import { BILLING_PLANS, getBillingPlan } from "../billing/billing-plans.js";
+import { BILLING_PLANS, TRIAL, getBillingPlan } from "../billing/billing-plans.js";
+import { isBillingEnforced } from "../billing/subscription.service.js";
 import { getOrganizationBillingStatus } from "../billing/subscription.service.js";
 import { prisma } from "../database/client.js";
 import { checkCampayPayment, createCampayCollection, getCampayChargeAmount, isCampayDemoMode } from "../services/payment.service.js";
@@ -95,6 +96,8 @@ async function reconcilePayment(payment: {
 export async function billingRoute(app: FastifyInstance) {
   app.get("/billing/plans", async () => ({
     plans: Object.values(BILLING_PLANS),
+    trial: TRIAL,
+    enforced: isBillingEnforced(),
     supportEmail: env.SUPPORT_EMAIL || null,
   }));
 
@@ -176,7 +179,7 @@ export async function billingRoute(app: FastifyInstance) {
       reply.code(503);
       return {
         success: false,
-        message: error instanceof Error ? error.message : "Le paiement n'est pas disponible pour le moment.",
+        message: "Le paiement par Mobile Money n'a pas pu démarrer. Vérifiez votre numéro puis réessayez dans quelques minutes. Si cela continue, écrivez-nous.",
       };
     }
   });
