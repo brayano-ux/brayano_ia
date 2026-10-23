@@ -6,6 +6,7 @@ import nodemailer from "nodemailer";
 import { z } from "zod";
 import { prisma } from "../database/client.js";
 import { env } from "../config/env.js";
+import { AppError } from "../shared/errors.js";
 
 const loginSchema = z.object({
   email: z.string().email("Adresse email invalide."),
@@ -139,14 +140,12 @@ async function sendVerificationCode(email: string, code: string) {
 
 const FALLBACK_ORGANIZATION_ID = "default-admin-org";
 
-async function withDatabaseFallback<T>(fallback: T, callback: () => Promise<T>): Promise<T> {
+async function withAuthDatabase<T>(callback: () => Promise<T>): Promise<T> {
   try {
     return await callback();
   } catch (error) {
-    if (process.env.NODE_ENV !== "production") {
-      console.warn("[auth] Database unavailable, using fallback behavior:", error);
-    }
-    return fallback;
+    if (error instanceof AppError) throw error;
+    throw new AppError("Le service de connexion est temporairement indisponible. Réessayez dans un instant.", 503, "AUTH_UNAVAILABLE");
   }
 }
 
@@ -154,7 +153,7 @@ async function ensureDefaultAdminOrganization(email: string) {
   const configuredAdmin = getConfiguredAdminCredentials();
   if (!configuredAdmin || email !== configuredAdmin.email) return null;
 
-  return withDatabaseFallback(FALLBACK_ORGANIZATION_ID, async () => {
+  return withAuthDatabase(async () => {
     const existingUser = await prisma.user.findUnique({ where: { email }, select: { organizationId: true } });
     if (existingUser?.organizationId) {
       return existingUser.organizationId;
@@ -198,7 +197,7 @@ export async function getSessionFromToken(token: string | null) {
   if (!token) return null;
 
   const hashed = hashToken(token);
-  return withDatabaseFallback(null, async () => {
+  return withAuthDatabase(async () => {
     const session = await prisma.session.findUnique({
       where: { tokenHash: hashed },
       select: {
@@ -229,11 +228,11 @@ async function issueToken(email: string, organizationId?: string) {
   const token = randomBytes(32).toString("hex");
   const expiresAt = new Date(Date.now() + env.SESSION_TTL_SECONDS * 1000);
 
-  return withDatabaseFallback(token, async () => {
+  return withAuthDatabase(async () => {
     const user = await prisma.user.findUnique({ where: { email }, select: { id: true } });
 
     if (!user) {
-      return token;
+      throw new AppError("Impossible de créer la session. Reconnectez-vous.", 503, "AUTH_UNAVAILABLE");
     }
 
     const normalizedOrganizationId = organizationId ?? null;
@@ -311,8 +310,8 @@ export async function authRoute(app: FastifyInstance) {
       return { token, organizationId: issuedOrganizationId, user: { email } };
     } catch (error) {
       app.log.error(error, "Login failed");
-      reply.code(500);
-      return { message: "Impossible de se connecter pour le moment." };
+      reply.code(error instanceof AppError ? error.statusCode : 500);
+      return { message: error instanceof AppError ? error.message : "Impossible de se connecter pour le moment." };
     }
   });
 

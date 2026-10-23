@@ -1,5 +1,15 @@
 import { getApiBaseUrl } from "../config.js";
-import { readSession } from "./storage.js";
+import { clearSession, readSession } from "./storage.js";
+
+let unauthorizedHandler = () => {};
+
+export function setUnauthorizedHandler(handler) {
+  unauthorizedHandler = handler;
+}
+
+export function isAuthenticationError(error) {
+  return error?.status === 401;
+}
 
 /**
  * Client HTTP unique du dashboard. Toute feature métier passe par ici
@@ -7,6 +17,12 @@ import { readSession } from "./storage.js";
  */
 export async function api(path, options = {}) {
   const session = readSession();
+  const protectedRequest = path === "/me" || path.startsWith("/organizations");
+  if (protectedRequest && !session?.token) {
+    const error = new Error("Connectez-vous pour accéder à votre espace.");
+    error.status = 401;
+    throw error;
+  }
   const headers = new Headers(options.headers || {});
 
   if (session?.token) {
@@ -31,7 +47,14 @@ export async function api(path, options = {}) {
     : await response.text().catch(() => "");
 
   if (!response.ok) {
-    throw new Error((typeof payload === "string" ? payload : payload.message) || "La requête a échoué.");
+    const error = new Error((typeof payload === "string" ? payload : payload.message) || "La requête a échoué.");
+    error.status = response.status;
+    // Une réponse tardive d’une ancienne session ne doit pas déconnecter la nouvelle.
+    if (response.status === 401 && protectedRequest && session?.token && readSession()?.token === session.token) {
+      clearSession();
+      unauthorizedHandler();
+    }
+    throw error;
   }
 
   if (response.status === 204) return null;

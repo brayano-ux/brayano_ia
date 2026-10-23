@@ -9,6 +9,7 @@ vi.mock("../database/client.js", () => ({
       findUnique: vi.fn(),
       update: vi.fn(),
     },
+    session: { upsert: vi.fn().mockResolvedValue({}) },
     signupVerification: {
       findUnique: vi.fn(),
       upsert: vi.fn(),
@@ -57,6 +58,7 @@ afterEach(() => {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  prismaMock.user.findUnique.mockResolvedValue(null);
   process.env.SMTP_HOST = "smtp.example.com";
   process.env.SMTP_PORT = "587";
   process.env.SMTP_USER = "user@example.com";
@@ -131,6 +133,7 @@ describe("auth security configuration", () => {
       aiSettings: { create: vi.fn() },
       signupVerification: { delete: vi.fn() },
     }));
+    prismaMock.user.findUnique.mockResolvedValue({ id: "user-trial" });
     const verifyResponse = await app.inject({
       method: "POST",
       url: "/register/verify",

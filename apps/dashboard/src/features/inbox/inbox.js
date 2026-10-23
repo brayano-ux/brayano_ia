@@ -473,7 +473,7 @@ function startPolling() {
     if (isInboxVisible() || tick % BACKGROUND_EVERY_N_TICKS === 0) void loadInbox({ silent: true });
   }, POLL_MS);
   document.addEventListener("visibilitychange", () => {
-    if (!document.hidden && getState().organizationId) void loadInbox({ silent: true });
+    if (!document.hidden && getState().organizationId && document.querySelector(".app-shell:not(.hidden)")) void loadInbox({ silent: true });
   });
 }
 
