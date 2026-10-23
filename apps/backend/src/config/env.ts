@@ -42,6 +42,7 @@ const envSchema = z.object({
   MISTRAL_MODEL: z.string().default("mistral-small-latest"),
   OPENROUTER_API_KEY: z.string().optional(),
   OPENROUTER_MODEL: z.string().default("openai/gpt-4o-mini"),
+  OPENROUTER_TRANSCRIPTION_MODEL: z.string().trim().min(1).default("openai/whisper-1"),
   SMTP_HOST: z.string().optional().or(z.literal("")),
   SMTP_PORT: z.coerce.number().int().positive().default(587),
   SMTP_USER: z.string().optional().or(z.literal("")),

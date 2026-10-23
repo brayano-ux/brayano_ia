@@ -25,9 +25,9 @@ function createProvider(): AIProvider {
   }
 }
 
-function createFallbackProvider(): AIProvider {
-  if (env.LLM_PROVIDER === "gemini") return new OpenRouterProvider();
-  return new GeminiProvider();
+function createFallbackProvider(): AIProvider | undefined {
+  if (env.LLM_PROVIDER === "gemini") return env.OPENROUTER_API_KEY ? new OpenRouterProvider() : undefined;
+  return env.GEMINI_API_KEY ? new GeminiProvider() : undefined;
 }
 
 export function getAiOrchestrator(): AiOrchestrator {
@@ -42,7 +42,8 @@ export function getRawProviders(): AIProvider[] {
   const providers: AIProvider[] = [];
   for (const create of [createProvider, createFallbackProvider]) {
     try {
-      providers.push(create());
+      const provider = create();
+      if (provider) providers.push(provider);
     } catch (error) {
       console.warn("Fournisseur IA indisponible :", error instanceof Error ? error.message : error);
     }

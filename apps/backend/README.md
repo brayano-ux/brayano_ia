@@ -168,3 +168,14 @@ src/
 Le backend utilise une authentification par session et isole les données par organisation. Les sessions WhatsApp sont stockées dans `WHATSAPP_AUTH_DIR` et restaurées automatiquement au démarrage lorsqu'elles existent encore.
 
 En production, utilise `npm run db:migrate:deploy` uniquement après avoir vérifié l'état de la base avec `npx prisma migrate status`. Ne lance jamais `prisma migrate reset` sur la base d'un client.
+
+
+## Transcription des messages vocaux avec OpenRouter
+
+Les vocaux passent par le fournisseur IA principal, puis par le fournisseur de secours si la transcription échoue, reste vide ou dépasse 60 secondes par fournisseur. Avec `LLM_PROVIDER=gemini`, OpenRouter sert de secours ; avec `LLM_PROVIDER=openrouter`, OpenRouter est appelé en premier puis Gemini (sa clé doit aussi être configurée pour ce secours).
+
+OpenRouter utilise `POST /api/v1/audio/transcriptions`, avec la clé `OPENROUTER_API_KEY` existante. Le modèle dédié est `OPENROUTER_TRANSCRIPTION_MODEL` (par défaut `openai/whisper-1`) : il ne faut pas remplacer le modèle de conversation `OPENROUTER_MODEL`. La clé doit autoriser ce modèle et le compte doit disposer du crédit nécessaire. Ne pas stocker la clé dans le dépôt ou le dashboard ; la renseigner dans les variables d’environnement du backend Render.
+
+Les formats OGG des vocaux WhatsApp (y compris `audio/ogg; codecs=opus`), MP3, WAV, FLAC, M4A, WebM et AAC sont transmis avec leur format, sans conversion artificielle du fichier. Le fichier doit être non vide et faire au maximum 25 Mo pour l’appel OpenRouter. La langue est détectée automatiquement. Un résultat vide ou invalide déclenche le secours ; si les deux fournisseurs échouent, le traitement remonte une erreur contrôlée et n’invente aucune transcription.
+
+Référence : https://openrouter.ai/docs/guides/overview/multimodal/stt
