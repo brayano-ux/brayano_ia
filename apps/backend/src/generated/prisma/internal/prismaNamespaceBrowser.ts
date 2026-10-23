@@ -118,6 +118,7 @@ export const AiSettingsScalarFieldEnum = {
   organizationId: 'organizationId',
   agentName: 'agentName',
   businessInfo: 'businessInfo',
+  onboardingTestHash: 'onboardingTestHash',
   agentImageUrl: 'agentImageUrl',
   systemPrompt: 'systemPrompt',
   welcomeMessage: 'welcomeMessage',

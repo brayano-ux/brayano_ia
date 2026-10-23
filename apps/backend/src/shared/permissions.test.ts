@@ -43,6 +43,7 @@ describe("isAllowedForRole", () => {
   it.each([
     ["PUT", `${org}/ai-settings`],
     ["GET", `${org}/ai-settings`],
+    ["GET", `${org}/onboarding`],
     ["POST", `${org}/whatsapp/connect`],
     ["POST", `${org}/whatsapp/disconnect`],
     ["GET", `${org}/whatsapp/qr`],

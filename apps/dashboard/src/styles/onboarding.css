@@ -1,0 +1,30 @@
+.onboarding-guide { padding: 24px; margin-bottom: 24px; border: 1px solid #ddd6fe; background: linear-gradient(135deg, #fff 60%, #f5f3ff); }
+.onboarding-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.onboarding-heading h2 { margin: 5px 0 8px; font-size: 21px; }
+.onboarding-heading .eyebrow { color: #6d4de5; }
+.onboarding-progress { height: 7px; border-radius: 10px; background: #e9e5f5; overflow: hidden; margin: 18px 0; }
+.onboarding-progress span { display: block; height: 100%; width: 0; background: #6d4de5; border-radius: inherit; transition: width .2s; }
+.onboarding-steps { padding: 0; margin: 0; list-style: none; }
+.onboarding-step { display: grid; grid-template-columns: 34px 1fr auto; align-items: start; gap: 13px; padding: 16px 0; border-bottom: 1px solid #ece9f3; }
+.onboarding-step h3 { margin: 0 0 5px; font-size: 14px; }
+.onboarding-step p { margin: 0 0 6px; color: var(--muted, #657087); font-size: 13px; line-height: 1.6; }
+.onboarding-number { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: #f0edf8; color: #6d4de5; font-size: 13px; font-weight: 700; }
+.onboarding-step.done .onboarding-number { color: #087f5b; background: #e5f7ee; }
+.onboarding-step.next .onboarding-number { background: #6d4de5; color: white; }
+.onboarding-state { font-size: 11px; color: #7a8292; }
+.onboarding-step.done .onboarding-state { color: #087f5b; }
+.onboarding-step.next .onboarding-state { color: #6d4de5; font-weight: 700; }
+.onboarding-step button { font-size: 12px; }
+.onboarding-guide #onboarding-note { font-size: 12px; line-height: 1.6; margin: 16px 0; }
+.onboarding-error { color: #a34708; font-size: 13px; line-height: 1.6; }
+.onboarding-first-help { margin-top: 18px; border-radius: 12px; background: #f0edf9; padding: 18px; scroll-margin-top: 90px; }
+.onboarding-first-help h3 { font-size: 14px; margin-top: 0; }
+.onboarding-first-help p { font-size: 13px; line-height: 1.7; color: #536079; }
+.onboarding-help-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+@media (max-width: 650px) {
+  .onboarding-guide { padding: 18px; }
+  .onboarding-heading h2 { font-size: 18px; }
+  .onboarding-step { grid-template-columns: 30px 1fr; }
+  .onboarding-step button { grid-column: 2; justify-self: start; max-width: 100%; white-space: normal; }
+  .onboarding-help-actions button, #onboarding-next { width: 100%; }
+}

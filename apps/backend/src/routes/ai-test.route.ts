@@ -25,7 +25,7 @@ const testAgentSchema = z.object({
 });
 
 export async function aiTestRoute(app: FastifyInstance) {
-  // Testeur de l'agent : simule la réponse (rendez-vous, commandes, photos, accueil, horaires) sans rien enregistrer ni envoyer.
+  // Testeur de l'agent : simule la réponse (rendez-vous, commandes, photos, accueil, horaires) sans enregistrer de conversation ni envoyer de message ; un test réussi valide la progression du démarrage.
   app.post("/organizations/:orgId/ai-test/reply", async (request) => {
     const { orgId } = request.params as { orgId: string };
     const parsed = testAgentSchema.safeParse(request.body);
