@@ -179,3 +179,12 @@ OpenRouter utilise `POST /api/v1/audio/transcriptions`, avec la clé `OPENROUTER
 Les formats OGG des vocaux WhatsApp (y compris `audio/ogg; codecs=opus`), MP3, WAV, FLAC, M4A, WebM et AAC sont transmis avec leur format, sans conversion artificielle du fichier. Le fichier doit être non vide et faire au maximum 25 Mo pour l’appel OpenRouter. La langue est détectée automatiquement. Un résultat vide ou invalide déclenche le secours ; si les deux fournisseurs échouent, le traitement remonte une erreur contrôlée et n’invente aucune transcription.
 
 Référence : https://openrouter.ai/docs/guides/overview/multimodal/stt
+
+
+## Guide de démarrage
+
+La vue d’ensemble du propriétaire affiche quatre étapes : informations de l’entreprise enregistrées, test réussi, WhatsApp actuellement connecté et première réponse automatique envoyée. `GET /organizations/:orgId/onboarding` calcule la progression pour l’entreprise authentifiée ; cet endpoint est réservé au propriétaire.
+
+Un test réussi conserve uniquement une empreinte des réglages dans `AiSettings.onboardingTestHash`, sans conserver la conversation du testeur. Une modification des réglages de réponse nécessite un nouveau test, tant qu’aucune réponse réelle n’a encore été envoyée. Une vérification de `updatedAt` empêche de valider des réglages modifiés pendant un test. Les réponses manuelles et les simulations ne valident pas la dernière étape : elle nécessite un message sortant d’auteur `AI` enregistré après envoi WhatsApp.
+
+La migration `20261023170000_add_onboarding_test_hash` ajoute une colonne nullable, sans modifier les données existantes. Le démarrage Render utilise déjà `prisma db push` avant le serveur ; les installations utilisant les migrations doivent appliquer `npm run db:migrate:deploy`, puis régénérer le client Prisma. Le guide se réduit lorsqu’il est terminé et peut être rouvert. La connexion WhatsApp et l’état actif de l’agent restent contrôlés séparément.

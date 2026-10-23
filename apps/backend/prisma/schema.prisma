@@ -48,6 +48,7 @@ model AiSettings {
   organizationId       String   @unique @map("organization_id")
   agentName            String   @default("Assistant") @map("agent_name")
   businessInfo         String?  @map("business_info")
+  onboardingTestHash   String?  @map("onboarding_test_hash")
   agentImageUrl        String?  @map("agent_image_url")
   systemPrompt         String   @map("system_prompt")
   welcomeMessage       String?  @map("welcome_message")

@@ -1,3 +1,4 @@
+import { markAgentTested } from "../onboarding/onboarding.service.js";
 import { loadAgendaPrompt, previewAiBooking } from "../appointments/appointments.service.js";
 import { computeAutoStage, STAGE_LABELS } from "../conversations/stage.js";
 import { formatAmount } from "../orders/order-logic.js";
@@ -43,7 +44,7 @@ export type TesterEffect = { type: "booking" | "order" | "photo" | "handoff" | "
 const ANALYZABLE = new Set(["image/jpeg", "image/png", "image/webp", "application/pdf"]);
 
 /**
- * Simule fidèlement ce que ferait l'assistant sur WhatsApp, SANS rien enregistrer, envoyer ni écrire à personne :
+ * Simule fidèlement ce que ferait l'assistant sur WhatsApp, SANS enregistrer de conversation, envoyer un message ni créer une commande ou un rendez-vous :
  * rendez-vous, commandes, photos, message d'accueil, horaires, passage de main.
  */
 export async function simulateAssistantReply(organizationId: string, input: TesterInput, now = new Date()) {
@@ -183,6 +184,10 @@ export async function simulateAssistantReply(organizationId: string, input: Test
   } else {
     replies.push({ type: "text", text });
     for (const product of photoProducts) replies.push({ type: "image", imageUrl: product.imageUrl, caption: buildProductImageCaption(product) });
+  }
+
+  if (reply.intent !== "erreur_traitement" && text.trim()) {
+    await markAgentTested(settings).catch(() => console.warn("Progression du démarrage non enregistrée ; le test reste disponible."));
   }
 
   return {

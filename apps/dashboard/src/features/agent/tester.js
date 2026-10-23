@@ -97,6 +97,7 @@ async function send(media, mediaTag) {
         ...(media ? { media: { ...media, ...(text ? { caption: text } : {}) } } : {}),
       }),
     });
+    document.dispatchEvent(new Event("brayano:onboarding-changed"));
     simulation = result.simulation || simulation;
     turns = [...turns, { role: "assistant", content: result.reply, replies: result.replies, effects: result.effects }];
     const info = $("#agent-test-result");

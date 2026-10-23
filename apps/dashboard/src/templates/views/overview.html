@@ -8,13 +8,21 @@
     </div>
   </div>
 
+  <section id="onboarding-guide" class="panel onboarding-guide admin-only hidden" aria-labelledby="onboarding-summary">
+    <div class="onboarding-heading"><div><p class="eyebrow">BIEN DÉMARRER</p><h2 id="onboarding-summary">Votre assistant, prêt en 4 étapes</h2><p id="onboarding-count" class="muted" aria-live="polite">Chargement de votre progression…</p></div><div class="onboarding-help-actions"><button id="onboarding-retry" type="button" class="text-button">Actualiser</button><button id="onboarding-toggle" type="button" class="text-button" aria-controls="onboarding-body" aria-expanded="true">Réduire</button></div></div>
+    <div id="onboarding-progress" class="onboarding-progress" role="progressbar" aria-label="Progression du démarrage" aria-valuemin="0" aria-valuemax="4" aria-valuenow="0"><span id="onboarding-progress-fill"></span></div>
+    <p id="onboarding-error" class="onboarding-error hidden" role="status"></p>
+    <div id="onboarding-body"><ol id="onboarding-steps" class="onboarding-steps"></ol><p id="onboarding-note" class="muted"></p><button id="onboarding-next" type="button" class="primary hidden"></button></div>
+    <div id="onboarding-first-help" class="onboarding-first-help hidden" tabindex="-1"><h3>Essayez depuis un autre numéro</h3><p>Depuis le téléphone d’un proche ou un autre numéro WhatsApp, envoyez une question au numéro que vous avez relié. Laissez l’agent répondre, puis revenez ici. Un message écrit manuellement ou une réponse du testeur ne valide pas cette étape.</p><div class="onboarding-help-actions"><button id="onboarding-open-inbox" type="button" class="ghost-button">Ouvrir les conversations</button><button id="onboarding-refresh" type="button" class="primary">Vérifier ma progression</button></div></div>
+  </section>
+
   <div class="status-banner">
     <span class="status-icon" aria-hidden="true">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 3v4"/><path d="M21 5h-4"/></svg>
     </span>
     <div class="status-text">
-      <strong>Votre agent est prêt à échanger.</strong>
-      <p>Il répond automatiquement aux messages reçus sur WhatsApp.</p>
+      <strong id="overview-agent-status-title">Votre espace est prêt.</strong>
+      <p id="overview-agent-status-description">Vérifiez la configuration de votre agent et la connexion WhatsApp.</p>
     </div>
     <button class="text-button admin-only" data-view-target="agent">
       Configurer l'agent

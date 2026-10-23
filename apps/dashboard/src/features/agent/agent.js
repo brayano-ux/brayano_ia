@@ -119,6 +119,7 @@ async function saveSettings(event) {
     });
     markClean();
     refreshAgentChrome();
+    document.dispatchEvent(new Event("brayano:onboarding-changed"));
     showToast(aiEnabled ? "Modifications enregistrées — agent actif" : "Modifications enregistrées — agent en pause", "success");
   } catch (error) {
     showToast(error.message, "error");
@@ -193,6 +194,11 @@ function setActiveTab(tab) {
   $$(".agent-pane").forEach((pane) => pane.classList.toggle("hidden", pane.dataset.agentPane !== tab));
   // L'onglet « Apprentissage » est hors du formulaire principal : on cache alors le formulaire (sinon il reste une carte vide).
   $("#agent-form").classList.toggle("hidden", tab === "learning");
+}
+
+export function openAgentSection(tab, focusSelector) {
+  setActiveTab(tab);
+  if (focusSelector) $(focusSelector)?.focus();
 }
 
 function focusInvalid(tab, selector, message) {

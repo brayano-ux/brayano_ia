@@ -1,10 +1,11 @@
 import { $ } from "./utils/dom.js";
+import { initOnboarding, refreshOnboarding } from "./features/onboarding/onboarding.js";
 import { initAuthFlow, logoutUser } from "./features/auth/auth.js";
 import { loadOrganizations } from "./features/organizations/organizations.js";
 import { initNavigation, registerLeaveGuard, setView, UNSAVED_CHANGES_MESSAGE, updateRealtimeHeader } from "./features/navigation/navigation.js";
 import { initOverview, refreshOverview } from "./features/overview/overview.js";
 import { initInbox, loadInbox, openConversation, bindInboxRefresh } from "./features/inbox/inbox.js";
-import { hasUnsavedAgentChanges, initAgent, loadSettings } from "./features/agent/agent.js";
+import { hasUnsavedAgentChanges, initAgent, loadSettings, openAgentSection } from "./features/agent/agent.js";
 import { initDelaySettings, loadDelaySettings } from "./features/settings/delay-settings.js";
 import { initRoutingSettings, loadRoutingConfig } from "./features/settings/routing-settings.js";
 import { loadPlatformSuspension } from "./features/suspension/suspension.js";
@@ -29,7 +30,7 @@ import { showToast } from "./utils/dom.js";
  */
 
 async function refreshAll() {
-  await Promise.all([refreshOverview(openConversation), loadPlatformSuspension(), refreshBillingBanner()]);
+  await Promise.all([refreshOverview(openConversation), loadPlatformSuspension(), refreshBillingBanner(), refreshOnboarding()]);
 }
 
 const viewLoaders = {
@@ -91,6 +92,11 @@ function bootstrap() {
   registerLeaveGuard("appointments", () => !hasUnsavedAgendaChanges() || window.confirm(UNSAVED_CHANGES_MESSAGE));
   initNavigation(viewLoaders);
   initOverview();
+  initOnboarding(action => {
+    if (action === "whatsapp" || action === "inbox") { setView(action, viewLoaders); return; }
+    if (!setView("agent", viewLoaders)) return;
+    openAgentSection("knowledge", action === "test" ? "#agent-test-input" : "#business-info");
+  });
   initInbox();
   initAgent();
   initConfigAssistant();

@@ -1,4 +1,5 @@
 import Fastify from "fastify";
+import { onboardingRoute } from "./onboarding/onboarding.route.js";
 import { env } from "./config/env.js";
 import { appointmentsRoute } from "./appointments/appointments.route.js";
 import { configAssistantRoute } from "./config-assistant/config-assistant.route.js";
@@ -152,6 +153,7 @@ export async function buildServer(options: { restoreConnections?: boolean } = {}
   await app.register(supportAssistantRoute);
   await app.register(aiSettingsRoute);
   await app.register(aiTestRoute);
+  await app.register(onboardingRoute);
   await app.register(aiCorrectionsRoute);
   await app.register(statsRoute);
   await app.register(broadcastsRoute);
