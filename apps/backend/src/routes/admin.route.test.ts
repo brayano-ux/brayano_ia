@@ -28,6 +28,11 @@ vi.mock("../billing/subscription.service.js", () => ({
   })),
 }));
 
+vi.mock("../analytics/platform-usage.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../analytics/platform-usage.js")>()),
+  getAiResponseUsageByOrganization: vi.fn(async () => new Map([["org-1", { today: 4, last7Days: 20, last30Days: 50, total: 120, lastAt: "2026-10-09T08:00:00.000Z" }]])),
+}));
+
 import { adminRoute } from "./admin.route.js";
 
 const billing = { plan: "trial", planName: "Essai gratuit", status: "ACTIVE", messagesUsed: 10, messageLimit: 100, expiresAt: null };
@@ -84,21 +89,24 @@ describe("platform admin routes", () => {
     const updatedAt = "2026-10-09T08:00:00.000Z";
     const history = { lastConnectedAt: updatedAt, lastDisconnectedAt: "2026-10-09T07:00:00.000Z", lastDisconnectReason: "Session ouverte ailleurs (code 440)" };
     mocks.list.mockResolvedValue([
-      { id: "org-1", platformSuspended: true, whatsappAccounts: [{ status: "CONNECTED", phoneNumber: "237600000000", updatedAt, ...history }] },
-      { id: "org-2", platformSuspended: false, whatsappAccounts: [] },
+      { id: "org-1", platformSuspended: true, users: [], whatsappAccounts: [{ status: "CONNECTED", phoneNumber: "237600000000", updatedAt, ...history }] },
+      { id: "org-2", platformSuspended: false, users: [], whatsappAccounts: [] },
     ]);
     const app = await buildApp();
     const response = await app.inject({ method: "GET", url: "/admin/organizations", headers: auth });
     expect(JSON.parse(response.payload)).toEqual({
       organizations: [
-        { id: "org-1", platformSuspended: true, billing, whatsapp: { status: "CONNECTED", phoneNumber: "237600000000", updatedAt, ...history } },
+        { id: "org-1", platformSuspended: true, owner: null, aiResponses: { today: 4, last7Days: 20, last30Days: 50, total: 120, lastAt: "2026-10-09T08:00:00.000Z" }, billing, whatsapp: { status: "CONNECTED", phoneNumber: "237600000000", updatedAt, ...history } },
         {
           id: "org-2",
           platformSuspended: false,
+          owner: null,
+          aiResponses: { today: 0, last7Days: 0, last30Days: 0, total: 0, lastAt: null },
           billing,
           whatsapp: { status: "DISCONNECTED", phoneNumber: null, updatedAt: null, lastConnectedAt: null, lastDisconnectedAt: null, lastDisconnectReason: null },
         },
       ],
+      totals: { organizations: 2, today: 4, last7Days: 20, last30Days: 50, total: 120 },
     });
   });
 
