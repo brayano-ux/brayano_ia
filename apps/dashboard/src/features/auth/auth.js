@@ -1,4 +1,4 @@
-import { api, isNetworkError } from "../../services/api.js";
+import { api, isNetworkError, isAuthenticationError, setUnauthorizedHandler } from "../../services/api.js";
 import { clearSession, isAuthenticated, readSession, writeOrganizationId, writeSession } from "../../services/storage.js";
 import { $, showToast } from "../../utils/dom.js";
 import { getState, setState } from "../../state/store.js";
@@ -95,6 +95,11 @@ export function initAuthFlow(onAuthenticated) {
   const forgotPasswordLink = $("#forgot-password-link");
 
   if (!loginForm || !registerForm || !verificationForm || !toggleButton) return;
+
+  setUnauthorizedHandler(() => {
+    logoutUser();
+    showToast("Votre session n’est plus valide. Reconnectez-vous pour continuer.", "error");
+  });
 
   if (forgotPasswordLink) {
     forgotPasswordLink.onclick = async () => {
@@ -234,10 +239,12 @@ export function initAuthFlow(onAuthenticated) {
   if (new URLSearchParams(window.location.search).has("inscription")) showAuthMode("register");
 
   if (isAuthenticated()) {
+    const restoringToken = readSession()?.token;
     showDashboard();
     api("/me")
       .then(async (me) => {
         const session = readSession();
+        if (!session?.token || session.token !== restoringToken) return;
         const nextSession = { ...session, organizationId: me.organizationId || session?.organizationId || null };
         writeSession(nextSession);
         if (nextSession.organizationId) {
@@ -247,12 +254,8 @@ export function initAuthFlow(onAuthenticated) {
         await onAuthenticated();
       })
       .catch((error) => {
-        if (isNetworkError(error)) {
-          showToast("Serveur indisponible. Réessayez plus tard.", "error");
-          return;
-        }
-        logoutUser();
-        showToast("Session expirée. Veuillez vous reconnecter.", "error");
+        if (isAuthenticationError(error)) return; // Le client API a déjà affiché la connexion.
+        showToast(isNetworkError(error) ? "Serveur indisponible. Réessayez plus tard." : error.message, "error");
       });
   }
 }
