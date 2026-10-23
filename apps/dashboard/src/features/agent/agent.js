@@ -91,6 +91,9 @@ async function saveSettings(event) {
   event.preventDefault();
   if (!$("#agent-name").value.trim()) return focusInvalid("identity", "#agent-name", "Donnez un nom à votre agent.");
   if (!$("#system-prompt").value.trim()) return focusInvalid("behavior", "#system-prompt", "Les instructions de l'agent sont obligatoires.");
+  if ($("#business-info").value.length > APP_CONFIG.businessInfoMaxLength) {
+    return focusInvalid("knowledge", "#business-info", "Les informations sur votre activité dépassent 50 000 caractères. Raccourcissez le texte avant d’enregistrer ; votre saisie est conservée.");
+  }
   const hoursError = validateHours();
   if (hoursError) return focusInvalid("hours", "#bh-rows", hoursError);
   const saveButton = $("#save-agent");
@@ -227,7 +230,11 @@ function refreshAgentChrome() {
 
   $$("[data-counter-for]").forEach((counter) => {
     const field = $(`#${counter.dataset.counterFor}`);
-    counter.textContent = `${field.value.length} / ${field.maxLength} caractères`;
+    const limit = field.id === "business-info" ? APP_CONFIG.businessInfoMaxLength : field.maxLength;
+    const overLimit = field.value.length > limit;
+    counter.textContent = `${field.value.length.toLocaleString("fr-FR")} / ${limit.toLocaleString("fr-FR")} caractères${overLimit ? " — limite dépassée" : ""}`;
+    counter.classList.toggle("over-limit", overLimit);
+    if (field.id === "business-info") field.setAttribute("aria-invalid", String(overLimit));
   });
 
   renderCompleteness();

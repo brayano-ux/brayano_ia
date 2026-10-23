@@ -1,6 +1,7 @@
 import { api } from "../../services/api.js";
 import { $, $$, escapeHtml, showToast } from "../../utils/dom.js";
 import { getState } from "../../state/store.js";
+import { APP_CONFIG } from "../../config.js";
 
 const MAX_PDF_BYTES = 5 * 1024 * 1024;
 let activeTab = "text";
@@ -77,7 +78,11 @@ function applyDraft(mode) {
   const draft = $("#ca-draft").value.trim();
   if (!draft) return showToast("Le brouillon est vide.", "error");
   const target = $("#business-info");
-  target.value = mode === "append" && target.value.trim() ? `${target.value.trim()}\n\n${draft}` : draft;
+  const combined = mode === "append" && target.value.trim() ? `${target.value.trim()}\n\n${draft}` : draft;
+  if (combined.length > APP_CONFIG.businessInfoMaxLength) {
+    return showToast("Ce texte dépasserait la limite de 50 000 caractères. Raccourcissez le brouillon ; vos informations actuelles sont conservées.", "error");
+  }
+  target.value = combined;
   target.dispatchEvent(new Event("input", { bubbles: true }));
   target.scrollIntoView({ behavior: "smooth", block: "center" });
   showToast("Texte placé dans « Informations sur votre activité ». Relisez puis cliquez sur « Enregistrer les modifications ».", "success");
