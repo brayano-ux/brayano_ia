@@ -78,7 +78,25 @@ export class AiOrchestrator {
   }
 
   async transcribeAudio(input: AIAudioInput): Promise<string> {
-    return this.provider.transcribeAudio(input);
+    for (const provider of [this.provider, this.fallbackProvider]) {
+      if (!provider) continue;
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      try {
+        const text = await Promise.race([
+          provider.transcribeAudio(input),
+          new Promise<never>((_resolve, reject) => {
+            timer = setTimeout(() => reject(new Error("Transcription audio trop longue.")), 60_000);
+          }),
+        ]);
+        if (text.trim()) return text.trim();
+        console.warn(`Transcription audio vide avec ${provider.name}.`);
+      } catch {
+        console.warn(`Transcription audio impossible avec ${provider.name}, essai du fournisseur suivant.`);
+      } finally {
+        if (timer !== undefined) clearTimeout(timer);
+      }
+    }
+    throw new Error("Aucun fournisseur IA n’a pu transcrire le message vocal.");
   }
 
   /** Décrit une photo ou un document reçu. Renvoie null si aucun modèle ne sait le faire : l'appelant s'en passe. */
