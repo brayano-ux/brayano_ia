@@ -7,6 +7,7 @@ import {
 import { isValidTimezone } from "../appointments/availability.js";
 import { workingHoursSchema } from "../appointments/appointments.service.js";
 import { getPlatformSuspension } from "../organizations/platform-suspension.service.js";
+import { BUSINESS_INFO_MAX_LENGTH } from "../ai/settings-limits.js";
 import { ValidationError } from "../shared/errors.js";
 
 const validMediaUrl = z
@@ -19,7 +20,7 @@ const validMediaUrl = z
 
 const updateAiSettingsSchema = z.object({
   agentName: z.string().min(1).optional(),
-  businessInfo: z.string().optional(),
+  businessInfo: z.string().max(BUSINESS_INFO_MAX_LENGTH, "Les informations sur votre activité ne doivent pas dépasser 50 000 caractères.").optional(),
   agentImageUrl: validMediaUrl.optional().or(z.literal("")),
   systemPrompt: z.string().min(1).optional(),
   welcomeMessage: z.string().optional(),

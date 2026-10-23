@@ -118,10 +118,10 @@
 
           <label>
             Informations sur votre activité
-            <textarea id="business-info" rows="9" maxlength="8000" placeholder="Présentez votre entreprise : activité, adresse, horaires, téléphone, livraison, moyens de paiement, conditions…"></textarea>
-            <span class="agent-counter" data-counter-for="business-info"></span>
+            <textarea id="business-info" rows="12" aria-describedby="business-info-counter business-info-tip" placeholder="Présentez votre entreprise : activité, adresse, horaires, téléphone, livraison, moyens de paiement, conditions…"></textarea>
+            <span id="business-info-counter" class="agent-counter" data-counter-for="business-info"></span>
           </label>
-          <p class="agent-tip">💡 Plus c’est précis (horaires, tarifs, quartiers livrés, moyens de paiement), moins l’agent devra vous solliciter. N’écrivez que des informations exactes.</p>
+          <p id="business-info-tip" class="agent-tip">Jusqu’à 50 000 caractères. Organisez votre texte par rubriques : présentation, services, tarifs, horaires, livraison et conditions. 💡 Plus c’est précis (horaires, tarifs, quartiers livrés, moyens de paiement), moins l’agent devra vous solliciter. N’écrivez que des informations exactes.</p>
         </div>
 
         <div class="agent-pane hidden" data-agent-pane="behavior">

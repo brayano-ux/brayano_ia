@@ -123,3 +123,15 @@ describe("sections added by the product improvements", () => {
     expect(prompt).toContain("Exemple 1");
   });
 });
+
+
+describe("extended business information", () => {
+  it("includes the entire 50,000-character company description in the AI context", () => {
+    const ending = "CONDITIONS FINALES À RESPECTER.";
+    const businessInfo = "Informations et tarifs.\n".repeat(2_200).slice(0, 50_000 - ending.length) + ending;
+    const prompt = buildSystemPrompt({ ...baseSettings, businessInfo });
+    expect(businessInfo).toHaveLength(50_000);
+    expect(prompt).toContain(businessInfo);
+    expect(prompt).toContain("CONDITIONS FINALES À RESPECTER.");
+  });
+});

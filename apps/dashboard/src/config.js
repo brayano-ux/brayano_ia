@@ -9,6 +9,7 @@ export const APP_CONFIG = {
   views: ["overview", "inbox", "agent", "settings", "whatsapp"],
   responseDelayOptions: [3, 5, 7, 60, 120],
   standardQualificationFields: ["name", "city", "need", "budget", "product", "urgency", "quartier"],
+  businessInfoMaxLength: 50_000,
   mobileBreakpointPx: 1024,
 };
 
