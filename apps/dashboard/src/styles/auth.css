@@ -60,3 +60,6 @@
 
 .auth-home { justify-self: center; font-size: var(--text-sm); font-weight: 600; color: var(--muted); text-decoration: none; }
 .auth-home:hover { color: var(--brand-600); text-decoration: underline; }
+
+.auth-legal { margin-top: 22px; color: var(--muted); font-size: .75rem; line-height: 1.7; }
+.auth-legal a { text-underline-offset: 3px; }
