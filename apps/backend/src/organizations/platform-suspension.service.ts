@@ -72,6 +72,8 @@ export async function listOrganizationsForAdmin() {
       suspensionReason: true,
       suspendedAt: true,
       aiSettings: { select: { aiEnabled: true } },
+      // Le propriétaire de l'entreprise (premier compte créé) : permet de savoir à qui correspond chaque entreprise.
+      users: { where: { role: "ADMIN" }, select: { name: true, email: true }, orderBy: { createdAt: "asc" }, take: 1 },
       whatsappAccounts: {
         select: { status: true, phoneNumber: true, updatedAt: true, lastConnectedAt: true, lastDisconnectedAt: true, lastDisconnectReason: true },
         orderBy: { updatedAt: "desc" },

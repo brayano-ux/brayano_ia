@@ -509,4 +509,67 @@ describe.skipIf(!integrationEnabled)("API complète (HTTP, base réelle)", () =>
       expect((await chat(organization.id, token, { messages: [{ role: "user", content: "Bonjour" }] })).statusCode).toBe(429);
     });
   });
+  describe("administration : réponses de l'IA par entreprise", () => {
+    const ADMIN = { authorization: "Bearer admin-token-admin-token-admin-token-0123" };
+    const daysAgo = (days: number) => new Date(Date.now() - days * 24 * 3600_000);
+
+    async function seedAiMessages(organizationId: string, jid: string, counts: { today?: number; threeDays?: number; fortyDays?: number; human?: number; inbound?: number }) {
+      const contact = await prisma.contact.create({ data: { organizationId, whatsappJid: jid } });
+      const conversation = await prisma.conversation.create({ data: { organizationId, contactId: contact.id } });
+      const make = (author: "AI" | "HUMAN" | "CONTACT", direction: "INBOUND" | "OUTBOUND", createdAt: Date) =>
+        ({ conversationId: conversation.id, author, direction, content: "x", createdAt });
+      const rows = [
+        ...Array.from({ length: counts.today ?? 0 }, () => make("AI", "OUTBOUND", new Date())),
+        ...Array.from({ length: counts.threeDays ?? 0 }, () => make("AI", "OUTBOUND", daysAgo(3))),
+        ...Array.from({ length: counts.fortyDays ?? 0 }, () => make("AI", "OUTBOUND", daysAgo(40))),
+        ...Array.from({ length: counts.human ?? 0 }, () => make("HUMAN", "OUTBOUND", new Date())),
+        ...Array.from({ length: counts.inbound ?? 0 }, () => make("CONTACT", "INBOUND", new Date())),
+      ];
+      await prisma.message.createMany({ data: rows });
+    }
+
+    it("donne, pour chaque entreprise, le nombre de réponses générées par l'IA (aujourd'hui, 7 j, 30 j, total)", async () => {
+      const { organization, token } = await setup();
+      const other = await createTestOrganization("Boutique Awa", { email: "awa@example.com", password: PASSWORD });
+      const quiet = await createTestOrganization("Sans activité", { email: "quiet@example.com", password: PASSWORD });
+      await seedAiMessages(organization.id, "237690000001@s.whatsapp.net", { today: 3, threeDays: 2, fortyDays: 5, human: 4, inbound: 6 });
+      await seedAiMessages(other.organization.id, "237690000002@s.whatsapp.net", { today: 1 });
+
+      expect((await app.inject({ method: "GET", url: "/admin/organizations" })).statusCode).toBe(401);
+      expect((await app.inject({ method: "GET", url: "/admin/organizations", headers: authed(token) })).statusCode).toBe(403);
+
+      const response = await app.inject({ method: "GET", url: "/admin/organizations", headers: ADMIN });
+      expect(response.statusCode).toBe(200);
+      const body = response.json();
+      const byId = Object.fromEntries(body.organizations.map((entry: { id: string }) => [entry.id, entry]));
+      // Les messages du client et ceux écrits par un humain ne comptent pas ; ceux d'il y a 40 jours comptent seulement dans le total.
+      expect(byId[organization.id].aiResponses).toMatchObject({ today: 3, last7Days: 5, last30Days: 5, total: 10 });
+      expect(byId[organization.id].aiResponses.lastAt).toEqual(expect.any(String));
+      expect(byId[other.organization.id].aiResponses).toMatchObject({ today: 1, last7Days: 1, last30Days: 1, total: 1 });
+      expect(byId[quiet.organization.id].aiResponses).toEqual({ today: 0, last7Days: 0, last30Days: 0, total: 0, lastAt: null });
+      expect(byId[organization.id].owner).toMatchObject({ email: "owner@example.com" });
+      expect(body.totals).toEqual({ organizations: 3, today: 4, last7Days: 6, last30Days: 6, total: 11 });
+    });
+
+    it("détaille les réponses de l'IA jour par jour pour une entreprise", async () => {
+      const { organization, token } = await setup();
+      await seedAiMessages(organization.id, "237690000003@s.whatsapp.net", { today: 2, threeDays: 1, fortyDays: 9 });
+      const url = `/admin/organizations/${organization.id}/ai-usage`;
+
+      expect((await app.inject({ method: "GET", url })).statusCode).toBe(401);
+      expect((await app.inject({ method: "GET", url, headers: authed(token) })).statusCode).toBe(403);
+      expect((await app.inject({ method: "GET", url: "/admin/organizations/inconnue/ai-usage", headers: ADMIN })).statusCode).toBe(404);
+      expect((await app.inject({ method: "GET", url: `${url}?days=1`, headers: ADMIN })).statusCode).toBe(400);
+
+      const response = await app.inject({ method: "GET", url: `${url}?days=30`, headers: ADMIN });
+      expect(response.statusCode).toBe(200);
+      const body = response.json();
+      expect(body.daily).toHaveLength(30);
+      expect(body.total).toBe(3); // les 9 messages d'il y a 40 jours sont hors de la fenêtre
+      expect(body.daily.at(-1).count).toBe(2);
+      expect(body.daily.at(-4).count).toBe(1);
+      expect(body.daily.slice(0, 26).every((day: { count: number }) => day.count === 0)).toBe(true);
+      expect(body.daily.map((day: { date: string }) => day.date)).toEqual([...body.daily.map((day: { date: string }) => day.date)].sort());
+    });
+  });
 });

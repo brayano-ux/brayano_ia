@@ -8,6 +8,7 @@ import {
   unsuspendOrganization,
 } from "../organizations/platform-suspension.service.js";
 import { getPlatformAdminEmails } from "../organizations/platform-admins.js";
+import { EMPTY_USAGE, getAiResponseUsageByOrganization, getDailyAiResponses, sumUsage } from "../analytics/platform-usage.js";
 import { getBillingPlan } from "../billing/billing-plans.js";
 import { getOrganizationBillingStatus } from "../billing/subscription.service.js";
 import { prisma } from "../database/client.js";
@@ -57,29 +58,45 @@ export async function adminRoute(app: FastifyInstance) {
   });
 
   app.get("/admin/organizations", async () => {
-    const organizations = await listOrganizationsForAdmin();
+    const [organizations, usageByOrganization] = await Promise.all([listOrganizationsForAdmin(), getAiResponseUsageByOrganization()]);
+    const listed = await Promise.all(organizations.map(async ({ whatsappAccounts, users, ...organization }) => {
+      const billing = await getOrganizationBillingStatus(organization.id).catch(() => null);
+      return {
+        ...organization,
+        owner: users[0] ?? null,
+        // Réponses générées par l'IA pour cette entreprise (heure du Cameroun).
+        aiResponses: usageByOrganization.get(organization.id) ?? EMPTY_USAGE,
+        // Forfait et messages utilisés (l'essai gratuit apparaît comme « Essai gratuit »).
+        billing: billing && {
+          plan: billing.plan, planName: billing.planName, status: billing.status,
+          messagesUsed: billing.messagesUsed, messageLimit: billing.messageLimit, expiresAt: billing.expiresAt,
+        },
+        // État en direct du serveur (la base peut dater d'avant un redémarrage).
+        whatsapp: {
+          status: getWhatsAppAccountStatus(organization.id),
+          phoneNumber: whatsappAccounts[0]?.phoneNumber ?? null,
+          updatedAt: whatsappAccounts[0]?.updatedAt ?? null,
+          lastConnectedAt: whatsappAccounts[0]?.lastConnectedAt ?? null,
+          lastDisconnectedAt: whatsappAccounts[0]?.lastDisconnectedAt ?? null,
+          lastDisconnectReason: whatsappAccounts[0]?.lastDisconnectReason ?? null,
+        },
+      };
+    }));
     return {
-      organizations: await Promise.all(organizations.map(async ({ whatsappAccounts, ...organization }) => {
-        const billing = await getOrganizationBillingStatus(organization.id).catch(() => null);
-        return {
-          ...organization,
-          // Forfait et messages utilisés (l'essai gratuit apparaît comme « Essai gratuit »).
-          billing: billing && {
-            plan: billing.plan, planName: billing.planName, status: billing.status,
-            messagesUsed: billing.messagesUsed, messageLimit: billing.messageLimit, expiresAt: billing.expiresAt,
-          },
-          // État en direct du serveur (la base peut dater d'avant un redémarrage).
-          whatsapp: {
-            status: getWhatsAppAccountStatus(organization.id),
-            phoneNumber: whatsappAccounts[0]?.phoneNumber ?? null,
-            updatedAt: whatsappAccounts[0]?.updatedAt ?? null,
-            lastConnectedAt: whatsappAccounts[0]?.lastConnectedAt ?? null,
-            lastDisconnectedAt: whatsappAccounts[0]?.lastDisconnectedAt ?? null,
-            lastDisconnectReason: whatsappAccounts[0]?.lastDisconnectReason ?? null,
-          },
-        };
-      })),
+      organizations: listed,
+      totals: { organizations: listed.length, ...sumUsage(listed.map((organization) => organization.aiResponses)) },
     };
+  });
+
+  // Réponses de l'IA jour par jour pour une entreprise (graphique du détail).
+  app.get("/admin/organizations/:orgId/ai-usage", async (request) => {
+    const { orgId } = request.params as { orgId: string };
+    const parsed = z.object({ days: z.coerce.number().int().min(7).max(90).default(30) }).safeParse(request.query ?? {});
+    if (!parsed.success) throw new ValidationError("Durée invalide : choisissez entre 7 et 90 jours.");
+    const organization = await prisma.organization.findUnique({ where: { id: orgId }, select: { id: true } });
+    if (!organization) throw new NotFoundError("Entreprise introuvable.");
+    const daily = await getDailyAiResponses(orgId, parsed.data.days);
+    return { organizationId: orgId, days: parsed.data.days, daily, total: daily.reduce((sum, day) => sum + day.count, 0) };
   });
 
   // Abonnement activé à la main (paiement reçu hors Campay, geste commercial, essai prolongé…).
