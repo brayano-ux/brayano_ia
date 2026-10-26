@@ -157,6 +157,11 @@ export async function setPaymentCheckPending(conversationId: string, pending: bo
   await prisma.$executeRaw`UPDATE conversations SET payment_check_pending = ${pending} WHERE id = ${conversationId}`;
 }
 
+/** Le client a enfin écrit sur le sujet autorisé : la porte reste ouverte pour toute la suite de la conversation. */
+export async function openTopicGate(conversationId: string) {
+  await prisma.$executeRaw`UPDATE conversations SET topic_gate_opened = true WHERE id = ${conversationId}`;
+}
+
 /** Fait avancer l'étiquette d'un client d'après ce que l'IA vient de faire (sans effet si le propriétaire l'a fixée à la main). */
 export async function advanceConversationStage(conversationId: string, signals: StageSignals) {
   const conversation = await prisma.conversation.findUnique({ where: { id: conversationId }, select: { stage: true, stageLocked: true } });

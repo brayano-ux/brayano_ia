@@ -1,7 +1,7 @@
 import { getOrCreateAiSettings, resolveResponseDelaySeconds } from "../ai/ai-settings.service.js";
 import { getAiOrchestrator } from "../ai/ai.factory.js";
 import { buildBusinessHoursPrompt } from "../ai/business-hours.js";
-import { buildSystemPrompt } from "../ai/prompt.js";
+import { buildSystemPrompt, buildTopicGateSection } from "../ai/prompt.js";
 import { loadMemorySections } from "../ai/memory.service.js";
 import { classifyByCaption, describeMediaKindLabel, type MediaAnalysis, type MediaKind } from "../ai/media-analysis.js";
 import { decideWelcome, placeWelcomeBeforeClientMessages } from "../ai/welcome.js";
@@ -11,6 +11,7 @@ import { isIgnoredNumber } from "../contacts/ignored-contacts.service.js";
 import {
   advanceConversationStage,
   getRecentHistoryForAi,
+  openTopicGate,
   recordInboundMessage,
   recordOutboundMessage,
   isConversationUpdateStillCurrent,
@@ -309,6 +310,9 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
       new Date(),
     );
     const memory = await loadMemorySections(organizationId, conversation.id, message.text);
+    // Sujet autorisé : tant que le client n'a pas encore écrit dessus, l'IA classe le message sans qu'on l'envoie.
+    // Une fois ouvert pour cette conversation, elle reste ouverte pour toujours : plus besoin de reclasser.
+    const topicGateActive = Boolean(settings.topicGateEnabled && settings.topicGateTopic?.trim() && !conversation.topicGateOpened);
     const systemPrompt = buildSystemPrompt({
       ...settings,
       knownLeadData: previousLeadData,
@@ -319,10 +323,20 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
       correctionsSection: memory.corrections,
       examplesSection: memory.examples,
       welcomeSent,
+      topicGateSection: topicGateActive ? buildTopicGateSection(settings.topicGateTopic!.trim()) : null,
     });
     const recentHistory = await getRecentHistoryForAi(conversation.id);
     const history = welcomeSent && welcomeDecision.welcome ? placeWelcomeBeforeClientMessages(recentHistory, welcomeDecision.welcome) : recentHistory;
     let aiReply = await getAiOrchestrator().getReply(conversation.id, systemPrompt, history);
+
+    if (topicGateActive) {
+      if (aiReply.onTopic) {
+        await openTopicGate(conversation.id);
+      } else {
+        console.log(`🔒 [org:${organizationId}] Message hors du sujet autorisé (« ${settings.topicGateTopic} ») : pas de réponse envoyée.`);
+        return;
+      }
+    }
 
     // Garde-fou : le modèle dit « rendez-vous confirmé / annulé », « commande enregistrée / annulée »
     // sans demander l'action au serveur, ou confirme un paiement qu'il ne peut pas voir. On compare à l'état réel

@@ -43,6 +43,8 @@ const updateAiSettingsSchema = z.object({
   agentDomain: z.string().trim().max(60).optional(),
   agentRole: z.string().trim().max(60).optional(),
   agentTone: z.string().trim().max(60).optional(),
+  topicGateEnabled: z.boolean().optional(),
+  topicGateTopic: z.string().trim().max(200).nullable().optional(),
 });
 
 export async function aiSettingsRoute(app: FastifyInstance) {
@@ -79,6 +81,8 @@ export async function aiSettingsRoute(app: FastifyInstance) {
       agentDomain?: string | undefined;
       agentRole?: string | undefined;
       agentTone?: string | undefined;
+      topicGateEnabled?: boolean | undefined;
+      topicGateTopic?: string | null | undefined;
     } = {};
 
     if (parsed.data.agentName !== undefined) settingsInput.agentName = parsed.data.agentName;
@@ -102,6 +106,8 @@ export async function aiSettingsRoute(app: FastifyInstance) {
     if (parsed.data.agentDomain !== undefined) settingsInput.agentDomain = parsed.data.agentDomain;
     if (parsed.data.agentRole !== undefined) settingsInput.agentRole = parsed.data.agentRole;
     if (parsed.data.agentTone !== undefined) settingsInput.agentTone = parsed.data.agentTone;
+    if (parsed.data.topicGateEnabled !== undefined) settingsInput.topicGateEnabled = parsed.data.topicGateEnabled;
+    if (parsed.data.topicGateTopic !== undefined) settingsInput.topicGateTopic = parsed.data.topicGateTopic;
 
     const settings = await updateAiSettings(orgId, settingsInput);
     return { settings };

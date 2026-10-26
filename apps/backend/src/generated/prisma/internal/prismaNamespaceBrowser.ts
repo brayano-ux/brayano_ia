@@ -138,6 +138,8 @@ export const AiSettingsScalarFieldEnum = {
   agentRole: 'agentRole',
   agentTone: 'agentTone',
   personaPromptedAt: 'personaPromptedAt',
+  topicGateEnabled: 'topicGateEnabled',
+  topicGateTopic: 'topicGateTopic',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -330,6 +332,7 @@ export const ConversationScalarFieldEnum = {
   stage: 'stage',
   stageLocked: 'stageLocked',
   paymentCheckPending: 'paymentCheckPending',
+  topicGateOpened: 'topicGateOpened',
   lastInboundAt: 'lastInboundAt',
   lastReadAt: 'lastReadAt',
   followUpCount: 'followUpCount',

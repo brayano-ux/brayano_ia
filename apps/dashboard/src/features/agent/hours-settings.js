@@ -53,6 +53,7 @@ function readHours() {
 function syncVisibility() {
   $("#bh-details").classList.toggle("is-off", !$("#bh-enabled").checked);
   $("#fu-details").classList.toggle("is-off", !$("#fu-enabled").checked);
+  $("#tg-details").classList.toggle("is-off", !$("#tg-enabled").checked);
 }
 
 function ensureOption(select, value) {
@@ -72,6 +73,8 @@ export function fillHoursSettings(settings) {
   $("#fu-enabled").checked = Boolean(settings.followUpEnabled);
   ensureOption($("#fu-delay"), settings.followUpDelayHours || 24);
   $("#fu-max").value = String(settings.followUpMax || 1);
+  $("#tg-enabled").checked = Boolean(settings.topicGateEnabled);
+  $("#tg-topic").value = settings.topicGateTopic || "";
   syncVisibility();
 }
 
@@ -84,6 +87,8 @@ export function readHoursSettings() {
     followUpEnabled: $("#fu-enabled").checked,
     followUpDelayHours: Number($("#fu-delay").value),
     followUpMax: Number($("#fu-max").value),
+    topicGateEnabled: $("#tg-enabled").checked,
+    topicGateTopic: $("#tg-topic").value.trim() || null,
   };
 }
 
@@ -93,6 +98,9 @@ export function hoursSnapshot() {
 
 /** Renvoie un message d'erreur lisible, ou "" si tout est correct. */
 export function validateHours() {
+  if ($("#tg-enabled").checked && !$("#tg-topic").value.trim()) {
+    return "Indiquez le sujet autorisé, ou désactivez cette limite.";
+  }
   if (!$("#bh-enabled").checked) return "";
   let openDays = 0;
   for (const row of $$(".bh-row")) {

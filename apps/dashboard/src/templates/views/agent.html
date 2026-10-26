@@ -222,6 +222,23 @@
             </div>
             <p class="agent-tip">🛡️ Garde-fous : seuls les clients étiquetés « Intéressé » dont le dernier message vient de l’agent sont relancés. Jamais pendant la fermeture de l’entreprise, jamais après un « STOP », et jamais si vous avez repris la conversation.</p>
           </div>
+
+          <div class="agent-pane-head bh-section">
+            <h2>Sujet autorisé</h2>
+            <p class="muted">Si activé, l’agent ne répond à un nouveau client qu’une fois qu’il a écrit sur ce sujet ; avant cela, il reste silencieux (le message reste visible dans votre boîte de réception). Une fois le sujet abordé, il répond normalement à cette personne pour toute la suite.</p>
+          </div>
+          <label class="agenda-switch">
+            <input id="tg-enabled" type="checkbox" />
+            <span>Limiter l’agent à un sujet précis</span>
+          </label>
+          <div id="tg-details" class="bh-details">
+            <label>
+              <span class="field-label">Sujet autorisé</span>
+              <input id="tg-topic" type="text" maxlength="200" placeholder="Ex. nos vêtements" />
+              <span class="field-hint">Décrivez le sujet en quelques mots : l’agent l’utilisera pour juger si un message s’y rapporte.</span>
+            </label>
+            <p class="agent-tip">⚠️ Un client qui écrit sur autre chose ne reçoit aucune réponse automatique tant qu’il n’a pas abordé ce sujet. Cela peut donner l’impression que votre service ne répond pas : à utiliser seulement si c’est vraiment ce que vous voulez.</p>
+          </div>
         </div>
 
         <div class="agent-pane hidden" data-agent-pane="features">
