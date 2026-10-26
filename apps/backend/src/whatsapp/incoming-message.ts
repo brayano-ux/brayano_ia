@@ -34,7 +34,6 @@ import { registerQualifiedLead } from "../lead-routing/lead-routing.service.js";
 import {
   buildProductDetailsMessage,
   buildProductImageCaption,
-  resolveRequestedProductImage,
   resolveRequestedProductPhotos,
 } from "../products/product-image-selection.js";
 import { listProductsForAssistant } from "../products/products.service.js";
@@ -451,15 +450,6 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
     // Une photo REÇUE du client ([Photo reçue]) n'est pas une demande de photo.
     const requestText = message.media ? message.media.caption ?? "" : message.text;
     const photoProducts = resolveRequestedProductPhotos({ message: requestText, productId: aiReply.productId, productIds: aiReply.productIds, products });
-    const legacyImageUrl = photoProducts.length
-      ? null
-      : resolveRequestedProductImage({
-          message: requestText,
-          productId: aiReply.productId,
-          products,
-          legacyImageUrl: aiReply.imageUrl,
-          configuredLegacyImageUrl: settings.agentImageUrl,
-        });
 
     const selectedProduct = photoProducts.length === 1 ? photoProducts[0]! : null;
     const outboundText = selectedProduct
@@ -528,20 +518,6 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
         if (failedNames.length) {
           await instance.sendMessage(message.fromJid, describeUnsentPhotos(failedNames));
         }
-      } else if (legacyImageUrl) {
-        let imageSent = true;
-        try {
-          await instance.sendImage(message.fromJid, legacyImageUrl, aiReply.reply);
-        } catch (error) {
-          imageSent = false;
-          imagesFailed = 1;
-          console.error(`❌ [org:${organizationId}] Image non envoyée :`, error instanceof Error ? error.message : error);
-        }
-        if (!imageSent) {
-          await instance.sendMessage(message.fromJid, `${textToSend}\n\n${describeUnsentPhotos([])}`);
-        } else if (textToSend !== outboundText) {
-          await instance.sendMessage(message.fromJid, textToSend);
-        }
       } else {
         await instance.sendMessage(message.fromJid, textToSend);
       }
@@ -559,8 +535,8 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
           needsHuman: aiReply.needsHuman,
           nextAction: aiReply.nextAction,
           ...(photoProducts.length ? { productNames: photoProducts.map((product) => product.name) } : {}),
-          imageSent: Boolean(photoProducts.length || legacyImageUrl),
-          photosSent: photoProducts.length + (legacyImageUrl ? 1 : 0) - imagesFailed,
+          imageSent: Boolean(photoProducts.length),
+          photosSent: photoProducts.length - imagesFailed,
           ...(imagesFailed ? { imagesFailed } : {}),
           actions,
           claimRetried,

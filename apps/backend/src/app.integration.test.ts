@@ -633,17 +633,6 @@ describe.skipIf(!integrationEnabled)("API complète (HTTP, base réelle)", () =>
       expect(await prisma.organization.count()).toBe(1);
     });
   });
-  describe("image de l'agent", () => {
-    it("refuse une adresse interne, blob: et SVG, mais accepte une adresse publique", async () => {
-      const { organization, token } = await setup();
-      const put = (agentImageUrl: string) => app.inject({ method: "PUT", url: `/organizations/${organization.id}/ai-settings`, headers: authed(token), payload: { agentImageUrl } });
-      for (const url of ["http://169.254.169.254/latest/meta-data/", "http://127.0.0.1:6379/", "blob:https://x.com/a", "data:image/svg+xml;base64,PHN2Zz48L3N2Zz4="]) {
-        expect((await put(url)).statusCode, url).toBe(400);
-      }
-      expect((await put("https://exemple.cm/logo.png")).statusCode).toBe(200);
-      expect((await put("")).statusCode).toBe(200);
-    });
-  });
   describe("personnalité de l'agent (rôle, ton, domaine)", () => {
     it("enregistre le choix et horodate la personnalisation seulement quand rôle et ton sont fournis ensemble", async () => {
       const { organization, token } = await setup();

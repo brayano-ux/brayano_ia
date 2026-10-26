@@ -23,18 +23,6 @@ function renderCustomQualificationFields(fields = []) {
     .join("");
 }
 
-function renderAgentImagePreview(url) {
-  const preview = $("#agent-image-preview");
-  if (!url) {
-    preview.classList.add("hidden");
-    preview.removeAttribute("src");
-    return;
-  }
-
-  preview.src = url;
-  preview.classList.remove("hidden");
-}
-
 export async function loadSettings() {
   try {
     const { settings, platformSuspension } = await api(`/organizations/${getState().organizationId}/ai-settings`);
@@ -44,8 +32,6 @@ export async function loadSettings() {
     applyPlatformSuspension(platformSuspension);
     $("#agent-name").value = settings.agentName || "";
     $("#business-info").value = settings.businessInfo || "";
-    $("#agent-image-url").value = settings.agentImageUrl || "";
-    renderAgentImagePreview(settings.agentImageUrl || "");
     $("#system-prompt").value = settings.systemPrompt || "";
     $("#welcome-message").value = settings.welcomeMessage || "";
     fillHoursSettings(settings);
@@ -61,35 +47,6 @@ export async function loadSettings() {
   } catch (error) {
     showToast(error.message, "error");
   }
-}
-
-async function handleAgentImageUpload(event) {
-  const file = event.target.files?.[0];
-  if (!file) return;
-
-  if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-    showToast("Choisissez une image JPEG, PNG ou WebP.", "error");
-    event.target.value = "";
-    return;
-  }
-  if (file.size > 5 * 1024 * 1024) {
-    showToast("Cette image est trop lourde (5 Mo maximum).", "error");
-    event.target.value = "";
-    return;
-  }
-
-  const reader = new FileReader();
-  reader.onload = () => {
-    const result = typeof reader.result === "string" ? reader.result : "";
-    $("#agent-image-url").value = result;
-    renderAgentImagePreview(result);
-    refreshAgentChrome();
-    showToast("Image de l'agent importée avec succès.", "success");
-  };
-  reader.onerror = () => {
-    showToast("Impossible de lire cette image.", "error");
-  };
-  reader.readAsDataURL(file);
 }
 
 async function saveSettings(event) {
@@ -115,7 +72,6 @@ async function saveSettings(event) {
         aiEnabled,
         agentName: $("#agent-name").value,
         businessInfo: $("#business-info").value,
-        agentImageUrl: $("#agent-image-url").value,
         systemPrompt: $("#system-prompt").value,
         welcomeMessage: $("#welcome-message").value,
         qualificationFields,
@@ -173,7 +129,7 @@ let cleanSnapshot = "";
 
 function snapshot() {
   return JSON.stringify([
-    $("#agent-name").value, $("#business-info").value, $("#agent-image-url").value, $("#system-prompt").value,
+    $("#agent-name").value, $("#business-info").value, $("#system-prompt").value,
     $("#welcome-message").value, $("#global-ai-enabled").checked,
     $$('input[name="qualification-field"]:checked, .custom-qualification-field:checked').map((input) => input.value).sort(),
     hoursSnapshot(),
@@ -220,19 +176,9 @@ function initials(name) {
 function refreshAgentChrome() {
   const name = $("#agent-name").value.trim();
   const toggle = $("#global-ai-enabled");
-  const imageUrl = $("#agent-image-url").value.trim();
 
   $("#agent-hero-name").textContent = name || "Assistant";
-  const avatar = $("#agent-avatar");
-  if (imageUrl) {
-    avatar.textContent = "";
-    avatar.style.backgroundImage = `url("${imageUrl.replace(/"/g, "%22")}")`;
-    avatar.classList.add("has-image");
-  } else {
-    avatar.style.backgroundImage = "";
-    avatar.classList.remove("has-image");
-    avatar.textContent = initials(name);
-  }
+  $("#agent-avatar").textContent = initials(name);
 
   const pill = $("#agent-hero-status");
   const suspended = toggle.disabled;
@@ -350,8 +296,6 @@ export function initAgent() {
   initAgentChrome();
   $("#agent-form").onsubmit = saveSettings;
   $("#save-agent").onclick = () => $("#agent-form").requestSubmit();
-  $("#agent-image-file").onchange = handleAgentImageUpload;
-  $("#agent-image-url").oninput = () => renderAgentImagePreview($("#agent-image-url").value);
   $("#create-qualification-field").onclick = createQualificationField;
   $("#custom-qualification-field-input").onkeydown = (event) => {
     if (event.key === "Enter") {

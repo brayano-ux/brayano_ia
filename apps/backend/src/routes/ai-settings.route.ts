@@ -10,24 +10,10 @@ import { workingHoursSchema } from "../appointments/appointments.service.js";
 import { getPlatformSuspension } from "../organizations/platform-suspension.service.js";
 import { BUSINESS_INFO_MAX_LENGTH } from "../ai/settings-limits.js";
 import { ValidationError } from "../shared/errors.js";
-import { assertAcceptableImageUrl } from "../whatsapp/public-image.js";
-
-const validMediaUrl = z
-  .string()
-  .trim()
-  .superRefine((value, context) => {
-    if (!value) return;
-    try {
-      assertAcceptableImageUrl(value);
-    } catch (error) {
-      context.addIssue({ code: z.ZodIssueCode.custom, message: error instanceof Error ? error.message : "Adresse d'image refusée." });
-    }
-  });
 
 const updateAiSettingsSchema = z.object({
   agentName: z.string().min(1).optional(),
   businessInfo: z.string().max(BUSINESS_INFO_MAX_LENGTH, "Les informations sur votre activité ne doivent pas dépasser 50 000 caractères.").optional(),
-  agentImageUrl: validMediaUrl.optional().or(z.literal("")),
   systemPrompt: z.string().min(1).optional(),
   welcomeMessage: z.string().optional(),
   qualificationFields: z.array(z.string().trim().min(1).max(60)).max(30).optional(),
@@ -65,7 +51,6 @@ export async function aiSettingsRoute(app: FastifyInstance) {
     const settingsInput: {
       agentName?: string | undefined;
       businessInfo?: string | undefined;
-      agentImageUrl?: string | undefined;
       systemPrompt?: string | undefined;
       welcomeMessage?: string | undefined;
       qualificationFields?: string[] | undefined;
@@ -87,7 +72,6 @@ export async function aiSettingsRoute(app: FastifyInstance) {
 
     if (parsed.data.agentName !== undefined) settingsInput.agentName = parsed.data.agentName;
     if (parsed.data.businessInfo !== undefined) settingsInput.businessInfo = parsed.data.businessInfo;
-    if (parsed.data.agentImageUrl !== undefined) settingsInput.agentImageUrl = parsed.data.agentImageUrl || undefined;
     if (parsed.data.systemPrompt !== undefined) settingsInput.systemPrompt = parsed.data.systemPrompt;
     if (parsed.data.welcomeMessage !== undefined) settingsInput.welcomeMessage = parsed.data.welcomeMessage;
     if (parsed.data.qualificationFields !== undefined) settingsInput.qualificationFields = parsed.data.qualificationFields;

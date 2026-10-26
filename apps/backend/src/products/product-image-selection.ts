@@ -54,26 +54,3 @@ export function resolveRequestedProductPhotos<T extends ProductImageCandidate>(i
   }
   return photos;
 }
-
-export function resolveRequestedProductImage(input: {
-  message: string;
-  productId?: string | undefined;
-  products: ProductImageCandidate[];
-  legacyImageUrl?: string | null | undefined;
-  configuredLegacyImageUrl?: string | null | undefined;
-}) {
-  if (!isImageRequested(input.message)) return null;
-
-  const selectedProduct = input.products.find((product) => product.id === input.productId && product.imageUrl);
-  if (selectedProduct?.imageUrl) return selectedProduct.imageUrl;
-
-  if (
-    input.products.length === 0 &&
-    input.legacyImageUrl &&
-    input.legacyImageUrl === input.configuredLegacyImageUrl
-  ) {
-    return input.legacyImageUrl;
-  }
-
-  return null;
-}

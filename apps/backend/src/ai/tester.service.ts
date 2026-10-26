@@ -3,7 +3,7 @@ import { loadAgendaPrompt, previewAiBooking } from "../appointments/appointments
 import { computeAutoStage, STAGE_LABELS } from "../conversations/stage.js";
 import { formatAmount } from "../orders/order-logic.js";
 import { loadOrderPrompt, previewAiOrder } from "../orders/orders.service.js";
-import { buildProductDetailsMessage, buildProductImageCaption, resolveRequestedProductImage, resolveRequestedProductPhotos } from "../products/product-image-selection.js";
+import { buildProductDetailsMessage, buildProductImageCaption, resolveRequestedProductPhotos } from "../products/product-image-selection.js";
 import { listProductsForAssistant } from "../products/products.service.js";
 import { getOrCreateAiSettings } from "./ai-settings.service.js";
 import { getAiOrchestrator } from "./ai.factory.js";
@@ -127,7 +127,6 @@ export async function simulateAssistantReply(organizationId: string, input: Test
   // Photos de produits.
   const requestText = input.media ? input.media.caption ?? "" : input.message;
   const photoProducts = resolveRequestedProductPhotos({ message: requestText, productId: reply.productId, productIds: reply.productIds, products });
-  const legacyImageUrl = photoProducts.length ? null : resolveRequestedProductImage({ message: requestText, productId: reply.productId, products, legacyImageUrl: reply.imageUrl, configuredLegacyImageUrl: settings.agentImageUrl });
   const selectedProduct = photoProducts.length === 1 ? photoProducts[0]! : null;
   let text = selectedProduct ? buildProductDetailsMessage(reply.reply, selectedProduct) : reply.reply;
 
@@ -178,13 +177,8 @@ export async function simulateAssistantReply(organizationId: string, input: Test
 
   const replies: Array<{ type: "text"; text: string } | { type: "image"; imageUrl: string; caption: string }> = [];
   if (welcome.welcome) replies.push({ type: "text", text: welcome.welcome });
-  if (legacyImageUrl) {
-    replies.push({ type: "image", imageUrl: legacyImageUrl, caption: reply.reply });
-    if (text !== reply.reply) replies.push({ type: "text", text });
-  } else {
-    replies.push({ type: "text", text });
-    for (const product of photoProducts) replies.push({ type: "image", imageUrl: product.imageUrl, caption: buildProductImageCaption(product) });
-  }
+  replies.push({ type: "text", text });
+  for (const product of photoProducts) replies.push({ type: "image", imageUrl: product.imageUrl, caption: buildProductImageCaption(product) });
 
   if (reply.intent !== "erreur_traitement" && text.trim()) {
     await markAgentTested(settings).catch(() => console.warn("Progression du démarrage non enregistrée ; le test reste disponible."));
