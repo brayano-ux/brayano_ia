@@ -2672,6 +2672,7 @@ export const AiSettingsScalarFieldEnum = {
   personaPromptedAt: 'personaPromptedAt',
   topicGateEnabled: 'topicGateEnabled',
   topicGateTopic: 'topicGateTopic',
+  adOnlyEnabled: 'adOnlyEnabled',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2865,6 +2866,7 @@ export const ConversationScalarFieldEnum = {
   stageLocked: 'stageLocked',
   paymentCheckPending: 'paymentCheckPending',
   topicGateOpened: 'topicGateOpened',
+  startedFromAd: 'startedFromAd',
   lastInboundAt: 'lastInboundAt',
   lastReadAt: 'lastReadAt',
   followUpCount: 'followUpCount',

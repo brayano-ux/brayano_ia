@@ -31,6 +31,7 @@ const updateAiSettingsSchema = z.object({
   agentTone: z.string().trim().max(60).optional(),
   topicGateEnabled: z.boolean().optional(),
   topicGateTopic: z.string().trim().max(200).nullable().optional(),
+  adOnlyEnabled: z.boolean().optional(),
 });
 
 export async function aiSettingsRoute(app: FastifyInstance) {
@@ -68,6 +69,7 @@ export async function aiSettingsRoute(app: FastifyInstance) {
       agentTone?: string | undefined;
       topicGateEnabled?: boolean | undefined;
       topicGateTopic?: string | null | undefined;
+      adOnlyEnabled?: boolean | undefined;
     } = {};
 
     if (parsed.data.agentName !== undefined) settingsInput.agentName = parsed.data.agentName;
@@ -92,6 +94,7 @@ export async function aiSettingsRoute(app: FastifyInstance) {
     if (parsed.data.agentTone !== undefined) settingsInput.agentTone = parsed.data.agentTone;
     if (parsed.data.topicGateEnabled !== undefined) settingsInput.topicGateEnabled = parsed.data.topicGateEnabled;
     if (parsed.data.topicGateTopic !== undefined) settingsInput.topicGateTopic = parsed.data.topicGateTopic;
+    if (parsed.data.adOnlyEnabled !== undefined) settingsInput.adOnlyEnabled = parsed.data.adOnlyEnabled;
 
     const settings = await updateAiSettings(orgId, settingsInput);
     return { settings };

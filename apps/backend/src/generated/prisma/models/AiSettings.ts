@@ -61,6 +61,7 @@ export type AiSettingsMinAggregateOutputType = {
   personaPromptedAt: Date | null
   topicGateEnabled: boolean | null
   topicGateTopic: string | null
+  adOnlyEnabled: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -88,6 +89,7 @@ export type AiSettingsMaxAggregateOutputType = {
   personaPromptedAt: Date | null
   topicGateEnabled: boolean | null
   topicGateTopic: string | null
+  adOnlyEnabled: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -117,6 +119,7 @@ export type AiSettingsCountAggregateOutputType = {
   personaPromptedAt: number
   topicGateEnabled: number
   topicGateTopic: number
+  adOnlyEnabled: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -158,6 +161,7 @@ export type AiSettingsMinAggregateInputType = {
   personaPromptedAt?: true
   topicGateEnabled?: true
   topicGateTopic?: true
+  adOnlyEnabled?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -185,6 +189,7 @@ export type AiSettingsMaxAggregateInputType = {
   personaPromptedAt?: true
   topicGateEnabled?: true
   topicGateTopic?: true
+  adOnlyEnabled?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -214,6 +219,7 @@ export type AiSettingsCountAggregateInputType = {
   personaPromptedAt?: true
   topicGateEnabled?: true
   topicGateTopic?: true
+  adOnlyEnabled?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -330,6 +336,7 @@ export type AiSettingsGroupByOutputType = {
   personaPromptedAt: Date | null
   topicGateEnabled: boolean
   topicGateTopic: string | null
+  adOnlyEnabled: boolean
   createdAt: Date
   updatedAt: Date
   _count: AiSettingsCountAggregateOutputType | null
@@ -382,6 +389,7 @@ export type AiSettingsWhereInput = {
   personaPromptedAt?: Prisma.DateTimeNullableFilter<"AiSettings"> | Date | string | null
   topicGateEnabled?: Prisma.BoolFilter<"AiSettings"> | boolean
   topicGateTopic?: Prisma.StringNullableFilter<"AiSettings"> | string | null
+  adOnlyEnabled?: Prisma.BoolFilter<"AiSettings"> | boolean
   createdAt?: Prisma.DateTimeFilter<"AiSettings"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AiSettings"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
@@ -412,6 +420,7 @@ export type AiSettingsOrderByWithRelationInput = {
   personaPromptedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   topicGateEnabled?: Prisma.SortOrder
   topicGateTopic?: Prisma.SortOrderInput | Prisma.SortOrder
+  adOnlyEnabled?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   organization?: Prisma.OrganizationOrderByWithRelationInput
@@ -445,6 +454,7 @@ export type AiSettingsWhereUniqueInput = Prisma.AtLeast<{
   personaPromptedAt?: Prisma.DateTimeNullableFilter<"AiSettings"> | Date | string | null
   topicGateEnabled?: Prisma.BoolFilter<"AiSettings"> | boolean
   topicGateTopic?: Prisma.StringNullableFilter<"AiSettings"> | string | null
+  adOnlyEnabled?: Prisma.BoolFilter<"AiSettings"> | boolean
   createdAt?: Prisma.DateTimeFilter<"AiSettings"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AiSettings"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
@@ -475,6 +485,7 @@ export type AiSettingsOrderByWithAggregationInput = {
   personaPromptedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   topicGateEnabled?: Prisma.SortOrder
   topicGateTopic?: Prisma.SortOrderInput | Prisma.SortOrder
+  adOnlyEnabled?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.AiSettingsCountOrderByAggregateInput
@@ -512,6 +523,7 @@ export type AiSettingsScalarWhereWithAggregatesInput = {
   personaPromptedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"AiSettings"> | Date | string | null
   topicGateEnabled?: Prisma.BoolWithAggregatesFilter<"AiSettings"> | boolean
   topicGateTopic?: Prisma.StringNullableWithAggregatesFilter<"AiSettings"> | string | null
+  adOnlyEnabled?: Prisma.BoolWithAggregatesFilter<"AiSettings"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"AiSettings"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"AiSettings"> | Date | string
 }
@@ -540,6 +552,7 @@ export type AiSettingsCreateInput = {
   personaPromptedAt?: Date | string | null
   topicGateEnabled?: boolean
   topicGateTopic?: string | null
+  adOnlyEnabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutAiSettingsInput
@@ -570,6 +583,7 @@ export type AiSettingsUncheckedCreateInput = {
   personaPromptedAt?: Date | string | null
   topicGateEnabled?: boolean
   topicGateTopic?: string | null
+  adOnlyEnabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -598,6 +612,7 @@ export type AiSettingsUpdateInput = {
   personaPromptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   topicGateEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   topicGateTopic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  adOnlyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutAiSettingsNestedInput
@@ -628,6 +643,7 @@ export type AiSettingsUncheckedUpdateInput = {
   personaPromptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   topicGateEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   topicGateTopic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  adOnlyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -657,6 +673,7 @@ export type AiSettingsCreateManyInput = {
   personaPromptedAt?: Date | string | null
   topicGateEnabled?: boolean
   topicGateTopic?: string | null
+  adOnlyEnabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -685,6 +702,7 @@ export type AiSettingsUpdateManyMutationInput = {
   personaPromptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   topicGateEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   topicGateTopic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  adOnlyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -714,6 +732,7 @@ export type AiSettingsUncheckedUpdateManyInput = {
   personaPromptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   topicGateEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   topicGateTopic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  adOnlyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -748,6 +767,7 @@ export type AiSettingsCountOrderByAggregateInput = {
   personaPromptedAt?: Prisma.SortOrder
   topicGateEnabled?: Prisma.SortOrder
   topicGateTopic?: Prisma.SortOrder
+  adOnlyEnabled?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -781,6 +801,7 @@ export type AiSettingsMaxOrderByAggregateInput = {
   personaPromptedAt?: Prisma.SortOrder
   topicGateEnabled?: Prisma.SortOrder
   topicGateTopic?: Prisma.SortOrder
+  adOnlyEnabled?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -808,6 +829,7 @@ export type AiSettingsMinOrderByAggregateInput = {
   personaPromptedAt?: Prisma.SortOrder
   topicGateEnabled?: Prisma.SortOrder
   topicGateTopic?: Prisma.SortOrder
+  adOnlyEnabled?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -874,6 +896,7 @@ export type AiSettingsCreateWithoutOrganizationInput = {
   personaPromptedAt?: Date | string | null
   topicGateEnabled?: boolean
   topicGateTopic?: string | null
+  adOnlyEnabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -902,6 +925,7 @@ export type AiSettingsUncheckedCreateWithoutOrganizationInput = {
   personaPromptedAt?: Date | string | null
   topicGateEnabled?: boolean
   topicGateTopic?: string | null
+  adOnlyEnabled?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -946,6 +970,7 @@ export type AiSettingsUpdateWithoutOrganizationInput = {
   personaPromptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   topicGateEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   topicGateTopic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  adOnlyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -974,6 +999,7 @@ export type AiSettingsUncheckedUpdateWithoutOrganizationInput = {
   personaPromptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   topicGateEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   topicGateTopic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  adOnlyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1005,6 +1031,7 @@ export type AiSettingsSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   personaPromptedAt?: boolean
   topicGateEnabled?: boolean
   topicGateTopic?: boolean
+  adOnlyEnabled?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -1035,6 +1062,7 @@ export type AiSettingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   personaPromptedAt?: boolean
   topicGateEnabled?: boolean
   topicGateTopic?: boolean
+  adOnlyEnabled?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -1065,6 +1093,7 @@ export type AiSettingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   personaPromptedAt?: boolean
   topicGateEnabled?: boolean
   topicGateTopic?: boolean
+  adOnlyEnabled?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -1095,11 +1124,12 @@ export type AiSettingsSelectScalar = {
   personaPromptedAt?: boolean
   topicGateEnabled?: boolean
   topicGateTopic?: boolean
+  adOnlyEnabled?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type AiSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "agentName" | "businessInfo" | "onboardingTestHash" | "agentImageUrl" | "systemPrompt" | "welcomeMessage" | "qualificationFields" | "aiEnabled" | "responseDelaySeconds" | "businessHoursEnabled" | "businessHours" | "businessTimezone" | "closedMessage" | "followUpEnabled" | "followUpDelayHours" | "followUpMax" | "agentDomain" | "agentRole" | "agentTone" | "personaPromptedAt" | "topicGateEnabled" | "topicGateTopic" | "createdAt" | "updatedAt", ExtArgs["result"]["aiSettings"]>
+export type AiSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "agentName" | "businessInfo" | "onboardingTestHash" | "agentImageUrl" | "systemPrompt" | "welcomeMessage" | "qualificationFields" | "aiEnabled" | "responseDelaySeconds" | "businessHoursEnabled" | "businessHours" | "businessTimezone" | "closedMessage" | "followUpEnabled" | "followUpDelayHours" | "followUpMax" | "agentDomain" | "agentRole" | "agentTone" | "personaPromptedAt" | "topicGateEnabled" | "topicGateTopic" | "adOnlyEnabled" | "createdAt" | "updatedAt", ExtArgs["result"]["aiSettings"]>
 export type AiSettingsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
 }
@@ -1140,6 +1170,7 @@ export type $AiSettingsPayload<ExtArgs extends runtime.Types.Extensions.Internal
     personaPromptedAt: Date | null
     topicGateEnabled: boolean
     topicGateTopic: string | null
+    adOnlyEnabled: boolean
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["aiSettings"]>
@@ -1590,6 +1621,7 @@ export interface AiSettingsFieldRefs {
   readonly personaPromptedAt: Prisma.FieldRef<"AiSettings", 'DateTime'>
   readonly topicGateEnabled: Prisma.FieldRef<"AiSettings", 'Boolean'>
   readonly topicGateTopic: Prisma.FieldRef<"AiSettings", 'String'>
+  readonly adOnlyEnabled: Prisma.FieldRef<"AiSettings", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"AiSettings", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"AiSettings", 'DateTime'>
 }

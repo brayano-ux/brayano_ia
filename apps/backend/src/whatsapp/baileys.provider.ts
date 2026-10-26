@@ -13,6 +13,7 @@ import pino from "pino";
 import QRCode from "qrcode";
 import { describeCloseCode } from "./disconnect-reasons.js";
 import { BotSentIds, extractHumanOutgoing } from "./outgoing-detection.js";
+import { startedFromAdClick } from "./ad-referral.js";
 import type {
   ConnectionLossReason,
   ConnectionUpdatePayload,
@@ -211,6 +212,8 @@ export class BaileysWhatsAppProvider implements WhatsAppProvider {
         // Les autres types (vidéo, position, contact...) restent ignorés.
         if (!text || !msg.key.id) continue;
 
+        const startedFromAd = startedFromAdClick(unwrapped);
+
         const incoming: IncomingWhatsAppMessage = {
           externalId: msg.key.id,
           fromJid: remoteJid,
@@ -218,6 +221,7 @@ export class BaileysWhatsAppProvider implements WhatsAppProvider {
           timestamp: new Date(Number(msg.messageTimestamp) * 1000),
           ...(audio ? { audio } : {}),
           ...(media ? { media } : {}),
+          ...(startedFromAd ? { startedFromAd: true } : {}),
         };
 
         for (const handler of this.messageHandlers) {
