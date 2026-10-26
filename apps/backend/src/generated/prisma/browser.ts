@@ -84,6 +84,11 @@ export type WhatsAppAccount = Prisma.WhatsAppAccountModel
  */
 export type Contact = Prisma.ContactModel
 /**
+ * Model IgnoredContact
+ * * Numéros auxquels l'IA ne doit jamais répondre automatiquement (famille, fournisseurs…). Le propriétaire garde la main pour répondre lui-même.
+ */
+export type IgnoredContact = Prisma.IgnoredContactModel
+/**
  * Model Conversation
  * 
  */

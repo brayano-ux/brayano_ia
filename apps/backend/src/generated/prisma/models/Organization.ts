@@ -267,6 +267,7 @@ export type OrganizationWhereInput = {
   users?: Prisma.UserListRelationFilter
   whatsappAccounts?: Prisma.WhatsAppAccountListRelationFilter
   contacts?: Prisma.ContactListRelationFilter
+  ignoredContacts?: Prisma.IgnoredContactListRelationFilter
   conversations?: Prisma.ConversationListRelationFilter
   aiSettings?: Prisma.XOR<Prisma.AiSettingsNullableScalarRelationFilter, Prisma.AiSettingsWhereInput> | null
   locations?: Prisma.LocationListRelationFilter
@@ -299,6 +300,7 @@ export type OrganizationOrderByWithRelationInput = {
   users?: Prisma.UserOrderByRelationAggregateInput
   whatsappAccounts?: Prisma.WhatsAppAccountOrderByRelationAggregateInput
   contacts?: Prisma.ContactOrderByRelationAggregateInput
+  ignoredContacts?: Prisma.IgnoredContactOrderByRelationAggregateInput
   conversations?: Prisma.ConversationOrderByRelationAggregateInput
   aiSettings?: Prisma.AiSettingsOrderByWithRelationInput
   locations?: Prisma.LocationOrderByRelationAggregateInput
@@ -334,6 +336,7 @@ export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
   users?: Prisma.UserListRelationFilter
   whatsappAccounts?: Prisma.WhatsAppAccountListRelationFilter
   contacts?: Prisma.ContactListRelationFilter
+  ignoredContacts?: Prisma.IgnoredContactListRelationFilter
   conversations?: Prisma.ConversationListRelationFilter
   aiSettings?: Prisma.XOR<Prisma.AiSettingsNullableScalarRelationFilter, Prisma.AiSettingsWhereInput> | null
   locations?: Prisma.LocationListRelationFilter
@@ -402,6 +405,7 @@ export type OrganizationCreateInput = {
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
@@ -434,6 +438,7 @@ export type OrganizationUncheckedCreateInput = {
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
@@ -466,6 +471,7 @@ export type OrganizationUpdateInput = {
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
@@ -498,6 +504,7 @@ export type OrganizationUncheckedUpdateInput = {
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -738,6 +745,20 @@ export type OrganizationUpdateOneRequiredWithoutContactsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutContactsInput, Prisma.OrganizationUpdateWithoutContactsInput>, Prisma.OrganizationUncheckedUpdateWithoutContactsInput>
 }
 
+export type OrganizationCreateNestedOneWithoutIgnoredContactsInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutIgnoredContactsInput, Prisma.OrganizationUncheckedCreateWithoutIgnoredContactsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutIgnoredContactsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutIgnoredContactsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutIgnoredContactsInput, Prisma.OrganizationUncheckedCreateWithoutIgnoredContactsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutIgnoredContactsInput
+  upsert?: Prisma.OrganizationUpsertWithoutIgnoredContactsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutIgnoredContactsInput, Prisma.OrganizationUpdateWithoutIgnoredContactsInput>, Prisma.OrganizationUncheckedUpdateWithoutIgnoredContactsInput>
+}
+
 export type OrganizationCreateNestedOneWithoutConversationsInput = {
   create?: Prisma.XOR<Prisma.OrganizationCreateWithoutConversationsInput, Prisma.OrganizationUncheckedCreateWithoutConversationsInput>
   connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutConversationsInput
@@ -907,6 +928,7 @@ export type OrganizationCreateWithoutAiSettingsInput = {
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
   responsibleAgents?: Prisma.ResponsibleCreateNestedManyWithoutOrganizationInput
@@ -938,6 +960,7 @@ export type OrganizationUncheckedCreateWithoutAiSettingsInput = {
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
   responsibleAgents?: Prisma.ResponsibleUncheckedCreateNestedManyWithoutOrganizationInput
@@ -985,6 +1008,7 @@ export type OrganizationUpdateWithoutAiSettingsInput = {
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
   responsibleAgents?: Prisma.ResponsibleUpdateManyWithoutOrganizationNestedInput
@@ -1016,6 +1040,7 @@ export type OrganizationUncheckedUpdateWithoutAiSettingsInput = {
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
   responsibleAgents?: Prisma.ResponsibleUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1047,6 +1072,7 @@ export type OrganizationCreateWithoutProductsInput = {
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
@@ -1078,6 +1104,7 @@ export type OrganizationUncheckedCreateWithoutProductsInput = {
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1125,6 +1152,7 @@ export type OrganizationUpdateWithoutProductsInput = {
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
@@ -1156,6 +1184,7 @@ export type OrganizationUncheckedUpdateWithoutProductsInput = {
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1187,6 +1216,7 @@ export type OrganizationCreateWithoutBillingPaymentsInput = {
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
@@ -1218,6 +1248,7 @@ export type OrganizationUncheckedCreateWithoutBillingPaymentsInput = {
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1265,6 +1296,7 @@ export type OrganizationUpdateWithoutBillingPaymentsInput = {
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
@@ -1296,6 +1328,7 @@ export type OrganizationUncheckedUpdateWithoutBillingPaymentsInput = {
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1327,6 +1360,7 @@ export type OrganizationCreateWithoutBillingSubscriptionInput = {
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
@@ -1358,6 +1392,7 @@ export type OrganizationUncheckedCreateWithoutBillingSubscriptionInput = {
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1405,6 +1440,7 @@ export type OrganizationUpdateWithoutBillingSubscriptionInput = {
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
@@ -1436,6 +1472,7 @@ export type OrganizationUncheckedUpdateWithoutBillingSubscriptionInput = {
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1466,6 +1503,7 @@ export type OrganizationCreateWithoutUsersInput = {
   whatsappNumber?: string | null
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
@@ -1497,6 +1535,7 @@ export type OrganizationUncheckedCreateWithoutUsersInput = {
   whatsappNumber?: string | null
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1544,6 +1583,7 @@ export type OrganizationUpdateWithoutUsersInput = {
   whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
@@ -1575,6 +1615,7 @@ export type OrganizationUncheckedUpdateWithoutUsersInput = {
   whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1606,6 +1647,7 @@ export type OrganizationCreateWithoutWhatsappAccountsInput = {
   whatsappNumber?: string | null
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
@@ -1637,6 +1679,7 @@ export type OrganizationUncheckedCreateWithoutWhatsappAccountsInput = {
   whatsappNumber?: string | null
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1684,6 +1727,7 @@ export type OrganizationUpdateWithoutWhatsappAccountsInput = {
   whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
@@ -1715,6 +1759,7 @@ export type OrganizationUncheckedUpdateWithoutWhatsappAccountsInput = {
   whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1746,6 +1791,7 @@ export type OrganizationCreateWithoutContactsInput = {
   whatsappNumber?: string | null
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
@@ -1777,6 +1823,7 @@ export type OrganizationUncheckedCreateWithoutContactsInput = {
   whatsappNumber?: string | null
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1824,6 +1871,7 @@ export type OrganizationUpdateWithoutContactsInput = {
   whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
@@ -1855,6 +1903,151 @@ export type OrganizationUncheckedUpdateWithoutContactsInput = {
   whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedUpdateManyWithoutOrganizationNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutOrganizationNestedInput
+  aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutOrganizationNestedInput
+  locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
+  responsibleAgents?: Prisma.ResponsibleUncheckedUpdateManyWithoutOrganizationNestedInput
+  routingSettings?: Prisma.OrganizationRoutingSettingsUncheckedUpdateOneWithoutOrganizationNestedInput
+  prospectLeads?: Prisma.ProspectLeadUncheckedUpdateManyWithoutOrganizationNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutOrganizationNestedInput
+  appointmentSettings?: Prisma.AppointmentSettingsUncheckedUpdateOneWithoutOrganizationNestedInput
+  appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutOrganizationNestedInput
+  orderSettings?: Prisma.OrderSettingsUncheckedUpdateOneWithoutOrganizationNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutOrganizationNestedInput
+  aiCorrections?: Prisma.AiCorrectionUncheckedUpdateManyWithoutOrganizationNestedInput
+  broadcasts?: Prisma.BroadcastUncheckedUpdateManyWithoutOrganizationNestedInput
+  billingPayments?: Prisma.BillingPaymentUncheckedUpdateManyWithoutOrganizationNestedInput
+  billingSubscription?: Prisma.BillingSubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutIgnoredContactsInput = {
+  id?: string
+  name: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  freeAiResponsesRemaining?: number
+  trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
+  platformSuspended?: boolean
+  suspensionReason?: string | null
+  suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
+  users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
+  whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
+  contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutOrganizationInput
+  aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutOrganizationInput
+  locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
+  responsibleAgents?: Prisma.ResponsibleCreateNestedManyWithoutOrganizationInput
+  routingSettings?: Prisma.OrganizationRoutingSettingsCreateNestedOneWithoutOrganizationInput
+  prospectLeads?: Prisma.ProspectLeadCreateNestedManyWithoutOrganizationInput
+  products?: Prisma.ProductCreateNestedManyWithoutOrganizationInput
+  appointmentSettings?: Prisma.AppointmentSettingsCreateNestedOneWithoutOrganizationInput
+  appointments?: Prisma.AppointmentCreateNestedManyWithoutOrganizationInput
+  orderSettings?: Prisma.OrderSettingsCreateNestedOneWithoutOrganizationInput
+  orders?: Prisma.OrderCreateNestedManyWithoutOrganizationInput
+  aiCorrections?: Prisma.AiCorrectionCreateNestedManyWithoutOrganizationInput
+  broadcasts?: Prisma.BroadcastCreateNestedManyWithoutOrganizationInput
+  billingPayments?: Prisma.BillingPaymentCreateNestedManyWithoutOrganizationInput
+  billingSubscription?: Prisma.BillingSubscriptionCreateNestedOneWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutIgnoredContactsInput = {
+  id?: string
+  name: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  freeAiResponsesRemaining?: number
+  trialUpgradeEmailSentAt?: Date | string | null
+  quotaNoticeAt?: Date | string | null
+  platformSuspended?: boolean
+  suspensionReason?: string | null
+  suspendedAt?: Date | string | null
+  whatsappNumber?: string | null
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
+  whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
+  contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutOrganizationInput
+  aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutOrganizationInput
+  locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
+  responsibleAgents?: Prisma.ResponsibleUncheckedCreateNestedManyWithoutOrganizationInput
+  routingSettings?: Prisma.OrganizationRoutingSettingsUncheckedCreateNestedOneWithoutOrganizationInput
+  prospectLeads?: Prisma.ProspectLeadUncheckedCreateNestedManyWithoutOrganizationInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutOrganizationInput
+  appointmentSettings?: Prisma.AppointmentSettingsUncheckedCreateNestedOneWithoutOrganizationInput
+  appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutOrganizationInput
+  orderSettings?: Prisma.OrderSettingsUncheckedCreateNestedOneWithoutOrganizationInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutOrganizationInput
+  aiCorrections?: Prisma.AiCorrectionUncheckedCreateNestedManyWithoutOrganizationInput
+  broadcasts?: Prisma.BroadcastUncheckedCreateNestedManyWithoutOrganizationInput
+  billingPayments?: Prisma.BillingPaymentUncheckedCreateNestedManyWithoutOrganizationInput
+  billingSubscription?: Prisma.BillingSubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutIgnoredContactsInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutIgnoredContactsInput, Prisma.OrganizationUncheckedCreateWithoutIgnoredContactsInput>
+}
+
+export type OrganizationUpsertWithoutIgnoredContactsInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutIgnoredContactsInput, Prisma.OrganizationUncheckedUpdateWithoutIgnoredContactsInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutIgnoredContactsInput, Prisma.OrganizationUncheckedCreateWithoutIgnoredContactsInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutIgnoredContactsInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutIgnoredContactsInput, Prisma.OrganizationUncheckedUpdateWithoutIgnoredContactsInput>
+}
+
+export type OrganizationUpdateWithoutIgnoredContactsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
+  trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
+  whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
+  contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutOrganizationNestedInput
+  aiSettings?: Prisma.AiSettingsUpdateOneWithoutOrganizationNestedInput
+  locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
+  responsibleAgents?: Prisma.ResponsibleUpdateManyWithoutOrganizationNestedInput
+  routingSettings?: Prisma.OrganizationRoutingSettingsUpdateOneWithoutOrganizationNestedInput
+  prospectLeads?: Prisma.ProspectLeadUpdateManyWithoutOrganizationNestedInput
+  products?: Prisma.ProductUpdateManyWithoutOrganizationNestedInput
+  appointmentSettings?: Prisma.AppointmentSettingsUpdateOneWithoutOrganizationNestedInput
+  appointments?: Prisma.AppointmentUpdateManyWithoutOrganizationNestedInput
+  orderSettings?: Prisma.OrderSettingsUpdateOneWithoutOrganizationNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutOrganizationNestedInput
+  aiCorrections?: Prisma.AiCorrectionUpdateManyWithoutOrganizationNestedInput
+  broadcasts?: Prisma.BroadcastUpdateManyWithoutOrganizationNestedInput
+  billingPayments?: Prisma.BillingPaymentUpdateManyWithoutOrganizationNestedInput
+  billingSubscription?: Prisma.BillingSubscriptionUpdateOneWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutIgnoredContactsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  freeAiResponsesRemaining?: Prisma.IntFieldUpdateOperationsInput | number
+  trialUpgradeEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quotaNoticeAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  platformSuspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
+  whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
+  contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1887,6 +2080,7 @@ export type OrganizationCreateWithoutConversationsInput = {
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
   responsibleAgents?: Prisma.ResponsibleCreateNestedManyWithoutOrganizationInput
@@ -1918,6 +2112,7 @@ export type OrganizationUncheckedCreateWithoutConversationsInput = {
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
   responsibleAgents?: Prisma.ResponsibleUncheckedCreateNestedManyWithoutOrganizationInput
@@ -1965,6 +2160,7 @@ export type OrganizationUpdateWithoutConversationsInput = {
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
   responsibleAgents?: Prisma.ResponsibleUpdateManyWithoutOrganizationNestedInput
@@ -1996,6 +2192,7 @@ export type OrganizationUncheckedUpdateWithoutConversationsInput = {
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
   responsibleAgents?: Prisma.ResponsibleUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2027,6 +2224,7 @@ export type OrganizationCreateWithoutLocationsInput = {
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutOrganizationInput
   responsibleAgents?: Prisma.ResponsibleCreateNestedManyWithoutOrganizationInput
@@ -2058,6 +2256,7 @@ export type OrganizationUncheckedCreateWithoutLocationsInput = {
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutOrganizationInput
   responsibleAgents?: Prisma.ResponsibleUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2105,6 +2304,7 @@ export type OrganizationUpdateWithoutLocationsInput = {
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutOrganizationNestedInput
   responsibleAgents?: Prisma.ResponsibleUpdateManyWithoutOrganizationNestedInput
@@ -2136,6 +2336,7 @@ export type OrganizationUncheckedUpdateWithoutLocationsInput = {
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutOrganizationNestedInput
   responsibleAgents?: Prisma.ResponsibleUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2167,6 +2368,7 @@ export type OrganizationCreateWithoutResponsibleAgentsInput = {
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
@@ -2198,6 +2400,7 @@ export type OrganizationUncheckedCreateWithoutResponsibleAgentsInput = {
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2245,6 +2448,7 @@ export type OrganizationUpdateWithoutResponsibleAgentsInput = {
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
@@ -2276,6 +2480,7 @@ export type OrganizationUncheckedUpdateWithoutResponsibleAgentsInput = {
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2307,6 +2512,7 @@ export type OrganizationCreateWithoutRoutingSettingsInput = {
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
@@ -2338,6 +2544,7 @@ export type OrganizationUncheckedCreateWithoutRoutingSettingsInput = {
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2385,6 +2592,7 @@ export type OrganizationUpdateWithoutRoutingSettingsInput = {
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
@@ -2416,6 +2624,7 @@ export type OrganizationUncheckedUpdateWithoutRoutingSettingsInput = {
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2447,6 +2656,7 @@ export type OrganizationCreateWithoutProspectLeadsInput = {
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
@@ -2478,6 +2688,7 @@ export type OrganizationUncheckedCreateWithoutProspectLeadsInput = {
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2525,6 +2736,7 @@ export type OrganizationUpdateWithoutProspectLeadsInput = {
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
@@ -2556,6 +2768,7 @@ export type OrganizationUncheckedUpdateWithoutProspectLeadsInput = {
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2587,6 +2800,7 @@ export type OrganizationCreateWithoutAppointmentSettingsInput = {
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
@@ -2618,6 +2832,7 @@ export type OrganizationUncheckedCreateWithoutAppointmentSettingsInput = {
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2665,6 +2880,7 @@ export type OrganizationUpdateWithoutAppointmentSettingsInput = {
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
@@ -2696,6 +2912,7 @@ export type OrganizationUncheckedUpdateWithoutAppointmentSettingsInput = {
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2727,6 +2944,7 @@ export type OrganizationCreateWithoutAppointmentsInput = {
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
@@ -2758,6 +2976,7 @@ export type OrganizationUncheckedCreateWithoutAppointmentsInput = {
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2805,6 +3024,7 @@ export type OrganizationUpdateWithoutAppointmentsInput = {
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
@@ -2836,6 +3056,7 @@ export type OrganizationUncheckedUpdateWithoutAppointmentsInput = {
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -2867,6 +3088,7 @@ export type OrganizationCreateWithoutOrderSettingsInput = {
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
@@ -2898,6 +3120,7 @@ export type OrganizationUncheckedCreateWithoutOrderSettingsInput = {
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
@@ -2945,6 +3168,7 @@ export type OrganizationUpdateWithoutOrderSettingsInput = {
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
@@ -2976,6 +3200,7 @@ export type OrganizationUncheckedUpdateWithoutOrderSettingsInput = {
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -3007,6 +3232,7 @@ export type OrganizationCreateWithoutOrdersInput = {
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
@@ -3038,6 +3264,7 @@ export type OrganizationUncheckedCreateWithoutOrdersInput = {
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
@@ -3085,6 +3312,7 @@ export type OrganizationUpdateWithoutOrdersInput = {
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
@@ -3116,6 +3344,7 @@ export type OrganizationUncheckedUpdateWithoutOrdersInput = {
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -3147,6 +3376,7 @@ export type OrganizationCreateWithoutAiCorrectionsInput = {
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
@@ -3178,6 +3408,7 @@ export type OrganizationUncheckedCreateWithoutAiCorrectionsInput = {
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
@@ -3225,6 +3456,7 @@ export type OrganizationUpdateWithoutAiCorrectionsInput = {
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
@@ -3256,6 +3488,7 @@ export type OrganizationUncheckedUpdateWithoutAiCorrectionsInput = {
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -3287,6 +3520,7 @@ export type OrganizationCreateWithoutBroadcastsInput = {
   users?: Prisma.UserCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsCreateNestedOneWithoutOrganizationInput
   locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput
@@ -3318,6 +3552,7 @@ export type OrganizationUncheckedCreateWithoutBroadcastsInput = {
   users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedCreateNestedManyWithoutOrganizationInput
   contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutOrganizationInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedCreateNestedManyWithoutOrganizationInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutOrganizationInput
   aiSettings?: Prisma.AiSettingsUncheckedCreateNestedOneWithoutOrganizationInput
   locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput
@@ -3365,6 +3600,7 @@ export type OrganizationUpdateWithoutBroadcastsInput = {
   users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUpdateOneWithoutOrganizationNestedInput
   locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput
@@ -3396,6 +3632,7 @@ export type OrganizationUncheckedUpdateWithoutBroadcastsInput = {
   users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput
   whatsappAccounts?: Prisma.WhatsAppAccountUncheckedUpdateManyWithoutOrganizationNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutOrganizationNestedInput
+  ignoredContacts?: Prisma.IgnoredContactUncheckedUpdateManyWithoutOrganizationNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutOrganizationNestedInput
   aiSettings?: Prisma.AiSettingsUncheckedUpdateOneWithoutOrganizationNestedInput
   locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -3421,6 +3658,7 @@ export type OrganizationCountOutputType = {
   users: number
   whatsappAccounts: number
   contacts: number
+  ignoredContacts: number
   conversations: number
   locations: number
   responsibleAgents: number
@@ -3437,6 +3675,7 @@ export type OrganizationCountOutputTypeSelect<ExtArgs extends runtime.Types.Exte
   users?: boolean | OrganizationCountOutputTypeCountUsersArgs
   whatsappAccounts?: boolean | OrganizationCountOutputTypeCountWhatsappAccountsArgs
   contacts?: boolean | OrganizationCountOutputTypeCountContactsArgs
+  ignoredContacts?: boolean | OrganizationCountOutputTypeCountIgnoredContactsArgs
   conversations?: boolean | OrganizationCountOutputTypeCountConversationsArgs
   locations?: boolean | OrganizationCountOutputTypeCountLocationsArgs
   responsibleAgents?: boolean | OrganizationCountOutputTypeCountResponsibleAgentsArgs
@@ -3478,6 +3717,13 @@ export type OrganizationCountOutputTypeCountWhatsappAccountsArgs<ExtArgs extends
  */
 export type OrganizationCountOutputTypeCountContactsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.ContactWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountIgnoredContactsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.IgnoredContactWhereInput
 }
 
 /**
@@ -3566,6 +3812,7 @@ export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   users?: boolean | Prisma.Organization$usersArgs<ExtArgs>
   whatsappAccounts?: boolean | Prisma.Organization$whatsappAccountsArgs<ExtArgs>
   contacts?: boolean | Prisma.Organization$contactsArgs<ExtArgs>
+  ignoredContacts?: boolean | Prisma.Organization$ignoredContactsArgs<ExtArgs>
   conversations?: boolean | Prisma.Organization$conversationsArgs<ExtArgs>
   aiSettings?: boolean | Prisma.Organization$aiSettingsArgs<ExtArgs>
   locations?: boolean | Prisma.Organization$locationsArgs<ExtArgs>
@@ -3631,6 +3878,7 @@ export type OrganizationInclude<ExtArgs extends runtime.Types.Extensions.Interna
   users?: boolean | Prisma.Organization$usersArgs<ExtArgs>
   whatsappAccounts?: boolean | Prisma.Organization$whatsappAccountsArgs<ExtArgs>
   contacts?: boolean | Prisma.Organization$contactsArgs<ExtArgs>
+  ignoredContacts?: boolean | Prisma.Organization$ignoredContactsArgs<ExtArgs>
   conversations?: boolean | Prisma.Organization$conversationsArgs<ExtArgs>
   aiSettings?: boolean | Prisma.Organization$aiSettingsArgs<ExtArgs>
   locations?: boolean | Prisma.Organization$locationsArgs<ExtArgs>
@@ -3657,6 +3905,7 @@ export type $OrganizationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     users: Prisma.$UserPayload<ExtArgs>[]
     whatsappAccounts: Prisma.$WhatsAppAccountPayload<ExtArgs>[]
     contacts: Prisma.$ContactPayload<ExtArgs>[]
+    ignoredContacts: Prisma.$IgnoredContactPayload<ExtArgs>[]
     conversations: Prisma.$ConversationPayload<ExtArgs>[]
     aiSettings: Prisma.$AiSettingsPayload<ExtArgs> | null
     locations: Prisma.$LocationPayload<ExtArgs>[]
@@ -4082,6 +4331,7 @@ export interface Prisma__OrganizationClient<T, Null = never, ExtArgs extends run
   users<T extends Prisma.Organization$usersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$usersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   whatsappAccounts<T extends Prisma.Organization$whatsappAccountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$whatsappAccountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WhatsAppAccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   contacts<T extends Prisma.Organization$contactsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$contactsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ContactPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  ignoredContacts<T extends Prisma.Organization$ignoredContactsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$ignoredContactsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$IgnoredContactPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   conversations<T extends Prisma.Organization$conversationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$conversationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   aiSettings<T extends Prisma.Organization$aiSettingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$aiSettingsArgs<ExtArgs>>): Prisma.Prisma__AiSettingsClient<runtime.Types.Result.GetResult<Prisma.$AiSettingsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   locations<T extends Prisma.Organization$locationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$locationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LocationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -4599,6 +4849,30 @@ export type Organization$contactsArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.ContactScalarFieldEnum | Prisma.ContactScalarFieldEnum[]
+}
+
+/**
+ * Organization.ignoredContacts
+ */
+export type Organization$ignoredContactsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the IgnoredContact
+   */
+  select?: Prisma.IgnoredContactSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the IgnoredContact
+   */
+  omit?: Prisma.IgnoredContactOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.IgnoredContactInclude<ExtArgs> | null
+  where?: Prisma.IgnoredContactWhereInput
+  orderBy?: Prisma.IgnoredContactOrderByWithRelationInput | Prisma.IgnoredContactOrderByWithRelationInput[]
+  cursor?: Prisma.IgnoredContactWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.IgnoredContactScalarFieldEnum | Prisma.IgnoredContactScalarFieldEnum[]
 }
 
 /**

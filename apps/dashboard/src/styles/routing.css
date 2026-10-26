@@ -44,3 +44,11 @@
 .team-form { display: grid; gap: var(--space-3); padding-top: var(--space-4); border-top: 1px solid var(--line-soft); }
 .team-form-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); }
 @media (max-width: 767px) { .team-form-grid { grid-template-columns: minmax(0, 1fr); } }
+
+/* ----- Contacts à ignorer ----- */
+.ignored-contacts-list { display: grid; gap: var(--space-2); }
+.ignored-contact-row { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; padding: var(--space-3) var(--space-4); border: 1px solid var(--line-soft); border-radius: var(--radius-md); background: var(--surface-2); }
+.ignored-contact-row > div:first-child { display: grid; gap: 2px; flex: 1; min-width: 200px; }
+.ignored-contact-form { display: grid; gap: var(--space-3); padding-top: var(--space-4); border-top: 1px solid var(--line-soft); }
+.ignored-contact-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
+@media (max-width: 767px) { .ignored-contact-form-grid { grid-template-columns: minmax(0, 1fr); } }

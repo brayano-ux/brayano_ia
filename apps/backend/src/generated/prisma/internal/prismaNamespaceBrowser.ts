@@ -64,6 +64,7 @@ export const ModelName = {
   Session: 'Session',
   WhatsAppAccount: 'WhatsAppAccount',
   Contact: 'Contact',
+  IgnoredContact: 'IgnoredContact',
   Conversation: 'Conversation',
   AiRun: 'AiRun',
   Message: 'Message',
@@ -133,6 +134,10 @@ export const AiSettingsScalarFieldEnum = {
   followUpEnabled: 'followUpEnabled',
   followUpDelayHours: 'followUpDelayHours',
   followUpMax: 'followUpMax',
+  agentDomain: 'agentDomain',
+  agentRole: 'agentRole',
+  agentTone: 'agentTone',
+  personaPromptedAt: 'personaPromptedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -299,6 +304,17 @@ export const ContactScalarFieldEnum = {
 } as const
 
 export type ContactScalarFieldEnum = (typeof ContactScalarFieldEnum)[keyof typeof ContactScalarFieldEnum]
+
+
+export const IgnoredContactScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  whatsappNumber: 'whatsappNumber',
+  label: 'label',
+  createdAt: 'createdAt'
+} as const
+
+export type IgnoredContactScalarFieldEnum = (typeof IgnoredContactScalarFieldEnum)[keyof typeof IgnoredContactScalarFieldEnum]
 
 
 export const ConversationScalarFieldEnum = {

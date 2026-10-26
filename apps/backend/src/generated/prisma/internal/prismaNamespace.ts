@@ -410,6 +410,7 @@ export const ModelName = {
   Session: 'Session',
   WhatsAppAccount: 'WhatsAppAccount',
   Contact: 'Contact',
+  IgnoredContact: 'IgnoredContact',
   Conversation: 'Conversation',
   AiRun: 'AiRun',
   Message: 'Message',
@@ -440,7 +441,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "organization" | "aiSettings" | "product" | "productImage" | "billingPayment" | "billingSubscription" | "user" | "allowedEmail" | "signupVerification" | "passwordResetVerification" | "session" | "whatsAppAccount" | "contact" | "conversation" | "aiRun" | "message" | "location" | "responsible" | "organizationRoutingSettings" | "prospectLead" | "appointmentSettings" | "appointment" | "orderSettings" | "order" | "aiCorrection" | "broadcast" | "broadcastRecipient" | "landingPageView"
+    modelProps: "organization" | "aiSettings" | "product" | "productImage" | "billingPayment" | "billingSubscription" | "user" | "allowedEmail" | "signupVerification" | "passwordResetVerification" | "session" | "whatsAppAccount" | "contact" | "ignoredContact" | "conversation" | "aiRun" | "message" | "location" | "responsible" | "organizationRoutingSettings" | "prospectLead" | "appointmentSettings" | "appointment" | "orderSettings" | "order" | "aiCorrection" | "broadcast" | "broadcastRecipient" | "landingPageView"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1403,6 +1404,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.ContactCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ContactCountAggregateOutputType> | number
+        }
+      }
+    }
+    IgnoredContact: {
+      payload: Prisma.$IgnoredContactPayload<ExtArgs>
+      fields: Prisma.IgnoredContactFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.IgnoredContactFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IgnoredContactPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.IgnoredContactFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IgnoredContactPayload>
+        }
+        findFirst: {
+          args: Prisma.IgnoredContactFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IgnoredContactPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.IgnoredContactFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IgnoredContactPayload>
+        }
+        findMany: {
+          args: Prisma.IgnoredContactFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IgnoredContactPayload>[]
+        }
+        create: {
+          args: Prisma.IgnoredContactCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IgnoredContactPayload>
+        }
+        createMany: {
+          args: Prisma.IgnoredContactCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.IgnoredContactCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IgnoredContactPayload>[]
+        }
+        delete: {
+          args: Prisma.IgnoredContactDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IgnoredContactPayload>
+        }
+        update: {
+          args: Prisma.IgnoredContactUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IgnoredContactPayload>
+        }
+        deleteMany: {
+          args: Prisma.IgnoredContactDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.IgnoredContactUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.IgnoredContactUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IgnoredContactPayload>[]
+        }
+        upsert: {
+          args: Prisma.IgnoredContactUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IgnoredContactPayload>
+        }
+        aggregate: {
+          args: Prisma.IgnoredContactAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateIgnoredContact>
+        }
+        groupBy: {
+          args: Prisma.IgnoredContactGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.IgnoredContactGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.IgnoredContactCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.IgnoredContactCountAggregateOutputType> | number
         }
       }
     }
@@ -2591,6 +2666,10 @@ export const AiSettingsScalarFieldEnum = {
   followUpEnabled: 'followUpEnabled',
   followUpDelayHours: 'followUpDelayHours',
   followUpMax: 'followUpMax',
+  agentDomain: 'agentDomain',
+  agentRole: 'agentRole',
+  agentTone: 'agentTone',
+  personaPromptedAt: 'personaPromptedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2757,6 +2836,17 @@ export const ContactScalarFieldEnum = {
 } as const
 
 export type ContactScalarFieldEnum = (typeof ContactScalarFieldEnum)[keyof typeof ContactScalarFieldEnum]
+
+
+export const IgnoredContactScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  whatsappNumber: 'whatsappNumber',
+  label: 'label',
+  createdAt: 'createdAt'
+} as const
+
+export type IgnoredContactScalarFieldEnum = (typeof IgnoredContactScalarFieldEnum)[keyof typeof IgnoredContactScalarFieldEnum]
 
 
 export const ConversationScalarFieldEnum = {
@@ -3586,6 +3676,7 @@ export type GlobalOmitConfig = {
   session?: Prisma.SessionOmit
   whatsAppAccount?: Prisma.WhatsAppAccountOmit
   contact?: Prisma.ContactOmit
+  ignoredContact?: Prisma.IgnoredContactOmit
   conversation?: Prisma.ConversationOmit
   aiRun?: Prisma.AiRunOmit
   message?: Prisma.MessageOmit

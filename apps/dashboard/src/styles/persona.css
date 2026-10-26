@@ -1,0 +1,38 @@
+/* ============================================================
+   PERSONNALITÉ DE L'AGENT IA — fenêtre de première connexion
+============================================================ */
+.persona-overlay { position: fixed; inset: 0; z-index: 210; display: grid; place-items: center; padding: var(--space-4); background: rgba(10, 12, 24, 0.6); animation: persona-fade 0.2s var(--ease); }
+.persona-overlay.hidden { display: none; }
+@keyframes persona-fade { from { opacity: 0; } to { opacity: 1; } }
+
+.persona-card { width: min(100%, 760px); max-height: min(92vh, 860px); overflow-y: auto; display: grid; gap: var(--space-6); padding: var(--space-6) var(--space-8); background: var(--surface); border-radius: var(--radius-xl); box-shadow: var(--shadow-lg); animation: persona-rise 0.25s var(--ease); }
+@keyframes persona-rise { from { opacity: 0; transform: translateY(12px) scale(0.98); } to { opacity: 1; transform: none; } }
+
+.persona-head { text-align: center; display: grid; gap: var(--space-2); justify-items: center; }
+.persona-badge { display: grid; place-items: center; width: 56px; height: 56px; border-radius: var(--radius-full); background: linear-gradient(135deg, var(--brand-500), var(--brand-700)); color: #fff; margin-bottom: var(--space-1); }
+.persona-badge .icon { width: 28px; height: 28px; }
+.persona-head h1 { font-size: var(--text-xl); font-weight: 800; margin: 0; }
+.persona-head p { margin: 0; max-width: 56ch; }
+
+.persona-section h2 { font-size: var(--text-base); font-weight: 700; margin: 0 0 var(--space-3); }
+.persona-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); }
+.persona-grid-tones { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+.persona-option { display: grid; gap: 4px; justify-items: start; text-align: left; padding: var(--space-3); border: 1.5px solid var(--line); border-radius: var(--radius-md); background: var(--surface); transition: var(--transition); }
+.persona-option:hover { border-color: #cfd3e3; background: var(--surface-2); }
+.persona-option:focus-visible { box-shadow: var(--ring); }
+.persona-option.selected { border-color: var(--brand-500); background: var(--brand-50); }
+.persona-option .persona-emoji { font-size: 1.5rem; line-height: 1; }
+.persona-option strong { font-size: var(--text-sm); font-weight: 700; color: var(--ink); }
+.persona-option.selected strong { color: var(--brand-700); }
+.persona-option small { color: var(--muted); font-size: var(--text-xs); line-height: 1.35; }
+
+.persona-actions { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; padding-top: var(--space-2); border-top: 1px solid var(--line-soft); }
+.persona-actions .primary { flex: 1 1 auto; min-width: 220px; }
+
+@media (max-width: 767px) {
+  .persona-card { padding: var(--space-5); }
+  .persona-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .persona-grid-tones { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .persona-actions { flex-direction: column-reverse; align-items: stretch; }
+}

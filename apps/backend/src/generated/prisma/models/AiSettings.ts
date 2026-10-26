@@ -55,6 +55,10 @@ export type AiSettingsMinAggregateOutputType = {
   followUpEnabled: boolean | null
   followUpDelayHours: number | null
   followUpMax: number | null
+  agentDomain: string | null
+  agentRole: string | null
+  agentTone: string | null
+  personaPromptedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -76,6 +80,10 @@ export type AiSettingsMaxAggregateOutputType = {
   followUpEnabled: boolean | null
   followUpDelayHours: number | null
   followUpMax: number | null
+  agentDomain: string | null
+  agentRole: string | null
+  agentTone: string | null
+  personaPromptedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -99,6 +107,10 @@ export type AiSettingsCountAggregateOutputType = {
   followUpEnabled: number
   followUpDelayHours: number
   followUpMax: number
+  agentDomain: number
+  agentRole: number
+  agentTone: number
+  personaPromptedAt: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -134,6 +146,10 @@ export type AiSettingsMinAggregateInputType = {
   followUpEnabled?: true
   followUpDelayHours?: true
   followUpMax?: true
+  agentDomain?: true
+  agentRole?: true
+  agentTone?: true
+  personaPromptedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -155,6 +171,10 @@ export type AiSettingsMaxAggregateInputType = {
   followUpEnabled?: true
   followUpDelayHours?: true
   followUpMax?: true
+  agentDomain?: true
+  agentRole?: true
+  agentTone?: true
+  personaPromptedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -178,6 +198,10 @@ export type AiSettingsCountAggregateInputType = {
   followUpEnabled?: true
   followUpDelayHours?: true
   followUpMax?: true
+  agentDomain?: true
+  agentRole?: true
+  agentTone?: true
+  personaPromptedAt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -288,6 +312,10 @@ export type AiSettingsGroupByOutputType = {
   followUpEnabled: boolean
   followUpDelayHours: number
   followUpMax: number
+  agentDomain: string | null
+  agentRole: string | null
+  agentTone: string | null
+  personaPromptedAt: Date | null
   createdAt: Date
   updatedAt: Date
   _count: AiSettingsCountAggregateOutputType | null
@@ -334,6 +362,10 @@ export type AiSettingsWhereInput = {
   followUpEnabled?: Prisma.BoolFilter<"AiSettings"> | boolean
   followUpDelayHours?: Prisma.IntFilter<"AiSettings"> | number
   followUpMax?: Prisma.IntFilter<"AiSettings"> | number
+  agentDomain?: Prisma.StringNullableFilter<"AiSettings"> | string | null
+  agentRole?: Prisma.StringNullableFilter<"AiSettings"> | string | null
+  agentTone?: Prisma.StringNullableFilter<"AiSettings"> | string | null
+  personaPromptedAt?: Prisma.DateTimeNullableFilter<"AiSettings"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"AiSettings"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AiSettings"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
@@ -358,6 +390,10 @@ export type AiSettingsOrderByWithRelationInput = {
   followUpEnabled?: Prisma.SortOrder
   followUpDelayHours?: Prisma.SortOrder
   followUpMax?: Prisma.SortOrder
+  agentDomain?: Prisma.SortOrderInput | Prisma.SortOrder
+  agentRole?: Prisma.SortOrderInput | Prisma.SortOrder
+  agentTone?: Prisma.SortOrderInput | Prisma.SortOrder
+  personaPromptedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   organization?: Prisma.OrganizationOrderByWithRelationInput
@@ -385,6 +421,10 @@ export type AiSettingsWhereUniqueInput = Prisma.AtLeast<{
   followUpEnabled?: Prisma.BoolFilter<"AiSettings"> | boolean
   followUpDelayHours?: Prisma.IntFilter<"AiSettings"> | number
   followUpMax?: Prisma.IntFilter<"AiSettings"> | number
+  agentDomain?: Prisma.StringNullableFilter<"AiSettings"> | string | null
+  agentRole?: Prisma.StringNullableFilter<"AiSettings"> | string | null
+  agentTone?: Prisma.StringNullableFilter<"AiSettings"> | string | null
+  personaPromptedAt?: Prisma.DateTimeNullableFilter<"AiSettings"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"AiSettings"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AiSettings"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
@@ -409,6 +449,10 @@ export type AiSettingsOrderByWithAggregationInput = {
   followUpEnabled?: Prisma.SortOrder
   followUpDelayHours?: Prisma.SortOrder
   followUpMax?: Prisma.SortOrder
+  agentDomain?: Prisma.SortOrderInput | Prisma.SortOrder
+  agentRole?: Prisma.SortOrderInput | Prisma.SortOrder
+  agentTone?: Prisma.SortOrderInput | Prisma.SortOrder
+  personaPromptedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.AiSettingsCountOrderByAggregateInput
@@ -440,6 +484,10 @@ export type AiSettingsScalarWhereWithAggregatesInput = {
   followUpEnabled?: Prisma.BoolWithAggregatesFilter<"AiSettings"> | boolean
   followUpDelayHours?: Prisma.IntWithAggregatesFilter<"AiSettings"> | number
   followUpMax?: Prisma.IntWithAggregatesFilter<"AiSettings"> | number
+  agentDomain?: Prisma.StringNullableWithAggregatesFilter<"AiSettings"> | string | null
+  agentRole?: Prisma.StringNullableWithAggregatesFilter<"AiSettings"> | string | null
+  agentTone?: Prisma.StringNullableWithAggregatesFilter<"AiSettings"> | string | null
+  personaPromptedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"AiSettings"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"AiSettings"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"AiSettings"> | Date | string
 }
@@ -462,6 +510,10 @@ export type AiSettingsCreateInput = {
   followUpEnabled?: boolean
   followUpDelayHours?: number
   followUpMax?: number
+  agentDomain?: string | null
+  agentRole?: string | null
+  agentTone?: string | null
+  personaPromptedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutAiSettingsInput
@@ -486,6 +538,10 @@ export type AiSettingsUncheckedCreateInput = {
   followUpEnabled?: boolean
   followUpDelayHours?: number
   followUpMax?: number
+  agentDomain?: string | null
+  agentRole?: string | null
+  agentTone?: string | null
+  personaPromptedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -508,6 +564,10 @@ export type AiSettingsUpdateInput = {
   followUpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   followUpDelayHours?: Prisma.IntFieldUpdateOperationsInput | number
   followUpMax?: Prisma.IntFieldUpdateOperationsInput | number
+  agentDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentTone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personaPromptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutAiSettingsNestedInput
@@ -532,6 +592,10 @@ export type AiSettingsUncheckedUpdateInput = {
   followUpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   followUpDelayHours?: Prisma.IntFieldUpdateOperationsInput | number
   followUpMax?: Prisma.IntFieldUpdateOperationsInput | number
+  agentDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentTone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personaPromptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -555,6 +619,10 @@ export type AiSettingsCreateManyInput = {
   followUpEnabled?: boolean
   followUpDelayHours?: number
   followUpMax?: number
+  agentDomain?: string | null
+  agentRole?: string | null
+  agentTone?: string | null
+  personaPromptedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -577,6 +645,10 @@ export type AiSettingsUpdateManyMutationInput = {
   followUpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   followUpDelayHours?: Prisma.IntFieldUpdateOperationsInput | number
   followUpMax?: Prisma.IntFieldUpdateOperationsInput | number
+  agentDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentTone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personaPromptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -600,6 +672,10 @@ export type AiSettingsUncheckedUpdateManyInput = {
   followUpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   followUpDelayHours?: Prisma.IntFieldUpdateOperationsInput | number
   followUpMax?: Prisma.IntFieldUpdateOperationsInput | number
+  agentDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentTone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personaPromptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -628,6 +704,10 @@ export type AiSettingsCountOrderByAggregateInput = {
   followUpEnabled?: Prisma.SortOrder
   followUpDelayHours?: Prisma.SortOrder
   followUpMax?: Prisma.SortOrder
+  agentDomain?: Prisma.SortOrder
+  agentRole?: Prisma.SortOrder
+  agentTone?: Prisma.SortOrder
+  personaPromptedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -655,6 +735,10 @@ export type AiSettingsMaxOrderByAggregateInput = {
   followUpEnabled?: Prisma.SortOrder
   followUpDelayHours?: Prisma.SortOrder
   followUpMax?: Prisma.SortOrder
+  agentDomain?: Prisma.SortOrder
+  agentRole?: Prisma.SortOrder
+  agentTone?: Prisma.SortOrder
+  personaPromptedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -676,6 +760,10 @@ export type AiSettingsMinOrderByAggregateInput = {
   followUpEnabled?: Prisma.SortOrder
   followUpDelayHours?: Prisma.SortOrder
   followUpMax?: Prisma.SortOrder
+  agentDomain?: Prisma.SortOrder
+  agentRole?: Prisma.SortOrder
+  agentTone?: Prisma.SortOrder
+  personaPromptedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -736,6 +824,10 @@ export type AiSettingsCreateWithoutOrganizationInput = {
   followUpEnabled?: boolean
   followUpDelayHours?: number
   followUpMax?: number
+  agentDomain?: string | null
+  agentRole?: string | null
+  agentTone?: string | null
+  personaPromptedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -758,6 +850,10 @@ export type AiSettingsUncheckedCreateWithoutOrganizationInput = {
   followUpEnabled?: boolean
   followUpDelayHours?: number
   followUpMax?: number
+  agentDomain?: string | null
+  agentRole?: string | null
+  agentTone?: string | null
+  personaPromptedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -796,6 +892,10 @@ export type AiSettingsUpdateWithoutOrganizationInput = {
   followUpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   followUpDelayHours?: Prisma.IntFieldUpdateOperationsInput | number
   followUpMax?: Prisma.IntFieldUpdateOperationsInput | number
+  agentDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentTone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personaPromptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -818,6 +918,10 @@ export type AiSettingsUncheckedUpdateWithoutOrganizationInput = {
   followUpEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   followUpDelayHours?: Prisma.IntFieldUpdateOperationsInput | number
   followUpMax?: Prisma.IntFieldUpdateOperationsInput | number
+  agentDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentTone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personaPromptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -843,6 +947,10 @@ export type AiSettingsSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   followUpEnabled?: boolean
   followUpDelayHours?: boolean
   followUpMax?: boolean
+  agentDomain?: boolean
+  agentRole?: boolean
+  agentTone?: boolean
+  personaPromptedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -867,6 +975,10 @@ export type AiSettingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   followUpEnabled?: boolean
   followUpDelayHours?: boolean
   followUpMax?: boolean
+  agentDomain?: boolean
+  agentRole?: boolean
+  agentTone?: boolean
+  personaPromptedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -891,6 +1003,10 @@ export type AiSettingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   followUpEnabled?: boolean
   followUpDelayHours?: boolean
   followUpMax?: boolean
+  agentDomain?: boolean
+  agentRole?: boolean
+  agentTone?: boolean
+  personaPromptedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -915,11 +1031,15 @@ export type AiSettingsSelectScalar = {
   followUpEnabled?: boolean
   followUpDelayHours?: boolean
   followUpMax?: boolean
+  agentDomain?: boolean
+  agentRole?: boolean
+  agentTone?: boolean
+  personaPromptedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type AiSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "agentName" | "businessInfo" | "onboardingTestHash" | "agentImageUrl" | "systemPrompt" | "welcomeMessage" | "qualificationFields" | "aiEnabled" | "responseDelaySeconds" | "businessHoursEnabled" | "businessHours" | "businessTimezone" | "closedMessage" | "followUpEnabled" | "followUpDelayHours" | "followUpMax" | "createdAt" | "updatedAt", ExtArgs["result"]["aiSettings"]>
+export type AiSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "agentName" | "businessInfo" | "onboardingTestHash" | "agentImageUrl" | "systemPrompt" | "welcomeMessage" | "qualificationFields" | "aiEnabled" | "responseDelaySeconds" | "businessHoursEnabled" | "businessHours" | "businessTimezone" | "closedMessage" | "followUpEnabled" | "followUpDelayHours" | "followUpMax" | "agentDomain" | "agentRole" | "agentTone" | "personaPromptedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["aiSettings"]>
 export type AiSettingsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
 }
@@ -954,6 +1074,10 @@ export type $AiSettingsPayload<ExtArgs extends runtime.Types.Extensions.Internal
     followUpEnabled: boolean
     followUpDelayHours: number
     followUpMax: number
+    agentDomain: string | null
+    agentRole: string | null
+    agentTone: string | null
+    personaPromptedAt: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["aiSettings"]>
@@ -1398,6 +1522,10 @@ export interface AiSettingsFieldRefs {
   readonly followUpEnabled: Prisma.FieldRef<"AiSettings", 'Boolean'>
   readonly followUpDelayHours: Prisma.FieldRef<"AiSettings", 'Int'>
   readonly followUpMax: Prisma.FieldRef<"AiSettings", 'Int'>
+  readonly agentDomain: Prisma.FieldRef<"AiSettings", 'String'>
+  readonly agentRole: Prisma.FieldRef<"AiSettings", 'String'>
+  readonly agentTone: Prisma.FieldRef<"AiSettings", 'String'>
+  readonly personaPromptedAt: Prisma.FieldRef<"AiSettings", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"AiSettings", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"AiSettings", 'DateTime'>
 }

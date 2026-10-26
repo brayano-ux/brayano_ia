@@ -62,6 +62,22 @@
       </form>
     </section>
 
+    <!-- ============ Contacts à ignorer ============ -->
+    <section class="panel settings-card ignored-contacts" aria-labelledby="ignored-title">
+      <div class="settings-card-head">
+        <h2 id="ignored-title">Numéros à ignorer</h2>
+        <p class="muted">Ajoutez les numéros (famille, fournisseurs…) auxquels votre agent IA ne doit jamais répondre automatiquement. Vous gardez la main pour leur répondre vous-même ; les autres clients ne sont pas concernés.</p>
+      </div>
+      <div id="ignored-contacts-list" class="ignored-contacts-list" aria-live="polite"><div class="empty-state">Chargement…</div></div>
+      <form id="ignored-contact-form" class="ignored-contact-form">
+        <div class="ignored-contact-form-grid">
+          <label><span class="field-label">Numéro WhatsApp</span><input id="ignored-contact-number" type="text" inputmode="tel" required placeholder="+237 6 90 00 00 00" /></label>
+          <label><span class="field-label">Note (facultatif)</span><input id="ignored-contact-label" type="text" maxlength="60" placeholder="Ex. Maman, Fournisseur tissus" /></label>
+        </div>
+        <div class="form-actions"><button type="submit" class="primary">Ajouter à la liste</button></div>
+      </form>
+    </section>
+
     <!-- ============ Zones et responsables ============ -->
     <section class="routing-settings" aria-labelledby="routing-title">
       <div class="settings-card-head routing-head">

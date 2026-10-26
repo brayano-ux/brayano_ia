@@ -111,6 +111,37 @@
       <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sparkles"/></svg><span>Besoin d'aide ?</span>
     </button>
   </div>
+
+  <!-- Personnalité de l'agent IA : proposée une seule fois, à la première connexion -->
+  <div id="persona-modal" class="persona-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="persona-title">
+    <div class="persona-card">
+      <div class="persona-head">
+        <span class="persona-badge"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sparkles"/></svg></span>
+        <h1 id="persona-title">Donnez une personnalité à votre agent</h1>
+        <p class="muted">Choisissez son domaine, son rôle et son ton : il s'exprimera ainsi dès maintenant avec vos clients. Vous pourrez toujours l'ajuster plus tard dans « Agent IA ».</p>
+      </div>
+
+      <section class="persona-section">
+        <h2>Quel est son domaine d'activité ?</h2>
+        <div id="persona-domains" class="persona-grid" role="radiogroup" aria-label="Domaine d'activité"></div>
+      </section>
+
+      <section class="persona-section">
+        <h2>Quel est son rôle ?</h2>
+        <div id="persona-roles" class="persona-grid" role="radiogroup" aria-label="Rôle de l'agent"></div>
+      </section>
+
+      <section class="persona-section">
+        <h2>Quel ton doit-il adopter ?</h2>
+        <div id="persona-tones" class="persona-grid persona-grid-tones" role="radiogroup" aria-label="Ton de l'agent"></div>
+      </section>
+
+      <div class="persona-actions">
+        <button type="button" class="text-button" id="persona-skip">Configurer plus tard</button>
+        <button type="button" class="primary" id="persona-confirm" disabled>Appliquer et continuer</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>

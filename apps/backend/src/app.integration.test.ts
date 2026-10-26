@@ -644,6 +644,81 @@ describe.skipIf(!integrationEnabled)("API complète (HTTP, base réelle)", () =>
       expect((await put("")).statusCode).toBe(200);
     });
   });
+  describe("personnalité de l'agent (rôle, ton, domaine)", () => {
+    it("enregistre le choix et horodate la personnalisation seulement quand rôle et ton sont fournis ensemble", async () => {
+      const { organization, token } = await setup();
+      const putSettings = (payload: object) => app.inject({ method: "PUT", url: `/organizations/${organization.id}/ai-settings`, headers: authed(token), payload });
+
+      const onlyRole = await putSettings({ agentRole: "Closer" });
+      expect(onlyRole.statusCode).toBe(200);
+      expect(onlyRole.json().settings.personaPromptedAt).toBeNull();
+
+      const both = await putSettings({ agentRole: "Closer", agentTone: "Amical", agentDomain: "Boutique" });
+      expect(both.statusCode).toBe(200);
+      const settings = both.json().settings;
+      expect(settings.agentRole).toBe("Closer");
+      expect(settings.agentTone).toBe("Amical");
+      expect(settings.agentDomain).toBe("Boutique");
+      expect(settings.personaPromptedAt).not.toBeNull();
+    });
+
+    it("la fermeture sans choix horodate aussi, pour ne plus reproposer la fenêtre", async () => {
+      const { organization, token } = await setup();
+      const before = await app.inject({ method: "GET", url: `/organizations/${organization.id}/ai-settings`, headers: authed(token) });
+      expect(before.json().settings.personaPromptedAt).toBeNull();
+
+      const skip = await app.inject({ method: "POST", url: `/organizations/${organization.id}/ai-settings/persona-seen`, headers: authed(token) });
+      expect(skip.statusCode).toBe(200);
+
+      const after = await app.inject({ method: "GET", url: `/organizations/${organization.id}/ai-settings`, headers: authed(token) });
+      expect(after.json().settings.personaPromptedAt).not.toBeNull();
+    });
+
+    it("est réservé au propriétaire", async () => {
+      const { organization } = await setup();
+      const agentUser = await prisma.user.create({ data: { organizationId: organization.id, email: "agent@example.com", passwordHash: await hashPassword(PASSWORD), name: "Agent", role: "AGENT" } });
+      const { token } = await login(agentUser.email);
+      expect((await app.inject({ method: "POST", url: `/organizations/${organization.id}/ai-settings/persona-seen`, headers: authed(token) })).statusCode).toBe(403);
+    });
+  });
+
+  describe("contacts à ignorer", () => {
+    it("ajoute, liste et retire un numéro, en refusant un numéro invalide", async () => {
+      const { organization, token } = await setup();
+      const base = `/organizations/${organization.id}/ignored-contacts`;
+
+      const bad = await app.inject({ method: "POST", url: base, headers: authed(token), payload: { whatsappNumber: "pas un numéro" } });
+      expect(bad.statusCode).toBe(400);
+
+      const add = await app.inject({ method: "POST", url: base, headers: authed(token), payload: { whatsappNumber: "+237 690 00 00 09", label: "Maman" } });
+      expect(add.statusCode).toBe(200);
+      const created = add.json().contact;
+      expect(created.label).toBe("Maman");
+      expect(created.displayNumber).toContain("237");
+
+      const list = await app.inject({ method: "GET", url: base, headers: authed(token) });
+      expect(list.json().contacts).toHaveLength(1);
+
+      const remove = await app.inject({ method: "DELETE", url: `${base}/${created.id}`, headers: authed(token) });
+      expect(remove.statusCode).toBe(200);
+      expect((await app.inject({ method: "GET", url: base, headers: authed(token) })).json().contacts).toHaveLength(0);
+    });
+
+    it("est réservé au propriétaire, et une entreprise ne voit pas la liste d'une autre", async () => {
+      const a = await setup();
+      const b = await createTestOrganization("Entreprise B", { email: "b@example.com", password: PASSWORD });
+      const bLogin = await login("b@example.com");
+      await app.inject({ method: "POST", url: `/organizations/${a.organization.id}/ignored-contacts`, headers: authed(a.token), payload: { whatsappNumber: "237690000009" } });
+
+      const agentUser = await prisma.user.create({ data: { organizationId: a.organization.id, email: "agent@example.com", passwordHash: await hashPassword(PASSWORD), name: "Agent", role: "AGENT" } });
+      const { token: agentToken } = await login(agentUser.email);
+      expect((await app.inject({ method: "GET", url: `/organizations/${a.organization.id}/ignored-contacts`, headers: authed(agentToken) })).statusCode).toBe(403);
+
+      const crossOrg = await app.inject({ method: "GET", url: `/organizations/${b.organization.id}/ignored-contacts`, headers: authed(bLogin.token) });
+      expect(crossOrg.json().contacts).toHaveLength(0);
+    });
+  });
+
   describe("isolation entre entreprises : identifiants d'une autre entreprise", () => {
     it("une entreprise ne peut ni lire ni modifier les éléments d'une autre, même en connaissant leurs identifiants", async () => {
       const a = await setup();
