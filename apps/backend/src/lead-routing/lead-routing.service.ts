@@ -494,6 +494,9 @@ export async function registerQualifiedLead(input: {
     where: { organizationId: input.organizationId, conversationId: input.conversationId },
     orderBy: { createdAt: "desc" },
   });
+  // Le prospect a déjà été transmis avec succès à un commercial pour cette conversation : on ne renvoie jamais une
+  // deuxième notification, même si le prospect continue d'écrire et que l'IA le considère toujours « qualifié ».
+  const alreadyRouted = existingLead?.isRouted === true && existingLead.routeStatus === "SENT";
 
   const payload = {
     organizationId: input.organizationId,
@@ -507,9 +510,14 @@ export async function registerQualifiedLead(input: {
     urgency: leadPayload.urgency ?? null,
     leadScore: input.leadScore ?? 0,
     leadData: input.leadData ? JSON.parse(JSON.stringify(input.leadData)) : null,
-    status: (qualification.isQualified ? "QUALIFIED" : "QUALIFYING") as "QUALIFIED" | "QUALIFYING",
-    isRouted: false,
-    routeStatus: "PENDING" as const,
+    // Une fois transmis, le statut d'envoi (routé, responsable, zone, date) ne doit plus jamais être réinitialisé.
+    ...(alreadyRouted
+      ? {}
+      : {
+          status: (qualification.isQualified ? "QUALIFIED" : "QUALIFYING") as "QUALIFIED" | "QUALIFYING",
+          isRouted: false,
+          routeStatus: "PENDING" as const,
+        }),
   };
 
   const lead = existingLead
@@ -518,6 +526,11 @@ export async function registerQualifiedLead(input: {
         data: payload,
       })
     : await prisma.prospectLead.create({ data: payload });
+
+  if (alreadyRouted) {
+    // Déjà transmis : on garde juste les informations du prospect à jour pour le tableau de bord, sans renvoyer de message.
+    return lead;
+  }
 
   if (!qualification.isQualified) {
     return lead;
