@@ -1,3 +1,4 @@
+import { getMediaSecret, sameToken } from "../media/media-secret.js";
 import { createHmac, randomUUID } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
@@ -41,7 +42,7 @@ function productImageDirectory(organizationId: string) {
 }
 
 export function createProductImageToken(organizationId: string, filename: string, issuedAt = Date.now()) {
-  const secret = env.MEDIA_SIGNING_SECRET || "development-media-secret";
+  const secret = getMediaSecret();
   const digest = createHmac("sha256", secret).update(`${organizationId}:${filename}:${issuedAt}`).digest("hex");
   return `${issuedAt}:${digest}`;
 }
@@ -51,12 +52,12 @@ export function verifyProductImageToken(organizationId: string, filename: string
 
   const [issuedAtValue, digest] = token.split(":");
   const issuedAt = Number.parseInt(issuedAtValue ?? "0", 10);
-  if (!digest || !Number.isFinite(issuedAt) || now - issuedAt > env.MEDIA_URL_TTL_SECONDS * 1000) {
+  if (!digest || !Number.isFinite(issuedAt) || now - issuedAt > env.MEDIA_URL_TTL_SECONDS * 1000 || issuedAt > now + 60_000) {
     return false;
   }
 
   const expectedToken = createProductImageToken(organizationId, filename, issuedAt);
-  return expectedToken === token;
+  return sameToken(expectedToken, token);
 }
 
 export function refreshProductImageUrl(organizationId: string, imageUrl: string | null, issuedAt = Date.now()) {

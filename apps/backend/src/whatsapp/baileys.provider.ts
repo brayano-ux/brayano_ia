@@ -1,3 +1,4 @@
+import { loadImageForSending } from "./public-image.js";
 import { Boom } from "@hapi/boom";
 import fs from "node:fs";
 import makeWASocket, {
@@ -23,6 +24,30 @@ import type {
 
 /** Au-delà, un fichier reçu n'est pas enregistré (photos WhatsApp : moins de 1 Mo ; documents : quelques Mo). */
 const MAX_MEDIA_BYTES = 10 * 1024 * 1024;
+const MAX_AUDIO_BYTES = 5 * 1024 * 1024;
+
+/**
+ * Télécharge un fichier reçu en s'arrêtant dès que la limite est dépassée : la taille annoncée par l'expéditeur
+ * n'est qu'une indication, elle ne doit jamais décider de ce que le serveur charge en mémoire.
+ */
+async function downloadCapped(download: () => Promise<unknown>, maxBytes: number): Promise<Buffer> {
+  const result = await download();
+  if (Buffer.isBuffer(result)) {
+    if (result.length > maxBytes) throw new Error("Fichier trop volumineux.");
+    return result;
+  }
+  const chunks: Buffer[] = [];
+  let size = 0;
+  for await (const chunk of result as AsyncIterable<Buffer>) {
+    size += chunk.length;
+    if (size > maxBytes) {
+      (result as { destroy?: () => void }).destroy?.();
+      throw new Error("Fichier trop volumineux.");
+    }
+    chunks.push(chunk);
+  }
+  return Buffer.concat(chunks);
+}
 
 const logger = pino({ level: "silent" }); // Baileys est très verbeux ; on garde nos propres logs applicatifs
 
@@ -142,17 +167,14 @@ export class BaileysWhatsAppProvider implements WhatsAppProvider {
         let audio: IncomingWhatsAppMessage["audio"];
         if (!text && audioMessage) {
           try {
-            const media = await downloadMediaMessage(
-              msg,
-              "buffer",
-              {},
-              {
-                logger,
-                reuploadRequest: this.socket!.updateMediaMessage,
-              },
+            const declared = Number(audioMessage.fileLength ?? 0);
+            if (!declared || declared > MAX_AUDIO_BYTES) throw new Error("Audio trop volumineux ou sans taille annoncée.");
+            const media = await downloadCapped(
+              () => downloadMediaMessage(msg, "stream", {}, { logger, reuploadRequest: this.socket!.updateMediaMessage }),
+              MAX_AUDIO_BYTES,
             );
             audio = {
-              data: media as Buffer,
+              data: media,
               mimeType: audioMessage.mimetype || "audio/ogg",
             };
             text = "[Audio à transcrire]";
@@ -172,10 +194,13 @@ export class BaileysWhatsAppProvider implements WhatsAppProvider {
           const fileName = documentMessage?.fileName?.trim() || undefined;
           const mimeType = info.mimetype || (isImage ? "image/jpeg" : "application/octet-stream");
           media = { kind: isImage ? "image" : "document", mimeType, ...(fileName ? { fileName } : {}), ...(caption ? { caption } : {}) };
-          if (Number(info.fileLength ?? 0) <= MAX_MEDIA_BYTES) {
+          const declaredBytes = Number(info.fileLength ?? 0);
+          if (declaredBytes > 0 && declaredBytes <= MAX_MEDIA_BYTES) {
             try {
-              const file = await downloadMediaMessage(msg, "buffer", {}, { logger, reuploadRequest: this.socket!.updateMediaMessage });
-              if ((file as Buffer).length <= MAX_MEDIA_BYTES) media.data = file as Buffer;
+              media.data = await downloadCapped(
+                () => downloadMediaMessage(msg, "stream", {}, { logger, reuploadRequest: this.socket!.updateMediaMessage }),
+                MAX_MEDIA_BYTES,
+              );
             } catch (error) {
               console.error("❌ Impossible de télécharger le fichier reçu sur WhatsApp :", error);
             }
@@ -294,8 +319,11 @@ export class BaileysWhatsAppProvider implements WhatsAppProvider {
       throw new Error("Le socket WhatsApp n'est pas connecté.");
     }
 
+    // Baileys ne reçoit jamais l'adresse : on télécharge l'image nous-mêmes, de façon sécurisée, puis on lui passe les octets.
+    const image = await loadImageForSending(imageUrl);
     const payload: Record<string, unknown> = {
-      image: { url: imageUrl },
+      image: image.data,
+      mimetype: image.mimeType,
     };
 
     const normalizedCaption = caption?.trim();

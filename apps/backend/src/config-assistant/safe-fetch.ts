@@ -19,7 +19,11 @@ for (const [network, prefix] of [
   ["172.16.0.0", 12], ["192.0.0.0", 24], ["192.0.2.0", 24], ["192.168.0.0", 16], ["198.18.0.0", 15],
   ["198.51.100.0", 24], ["203.0.113.0", 24], ["224.0.0.0", 4], ["240.0.0.0", 4],
 ] as const) blocked.addSubnet(network, prefix, "ipv4");
-for (const [network, prefix] of [["::", 128], ["::1", 128], ["fc00::", 7], ["fe80::", 10], ["ff00::", 8], ["2001:db8::", 32]] as const) {
+for (const [network, prefix] of [
+  ["::", 96], ["::ffff:0:0:0", 96], ["fc00::", 7], ["fe80::", 10], ["ff00::", 8], ["2001:db8::", 32],
+  // Préfixes de traduction vers IPv4 (NAT64, 6to4, Teredo) : ils pourraient mener vers une adresse interne.
+  ["64:ff9b::", 96], ["64:ff9b:1::", 48], ["2002::", 16], ["2001::", 32], ["100::", 64],
+] as const) {
   blocked.addSubnet(network, prefix, "ipv6");
 }
 
@@ -54,8 +58,17 @@ export function parsePublicUrl(raw: string, testAllowHost?: string): URL {
 
 export interface SafeFetchOptions {
   maxBytes?: number;
+  /** Délai d'inactivité de la connexion. */
   timeoutMs?: number;
+  /** Durée maximale de toute la récupération (redirections comprises). */
+  totalTimeoutMs?: number;
   maxRedirects?: number;
+  /** En-tête Accept envoyé au site. */
+  accept?: string;
+  /** Types de contenu acceptés (par défaut : pages web). */
+  allowedContentType?: RegExp;
+  /** Hôtes (« hôte » ou « hôte:port ») dont l'adresse n'est pas filtrée : uniquement le serveur de l'application lui-même. */
+  trustedHosts?: string[];
   /** Réservé aux tests : « hôte:port » d'un serveur local autorisé. Jamais passé par une route. */
   testAllowHost?: string;
 }
@@ -81,7 +94,7 @@ async function resolvePublicAddress(hostname: string, allowPrivate: boolean) {
   return addresses[0]!;
 }
 
-function requestOnce(url: URL, pinned: { address: string; family: number }, options: Required<Pick<SafeFetchOptions, "maxBytes" | "timeoutMs">>) {
+function requestOnce(url: URL, pinned: { address: string; family: number }, options: { maxBytes: number; timeoutMs: number; totalTimeoutMs: number; accept: string }) {
   return new Promise<{ status: number; headers: http.IncomingHttpHeaders; body: Buffer; truncated: boolean }>((resolve, reject) => {
     const client = url.protocol === "https:" ? https : http;
     const request = client.request(
@@ -94,7 +107,7 @@ function requestOnce(url: URL, pinned: { address: string; family: number }, opti
         headers: {
           Host: url.host,
           "User-Agent": "BrayanoAI-ConfigAssistant/1.0 (+lecture d'une page publique à la demande du propriétaire)",
-          Accept: "text/html,text/plain;q=0.9,*/*;q=0.1",
+          Accept: options.accept,
           "Accept-Encoding": "identity",
         },
         lookup: ((_host: string, lookupOptions: { all?: boolean }, callback: (...args: unknown[]) => void) => {
@@ -124,6 +137,9 @@ function requestOnce(url: URL, pinned: { address: string; family: number }, opti
         response.on("error", reject);
       },
     );
+    // Un site qui envoie un octet de temps en temps ne doit pas nous garder indéfiniment : durée totale plafonnée.
+    const deadline = setTimeout(() => request.destroy(new ValidationError("Le site met trop de temps à répondre.")), Math.max(1, options.totalTimeoutMs));
+    request.on("close", () => clearTimeout(deadline));
     request.on("timeout", () => request.destroy(new ValidationError("Le site met trop de temps à répondre.")));
     request.on("error", (error) => reject(error instanceof ValidationError ? error : new ValidationError("Impossible de lire ce site pour le moment.")));
     request.end();
@@ -134,23 +150,42 @@ export async function safeFetch(rawUrl: string, options: SafeFetchOptions = {}):
   const maxBytes = options.maxBytes ?? 1_500_000;
   const timeoutMs = options.timeoutMs ?? 10_000;
   const maxRedirects = options.maxRedirects ?? 3;
+  const accept = options.accept ?? "text/html,text/plain;q=0.9,*/*;q=0.1";
+  const allowedContentType = options.allowedContentType ?? /^(text\/html|text\/plain|application\/xhtml\+xml)/;
+  const deadlineAt = Date.now() + (options.totalTimeoutMs ?? 15_000);
+  const isTrusted = (url: URL) => (options.testAllowHost !== undefined && url.host === options.testAllowHost) || (options.trustedHosts ?? []).some((host) => host === url.host || host === url.hostname);
 
-  let url = parsePublicUrl(rawUrl, options.testAllowHost);
+  const check = (raw: string) => {
+    const parsed = (() => {
+      try {
+        return new URL(raw.trim());
+      } catch {
+        return null;
+      }
+    })();
+    // Le serveur de l'application lui-même (liens de photos signés) n'est pas filtré ; tout le reste l'est.
+    if (parsed && isTrusted(parsed) && (parsed.protocol === "http:" || parsed.protocol === "https:") && !parsed.username && !parsed.password) return parsed;
+    return parsePublicUrl(raw);
+  };
+
+  let url = check(rawUrl);
   for (let hop = 0; hop <= maxRedirects; hop += 1) {
-    const pinned = await resolvePublicAddress(url.hostname, options.testAllowHost !== undefined && url.host === options.testAllowHost);
-    const response = await requestOnce(url, pinned, { maxBytes, timeoutMs });
+    const remaining = deadlineAt - Date.now();
+    if (remaining <= 0) throw new ValidationError("Le site met trop de temps à répondre.");
+    const pinned = await resolvePublicAddress(url.hostname, isTrusted(url));
+    const response = await requestOnce(url, pinned, { maxBytes, timeoutMs: Math.min(timeoutMs, remaining), totalTimeoutMs: remaining, accept });
 
     if ([301, 302, 303, 307, 308].includes(response.status)) {
       const location = response.headers.location;
       if (!location) throw new ValidationError("Redirection invalide.");
-      url = parsePublicUrl(new URL(location, url).toString(), options.testAllowHost);
+      url = check(new URL(location, url).toString());
       continue;
     }
     if (response.status < 200 || response.status >= 300) {
       throw new ValidationError(`Le site a répondu avec une erreur (${response.status}).`);
     }
     const contentType = String(response.headers["content-type"] ?? "").toLowerCase();
-    if (!/^(text\/html|text\/plain|application\/xhtml\+xml)/.test(contentType)) {
+    if (!allowedContentType.test(contentType)) {
       throw new ValidationError("Cette adresse ne renvoie pas une page web lisible (HTML ou texte).");
     }
     return { finalUrl: url.toString(), contentType, body: response.body, truncated: response.truncated };

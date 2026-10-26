@@ -633,4 +633,92 @@ describe.skipIf(!integrationEnabled)("API complète (HTTP, base réelle)", () =>
       expect(await prisma.organization.count()).toBe(1);
     });
   });
+  describe("image de l'agent", () => {
+    it("refuse une adresse interne, blob: et SVG, mais accepte une adresse publique", async () => {
+      const { organization, token } = await setup();
+      const put = (agentImageUrl: string) => app.inject({ method: "PUT", url: `/organizations/${organization.id}/ai-settings`, headers: authed(token), payload: { agentImageUrl } });
+      for (const url of ["http://169.254.169.254/latest/meta-data/", "http://127.0.0.1:6379/", "blob:https://x.com/a", "data:image/svg+xml;base64,PHN2Zz48L3N2Zz4="]) {
+        expect((await put(url)).statusCode, url).toBe(400);
+      }
+      expect((await put("https://exemple.cm/logo.png")).statusCode).toBe(200);
+      expect((await put("")).statusCode).toBe(200);
+    });
+  });
+  describe("isolation entre entreprises : identifiants d'une autre entreprise", () => {
+    it("une entreprise ne peut ni lire ni modifier les éléments d'une autre, même en connaissant leurs identifiants", async () => {
+      const a = await setup();
+      const b = await createTestOrganization("Entreprise B", { email: "b@example.com", password: PASSWORD });
+      const bLogin = await login("b@example.com");
+      const A = a.organization.id;
+      const B = b.organization.id;
+
+      const contact = await prisma.contact.create({ data: { organizationId: A, whatsappJid: "237690000009@s.whatsapp.net", displayName: "Client de A" } });
+      const conversation = await prisma.conversation.create({ data: { organizationId: A, contactId: contact.id } });
+      const message = await prisma.message.create({ data: { conversationId: conversation.id, direction: "OUTBOUND", author: "AI", content: "Réponse de A" } });
+      const product = await prisma.product.create({ data: { organizationId: A, name: "Produit A", description: "Secret de A" } });
+      const order = await prisma.order.create({ data: { organizationId: A, customerName: "Client de A", deliveryAddress: "Rue de A", items: [] } });
+      const appointment = await prisma.appointment.create({ data: { organizationId: A, startsAt: new Date(Date.now() + 86_400_000), endsAt: new Date(Date.now() + 90_000_000) } });
+      const correction = await prisma.aiCorrection.create({ data: { organizationId: A, question: "Question de A", correctReply: "Réponse de A" } });
+      const location = await prisma.location.create({ data: { organizationId: A, name: "Zone A", city: "Douala" } });
+      const responsible = await prisma.responsible.create({ data: { organizationId: A, locationId: location.id, name: "Resp A", whatsappNumber: "237690000010" } });
+      const broadcast = await prisma.broadcast.create({ data: { organizationId: A, text: "Annonce de A" } });
+      const agent = await prisma.user.create({ data: { organizationId: A, email: "agent-a@example.com", passwordHash: "x", name: "Agent A", role: "AGENT" } });
+
+      const asB = (method: "GET" | "POST" | "PUT" | "DELETE", path: string, payload?: object) =>
+        app.inject({ method, url: `/organizations/${B}${path}`, headers: authed(bLogin.token), ...(payload ? { payload } : {}) });
+      const attempts: Array<[string, Promise<{ statusCode: number }>]> = [
+        ["lire la conversation", asB("GET", `/conversations/${conversation.id}`)],
+        ["répondre dans la conversation", asB("POST", `/conversations/${conversation.id}/reply`, { text: "intrusion" })],
+        ["marquer comme lue", asB("POST", `/conversations/${conversation.id}/read`)],
+        ["changer l'étiquette", asB("POST", `/conversations/${conversation.id}/stage`, { stage: "ORDERED" })],
+        ["couper l'IA", asB("POST", `/conversations/${conversation.id}/ai/disable`)],
+        ["réactiver l'IA", asB("POST", `/conversations/${conversation.id}/ai/enable`)],
+        ["bloquer le client", asB("POST", `/conversations/${conversation.id}/opt-out`, { optedOut: true })],
+        ["signaler un paiement", asB("POST", `/conversations/${conversation.id}/payment-check`, { pending: true })],
+        ["corriger un message", asB("POST", `/conversations/${conversation.id}/messages/${message.id}/correct`, { correctReply: "intrusion" })],
+        ["modifier le produit", asB("PUT", `/products/${product.id}`, { name: "Piraté", description: "Piraté" })],
+        ["supprimer le produit", asB("DELETE", `/products/${product.id}`)],
+        ["modifier la commande", asB("PUT", `/orders/${order.id}`, { status: "CANCELLED" })],
+        ["marquer la commande payée", asB("PUT", `/orders/${order.id}/payment`, { paymentStatus: "PAID" })],
+        ["modifier le rendez-vous", asB("PUT", `/appointments/${appointment.id}`, { status: "CANCELLED" })],
+        ["modifier la correction", asB("PUT", `/ai-corrections/${correction.id}`, { correctReply: "Piraté" })],
+        ["supprimer la correction", asB("DELETE", `/ai-corrections/${correction.id}`)],
+        ["modifier l'employé", asB("PUT", `/team/${agent.id}`, { active: false })],
+        ["supprimer l'employé", asB("DELETE", `/team/${agent.id}`)],
+        ["lire l'envoi groupé", asB("GET", `/broadcasts/${broadcast.id}`)],
+        ["annuler l'envoi groupé", asB("POST", `/broadcasts/${broadcast.id}/cancel`)],
+        ["lister les responsables d'une zone", asB("GET", `/locations/${location.id}/responsibles`)],
+        ["modifier le responsable", asB("PUT", `/responsibles/${responsible.id}`, { name: "Piraté" })],
+        ["supprimer le responsable", asB("DELETE", `/responsibles/${responsible.id}`)],
+      ];
+      for (const [label, pending] of attempts) {
+        const response = await pending as { statusCode: number; body: string };
+        if (label === "lister les responsables d'une zone") {
+          // Liste filtrée par entreprise : réponse vide, rien de l'autre entreprise.
+          expect(response.statusCode).toBe(200);
+          expect(JSON.parse(response.body).responsibles).toEqual([]);
+          continue;
+        }
+        expect(response.statusCode, `${label} → ${response.statusCode}`).toBeGreaterThanOrEqual(400);
+        expect(response.body, label).not.toMatch(/Client de A|Produit A|Secret de A|Réponse de A|Annonce de A|Resp A|Rue de A/);
+      }
+
+      // Rien n'a bougé chez l'entreprise A.
+      expect((await prisma.product.findUniqueOrThrow({ where: { id: product.id } })).name).toBe("Produit A");
+      expect(await prisma.order.count({ where: { id: order.id, status: "NEW" } })).toBe(1);
+      expect(await prisma.aiCorrection.count({ where: { id: correction.id } })).toBe(1);
+      expect(await prisma.responsible.count({ where: { id: responsible.id } })).toBe(1);
+      expect((await prisma.user.findUniqueOrThrow({ where: { id: agent.id } })).active).toBe(true);
+      expect((await prisma.conversation.findUniqueOrThrow({ where: { id: conversation.id } })).stageLocked).toBe(false);
+      expect(await prisma.message.count({ where: { conversationId: conversation.id } })).toBe(1);
+      expect((await prisma.contact.findUniqueOrThrow({ where: { id: contact.id } })).optedOut).toBe(false);
+
+      // L'adresse d'une autre entreprise est refusée, quelle que soit la façon de l'écrire.
+      for (const path of [`/organizations/${A}/products`, `/organizations/${A.toUpperCase()}/products`, `/organizations/${encodeURIComponent(A)}/products`, `/organizations/%2e%2e/${A}/products`, `//organizations/${A}/products`, `/organizations/${B}/../${A}/products`, `/organizations/${A};x/products`]) {
+        const response = await app.inject({ method: "GET", url: path, headers: authed(bLogin.token) });
+        expect(response.statusCode, path).not.toBe(200);
+        expect(response.body, path).not.toContain("Produit A");
+      }
+    });
+  });
 });

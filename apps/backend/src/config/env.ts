@@ -12,6 +12,8 @@ const envSchema = z.object({
   WHATSAPP_AUTH_DIR: z.string().default("./wa-session"),
   PRODUCT_IMAGE_DIR: z.string().optional(),
   CLIENT_MEDIA_DIR: z.string().optional(),
+  /** Espace maximal des photos et documents reçus par entreprise (Mo). */
+  CLIENT_MEDIA_QUOTA_MB: z.coerce.number().int().min(10).max(100_000).default(1024),
   CLIENT_MEDIA_RETENTION_DAYS: z.coerce.number().int().min(7).max(3650).default(90),
   /** Applique les forfaits : essai de 100 messages, quota mensuel, fonctions réservées. Éteint par défaut : l'assistant reste illimité. */
   BILLING_ENFORCED: z.enum(["true", "false"]).default("false").transform((value) => value === "true"),
@@ -81,11 +83,11 @@ const envSchema = z.object({
     });
   }
 
-  if (env.NODE_ENV === "production" && (!env.MEDIA_SIGNING_SECRET || env.MEDIA_SIGNING_SECRET.length < 16)) {
+  if (env.NODE_ENV !== "test" && (!env.MEDIA_SIGNING_SECRET || env.MEDIA_SIGNING_SECRET.length < 16 || env.MEDIA_SIGNING_SECRET === "development-media-secret")) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       path: ["MEDIA_SIGNING_SECRET"],
-      message: "MEDIA_SIGNING_SECRET doit être défini en production et faire au moins 16 caractères.",
+      message: "MEDIA_SIGNING_SECRET est obligatoire (une longue valeur aléatoire, 16 caractères minimum, jamais la valeur d'exemple).",
     });
   }
 });

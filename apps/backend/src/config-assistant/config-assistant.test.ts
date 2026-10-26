@@ -166,6 +166,12 @@ describe("SSRF protection", () => {
     expect(isBlockedAddress("2606:4700:4700::1111")).toBe(false);
   });
 
+  it("blocks IPv6 forms that translate to an internal IPv4 address (NAT64, 6to4, IPv4-compatible, SIIT)", () => {
+    for (const address of ["::7f00:1", "64:ff9b::7f00:1", "64:ff9b::a9fe:a9fe", "2002:7f00:1::", "2002:a9fe:a9fe::1", "::ffff:0:7f00:1", "2001:0:4136:e378:8000:63bf:3fff:fdd2"]) {
+      expect(isBlockedAddress(address), address).toBe(true);
+    }
+  });
+
   it("rejects dangerous URLs before any network access", () => {
     for (const url of ["file:///etc/passwd", "ftp://x.com", "http://localhost/", "http://a.localhost/", "http://x.internal/", "https://user:pw@x.com", "http://x.com:8080/", "pas une url"]) {
       expect(() => parsePublicUrl(url), url).toThrow();
@@ -248,5 +254,27 @@ describe("sources", () => {
 
   it("rejects files that are not PDFs", async () => {
     await expect(preparePdfSource(Buffer.from("MZ<exécutable>"))).rejects.toThrow(/PDF valide/);
+  });
+});
+
+describe("html-text : pages piégées (temps proportionnel à la taille)", () => {
+  const traps: Array<[string, string]> = [
+    ["balises <title non fermées", "<title ".repeat(190_000)],
+    ["balises <meta non fermées", "<meta ".repeat(220_000)],
+    ["chevrons sans fin", "<".repeat(1_400_000)],
+    ["<script non fermés", "<script ".repeat(160_000)],
+    ["commentaires non fermés", "<!--".repeat(300_000)],
+    ["<a href non fermés", '<a href="/contact" '.repeat(70_000)],
+    ["balise géante jamais fermée", `<div ${"a".repeat(1_400_000)}`],
+  ];
+  it.each(traps)("traite vite : %s", (_label, html) => {
+    const start = Date.now();
+    htmlToText(html);
+    findUsefulLinks(html, "https://exemple.cm/");
+    expect(Date.now() - start).toBeLessThan(1500);
+  });
+
+  it("ne plante pas sur un lien tel: mal encodé", () => {
+    expect(htmlToText('<a href="tel:%E0%A4">x</a>')).toContain("Téléphone");
   });
 });

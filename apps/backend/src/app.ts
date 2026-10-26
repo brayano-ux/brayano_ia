@@ -1,4 +1,4 @@
-import Fastify from "fastify";
+import Fastify, { type FastifyRequest } from "fastify";
 import { onboardingRoute } from "./onboarding/onboarding.route.js";
 import { env } from "./config/env.js";
 import { appointmentsRoute } from "./appointments/appointments.route.js";
@@ -25,6 +25,11 @@ import { isAllowedForRole } from "./shared/permissions.js";
 import { isPublicRoute } from "./shared/public-route.js";
 import { restoreWhatsAppConnections } from "./whatsapp/whatsapp.registry.js";
 
+/** Retire la partie « ?t=… » (jeton de lien de média) d'une adresse avant de l'écrire dans les journaux. */
+export function redactUrl(url: string | undefined) {
+  return url?.replace(/([?&](?:t|token|key|secret)=)[^&]*/gi, "$1[masqué]");
+}
+
 export async function buildServer(options: { restoreConnections?: boolean } = {}) {
   const app = Fastify({
     bodyLimit: 5 * 1024 * 1024,
@@ -35,7 +40,14 @@ export async function buildServer(options: { restoreConnections?: boolean } = {}
         ? false
         : env.NODE_ENV === "development"
           ? { transport: { target: "pino-pretty" } }
-          : true,
+          : {
+              // Les liens de photos portent un jeton temporaire dans l'adresse : on ne le garde pas dans les journaux.
+              serializers: {
+                req(request: FastifyRequest) {
+                  return { method: request.method, url: redactUrl(request.url) ?? "", host: request.host, remoteAddress: request.ip };
+                },
+              },
+            },
   });
 
   app.addContentTypeParser(/^image\/(jpeg|png|webp)$/, { parseAs: "buffer" }, (_request, body, done) => {

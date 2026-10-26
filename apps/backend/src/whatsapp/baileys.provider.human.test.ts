@@ -11,6 +11,7 @@ vi.mock("@whiskeysockets/baileys", () => ({
   generateMessageID: vi.fn(() => `BOT-${++mocks.ids}`),
 }));
 vi.mock("qrcode", () => ({ default: { toDataURL: vi.fn() } }));
+vi.mock("./public-image.js", () => ({ loadImageForSending: vi.fn(async () => ({ data: Buffer.from([0xff, 0xd8, 0xff]), mimeType: "image/jpeg" })) }));
 
 import { BaileysWhatsAppProvider } from "./baileys.provider.js";
 
@@ -98,6 +99,37 @@ describe("BaileysWhatsAppProvider : réponse humaine depuis le téléphone", () 
     await new Promise((r) => setTimeout(r, 20));
     errors.mockRestore();
     expect(incoming).toHaveBeenCalledWith(expect.objectContaining({ text: "[Photo reçue]", media: expect.not.objectContaining({ data: expect.anything() }) }));
+  });
+
+  it("does not trust a missing or zero announced size, and stops a stream that exceeds the cap", async () => {
+    const { downloadMediaMessage } = await import("@whiskeysockets/baileys");
+    // Taille annoncée absente : rien n'est téléchargé.
+    upsert({ key: { id: "IMG-3", fromMe: false, remoteJid: JID }, message: { imageMessage: { mimetype: "image/jpeg" } }, messageTimestamp: nowSeconds() });
+    await new Promise((r) => setTimeout(r, 20));
+    expect(downloadMediaMessage).not.toHaveBeenCalled();
+
+    // Taille annoncée petite mais flux énorme : le téléchargement est coupé au plafond, la photo est signalée sans fichier.
+    const { Readable } = await import("node:stream");
+    let produced = 0;
+    const stream = new Readable({ read() { produced += 1024 * 1024; this.push(produced > 40 * 1024 * 1024 ? null : Buffer.alloc(1024 * 1024)); } });
+    vi.mocked(downloadMediaMessage).mockResolvedValueOnce(stream as never);
+    const errors = vi.spyOn(console, "error").mockImplementation(() => {});
+    upsert({ key: { id: "IMG-4", fromMe: false, remoteJid: JID }, message: { imageMessage: { mimetype: "image/jpeg", fileLength: 10 } }, messageTimestamp: nowSeconds() });
+    await new Promise((r) => setTimeout(r, 100));
+    errors.mockRestore();
+    expect(produced).toBeLessThan(20 * 1024 * 1024);
+    expect(incoming).toHaveBeenCalledWith(expect.objectContaining({ externalId: "IMG-4", media: expect.not.objectContaining({ data: expect.anything() }) }));
+  });
+
+  it("refuses an audio message without an announced size or above the cap", async () => {
+    const { downloadMediaMessage } = await import("@whiskeysockets/baileys");
+    const errors = vi.spyOn(console, "error").mockImplementation(() => {});
+    upsert({ key: { id: "AUD-1", fromMe: false, remoteJid: JID }, message: { audioMessage: { mimetype: "audio/ogg" } }, messageTimestamp: nowSeconds() });
+    upsert({ key: { id: "AUD-2", fromMe: false, remoteJid: JID }, message: { audioMessage: { mimetype: "audio/ogg", fileLength: 80 * 1024 * 1024 } }, messageTimestamp: nowSeconds() });
+    await new Promise((r) => setTimeout(r, 30));
+    errors.mockRestore();
+    expect(downloadMediaMessage).not.toHaveBeenCalled();
+    expect(incoming).not.toHaveBeenCalled();
   });
 
   it("does not download a file that is too large", async () => {

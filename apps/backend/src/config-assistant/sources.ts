@@ -40,16 +40,41 @@ export async function prepareUrlSource(rawUrl: string): Promise<PreparedSource> 
   return { kind: "url", label: first.finalUrl, text: joined.slice(0, MAX_SOURCE_CHARS), truncated: joined.length > MAX_SOURCE_CHARS || first.truncated };
 }
 
+const PDF_TIMEOUT_MS = 20_000;
+let pdfInProgress = false;
+
+function withTimeout<T>(work: Promise<T>, ms: number, onTimeout: () => void): Promise<T> {
+  let timer: NodeJS.Timeout;
+  const timeout = new Promise<never>((_resolve, reject) => {
+    timer = setTimeout(() => {
+      onTimeout();
+      reject(new ValidationError("La lecture de ce PDF prend trop de temps. Collez plutôt le texte de votre document."));
+    }, ms);
+  });
+  return Promise.race([work, timeout]).finally(() => clearTimeout(timer));
+}
+
 export async function preparePdfSource(buffer: Buffer): Promise<PreparedSource> {
+  // Un seul PDF à la fois sur tout le serveur : la lecture d'un PDF est coûteuse et ne doit pas pouvoir être multipliée.
+  if (pdfInProgress) throw new ValidationError("Une autre analyse de PDF est en cours. Réessayez dans un instant.");
+  pdfInProgress = true;
+  try {
+    return await readPdf(buffer);
+  } finally {
+    pdfInProgress = false;
+  }
+}
+
+async function readPdf(buffer: Buffer): Promise<PreparedSource> {
   if (buffer.length < 8 || buffer.subarray(0, 5).toString("latin1") !== "%PDF-") {
     throw new ValidationError("Ce fichier n'est pas un PDF valide.");
   }
   let text = "";
   try {
     const { extractText, getDocumentProxy } = await import("unpdf");
-    const pdf = await getDocumentProxy(new Uint8Array(buffer));
+    const pdf = await withTimeout(getDocumentProxy(new Uint8Array(buffer)), PDF_TIMEOUT_MS, () => undefined);
     if (pdf.numPages > 60) throw new ValidationError("Ce PDF a trop de pages (60 maximum). Collez plutôt les parties utiles.");
-    text = (await extractText(pdf, { mergePages: true })).text;
+    text = (await withTimeout(extractText(pdf, { mergePages: true }), PDF_TIMEOUT_MS, () => void (pdf as { cleanup?: () => Promise<void> }).cleanup?.())).text;
   } catch (error) {
     if (error instanceof ValidationError) throw error;
     throw new ValidationError("Impossible de lire ce PDF (fichier protégé ou abîmé).");

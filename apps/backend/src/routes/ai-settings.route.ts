@@ -9,14 +9,19 @@ import { workingHoursSchema } from "../appointments/appointments.service.js";
 import { getPlatformSuspension } from "../organizations/platform-suspension.service.js";
 import { BUSINESS_INFO_MAX_LENGTH } from "../ai/settings-limits.js";
 import { ValidationError } from "../shared/errors.js";
+import { assertAcceptableImageUrl } from "../whatsapp/public-image.js";
 
 const validMediaUrl = z
   .string()
   .trim()
-  .refine(
-    (value) => !value || /^https?:\/\//i.test(value) || /^data:image\//i.test(value) || /^blob:/i.test(value),
-    "L'URL de l'image doit être une URL HTTP(S), une image data URL ou un blob local.",
-  );
+  .superRefine((value, context) => {
+    if (!value) return;
+    try {
+      assertAcceptableImageUrl(value);
+    } catch (error) {
+      context.addIssue({ code: z.ZodIssueCode.custom, message: error instanceof Error ? error.message : "Adresse d'image refusée." });
+    }
+  });
 
 const updateAiSettingsSchema = z.object({
   agentName: z.string().min(1).optional(),
