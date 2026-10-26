@@ -75,6 +75,7 @@ export function fillHoursSettings(settings) {
   $("#fu-max").value = String(settings.followUpMax || 1);
   $("#tg-enabled").checked = Boolean(settings.topicGateEnabled);
   $("#tg-topic").value = settings.topicGateTopic || "";
+  $("#ad-only-enabled").checked = Boolean(settings.adOnlyEnabled);
   syncVisibility();
 }
 
@@ -89,6 +90,7 @@ export function readHoursSettings() {
     followUpMax: Number($("#fu-max").value),
     topicGateEnabled: $("#tg-enabled").checked,
     topicGateTopic: $("#tg-topic").value.trim() || null,
+    adOnlyEnabled: $("#ad-only-enabled").checked,
   };
 }
 

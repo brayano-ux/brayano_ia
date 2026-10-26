@@ -16,6 +16,8 @@ export interface RecordInboundMessageInput {
   media?: StoredMediaRef | null;
   /** Analyse automatique d'un fichier reçu : { mediaKind, mediaNote }. */
   aiMeta?: Prisma.InputJsonValue | null;
+  /** Vrai si ce message vient d'une publicité Facebook/Instagram « Cliquer pour WhatsApp » ; n'a d'effet qu'à la création de la conversation. */
+  startedFromAd?: boolean;
 }
 
 export interface RecordOutboundMessageInput {

@@ -182,6 +182,7 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
       ...(received && message.media
         ? { type: message.media.kind === "image" ? ("IMAGE" as const) : ("DOCUMENT" as const), media: received.stored, aiMeta: received.aiMeta }
         : {}),
+      ...(message.startedFromAd ? { startedFromAd: true } : {}),
     });
 
     if (isDuplicate) {
@@ -249,6 +250,14 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
       ? conversation.leadData as Record<string, unknown>
       : {};
     const settings = await getOrCreateAiSettings(organizationId);
+
+    // Publicité uniquement : le client n'a pas démarré la conversation en cliquant sur une publicité
+    // Facebook/Instagram « Cliquer pour WhatsApp ». Message gardé dans la boîte de réception, aucune réponse.
+    if (settings.adOnlyEnabled && !conversation.startedFromAd) {
+      console.log(`📢 [org:${organizationId}] Conversation non issue d'une publicité : aucune réponse automatique.`);
+      return;
+    }
+
     if (!settings.aiEnabled) {
       console.log(`⏸️  [org:${organizationId}] IA désactivée globalement depuis le dashboard.`);
       return;

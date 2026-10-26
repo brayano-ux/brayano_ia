@@ -32,7 +32,7 @@ export function selectActiveConversation<T extends ConversationForRouting>(
   return conversations[0] ?? null;
 }
 
-async function findOrCreateConversation(organizationId: string, contactId: string) {
+async function findOrCreateConversation(organizationId: string, contactId: string, startedFromAd = false) {
   const existing = await prisma.conversation.findMany({
     where: { organizationId, contactId },
     orderBy: { updatedAt: "desc" },
@@ -42,7 +42,7 @@ async function findOrCreateConversation(organizationId: string, contactId: strin
   if (active) return active;
 
   return prisma.conversation.create({
-    data: { organizationId, contactId },
+    data: { organizationId, contactId, startedFromAd },
   });
 }
 
@@ -52,7 +52,7 @@ async function findOrCreateConversation(organizationId: string, contactId: strin
  */
 export async function recordInboundMessage(input: RecordInboundMessageInput) {
   const contact = await findOrCreateContact(input.organizationId, input.fromJid);
-  const conversation = await findOrCreateConversation(input.organizationId, contact.id);
+  const conversation = await findOrCreateConversation(input.organizationId, contact.id, input.startedFromAd ?? false);
 
   // Déduplication : si Baileys renvoie deux fois le même message (retry réseau),
   // on ignore silencieusement plutôt que de planter sur la contrainte unique.

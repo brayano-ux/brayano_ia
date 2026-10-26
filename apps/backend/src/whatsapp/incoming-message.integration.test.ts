@@ -421,6 +421,52 @@ describe.skipIf(!integrationEnabled)("traitement d'un message entrant (base rée
     });
   });
 
+  describe("publicité Facebook/Instagram uniquement", () => {
+    async function orgWithAdOnly() {
+      const { organization } = await createTestOrganization();
+      await prisma.aiSettings.update({ where: { organizationId: organization.id }, data: { adOnlyEnabled: true } });
+      return organization;
+    }
+
+    it("ne répond pas à un client qui n'est pas venu d'une publicité, mais garde le message", async () => {
+      const organization = await orgWithAdOnly();
+      const calls = installScriptedAi([aiReply()]);
+      const whatsapp = new FakeWhatsApp();
+
+      await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "Bonjour, vous êtes ouverts ?"));
+
+      expect(calls).toHaveLength(0);
+      expect(whatsapp.sent).toHaveLength(0);
+      expect((await prisma.message.findFirstOrThrow({ where: { direction: "INBOUND" } })).content).toBe("Bonjour, vous êtes ouverts ?");
+      expect((await prisma.conversation.findFirstOrThrow()).startedFromAd).toBe(false);
+    });
+
+    it("répond à un client venu d'une publicité, et continue de lui répondre ensuite", async () => {
+      const organization = await orgWithAdOnly();
+      installScriptedAi([
+        aiReply({ reply: "Bonjour ! La robe rouge est à 12 000 FCFA." }),
+        aiReply({ reply: "Elle est disponible en taille M." }),
+      ]);
+      const whatsapp = new FakeWhatsApp();
+
+      await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "Bonjour, je viens de votre publicité", { startedFromAd: true }));
+      expect(whatsapp.sent.map((item) => item.text)).toEqual(["Bonjour ! La robe rouge est à 12 000 FCFA."]);
+      expect((await prisma.conversation.findFirstOrThrow()).startedFromAd).toBe(true);
+
+      // Le deuxième message n'a plus la marque « publicité » (comme sur WhatsApp), mais la conversation reste ouverte.
+      await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "Et en quelle taille ?"));
+      expect(whatsapp.sent.map((item) => item.text)).toEqual(["Bonjour ! La robe rouge est à 12 000 FCFA.", "Elle est disponible en taille M."]);
+    });
+
+    it("n'a aucun effet quand il n'est pas activé", async () => {
+      const { organization } = await createTestOrganization();
+      installScriptedAi([aiReply({ reply: "Bonjour, comment puis-je vous aider ?" })]);
+      const whatsapp = new FakeWhatsApp();
+      await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "Bonjour"));
+      expect(whatsapp.sent.map((item) => item.text)).toEqual(["Bonjour, comment puis-je vous aider ?"]);
+    });
+  });
+
   describe("étiquettes de suivi", () => {
     it("passe de Nouveau à Intéressé après une demande de prix", async () => {
       const { organization } = await createTestOrganization();

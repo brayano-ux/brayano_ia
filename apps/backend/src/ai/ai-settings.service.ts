@@ -30,6 +30,7 @@ export interface AiSettingsInput {
   agentTone?: string | undefined;
   topicGateEnabled?: boolean | undefined;
   topicGateTopic?: string | null | undefined;
+  adOnlyEnabled?: boolean | undefined;
 }
 
 export function resolveResponseDelaySeconds(value: unknown): ResponseDelaySeconds {
@@ -91,6 +92,7 @@ export async function updateAiSettings(organizationId: string, input: AiSettings
     ...(input.agentRole && input.agentTone ? { personaPromptedAt: new Date() } : {}),
     ...(input.topicGateEnabled !== undefined ? { topicGateEnabled: input.topicGateEnabled } : {}),
     ...(input.topicGateTopic !== undefined ? { topicGateTopic: input.topicGateTopic?.trim() || null } : {}),
+    ...(input.adOnlyEnabled !== undefined ? { adOnlyEnabled: input.adOnlyEnabled } : {}),
   };
 
   return prisma.aiSettings.upsert({

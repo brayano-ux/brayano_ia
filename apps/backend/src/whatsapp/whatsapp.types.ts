@@ -19,6 +19,8 @@ export interface IncomingWhatsAppMessage {
     mimeType: string;
   };
   media?: IncomingMedia;
+  /** Vrai si ce message vient du bouton d'une publicité Facebook/Instagram « Cliquer pour WhatsApp » (identifiant ctwaClid présent). */
+  startedFromAd?: boolean;
 }
 
 /** Message envoyé par un humain depuis le téléphone du numéro connecté (pas par l'application). */
