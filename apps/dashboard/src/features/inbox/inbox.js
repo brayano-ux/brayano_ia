@@ -215,7 +215,7 @@ function messageBubbleMarkup(message) {
       ${label ? `<small class="bubble-label">${escapeHtml(label)}</small>` : ""}
       ${mediaMarkup(message)}
       ${text ? `<span>${escapeHtml(text)}</span>` : ""}
-      <time>${formatDateTime(message.createdAt)}</time>
+      <time>${escapeHtml(formatDateTime(message.createdAt))}</time>
       ${whyMarkup(message)}
     </div>
   `;

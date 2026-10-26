@@ -7,11 +7,13 @@ services:
 
     environment:
       POSTGRES_USER: brayano
-      POSTGRES_PASSWORD: brayano
+      # Mot de passe de la base : définissez POSTGRES_PASSWORD dans .env (valeur par défaut « brayano » réservée au développement local).
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-brayano}
       POSTGRES_DB: brayano_ai
 
     ports:
-      - "5432:5432"
+      # La base n'est joignable que depuis cette machine, jamais depuis le réseau.
+      - "127.0.0.1:5432:5432"
 
     volumes:
       - brayano_postgres_data:/var/lib/postgresql/data

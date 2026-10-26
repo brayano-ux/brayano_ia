@@ -67,8 +67,13 @@ async function handleAgentImageUpload(event) {
   const file = event.target.files?.[0];
   if (!file) return;
 
-  if (!file.type.startsWith("image/")) {
-    showToast("Veuillez choisir un fichier image valide.", "error");
+  if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+    showToast("Choisissez une image JPEG, PNG ou WebP.", "error");
+    event.target.value = "";
+    return;
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    showToast("Cette image est trop lourde (5 Mo maximum).", "error");
     event.target.value = "";
     return;
   }

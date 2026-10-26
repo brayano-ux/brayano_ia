@@ -1,3 +1,10 @@
+// Anti-« clickjacking » : le tableau de bord ne s'affiche jamais à l'intérieur d'une page d'un autre site.
+if (window.top !== window.self) {
+  document.documentElement.style.display = "none";
+  try { window.top.location.href = window.self.location.href; } catch { /* navigation refusée : la page reste masquée */ }
+  throw new Error("Affichage dans un cadre refusé.");
+}
+
 const templatePaths = [
   "./templates/auth.html",
   "./templates/app-shell.html",

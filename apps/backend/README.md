@@ -188,3 +188,11 @@ La vue d’ensemble du propriétaire affiche quatre étapes : informations de l�
 Un test réussi conserve uniquement une empreinte des réglages dans `AiSettings.onboardingTestHash`, sans conserver la conversation du testeur. Une modification des réglages de réponse nécessite un nouveau test, tant qu’aucune réponse réelle n’a encore été envoyée. Une vérification de `updatedAt` empêche de valider des réglages modifiés pendant un test. Les réponses manuelles et les simulations ne valident pas la dernière étape : elle nécessite un message sortant d’auteur `AI` enregistré après envoi WhatsApp.
 
 La migration `20261023170000_add_onboarding_test_hash` ajoute une colonne nullable, sans modifier les données existantes. Le démarrage Render utilise déjà `prisma db push` avant le serveur ; les installations utilisant les migrations doivent appliquer `npm run db:migrate:deploy`, puis régénérer le client Prisma. Le guide se réduit lorsqu’il est terminé et peut être rouvert. La connexion WhatsApp et l’état actif de l’agent restent contrôlés séparément.
+
+
+## Sécurité : variables importantes
+- `MEDIA_SIGNING_SECRET` : **obligatoire** (le serveur refuse de démarrer sans). Une longue valeur aléatoire (`openssl rand -hex 32`) ; sur Render elle est générée automatiquement par `render.yaml`.
+- `TRUST_PROXY_HOPS` (défaut `1`) : nombre de proxys de l'hébergeur devant le serveur. Sert à lire la vraie adresse du client pour limiter les tentatives de connexion ; ce que le client écrit dans `X-Forwarded-For` n'est jamais cru. En plus, chaque compte est verrouillé 15 minutes après 10 échecs.
+- `CLIENT_MEDIA_QUOTA_MB` (défaut `1024`) : espace maximal des photos et documents reçus par entreprise.
+- `DEFAULT_ADMIN_EMAIL` / `DEFAULT_ADMIN_PASSWORD` : ne les définissez pas en production sauf besoin ; si vous les définissez, choisissez un long mot de passe unique.
+- Les mots de passe sont stockés avec scrypt et un sel ; les anciens comptes sont mis à niveau à leur prochaine connexion.

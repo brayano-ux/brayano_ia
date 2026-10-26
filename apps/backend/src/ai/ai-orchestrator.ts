@@ -127,7 +127,7 @@ export class AiOrchestrator {
       }
       return result.data;
     } catch {
-      console.error("❌ Réponse IA invalide (JSON malformé) :", rawText);
+      console.error(`❌ Réponse IA invalide (JSON malformé, ${rawText.length} caractères).`);
       return null;
     }
   }

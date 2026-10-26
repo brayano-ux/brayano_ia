@@ -68,13 +68,13 @@ function renderOrders() {
     const items = Array.isArray(order.items) ? order.items : [];
     const phone = order.customerPhone ? `+${String(order.customerPhone).replace(/^\+/, "")}` : "";
     return `
-    <article class="order-card status-${order.status.toLowerCase()}">
+    <article class="order-card status-${escapeHtml(String(order.status).toLowerCase())}">
       <header class="order-card-head">
         <div>
           <strong>${escapeHtml(order.customerName)}</strong>
           <small class="muted">${escapeHtml(phone)}${phone ? " • " : ""}${escapeHtml(formatDate(order.createdAt))}</small>
         </div>
-        <span class="appointment-status">${STATUS_LABELS[order.status] || order.status}</span>
+        <span class="appointment-status">${escapeHtml(STATUS_LABELS[order.status] || order.status)}</span>
       </header>
       <ul class="order-items">
         ${items.map((item) => `<li><span>${escapeHtml(item.quantity)} × ${escapeHtml(item.name)}</span><small class="muted">${escapeHtml(item.unitPrice || "")}</small></li>`).join("")}

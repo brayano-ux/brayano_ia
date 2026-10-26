@@ -2,10 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, saveSession } from '../../services/api';
 
-const DEFAULT_CREDENTIALS = {
-  email: 'admin@brayano.ai',
-  password: 'brayano123',
-};
+// Aucun identifiant n'est prérempli : la page de connexion démarre toujours vide.
+const DEFAULT_CREDENTIALS = { email: '', password: '' };
 
 export default function LoginPage() {
   const navigate = useNavigate();

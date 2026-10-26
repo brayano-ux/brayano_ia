@@ -385,15 +385,12 @@ export async function resolveRoutingForLead(
           : "Location détectée sans ville précise",
     };
     console.log(`[route:${organizationId}] Responsable trouvé par quartier/ville`, {
-      rawCity: city,
-      rawQuarter: quarter,
       normalizedCity,
       locationId: matchedLocation.id,
       locationName: matchedLocation.name,
       responsibleId: responsible.id,
-      responsibleName: responsible.name,
-      responsibleWhatsapp: responsible.whatsappNumber,
-      outcome,
+      routed: outcome.routed,
+      routeType: outcome.routeType,
     });
     return outcome;
   }
@@ -402,20 +399,17 @@ export async function resolveRoutingForLead(
     const outcome: LeadRoutingOutcome = fallbackOutcome.routed
       ? fallbackOutcome
       : { routed: false, routeType: "none", reason: "Ville et quartier absents ou non identifiables." };
-    console.log(`[route:${organizationId}] Ville et quartier non identifiables pour le routage`, { rawCity: city, rawQuarter: quarter, normalizedCity, outcome });
+    console.log(`[route:${organizationId}] Ville et quartier non identifiables pour le routage`, { routed: outcome.routed, routeType: outcome.routeType });
     return outcome;
   }
 
   if (fallbackOutcome.routed) {
     const outcome = fallbackOutcome;
     console.log(`[route:${organizationId}] Fallback utilisé pour le routage`, {
-      rawCity: city,
-      rawQuarter: quarter,
       normalizedCity,
       fallbackResponsibleId: settings.fallbackResponsible?.id,
-      fallbackResponsibleName: settings.fallbackResponsible?.name,
-      fallbackWhatsApp: settings.fallbackWhatsApp,
-      outcome,
+      routed: outcome.routed,
+      routeType: outcome.routeType,
     });
     return outcome;
   }
@@ -426,8 +420,6 @@ export async function resolveRoutingForLead(
     reason: quarter ? `Aucune localisation correspondante pour le quartier ${quarter}` : `Aucune localisation correspondante pour ${normalizedCity}`,
   };
   console.log(`[route:${organizationId}] Aucune route trouvée`, {
-    rawCity: city,
-    rawQuarter: quarter,
     normalizedCity,
     locationsCount: locations.length,
     outcome,
@@ -561,19 +553,14 @@ export async function registerQualifiedLead(input: {
   try {
     const { sendWhatsAppMessageForOrg } = await import("../whatsapp/whatsapp.registry.js");
     console.log(`[route:${input.organizationId}] Envoi notification au responsable`, {
-      city: lead.city,
       routeType: routingResult.routeType,
       responsibleId: routingResult.responsibleId,
-      responsibleWhatsapp: routingResult.responsibleWhatsapp,
       leadId: lead.id,
-      leadName: lead.contactName,
     });
     await sendWhatsAppMessageForOrg(input.organizationId, routingResult.responsibleWhatsapp, notificationMessage);
     console.log(`[route:${input.organizationId}] Notification envoyée au responsable`, {
-      city: lead.city,
       routeType: routingResult.routeType,
       responsibleId: routingResult.responsibleId,
-      responsibleWhatsapp: routingResult.responsibleWhatsapp,
       leadId: lead.id,
     });
 

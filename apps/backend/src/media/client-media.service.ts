@@ -1,7 +1,9 @@
+import { getMediaSecret, sameToken } from "./media-secret.js";
 import { createHmac, randomUUID } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { env } from "../config/env.js";
+import { detectImageType } from "../whatsapp/public-image.js";
 
 /**
  * Photos et documents envoyés par les clients (WhatsApp). Rangés par entreprise sur le disque persistant,
@@ -39,9 +41,27 @@ function organizationDirectory(organizationId: string) {
   return path.join(path.resolve(env.CLIENT_MEDIA_DIR), organizationId);
 }
 
-export async function saveClientMedia(organizationId: string, data: Buffer, mimeType: string, fileName?: string | null): Promise<StoredClientMedia> {
+/** Taille totale des fichiers déjà rangés pour l'entreprise. */
+async function directorySize(directory: string): Promise<number> {
+  const entries = await fs.readdir(directory).catch(() => [] as string[]);
+  const sizes = await Promise.all(entries.map((entry) => fs.stat(path.join(directory, entry)).then((stat) => stat.size).catch(() => 0)));
+  return sizes.reduce((total, size) => total + size, 0);
+}
+
+export class MediaQuotaError extends Error {
+  constructor() {
+    super("Espace de stockage des fichiers reçus plein pour cette entreprise.");
+    this.name = "MediaQuotaError";
+  }
+}
+
+export async function saveClientMedia(organizationId: string, data: Buffer, declaredMimeType: string, fileName?: string | null): Promise<StoredClientMedia> {
   const directory = organizationDirectory(organizationId);
   await fs.mkdir(directory, { recursive: true });
+  // Un client ne peut pas remplir le disque : plafond d'espace par entreprise (les fichiers sont effacés après la durée de rétention).
+  if ((await directorySize(directory)) + data.length > env.CLIENT_MEDIA_QUOTA_MB * 1024 * 1024) throw new MediaQuotaError();
+  // Le type annoncé par l'expéditeur n'est pas cru : une « image » dont les octets ne sont pas ceux d'une image est rangée comme fichier à télécharger.
+  const mimeType = IMAGE_TYPES.has(declaredMimeType) && detectImageType(data) !== declaredMimeType ? "application/octet-stream" : declaredMimeType;
   const file = `${randomUUID()}.${resolveStoredExtension(mimeType, fileName)}`;
   const temporary = path.join(directory, `${randomUUID()}.tmp`);
   await fs.writeFile(temporary, data, { flag: "wx" });
@@ -67,7 +87,7 @@ export async function deleteClientMediaFile(organizationId: string, file: string
 }
 
 export function createClientMediaToken(organizationId: string, file: string, issuedAt = Date.now()) {
-  const secret = env.MEDIA_SIGNING_SECRET || "development-media-secret";
+  const secret = getMediaSecret();
   const digest = createHmac("sha256", secret).update(`client:${organizationId}:${file}:${issuedAt}`).digest("hex");
   return `${issuedAt}:${digest}`;
 }
@@ -77,7 +97,7 @@ export function verifyClientMediaToken(organizationId: string, file: string, tok
   const [issuedAtValue, digest] = token.split(":");
   const issuedAt = Number.parseInt(issuedAtValue ?? "0", 10);
   if (!digest || !Number.isFinite(issuedAt) || now - issuedAt > env.MEDIA_URL_TTL_SECONDS * 1000 || issuedAt > now + 60_000) return false;
-  return createClientMediaToken(organizationId, file, issuedAt) === token;
+  return sameToken(createClientMediaToken(organizationId, file, issuedAt), token);
 }
 
 /** Chemin relatif signé, à préfixer par l'adresse de l'API côté tableau de bord. */

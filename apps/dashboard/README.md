@@ -77,3 +77,9 @@ Le dossier `apps/dashboard` est publié tel quel sur Render (Static Site, dossie
 - `/app/` : tableau de bord (connexion). `/app/?inscription` ouvre directement le formulaire de création de compte.
 - Dans le backend, mettre `CLIENT_DASHBOARD_URL` sur l'adresse `/app/` (ex. `https://brayanoia.onrender.com/app/`) pour que les liens des emails mènent directement au tableau de bord. Les balises de partage (`og:url`, `og:image`, `canonical`) de `index.html` contiennent l'adresse du site : à adapter si le domaine change.
 - En local : `python -m http.server 4173 --directory apps/dashboard`, puis `http://localhost:4173/` (accueil) ou `http://localhost:4173/app/` (tableau de bord).
+
+
+## Sécurité du site statique
+- Les pages portent une politique de contenu (CSP) dans une balise `<meta>` : scripts uniquement depuis ce site, pas de script en ligne. `app/index.html` autorise les appels vers l'adresse du serveur définie dans `src/config.js` (`defaultApi`). **Si vous changez l'adresse du serveur, mettez aussi à jour `connect-src` dans `app/index.html`** (un test le vérifie).
+- Le tableau de bord se masque s'il est affiché dans un cadre d'un autre site.
+- Sur Render (site statique), ajoutez aussi ces en-têtes dans *Settings → Headers* pour `/*` : `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, `Permissions-Policy: geolocation=(), microphone=(), camera=()` (une balise `<meta>` ne peut pas les définir).

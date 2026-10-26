@@ -9,7 +9,7 @@ RUN mkdir -p /data/wa-session
 
 COPY package*.json ./
 
-RUN npm install
+RUN npm ci
 
 COPY . .
 

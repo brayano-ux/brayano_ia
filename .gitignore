@@ -5,3 +5,6 @@ node_modules/
 dist/
 wa-session/
 *.log
+
+.DS_Store
+apps/backend/uploads/

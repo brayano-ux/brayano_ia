@@ -57,10 +57,8 @@ export async function productsRoute(app: FastifyInstance) {
     const { orgId, productId } = request.params as { orgId: string; productId: string };
     const contentType = request.headers["content-type"]?.split(";")[0]?.trim().toLowerCase() ?? "";
     if (!Buffer.isBuffer(request.body)) throw new ValidationError("Le fichier image est invalide.");
-    const publicBaseUrl = env.NODE_ENV === "development"
-      ? `http://${request.headers.host}`
-      : env.APP_URL;
-    return { product: await saveProductImage(orgId, productId, contentType, request.body, publicBaseUrl) };
+    // Toujours l'adresse configurée (APP_URL) : jamais l'en-tête Host, que le client peut falsifier.
+    return { product: await saveProductImage(orgId, productId, contentType, request.body, env.APP_URL) };
   });
 
   app.get("/media/products/:orgId/:filename", async (request, reply) => {
@@ -79,6 +77,6 @@ export async function productsRoute(app: FastifyInstance) {
       return { message: "Image introuvable." };
     }
 
-    return reply.type(image.mimeType).header("Cache-Control", "public, max-age=86400").send(image.contents);
+    return reply.type(image.mimeType).header("Cache-Control", "private, max-age=3600").send(image.contents);
   });
 }

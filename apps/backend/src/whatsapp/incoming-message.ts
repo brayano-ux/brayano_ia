@@ -190,10 +190,8 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
 
     const replyStartedAt = Date.now();
 
-    console.log(`📩 [org:${organizationId}] Message enregistré :`, {
-      from: message.fromJid,
-      text: message.text,
-    });
+    // Pas de contenu de message ni de numéro dans les journaux : ce sont des données de vos clients.
+    console.log(`📩 [org:${organizationId}] Message enregistré (${message.text.length} caractères).`);
 
     if (received) {
       await reportReceivedMedia({

@@ -153,13 +153,13 @@ function renderAppointments() {
     <div class="appointment-day">
       <h3>${escapeHtml(date)}</h3>
       ${items.map((appointment) => `
-        <article class="appointment-card status-${appointment.status.toLowerCase()}">
+        <article class="appointment-card status-${escapeHtml(String(appointment.status).toLowerCase())}">
           <strong class="appointment-time">${escapeHtml(formatWhen(appointment.startsAt).time)}</strong>
           <div class="appointment-info">
             <span>${escapeHtml(appointment.contactName || appointment.contactPhone || "Client WhatsApp")}</span>
             <small class="muted">${escapeHtml([appointment.service, appointment.contactPhone && appointment.contactName ? appointment.contactPhone : "", appointment.source === "AI" ? "pris par l’agent" : "ajouté à la main"].filter(Boolean).join(" • "))}</small>
           </div>
-          <span class="appointment-status">${STATUS_LABELS[appointment.status] || appointment.status}</span>
+          <span class="appointment-status">${escapeHtml(STATUS_LABELS[appointment.status] || appointment.status)}</span>
           ${appointment.status === "BOOKED" ? `
             <div class="appointment-actions">
               <button type="button" class="text-button" data-appt="${escapeHtml(appointment.id)}" data-status="DONE">Terminé</button>

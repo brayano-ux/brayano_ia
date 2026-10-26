@@ -20,7 +20,7 @@ export async function createTestOrganization(name = "Salon Éclat", options: { e
   const organization = await prisma.organization.create({ data: { name } });
   const email = options.email ?? `owner-${randomUUID().slice(0, 8)}@example.com`;
   const user = await prisma.user.create({
-    data: { organizationId: organization.id, email, passwordHash: options.password ? hashPassword(options.password) : "x", name: "Propriétaire", role: options.role ?? "ADMIN" },
+    data: { organizationId: organization.id, email, passwordHash: options.password ? await hashPassword(options.password) : "x", name: "Propriétaire", role: options.role ?? "ADMIN" },
   });
   await prisma.aiSettings.create({
     data: { organizationId: organization.id, agentName: "Assistant", systemPrompt: "Réponds poliment.", businessInfo: "Salon de coiffure à Douala.", responseDelaySeconds: 3 },

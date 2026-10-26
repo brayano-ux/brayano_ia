@@ -1,5 +1,6 @@
 import { api, isNetworkError, isAuthenticationError, setUnauthorizedHandler } from "../../services/api.js";
 import { clearSession, isAuthenticated, readSession, writeOrganizationId, writeSession } from "../../services/storage.js";
+import { askFields } from "../../utils/ask.js";
 import { $, showToast } from "../../utils/dom.js";
 import { getState, setState } from "../../state/store.js";
 
@@ -34,6 +35,8 @@ export function showDashboard() {
 }
 
 export function logoutUser(mode = "login") {
+  // On prévient le serveur pour qu'il supprime la session : le jeton ne doit plus servir après la déconnexion.
+  if (isAuthenticated()) void api("/logout", { method: "POST" }).catch(() => undefined);
   clearSession();
   $(".app-shell").classList.add("hidden");
   $("#login-screen").classList.remove("hidden");
@@ -117,16 +120,18 @@ export function initAuthFlow(onAuthenticated) {
         });
 
         showToast(result.message || "Un code de vérification a été envoyé.", "success");
-        const code = window.prompt("Entrez le code reçu par email :", "");
-        if (!code) {
-          return;
-        }
-
-        const newPassword = window.prompt("Choisissez un nouveau mot de passe (au moins 8 caractères) :", "");
-        if (!newPassword || newPassword.length < 8) {
-          showToast("Le nouveau mot de passe doit contenir au moins 8 caractères.", "error");
-          return;
-        }
+        const answer = await askFields({
+          title: "Réinitialiser votre mot de passe",
+          intro: "Saisissez le code à 6 chiffres reçu par email, puis choisissez un nouveau mot de passe.",
+          confirmLabel: "Réinitialiser",
+          fields: [
+            { name: "code", label: "Code reçu par email", inputMode: "numeric", autocomplete: "one-time-code", placeholder: "123456" },
+            { name: "newPassword", label: "Nouveau mot de passe (8 caractères minimum)", type: "password", minLength: 8, autocomplete: "new-password" },
+          ],
+        });
+        if (!answer) return;
+        const code = answer.code.trim();
+        const newPassword = answer.newPassword;
 
         const resetResult = await api("/password-reset/verify", {
           method: "POST",

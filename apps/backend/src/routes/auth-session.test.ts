@@ -43,7 +43,7 @@ describe("persistent authentication sessions", () => {
   });
 
   it("never returns a login token if its persistence fails", async () => {
-    mocks.user.findUnique.mockResolvedValue({ id: "user-1", organizationId: "org-1", active: true, passwordHash: hashPassword("password123") });
+    mocks.user.findUnique.mockResolvedValue({ id: "user-1", organizationId: "org-1", active: true, passwordHash: await hashPassword("password123") });
     mocks.session.upsert.mockRejectedValue(new Error("database unavailable"));
     const app = Fastify(); await app.register(authRoute);
     try {
