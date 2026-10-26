@@ -20,7 +20,7 @@ export async function addAgent(organizationId: string, input: { name: string; em
   const existing = await prisma.user.findUnique({ where: { email }, select: { id: true } });
   if (existing) throw new ValidationError("Cette adresse email est déjà utilisée par un autre compte.");
   return prisma.user.create({
-    data: { organizationId, email, name: input.name.trim(), passwordHash: hashPassword(input.password), role: "AGENT" },
+    data: { organizationId, email, name: input.name.trim(), passwordHash: await hashPassword(input.password), role: "AGENT" },
     select: memberSelect,
   });
 }
@@ -42,7 +42,7 @@ export async function setAgentActive(organizationId: string, userId: string, act
 
 export async function resetAgentPassword(organizationId: string, userId: string, password: string, actingUserId: string | undefined) {
   await findAgent(organizationId, userId, actingUserId);
-  await prisma.user.update({ where: { id: userId }, data: { passwordHash: hashPassword(password) } });
+  await prisma.user.update({ where: { id: userId }, data: { passwordHash: await hashPassword(password) } });
   await prisma.session.deleteMany({ where: { userId } });
 }
 

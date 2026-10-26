@@ -28,6 +28,8 @@ import { restoreWhatsAppConnections } from "./whatsapp/whatsapp.registry.js";
 export async function buildServer(options: { restoreConnections?: boolean } = {}) {
   const app = Fastify({
     bodyLimit: 5 * 1024 * 1024,
+    // L'adresse du client est lue dans X-Forwarded-For en ne faisant confiance qu'aux proxys de l'hébergeur (TRUST_PROXY_HOPS), jamais à ce que le client écrit.
+    trustProxy: (_address: string, hop: number) => hop < env.TRUST_PROXY_HOPS,
     logger:
       env.NODE_ENV === "test"
         ? false

@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { ValidationError } from "../shared/errors.js";
+import { getPlatformAdminEmails } from "../organizations/platform-admins.js";
 import { requireAuth } from "./auth.route.js";
 import {
   createOrganization,
@@ -12,7 +13,13 @@ const createOrganizationSchema = z.object({
 });
 
 export async function organizationsRoute(app: FastifyInstance) {
-  app.post("/organizations", async (request) => {
+  // Réservé aux administrateurs de la plateforme : le tableau de bord ne crée jamais d'entreprise vide.
+  app.post("/organizations", async (request, reply) => {
+    const session = await requireAuth(request.headers.authorization);
+    if (!session || !getPlatformAdminEmails().includes(session.email.trim().toLowerCase())) {
+      reply.code(403);
+      return { message: "Action réservée à l'administrateur de la plateforme." };
+    }
     const parsed = createOrganizationSchema.safeParse(request.body);
     if (!parsed.success) {
       throw new ValidationError(parsed.error.issues[0]?.message);

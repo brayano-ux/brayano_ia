@@ -1,12 +1,16 @@
 import { TRIAL } from "../billing/billing-plans.js";
 import { normalizeWhatsAppNumber } from "../shared/phone.js";
 import type { FastifyInstance } from "fastify";
-import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import nodemailer from "nodemailer";
 import { z } from "zod";
 import { prisma } from "../database/client.js";
 import { env } from "../config/env.js";
 import { AppError } from "../shared/errors.js";
+import { burnPasswordCheck, hashPassword, needsRehash, safeEqualText, verifyPassword } from "../auth/password.js";
+import { clearRateLimit, evaluateRateLimit, isRateLimited, recordFailure } from "../auth/rate-limit.js";
+
+export { evaluateRateLimit, hashPassword, verifyPassword };
 
 const loginSchema = z.object({
   email: z.string().email("Adresse email invalide."),
@@ -40,32 +44,13 @@ const passwordResetVerifySchema = z.object({
 
 const resendRegistrationSchema = z.object({ email: z.string().email() });
 
-const VALID_USERS = new Map<string, string>();
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-
-export function evaluateRateLimit(key: string, limit: number, windowMs: number) {
-  const now = Date.now();
-  const previous = rateLimitMap.get(key);
-
-  if (!previous || previous.resetAt <= now) {
-    rateLimitMap.set(key, { count: 1, resetAt: now + windowMs });
-    return true;
-  }
-
-  if (previous.count >= limit) {
-    return false;
-  }
-
-  previous.count += 1;
-  rateLimitMap.set(key, previous);
-  return true;
+/** Adresse du client telle que la voit le serveur (trustProxy : voir app.ts). Jamais lue directement dans un en-tête. */
+function getClientKey(request: { ip?: string | undefined }) {
+  return request.ip ?? "unknown-client";
 }
 
-function getClientKey(request: { headers: Record<string, string | string[] | undefined>; ip?: string | undefined }) {
-  const forwarded = request.headers["x-forwarded-for"];
-  const value = Array.isArray(forwarded) ? forwarded[0] : forwarded;
-  return value ?? request.ip ?? "unknown-client";
-}
+const HOUR = 3_600_000;
+const FIFTEEN_MINUTES = 15 * 60_000;
 
 export function getConfiguredAdminCredentials() {
   const email = process.env.DEFAULT_ADMIN_EMAIL?.trim().toLowerCase();
@@ -75,27 +60,8 @@ export function getConfiguredAdminCredentials() {
   return { email, password };
 }
 
-function registerConfiguredAdmin() {
-  const admin = getConfiguredAdminCredentials();
-  if (!admin) return;
-  VALID_USERS.set(admin.email, hashPassword(admin.password));
-}
-
-registerConfiguredAdmin();
-
 function hashToken(token: string) {
   return createHash("sha256").update(token).digest("hex");
-}
-
-export function hashPassword(password: string) {
-  return createHash("sha256").update(password).digest("hex");
-}
-
-export function verifyPassword(password: string, storedHash: string | undefined) {
-  if (!storedHash) return false;
-  const stored = Buffer.from(storedHash, "utf8");
-  const candidate = Buffer.from(hashPassword(password), "utf8");
-  return stored.length === candidate.length && timingSafeEqual(stored, candidate);
 }
 
 function createVerificationCode() {
@@ -166,7 +132,7 @@ async function ensureDefaultAdminOrganization(email: string) {
           organizationId: createdOrganization.id,
           name: "Administrateur",
           email,
-          passwordHash: hashPassword(configuredAdmin.password),
+          passwordHash: await hashPassword(configuredAdmin.password),
           role: "ADMIN",
         },
       });
@@ -265,8 +231,8 @@ export async function requireAuth(headerValue: string | undefined) {
 
 export async function authRoute(app: FastifyInstance) {
   app.post("/login", async (request, reply) => {
-    const clientKey = getClientKey(request as { headers: Record<string, string | string[] | undefined>; ip?: string | undefined });
-    if (!evaluateRateLimit(`${clientKey}:login`, 5, 60_000)) {
+    // Limite large par adresse (plusieurs clients peuvent partager la même) ; le vrai verrou est par compte, plus bas.
+    if (!evaluateRateLimit(`${getClientKey(request)}:login`, 30, 60_000)) {
       reply.code(429);
       return { message: "Trop de tentatives. Réessayez dans une minute." };
     }
@@ -279,21 +245,36 @@ export async function authRoute(app: FastifyInstance) {
 
     const email = parsed.data.email.trim().toLowerCase();
     const password = parsed.data.password;
+    const failureKey = `login-failures:${email}`;
+    if (isRateLimited(failureKey, 10)) {
+      reply.code(429);
+      return { message: "Trop de tentatives sur ce compte. Réessayez dans quelques minutes." };
+    }
 
     try {
       const organizationId = await ensureDefaultAdminOrganization(email);
       const configuredAdmin = getConfiguredAdminCredentials();
-      const storedPassword = VALID_USERS.get(email);
-      const dbUser = storedPassword ? null : await prisma.user.findUnique({ where: { email }, select: { organizationId: true, passwordHash: true, active: true } });
-      const isValidPassword = verifyPassword(password, storedPassword ?? dbUser?.passwordHash);
+      const dbUser = await prisma.user.findUnique({ where: { email }, select: { id: true, organizationId: true, passwordHash: true, active: true } });
+
+      let isValidPassword = false;
+      if (dbUser) isValidPassword = await verifyPassword(password, dbUser.passwordHash);
+      else await burnPasswordCheck(password);
+      // Le mot de passe de l'administrateur défini dans l'environnement reste accepté (comparaison à temps constant).
+      if (!isValidPassword && configuredAdmin?.email === email && safeEqualText(password, configuredAdmin.password)) isValidPassword = true;
 
       if (!isValidPassword) {
+        recordFailure(failureKey, FIFTEEN_MINUTES);
         reply.code(401);
         return { message: "Email ou mot de passe incorrect." };
       }
       if (dbUser && !dbUser.active) {
         reply.code(403);
         return { message: "Ce compte a été désactivé. Contactez le propriétaire de l'entreprise." };
+      }
+
+      // Ancienne empreinte (SHA-256) : on la remplace par une empreinte salée maintenant qu'on connaît le mot de passe.
+      if (dbUser && needsRehash(dbUser.passwordHash) && (await verifyPassword(password, dbUser.passwordHash))) {
+        await prisma.user.update({ where: { id: dbUser.id }, data: { passwordHash: await hashPassword(password) } }).catch((error) => app.log.error(error, "Mise à niveau du mot de passe impossible"));
       }
 
       let issuedOrganizationId = organizationId ?? dbUser?.organizationId;
@@ -306,6 +287,7 @@ export async function authRoute(app: FastifyInstance) {
         return { message: "Impossible de se connecter pour le moment." };
       }
 
+      clearRateLimit(failureKey);
       const token = await issueToken(email, issuedOrganizationId);
       return { token, organizationId: issuedOrganizationId, user: { email } };
     } catch (error) {
@@ -315,9 +297,15 @@ export async function authRoute(app: FastifyInstance) {
     }
   });
 
+  app.post("/logout", async (request) => {
+    const token = getBearerToken(request.headers.authorization);
+    if (token) await prisma.session.deleteMany({ where: { tokenHash: hashToken(token) } });
+    return { message: "Vous êtes déconnecté." };
+  });
+
   app.post("/register", async (request, reply) => {
-    const clientKey = getClientKey(request as { headers: Record<string, string | string[] | undefined>; ip?: string | undefined });
-    if (!evaluateRateLimit(`${clientKey}:register`, 3, 60_000)) {
+    const clientKey = getClientKey(request);
+    if (!evaluateRateLimit(`${clientKey}:register`, 10, 60_000)) {
       reply.code(429);
       return { message: "Trop de tentatives. Réessayez dans une minute." };
     }
@@ -329,6 +317,10 @@ export async function authRoute(app: FastifyInstance) {
     }
 
     const email = parsed.data.email.trim().toLowerCase();
+    if (!evaluateRateLimit(`register-email:${email}`, 5, HOUR)) {
+      reply.code(429);
+      return { message: "Trop de demandes pour cette adresse. Réessayez plus tard." };
+    }
     const name = parsed.data.name.trim();
     const companyName = parsed.data.companyName.trim();
     const whatsappNumber = normalizeWhatsAppNumber(parsed.data.whatsappNumber)!;
@@ -347,6 +339,7 @@ export async function authRoute(app: FastifyInstance) {
       }
 
       const code = createVerificationCode();
+      const passwordHash = await hashPassword(parsed.data.password);
       await sendVerificationCode(email, code);
       await prisma.signupVerification.upsert({
         where: { email },
@@ -354,7 +347,7 @@ export async function authRoute(app: FastifyInstance) {
           name,
           companyName,
           whatsappNumber,
-          passwordHash: hashPassword(parsed.data.password),
+          passwordHash,
           codeHash: hashToken(code),
           expiresAt: new Date(Date.now() + 10 * 60_000),
           lastSentAt: new Date(),
@@ -366,7 +359,7 @@ export async function authRoute(app: FastifyInstance) {
           name,
           companyName,
           whatsappNumber,
-          passwordHash: hashPassword(parsed.data.password),
+          passwordHash,
           codeHash: hashToken(code),
           expiresAt: new Date(Date.now() + 10 * 60_000),
           lastSentAt: new Date(),
@@ -381,8 +374,8 @@ export async function authRoute(app: FastifyInstance) {
   });
 
   app.post("/register/verify", async (request, reply) => {
-    const clientKey = getClientKey(request as { headers: Record<string, string | string[] | undefined>; ip?: string | undefined });
-    if (!evaluateRateLimit(`${clientKey}:verify`, 5, 60_000)) {
+    const clientKey = getClientKey(request);
+    if (!evaluateRateLimit(`${clientKey}:verify`, 20, 60_000)) {
       reply.code(429);
       return { message: "Trop de tentatives. Réessayez dans une minute." };
     }
@@ -394,6 +387,11 @@ export async function authRoute(app: FastifyInstance) {
     }
 
     const email = parsed.data.email.trim().toLowerCase();
+    // Quel que soit le nombre de codes demandés, une adresse n'a que 10 essais par heure.
+    if (!evaluateRateLimit(`verify-email:${email}`, 10, HOUR)) {
+      reply.code(429);
+      return { message: "Nombre maximal de tentatives atteint. Réessayez plus tard." };
+    }
     const verification = await prisma.signupVerification.findUnique({ where: { email } });
     if (!verification || verification.expiresAt.getTime() <= Date.now()) {
       reply.code(400);
@@ -430,7 +428,6 @@ export async function authRoute(app: FastifyInstance) {
         return { organization: createdOrganization, user: createdUser };
       });
 
-      VALID_USERS.set(email, verification.passwordHash);
       const token = await issueToken(email, organization.organization.id);
       return { token, organizationId: organization.organization.id, organizationName: organization.organization.name, user: { email } };
     } catch (error) {
@@ -441,8 +438,8 @@ export async function authRoute(app: FastifyInstance) {
   });
 
   app.post("/register/resend", async (request, reply) => {
-    const clientKey = getClientKey(request as { headers: Record<string, string | string[] | undefined>; ip?: string | undefined });
-    if (!evaluateRateLimit(`${clientKey}:resend`, 3, 60_000)) {
+    const clientKey = getClientKey(request);
+    if (!evaluateRateLimit(`${clientKey}:resend`, 10, 60_000)) {
       reply.code(429);
       return { message: "Trop de demandes. Réessayez dans une minute." };
     }
@@ -454,6 +451,10 @@ export async function authRoute(app: FastifyInstance) {
     }
 
     const email = parsed.data.email.trim().toLowerCase();
+    if (!evaluateRateLimit(`resend-email:${email}`, 5, HOUR)) {
+      reply.code(429);
+      return { message: "Trop de demandes pour cette adresse. Réessayez plus tard." };
+    }
     const verification = await prisma.signupVerification.findUnique({ where: { email } });
     if (!verification || Date.now() - verification.lastSentAt.getTime() < 60_000) {
       reply.code(429);
@@ -470,8 +471,8 @@ export async function authRoute(app: FastifyInstance) {
   });
 
   app.post("/password-reset/request", async (request, reply) => {
-    const clientKey = getClientKey(request as { headers: Record<string, string | string[] | undefined>; ip?: string | undefined });
-    if (!evaluateRateLimit(`${clientKey}:password-reset-request`, 3, 60_000)) {
+    const clientKey = getClientKey(request);
+    if (!evaluateRateLimit(`${clientKey}:password-reset-request`, 10, 60_000)) {
       reply.code(429);
       return { message: "Trop de demandes. Réessayez dans une minute." };
     }
@@ -483,6 +484,10 @@ export async function authRoute(app: FastifyInstance) {
     }
 
     const email = parsed.data.email.trim().toLowerCase();
+    if (!evaluateRateLimit(`reset-request-email:${email}`, 5, HOUR)) {
+      // Réponse neutre : on ne révèle pas si le compte existe, et on n'envoie pas d'email de plus.
+      return { message: "Si un compte existe avec cette adresse, un code de vérification a été envoyé." };
+    }
     const user = await Promise.resolve(prisma.user.findUnique({ where: { email }, select: { id: true, email: true } })).catch(() => null);
     if (!user) {
       return { message: "Si un compte existe avec cette adresse, un code de vérification a été envoyé." };
@@ -516,8 +521,8 @@ export async function authRoute(app: FastifyInstance) {
   });
 
   app.post("/password-reset/verify", async (request, reply) => {
-    const clientKey = getClientKey(request as { headers: Record<string, string | string[] | undefined>; ip?: string | undefined });
-    if (!evaluateRateLimit(`${clientKey}:password-reset-verify`, 5, 60_000)) {
+    const clientKey = getClientKey(request);
+    if (!evaluateRateLimit(`${clientKey}:password-reset-verify`, 20, 60_000)) {
       reply.code(429);
       return { message: "Trop de tentatives. Réessayez dans une minute." };
     }
@@ -529,6 +534,11 @@ export async function authRoute(app: FastifyInstance) {
     }
 
     const email = parsed.data.email.trim().toLowerCase();
+    // Quel que soit le nombre de codes demandés, une adresse n'a que 10 essais par heure.
+    if (!evaluateRateLimit(`reset-verify-email:${email}`, 10, HOUR)) {
+      reply.code(429);
+      return { message: "Nombre maximal de tentatives atteint. Réessayez plus tard." };
+    }
     const resetVerification = await Promise.resolve(prisma.passwordResetVerification.findUnique({ where: { email } })).catch(() => null);
     if (!resetVerification || new Date(resetVerification.expiresAt).getTime() <= Date.now()) {
       reply.code(400);
@@ -553,9 +563,10 @@ export async function authRoute(app: FastifyInstance) {
       return { message: "Compte introuvable." };
     }
 
-    const passwordHash = hashPassword(parsed.data.newPassword);
+    const passwordHash = await hashPassword(parsed.data.newPassword);
     await prisma.user.update({ where: { email }, data: { passwordHash } });
-    VALID_USERS.set(email, passwordHash);
+    // Un nouveau mot de passe coupe toutes les sessions ouvertes (un jeton volé ne survit pas au changement).
+    await prisma.session.deleteMany({ where: { userId: user.id } });
     await Promise.resolve(prisma.passwordResetVerification.delete({ where: { email } })).catch(() => undefined);
 
     return { message: "Votre mot de passe a été réinitialisé avec succès." };

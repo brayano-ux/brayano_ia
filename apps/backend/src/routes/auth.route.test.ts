@@ -9,7 +9,7 @@ vi.mock("../database/client.js", () => ({
       findUnique: vi.fn(),
       update: vi.fn(),
     },
-    session: { upsert: vi.fn().mockResolvedValue({}) },
+    session: { upsert: vi.fn().mockResolvedValue({}), deleteMany: vi.fn().mockResolvedValue({ count: 2 }) },
     signupVerification: {
       findUnique: vi.fn(),
       upsert: vi.fn(),
@@ -39,7 +39,7 @@ vi.mock("nodemailer", () => ({
   },
 }));
 
-import { getConfiguredAdminCredentials, verifyPassword } from "./auth.route.js";
+import { getConfiguredAdminCredentials, hashPassword, verifyPassword } from "./auth.route.js";
 
 const prismaMock = prisma as any;
 
@@ -74,7 +74,7 @@ describe("auth security configuration", () => {
     expect(getConfiguredAdminCredentials()).toBeNull();
   });
 
-  it("verifies a configured admin password with a constant-time hash check", () => {
+  it("verifies a configured admin password with a constant-time hash check", async () => {
     process.env.DEFAULT_ADMIN_EMAIL = "admin@brayano.ai";
     process.env.DEFAULT_ADMIN_PASSWORD = "brayano123";
 
@@ -83,9 +83,13 @@ describe("auth security configuration", () => {
       password: "brayano123",
     });
 
-    const expectedHash = createHash("sha256").update("brayano123").digest("hex");
-    expect(verifyPassword("brayano123", expectedHash)).toBe(true);
-    expect(verifyPassword("wrong-pass", expectedHash)).toBe(false);
+    // Anciennes empreintes (SHA-256) toujours acceptées à la connexion, en attendant leur mise à niveau.
+    const legacyHash = createHash("sha256").update("brayano123").digest("hex");
+    expect(await verifyPassword("brayano123", legacyHash)).toBe(true);
+    expect(await verifyPassword("wrong-pass", legacyHash)).toBe(false);
+    const modernHash = await hashPassword("brayano123");
+    expect(await verifyPassword("brayano123", modernHash)).toBe(true);
+    expect(await verifyPassword("wrong-pass", modernHash)).toBe(false);
   });
 
   it("allows an unlisted email to start signup but creates the account only after code verification", async () => {
@@ -235,7 +239,9 @@ describe("auth security configuration", () => {
     expect(JSON.parse(verifyResponse.payload).message).toContain("réinitialisé");
     expect(prisma.user.update).toHaveBeenCalledWith(expect.objectContaining({
       where: { email: "user@example.com" },
-      data: expect.objectContaining({ passwordHash: expect.any(String) }),
+      data: expect.objectContaining({ passwordHash: expect.stringMatching(/^scrypt\$/) }),
     }));
+    // Toutes les sessions ouvertes sont coupées par le changement de mot de passe.
+    expect(prismaMock.session.deleteMany).toHaveBeenCalledWith({ where: { userId: "user-1" } });
   });
 });

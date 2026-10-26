@@ -5,6 +5,7 @@ const signedClientMediaPath = /^\/media\/client\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.[
 export function isPublicRoute(url: string) {
   return url === "/"
     || url === "/login"
+    || url === "/logout"
     || url === "/register"
     || url.startsWith("/register/")
     || url.startsWith("/password-reset/")

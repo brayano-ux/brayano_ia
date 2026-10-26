@@ -34,6 +34,8 @@ export function showDashboard() {
 }
 
 export function logoutUser(mode = "login") {
+  // On prévient le serveur pour qu'il supprime la session : le jeton ne doit plus servir après la déconnexion.
+  if (isAuthenticated()) void api("/logout", { method: "POST" }).catch(() => undefined);
   clearSession();
   $(".app-shell").classList.add("hidden");
   $("#login-screen").classList.remove("hidden");

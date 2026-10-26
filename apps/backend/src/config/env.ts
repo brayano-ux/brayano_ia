@@ -32,7 +32,9 @@ const envSchema = z.object({
   SUPPORT_EMAIL: z.string().email().optional().or(z.literal("")),
   DEFAULT_ADMIN_EMAIL: z.string().trim().email().optional().or(z.literal("")),
   DEFAULT_ADMIN_PASSWORD: z.string().min(8).optional().or(z.literal("")),
-  SESSION_TTL_SECONDS: z.coerce.number().int().positive().default(60 * 60 * 24 * 30),
+  SESSION_TTL_SECONDS: z.coerce.number().int().positive().default(60 * 60 * 24 * 14),
+  /** Nombre de proxys de l'hébergeur devant le serveur (Render : 1). Sert à lire la vraie adresse du client. */
+  TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(1),
   MEDIA_SIGNING_SECRET: z.string().min(16).optional().or(z.literal("")),
   MEDIA_URL_TTL_SECONDS: z.coerce.number().int().positive().default(60 * 60),
   LLM_PROVIDER: z.enum(["gemini", "mistral", "openrouter"]).default("gemini"),

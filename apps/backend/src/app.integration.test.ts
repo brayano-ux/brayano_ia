@@ -30,6 +30,7 @@ import { resetSupportRateLimitForTests, setSupportProvidersForTests } from "./su
 import { prisma } from "./database/client.js";
 import { saveClientMedia } from "./media/client-media.service.js";
 import { hashPassword } from "./routes/auth.route.js";
+import { resetRateLimitsForTests } from "./auth/rate-limit.js";
 import { createTestOrganization, disconnectTestDatabase, integrationEnabled, resetDatabase } from "./test-support/integration.js";
 
 const PASSWORD = "motdepasse123";
@@ -492,7 +493,7 @@ describe.skipIf(!integrationEnabled)("API complète (HTTP, base réelle)", () =>
       expect((await chat(organization.id, token, { messages: [] })).statusCode).toBe(400);
       expect((await chat(organization.id, token, { messages: [{ role: "user", content: "   " }] })).statusCode).toBe(400);
       expect((await chat(organization.id, token, { messages: [{ role: "user", content: "Q" }, { role: "assistant", content: "R" }] })).statusCode).toBe(400);
-      await prisma.user.create({ data: { organizationId: organization.id, email: "agent@example.com", passwordHash: hashPassword(PASSWORD), name: "Awa", role: "AGENT" } });
+      await prisma.user.create({ data: { organizationId: organization.id, email: "agent@example.com", passwordHash: await hashPassword(PASSWORD), name: "Awa", role: "AGENT" } });
       const agent = await login("agent@example.com");
       expect((await chat(organization.id, agent.token, { messages })).statusCode).toBe(403);
       expect(prompts).toHaveLength(0);
@@ -570,6 +571,66 @@ describe.skipIf(!integrationEnabled)("API complète (HTTP, base réelle)", () =>
       expect(body.daily.at(-4).count).toBe(1);
       expect(body.daily.slice(0, 26).every((day: { count: number }) => day.count === 0)).toBe(true);
       expect(body.daily.map((day: { date: string }) => day.date)).toEqual([...body.daily.map((day: { date: string }) => day.date)].sort());
+    });
+  });
+  describe("sécurité de la connexion", () => {
+    beforeEach(() => resetRateLimitsForTests());
+    // Derrière le proxy de l'hébergeur, l'adresse réelle est la dernière de la liste ; ce que le client écrit avant ne compte pas.
+    const attempt = (email: string, password: string, spoofed: string, real = "203.0.113.9") =>
+      app.inject({ method: "POST", url: "/login", headers: { "x-forwarded-for": `${spoofed}, ${real}` }, payload: { email, password } });
+
+    it("ignore l'adresse écrite par le client : changer d'en-tête ne remet pas le compteur à zéro", async () => {
+      await setup();
+      let blocked = 0;
+      for (let i = 0; i < 40; i++) {
+        const response = await attempt(`inconnu${i}@example.com`, "mauvais", `198.51.100.${i}`);
+        if (response.statusCode === 429) blocked += 1;
+      }
+      expect(blocked).toBeGreaterThanOrEqual(10);
+    });
+
+    it("verrouille le compte après 10 échecs, même depuis des adresses différentes, puis refuse le bon mot de passe", async () => {
+      await setup();
+      for (let i = 0; i < 10; i++) {
+        const response = await attempt("owner@example.com", "mauvais-mot-de-passe", "198.51.100.1", `203.0.113.${i + 1}`);
+        expect(response.statusCode).toBe(401);
+      }
+      const locked = await attempt("owner@example.com", PASSWORD, "198.51.100.1", "203.0.113.200");
+      expect(locked.statusCode).toBe(429);
+      expect(locked.json().token).toBeUndefined();
+      // Un autre compte n'est pas touché.
+      await createTestOrganization("Autre", { email: "autre@example.com", password: PASSWORD });
+      expect((await attempt("autre@example.com", PASSWORD, "198.51.100.1", "203.0.113.201")).statusCode).toBe(200);
+    });
+
+    it("remplace une ancienne empreinte SHA-256 par une empreinte salée à la première connexion réussie", async () => {
+      const { user } = await setup();
+      const legacy = createHash("sha256").update(PASSWORD).digest("hex");
+      await prisma.user.update({ where: { id: user.id }, data: { passwordHash: legacy } });
+
+      expect((await attempt("owner@example.com", "mauvais", "1.1.1.1", "203.0.113.50")).statusCode).toBe(401);
+      expect((await prisma.user.findUniqueOrThrow({ where: { id: user.id } })).passwordHash).toBe(legacy);
+
+      expect((await attempt("owner@example.com", PASSWORD, "1.1.1.1", "203.0.113.51")).statusCode).toBe(200);
+      const upgraded = (await prisma.user.findUniqueOrThrow({ where: { id: user.id } })).passwordHash;
+      expect(upgraded).toMatch(/^scrypt\$/);
+      expect((await attempt("owner@example.com", PASSWORD, "1.1.1.1", "203.0.113.52")).statusCode).toBe(200);
+    });
+
+    it("la déconnexion supprime la session côté serveur : l'ancien jeton ne marche plus", async () => {
+      const { token } = await setup();
+      expect((await app.inject({ method: "GET", url: "/me", headers: authed(token) })).statusCode).toBe(200);
+      expect((await app.inject({ method: "POST", url: "/logout", headers: authed(token) })).statusCode).toBe(200);
+      expect((await app.inject({ method: "GET", url: "/me", headers: authed(token) })).statusCode).toBe(401);
+      // Sans jeton, la déconnexion répond quand même sans erreur.
+      expect((await app.inject({ method: "POST", url: "/logout" })).statusCode).toBe(200);
+    });
+
+    it("la création d'entreprise à part est réservée à l'administrateur de la plateforme", async () => {
+      const { token } = await setup();
+      expect((await app.inject({ method: "POST", url: "/organizations", payload: { name: "Spam" } })).statusCode).toBe(401);
+      expect((await app.inject({ method: "POST", url: "/organizations", headers: authed(token), payload: { name: "Spam" } })).statusCode).toBe(403);
+      expect(await prisma.organization.count()).toBe(1);
     });
   });
 });
