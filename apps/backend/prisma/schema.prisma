@@ -67,6 +67,8 @@ model AiSettings {
   agentRole            String?  @map("agent_role")
   agentTone            String?  @map("agent_tone")
   personaPromptedAt    DateTime? @map("persona_prompted_at")
+  topicGateEnabled     Boolean  @default(false) @map("topic_gate_enabled")
+  topicGateTopic       String?  @map("topic_gate_topic")
   createdAt            DateTime @default(now()) @map("created_at")
   updatedAt            DateTime @updatedAt @map("updated_at")
 
@@ -326,6 +328,7 @@ model Conversation {
   stage               ConversationStage   @default(NEW)
   stageLocked         Boolean             @default(false) @map("stage_locked")
   paymentCheckPending Boolean             @default(false) @map("payment_check_pending")
+  topicGateOpened     Boolean             @default(false) @map("topic_gate_opened")
   lastInboundAt       DateTime?           @map("last_inbound_at")
   lastReadAt          DateTime?           @map("last_read_at")
   followUpCount       Int                 @default(0) @map("follow_up_count")

@@ -363,6 +363,64 @@ describe.skipIf(!integrationEnabled)("traitement d'un message entrant (base rée
     });
   });
 
+  describe("sujet autorisé", () => {
+    async function orgWithTopicGate(topic = "nos vêtements") {
+      const { organization } = await createTestOrganization();
+      await prisma.aiSettings.update({ where: { organizationId: organization.id }, data: { topicGateEnabled: true, topicGateTopic: topic } });
+      return organization;
+    }
+
+    it("ne répond pas à un message hors sujet, mais garde le message dans la conversation", async () => {
+      const organization = await orgWithTopicGate();
+      installScriptedAi([aiReply({ reply: "Nous ouvrons à 8h.", onTopic: false })]);
+      const whatsapp = new FakeWhatsApp();
+
+      await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "Vous êtes ouverts demain ?"));
+
+      expect(whatsapp.sent).toHaveLength(0);
+      expect((await prisma.message.findFirstOrThrow({ where: { direction: "INBOUND" } })).content).toBe("Vous êtes ouverts demain ?");
+      expect((await prisma.conversation.findFirstOrThrow()).topicGateOpened).toBe(false);
+    });
+
+    it("répond dès que le message correspond au sujet, et ouvre la porte pour la suite", async () => {
+      const organization = await orgWithTopicGate();
+      installScriptedAi([
+        aiReply({ reply: "Oui, la robe rouge est disponible à 12 000 FCFA.", onTopic: true }),
+        aiReply({ reply: "Elle est en taille M et L." }),
+      ]);
+      const whatsapp = new FakeWhatsApp();
+
+      await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "Je voudrais en savoir plus sur ces vêtements"));
+      expect(whatsapp.sent.map((item) => item.text)).toEqual(["Oui, la robe rouge est disponible à 12 000 FCFA."]);
+      expect((await prisma.conversation.findFirstOrThrow()).topicGateOpened).toBe(true);
+
+      // La porte reste ouverte : la suite de la conversation reçoit une réponse normale, même sans re-classification.
+      await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "Et en quelle taille ?"));
+      expect(whatsapp.sent.map((item) => item.text)).toEqual(["Oui, la robe rouge est disponible à 12 000 FCFA.", "Elle est en taille M et L."]);
+    });
+
+    it("ne consomme pas de message du forfait pour un message bloqué", async () => {
+      const organization = await orgWithTopicGate();
+      await prisma.organization.update({ where: { id: organization.id }, data: { freeAiResponsesRemaining: 3 } });
+      setBillingEnforcedForTests(true);
+      try {
+        installScriptedAi([aiReply({ onTopic: false })]);
+        await deliver(organization.id, new FakeWhatsApp(), inbound(JID_NUMBER, "Bonjour, vous vendez des meubles ?"));
+        expect((await prisma.organization.findUniqueOrThrow({ where: { id: organization.id } })).freeAiResponsesRemaining).toBe(3);
+      } finally {
+        setBillingEnforcedForTests(null);
+      }
+    });
+
+    it("n'a aucun effet quand il n'est pas activé", async () => {
+      const { organization } = await createTestOrganization();
+      installScriptedAi([aiReply({ reply: "Bonjour, comment puis-je vous aider ?" })]);
+      const whatsapp = new FakeWhatsApp();
+      await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "Vous êtes ouverts demain ?"));
+      expect(whatsapp.sent.map((item) => item.text)).toEqual(["Bonjour, comment puis-je vous aider ?"]);
+    });
+  });
+
   describe("étiquettes de suivi", () => {
     it("passe de Nouveau à Intéressé après une demande de prix", async () => {
       const { organization } = await createTestOrganization();

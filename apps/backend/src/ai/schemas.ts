@@ -23,6 +23,8 @@ export const aiReplySchema = z.object({
   imageUrl: z.string().url().optional().or(z.literal("")),
   booking: bookingRequestSchema,
   order: orderRequestSchema,
+  /** Rempli seulement quand un « sujet autorisé » est actif pour cette entreprise (voir ai/prompt.ts). */
+  onTopic: z.boolean().optional(),
 });
 
 export type AIReply = z.infer<typeof aiReplySchema>;

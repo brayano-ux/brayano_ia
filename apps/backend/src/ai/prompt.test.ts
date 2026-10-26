@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildSystemPrompt } from "./prompt.js";
+import { buildSystemPrompt, buildTopicGateSection } from "./prompt.js";
 import { aiReplySchema } from "./schemas.js";
 
 const baseSettings = {
@@ -7,6 +7,20 @@ const baseSettings = {
   businessInfo: null,
   systemPrompt: "Réponds de manière utile.",
 };
+
+describe("sujet autorisé dans le prompt", () => {
+  it("n'apparaît pas quand aucune section n'est fournie", () => {
+    const prompt = buildSystemPrompt({ ...baseSettings });
+    expect(prompt).not.toContain("SUJET AUTORISÉ");
+  });
+
+  it("insère le sujet configuré et demande une classification tranchée", () => {
+    const prompt = buildSystemPrompt({ ...baseSettings, topicGateSection: buildTopicGateSection("nos vêtements") });
+    expect(prompt).toContain("SUJET AUTORISÉ");
+    expect(prompt).toContain('"nos vêtements"');
+    expect(prompt).toContain("onTopic");
+  });
+});
 
 describe("product catalog in the assistant prompt", () => {
   it("provides product facts and an image flag without exposing the media URL", () => {
