@@ -177,3 +177,10 @@ export type Broadcast = Prisma.BroadcastModel
  * 
  */
 export type BroadcastRecipient = Prisma.BroadcastRecipientModel
+/**
+ * Model LandingPageView
+ * Compteur de visites de la page d'accueil, sans donnée personnelle : pas d'IP ni de cookie conservés.
+ * `visitorHash` est une empreinte à sens unique (HMAC quotidien) qui sert uniquement à estimer le nombre
+ * de visiteurs distincts dans la même journée ; elle change chaque jour et ne permet pas de retrouver qui que ce soit.
+ */
+export type LandingPageView = Prisma.LandingPageViewModel

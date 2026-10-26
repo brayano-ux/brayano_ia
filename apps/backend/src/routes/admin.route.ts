@@ -9,6 +9,7 @@ import {
 } from "../organizations/platform-suspension.service.js";
 import { getPlatformAdminEmails } from "../organizations/platform-admins.js";
 import { EMPTY_USAGE, getAiResponseUsageByOrganization, getDailyAiResponses, sumUsage } from "../analytics/platform-usage.js";
+import { getLandingViewsSummary } from "../analytics/landing-views.service.js";
 import { getBillingPlan } from "../billing/billing-plans.js";
 import { getOrganizationBillingStatus } from "../billing/subscription.service.js";
 import { prisma } from "../database/client.js";
@@ -97,6 +98,13 @@ export async function adminRoute(app: FastifyInstance) {
     if (!organization) throw new NotFoundError("Entreprise introuvable.");
     const daily = await getDailyAiResponses(orgId, parsed.data.days);
     return { organizationId: orgId, days: parsed.data.days, daily, total: daily.reduce((sum, day) => sum + day.count, 0) };
+  });
+
+  // Visites de la page d'accueil (pas d'IP ni de cookie conservés) : total, par jour, estimation de visiteurs distincts.
+  app.get("/admin/analytics/landing-views", async (request) => {
+    const parsed = z.object({ days: z.coerce.number().int().min(7).max(90).default(30) }).safeParse(request.query ?? {});
+    const days = parsed.success ? parsed.data.days : 30;
+    return getLandingViewsSummary(days);
   });
 
   // Abonnement activé à la main (paiement reçu hors Campay, geste commercial, essai prolongé…).

@@ -13,6 +13,12 @@ describe("public routes", () => {
     expect(isPublicRoute("/media/client/invalid/file.jpg")).toBe(false);
   });
 
+  it("exposes the anonymous landing-view counter, nothing else under /analytics", () => {
+    expect(isPublicRoute("/analytics/landing-view")).toBe(true);
+    expect(isPublicRoute("/analytics/landing-view/other")).toBe(false);
+    expect(isPublicRoute("/analytics/anything-else")).toBe(false);
+  });
+
   it("leaves /admin routes to their own platform token check", () => {
     expect(isPublicRoute("/admin/organizations")).toBe(true);
     expect(isPublicRoute("/administrator")).toBe(false);

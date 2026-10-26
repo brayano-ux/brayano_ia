@@ -80,12 +80,12 @@ export type PrismaVersion = {
 }
 
 /**
- * Prisma Client JS version: 7.10.0
- * Query Engine version: 0edf323efd1d98336f3f0a68684b56f689b900d3
+ * Prisma Client JS version: 7.10.1
+ * Query Engine version: d1b3f377ca835d73fd50954a5e22128b9ebdd6b8
  */
 export const prismaVersion: PrismaVersion = {
-  client: "7.10.0",
-  engine: "0edf323efd1d98336f3f0a68684b56f689b900d3"
+  client: "7.10.1",
+  engine: "d1b3f377ca835d73fd50954a5e22128b9ebdd6b8"
 }
 
 /**
@@ -423,7 +423,8 @@ export const ModelName = {
   Order: 'Order',
   AiCorrection: 'AiCorrection',
   Broadcast: 'Broadcast',
-  BroadcastRecipient: 'BroadcastRecipient'
+  BroadcastRecipient: 'BroadcastRecipient',
+  LandingPageView: 'LandingPageView'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -439,7 +440,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "organization" | "aiSettings" | "product" | "productImage" | "billingPayment" | "billingSubscription" | "user" | "allowedEmail" | "signupVerification" | "passwordResetVerification" | "session" | "whatsAppAccount" | "contact" | "conversation" | "aiRun" | "message" | "location" | "responsible" | "organizationRoutingSettings" | "prospectLead" | "appointmentSettings" | "appointment" | "orderSettings" | "order" | "aiCorrection" | "broadcast" | "broadcastRecipient"
+    modelProps: "organization" | "aiSettings" | "product" | "productImage" | "billingPayment" | "billingSubscription" | "user" | "allowedEmail" | "signupVerification" | "passwordResetVerification" | "session" | "whatsAppAccount" | "contact" | "conversation" | "aiRun" | "message" | "location" | "responsible" | "organizationRoutingSettings" | "prospectLead" | "appointmentSettings" | "appointment" | "orderSettings" | "order" | "aiCorrection" | "broadcast" | "broadcastRecipient" | "landingPageView"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2441,6 +2442,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    LandingPageView: {
+      payload: Prisma.$LandingPageViewPayload<ExtArgs>
+      fields: Prisma.LandingPageViewFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LandingPageViewFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LandingPageViewPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LandingPageViewFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LandingPageViewPayload>
+        }
+        findFirst: {
+          args: Prisma.LandingPageViewFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LandingPageViewPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LandingPageViewFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LandingPageViewPayload>
+        }
+        findMany: {
+          args: Prisma.LandingPageViewFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LandingPageViewPayload>[]
+        }
+        create: {
+          args: Prisma.LandingPageViewCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LandingPageViewPayload>
+        }
+        createMany: {
+          args: Prisma.LandingPageViewCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LandingPageViewCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LandingPageViewPayload>[]
+        }
+        delete: {
+          args: Prisma.LandingPageViewDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LandingPageViewPayload>
+        }
+        update: {
+          args: Prisma.LandingPageViewUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LandingPageViewPayload>
+        }
+        deleteMany: {
+          args: Prisma.LandingPageViewDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LandingPageViewUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LandingPageViewUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LandingPageViewPayload>[]
+        }
+        upsert: {
+          args: Prisma.LandingPageViewUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LandingPageViewPayload>
+        }
+        aggregate: {
+          args: Prisma.LandingPageViewAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLandingPageView>
+        }
+        groupBy: {
+          args: Prisma.LandingPageViewGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LandingPageViewGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LandingPageViewCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LandingPageViewCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2925,6 +3000,16 @@ export const BroadcastRecipientScalarFieldEnum = {
 } as const
 
 export type BroadcastRecipientScalarFieldEnum = (typeof BroadcastRecipientScalarFieldEnum)[keyof typeof BroadcastRecipientScalarFieldEnum]
+
+
+export const LandingPageViewScalarFieldEnum = {
+  id: 'id',
+  day: 'day',
+  visitorHash: 'visitorHash',
+  createdAt: 'createdAt'
+} as const
+
+export type LandingPageViewScalarFieldEnum = (typeof LandingPageViewScalarFieldEnum)[keyof typeof LandingPageViewScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -3515,6 +3600,7 @@ export type GlobalOmitConfig = {
   aiCorrection?: Prisma.AiCorrectionOmit
   broadcast?: Prisma.BroadcastOmit
   broadcastRecipient?: Prisma.BroadcastRecipientOmit
+  landingPageView?: Prisma.LandingPageViewOmit
 }
 
 /* Types for Logging */

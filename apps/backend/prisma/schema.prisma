@@ -665,3 +665,17 @@ model BroadcastRecipient {
   @@index([broadcastId, status])
   @@map("broadcast_recipients")
 }
+
+/// Compteur de visites de la page d'accueil, sans donnée personnelle : pas d'IP ni de cookie conservés.
+/// `visitorHash` est une empreinte à sens unique (HMAC quotidien) qui sert uniquement à estimer le nombre
+/// de visiteurs distincts dans la même journée ; elle change chaque jour et ne permet pas de retrouver qui que ce soit.
+model LandingPageView {
+  id          String   @id @default(uuid())
+  day         String   @map("day")
+  visitorHash String   @map("visitor_hash")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([day])
+  @@index([day, visitorHash])
+  @@map("landing_page_views")
+}
