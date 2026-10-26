@@ -11,7 +11,7 @@
 .help-fab-ai:hover { background: var(--brand-600); }
 
 /* ----- Robot animé + bulle de pensée ----- */
-.help-robot-wrap { position: relative; }
+.help-robot-wrap { position: relative; margin-top: 56px; }
 .help-robot { width: 34px; height: 34px; overflow: visible; }
 .help-robot-float { animation: help-robot-bob 2.6s ease-in-out infinite; transform-origin: center; }
 .help-robot-antenna { transform-box: fill-box; transform-origin: 50% 50%; animation: help-robot-ping 1.7s ease-in-out infinite; filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.85)); }
