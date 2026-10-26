@@ -7,7 +7,7 @@ import { NotFoundError } from "../shared/errors.js";
 export function settingsFingerprint(settings: AiSettings): string {
   return createHash("sha256").update(JSON.stringify([
     settings.agentName, settings.businessInfo, settings.systemPrompt, settings.welcomeMessage,
-    settings.agentImageUrl, settings.qualificationFields, settings.businessHoursEnabled,
+    settings.qualificationFields, settings.businessHoursEnabled,
     settings.businessHours, settings.businessTimezone, settings.closedMessage,
   ])).digest("hex");
 }

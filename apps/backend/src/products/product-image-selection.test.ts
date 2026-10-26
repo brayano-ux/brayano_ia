@@ -3,7 +3,6 @@ import {
   buildProductDetailsMessage,
   buildProductImageCaption,
   isImageRequested,
-  resolveRequestedProductImage,
   resolveRequestedProductPhotos,
 } from "./product-image-selection.js";
 
@@ -15,38 +14,27 @@ const catalog = [
 
 describe("requested product image selection", () => {
   it("returns the stored image for the selected catalog product after an image request", () => {
-    expect(resolveRequestedProductImage({
+    expect(resolveRequestedProductPhotos({
       message: "Peux-tu m’envoyer la photo de ce produit ?",
       productId: "selected",
       products: catalog,
-    })).toBe(selectedImageUrl);
+    })).toEqual([catalog[0]]);
   });
 
-  it("does not send a model-provided URL or an image the prospect did not request", () => {
-    expect(resolveRequestedProductImage({
+  it("returns nothing when the prospect did not request an image", () => {
+    expect(resolveRequestedProductPhotos({
       message: "Ce produit coûte combien ?",
       productId: "selected",
       products: catalog,
-      legacyImageUrl: "https://attacker.example/image.jpg",
-      configuredLegacyImageUrl: "https://api.example.com/agent.png",
-    })).toBeNull();
-    expect(resolveRequestedProductImage({
-      message: "Je voudrais voir le produit.",
-      productId: "selected",
-      products: catalog,
-      legacyImageUrl: "https://attacker.example/image.jpg",
-      configuredLegacyImageUrl: "https://api.example.com/agent.png",
-    })).toBe(selectedImageUrl);
+    })).toEqual([]);
   });
 
-  it("does not substitute an unrelated agent image for a missing product image", () => {
-    expect(resolveRequestedProductImage({
+  it("does not substitute an image for a product that has none", () => {
+    expect(resolveRequestedProductPhotos({
       message: "Montre-moi une image du produit.",
       productId: "without-image",
       products: catalog,
-      legacyImageUrl: "https://api.example.com/agent.png",
-      configuredLegacyImageUrl: "https://api.example.com/agent.png",
-    })).toBeNull();
+    })).toEqual([]);
   });
 });
 

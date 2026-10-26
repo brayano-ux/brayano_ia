@@ -50,7 +50,7 @@ model AiSettings {
   agentName            String   @default("Assistant") @map("agent_name")
   businessInfo         String?  @map("business_info")
   onboardingTestHash   String?  @map("onboarding_test_hash")
-  agentImageUrl        String?  @map("agent_image_url")
+  agentImageUrl        String?  @map("agent_image_url") // Fonctionnalité retirée (voir migration clear_agent_image_url) ; colonne gardée vide pour l'instant.
   systemPrompt         String   @map("system_prompt")
   welcomeMessage       String?  @map("welcome_message")
   qualificationFields  Json?    @map("qualification_fields")

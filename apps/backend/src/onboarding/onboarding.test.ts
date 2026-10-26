@@ -3,7 +3,7 @@ import type { AiSettings } from "../generated/prisma/client.js";
 const mocks = vi.hoisted(() => ({ organization: { findUnique: vi.fn() }, message: { findFirst: vi.fn() }, aiSettings: { updateMany: vi.fn() } }));
 vi.mock("../database/client.js", () => ({ prisma: mocks }));
 import { getOnboardingStatus, markAgentTested, settingsFingerprint } from "./onboarding.service.js";
-const settings = () => ({ organizationId: "org-1", agentName: "Awa", businessInfo: "Formation à Douala", systemPrompt: "Réponds aux questions", welcomeMessage: null, agentImageUrl: null, qualificationFields: [], businessHoursEnabled: false, businessHours: null, businessTimezone: "Africa/Douala", closedMessage: null, onboardingTestHash: null, aiEnabled: true, updatedAt: new Date("2026-10-23T10:00:00Z") } as unknown as AiSettings);
+const settings = () => ({ organizationId: "org-1", agentName: "Awa", businessInfo: "Formation à Douala", systemPrompt: "Réponds aux questions", welcomeMessage: null, qualificationFields: [], businessHoursEnabled: false, businessHours: null, businessTimezone: "Africa/Douala", closedMessage: null, onboardingTestHash: null, aiEnabled: true, updatedAt: new Date("2026-10-23T10:00:00Z") } as unknown as AiSettings);
 beforeEach(() => { vi.resetAllMocks(); mocks.organization.findUnique.mockResolvedValue({ aiSettings: settings(), platformSuspended: false }); mocks.message.findFirst.mockResolvedValue(null); });
 
 describe("guided onboarding status", () => {
