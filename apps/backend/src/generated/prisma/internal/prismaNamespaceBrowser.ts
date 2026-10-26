@@ -77,7 +77,8 @@ export const ModelName = {
   Order: 'Order',
   AiCorrection: 'AiCorrection',
   Broadcast: 'Broadcast',
-  BroadcastRecipient: 'BroadcastRecipient'
+  BroadcastRecipient: 'BroadcastRecipient',
+  LandingPageView: 'LandingPageView'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -541,6 +542,16 @@ export const BroadcastRecipientScalarFieldEnum = {
 } as const
 
 export type BroadcastRecipientScalarFieldEnum = (typeof BroadcastRecipientScalarFieldEnum)[keyof typeof BroadcastRecipientScalarFieldEnum]
+
+
+export const LandingPageViewScalarFieldEnum = {
+  id: 'id',
+  day: 'day',
+  visitorHash: 'visitorHash',
+  createdAt: 'createdAt'
+} as const
+
+export type LandingPageViewScalarFieldEnum = (typeof LandingPageViewScalarFieldEnum)[keyof typeof LandingPageViewScalarFieldEnum]
 
 
 export const SortOrder = {

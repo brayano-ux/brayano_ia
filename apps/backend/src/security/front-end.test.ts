@@ -65,7 +65,9 @@ describe("tableau de bord : protections du navigateur", () => {
       // Aucun <script> en ligne (les blocs de données JSON-LD ne s'exécutent pas).
       expect(html.match(/<script(?![^>]*\bsrc=)(?![^>]*application\/ld\+json)[^>]*>/gi) ?? [], page).toEqual([]);
     }
-    expect(/http-equiv="Content-Security-Policy" content="([^"]+)"/.exec(read("app/index.html"))?.[1]).toContain(api!);
+    for (const page of ["index.html", "app/index.html"]) {
+      expect(/http-equiv="Content-Security-Policy" content="([^"]+)"/.exec(read(page))?.[1], page).toContain(api!);
+    }
   });
 });
 

@@ -5,6 +5,7 @@ import { appointmentsRoute } from "./appointments/appointments.route.js";
 import { configAssistantRoute } from "./config-assistant/config-assistant.route.js";
 import { supportAssistantRoute } from "./support-assistant/support-assistant.route.js";
 import { adminRoute } from "./routes/admin.route.js";
+import { landingViewsRoute } from "./analytics/landing-views.route.js";
 import { aiCorrectionsRoute } from "./ai/corrections.route.js";
 import { statsRoute } from "./analytics/stats.route.js";
 import { broadcastsRoute } from "./broadcasts/broadcasts.route.js";
@@ -158,6 +159,7 @@ export async function buildServer(options: { restoreConnections?: boolean } = {}
 
   await app.register(healthRoute);
   await app.register(adminRoute);
+  await app.register(landingViewsRoute);
   await app.register(authRoute);
   await app.register(organizationsRoute);
   await app.register(productsRoute);

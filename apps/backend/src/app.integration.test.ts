@@ -721,4 +721,48 @@ describe.skipIf(!integrationEnabled)("API complète (HTTP, base réelle)", () =>
       }
     });
   });
+  describe("visites de la page d'accueil (compteur anonyme)", () => {
+    const ADMIN = { authorization: "Bearer admin-token-admin-token-admin-token-0123" };
+
+    it("compte une vraie visite, ignore les robots et répond sans authentification", async () => {
+      const real = await app.inject({ method: "POST", url: "/analytics/landing-view", headers: { "x-forwarded-for": "198.51.100.11", "user-agent": "Mozilla/5.0 (iPhone)" } });
+      expect(real.statusCode).toBe(202);
+      expect(real.json()).toEqual({ recorded: true });
+
+      const bot = await app.inject({ method: "POST", url: "/analytics/landing-view", headers: { "x-forwarded-for": "198.51.100.12", "user-agent": "Googlebot/2.1" } });
+      expect(bot.json()).toEqual({ recorded: false });
+
+      // Un en-tête vide (certains outils l'envoient ainsi) compte aussi comme un robot.
+      const noUserAgent = await app.inject({ method: "POST", url: "/analytics/landing-view", headers: { "x-forwarded-for": "198.51.100.13", "user-agent": "" } });
+      expect(noUserAgent.json()).toEqual({ recorded: false });
+
+      const stats = await app.inject({ method: "GET", url: "/admin/analytics/landing-views", headers: ADMIN });
+      expect(stats.statusCode).toBe(200);
+      const body = stats.json();
+      expect(body.today.views).toBeGreaterThanOrEqual(1);
+      expect(body.total.views).toBeGreaterThanOrEqual(1);
+      expect(body.daily.at(-1).views).toBeGreaterThanOrEqual(1);
+    });
+
+    it("n'enregistre pas deux fois la même adresse dans les 5 secondes, et refuse l'accès aux statistiques sans être administrateur", async () => {
+      const ip = { "x-forwarded-for": "198.51.100.20", "user-agent": "Mozilla/5.0 (Macintosh)" };
+      const before = (await app.inject({ method: "GET", url: "/admin/analytics/landing-views", headers: ADMIN })).json().today.views;
+      await app.inject({ method: "POST", url: "/analytics/landing-view", headers: ip });
+      const second = await app.inject({ method: "POST", url: "/analytics/landing-view", headers: ip });
+      expect(second.json()).toEqual({ recorded: false });
+      const after = (await app.inject({ method: "GET", url: "/admin/analytics/landing-views", headers: ADMIN })).json().today.views;
+      expect(after).toBe(before + 1);
+
+      expect((await app.inject({ method: "GET", url: "/admin/analytics/landing-views" })).statusCode).toBe(401);
+      const { token } = await setup();
+      expect((await app.inject({ method: "GET", url: "/admin/analytics/landing-views", headers: authed(token) })).statusCode).toBe(403);
+    });
+
+    it("ne stocke ni adresse IP ni identifiant lisible : seule une empreinte qui change chaque jour est gardée", async () => {
+      await app.inject({ method: "POST", url: "/analytics/landing-view", headers: { "x-forwarded-for": "203.0.113.77", "user-agent": "Mozilla/5.0 (Linux; Android 10)" } });
+      const rows = await prisma.landingPageView.findMany({ orderBy: { createdAt: "desc" }, take: 1 });
+      expect(rows[0]!.visitorHash).not.toContain("203.0.113.77");
+      expect(rows[0]!.visitorHash).toMatch(/^[0-9a-f]{64}$/);
+    });
+  });
 });
