@@ -341,6 +341,30 @@ export async function getCommercialMetrics(organizationId: string) {
   });
 }
 
+/**
+ * Choisit, parmi les commerciaux actifs d'une même zone, celui à qui le prospect suivant doit aller : celui qui
+ * attend un prospect depuis le plus longtemps (jamais servi en premier). Sans ça, le premier de la liste
+ * (toujours le même, trié par nom) recevrait systématiquement tous les prospects de la zone, et les autres aucun.
+ */
+async function pickResponsibleForLocation<T extends { id: string }>(organizationId: string, candidates: T[]): Promise<T> {
+  if (candidates.length <= 1) return candidates[0]!;
+
+  const rows = await prisma.prospectLead.groupBy({
+    by: ["responsibleId"],
+    where: { organizationId, responsibleId: { in: candidates.map((candidate) => candidate.id) }, isRouted: true },
+    _max: { routedAt: true },
+  });
+  const lastRoutedAt = new Map(rows.map((row) => [row.responsibleId as string, row._max.routedAt]));
+
+  return candidates.reduce((longestWaiting, candidate) => {
+    const current = lastRoutedAt.get(longestWaiting.id);
+    const challenger = lastRoutedAt.get(candidate.id);
+    if (current === undefined) return longestWaiting; // jamais servi : garde la priorité tant qu'un autre n'est pas aussi prioritaire
+    if (challenger === undefined) return candidate; // jamais servi : passe devant quelqu'un qui a déjà reçu un prospect
+    return challenger!.getTime() < current!.getTime() ? candidate : longestWaiting;
+  });
+}
+
 export async function resolveRoutingForLead(
   organizationId: string,
   city?: string | null,
@@ -370,8 +394,8 @@ export async function resolveRoutingForLead(
 
   const matchedLocation = findBestMatchingLocation(locations, city, quarter ?? null);
 
-  if (matchedLocation?.responsible?.[0]) {
-    const responsible = matchedLocation.responsible[0];
+  if (matchedLocation?.responsible?.length) {
+    const responsible = await pickResponsibleForLocation(organizationId, matchedLocation.responsible);
     const outcome: LeadRoutingOutcome = {
       routed: true,
       routeType: "location",
