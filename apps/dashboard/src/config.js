@@ -14,10 +14,12 @@ export const APP_CONFIG = {
 };
 
 export function getApiBaseUrl() {
-  if (window.API_BASE_URL) return window.API_BASE_URL;
+  // Une chaîne uniquement (un élément HTML nommé « API_BASE_URL » ne doit pas pouvoir rediriger les appels).
+  if (typeof window.API_BASE_URL === "string" && /^https?:\/\//.test(window.API_BASE_URL)) return window.API_BASE_URL;
 
   const localHosts = ["localhost", "127.0.0.1"];
   if (localHosts.includes(window.location.hostname)) return "http://127.0.0.1:3000";
 
-  return localStorage.getItem(APP_CONFIG.localStorageKeys.apiBase) || APP_CONFIG.defaultApi;
+  // L'adresse du serveur n'est plus lue dans le stockage du navigateur : le jeton de connexion ne peut pas être détourné vers un autre serveur.
+  return APP_CONFIG.defaultApi;
 }

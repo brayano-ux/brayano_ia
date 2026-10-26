@@ -1,8 +1,19 @@
 import { formatExportDate } from "./format.js";
 
+/** Un numéro de téléphone (« +237 690 00 00 00 ») commence par « + » sans être une formule. */
+const PHONE_NUMBER = /^\+?[\d\s().-]+$/;
+
+/**
+ * Neutralise les valeurs que Excel / LibreOffice exécuteraient comme une formule (=, +, -, @, tabulation) :
+ * un client peut mettre ce qu'il veut dans son nom WhatsApp, et le propriétaire ouvre ensuite le fichier.
+ */
+export function neutralizeFormula(text) {
+  return /^[=+\-@\t\r]/.test(text.trimStart()) && !PHONE_NUMBER.test(text.trim()) ? `'${text}` : text;
+}
+
 function csvValue(value) {
   const text = value === null || value === undefined ? "" : String(value);
-  return `"${text.replace(/"/g, '""').replace(/\r?\n/g, " ")}"`;
+  return `"${neutralizeFormula(text).replace(/"/g, '""').replace(/[\r\n]+/g, " ")}"`;
 }
 
 /**

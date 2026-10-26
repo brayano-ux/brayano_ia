@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
   <title>Brayano IA — L'assistant WhatsApp qui répond à vos clients</title>
   <meta name="description" content="Brayano IA répond à vos clients sur WhatsApp à votre place, 24h/24, note leurs commandes et les relance. Essayez avec 100 réponses offertes, sans carte bancaire, en conservant votre numéro." />
   <meta name="theme-color" content="#1f6bff" />
@@ -17,15 +19,7 @@
   <meta property="og:image" content="https://brayanoia.onrender.com/assets/og-image.png" />
   <meta name="twitter:card" content="summary_large_image" />
   <!-- Déjà connecté ? On va directement au tableau de bord (ajoutez ?accueil à l'adresse pour voir cette page quand même). -->
-  <script>
-    try {
-      var session = JSON.parse(localStorage.getItem("brayano_session") || "null");
-      if (session && session.token && session.email && location.search.indexOf("accueil") === -1) {
-        document.documentElement.style.visibility = "hidden";
-        location.replace("app/");
-      }
-    } catch (error) { /* stockage indisponible : on affiche la page d'accueil */ }
-  </script>
+  <script src="assets/landing-redirect.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
@@ -370,12 +364,7 @@
     <a class="sticky-wa" href="https://wa.me/237683260520?text=Bonjour%2C%20je%20veux%20essayer%20Brayano%20IA" rel="noopener" aria-label="Écrire sur WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.2 14c-.2.6-1.3 1.2-1.8 1.2-.5.1-1.1.1-3.6-.9-3-1.3-4.9-4.4-5-4.6-.2-.2-1.2-1.6-1.2-3s.7-2.1 1-2.4c.3-.3.6-.3.8-.3h.6c.2 0 .5-.1.7.5.2.6.9 2.1.9 2.3.1.2.1.4 0 .6-.1.2-.2.4-.4.6l-.5.6c-.2.2-.4.4-.2.8.2.4 1 1.6 2.1 2.6 1.4 1.2 2.6 1.6 3 1.8.4.2.6.2.8-.1.2-.3 1-1.1 1.3-1.5.3-.4.5-.3.9-.2l2 1c.4.2.6.3.7.4.1.3.1.8-.1 1.4z"/></svg></a>
   </div>
 
-  <script>
-    // Ferme le menu du haut après un clic sur un lien (téléphone).
-    document.querySelectorAll(".menu-list a").forEach(function (link) {
-      link.addEventListener("click", function () { link.closest("details").removeAttribute("open"); });
-    });
-  </script>
+  <script src="assets/landing-menu.js" defer></script>
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"SoftwareApplication","name":"Brayano IA","applicationCategory":"BusinessApplication","operatingSystem":"Web","description":"Assistant WhatsApp qui répond aux clients, note les commandes et les rendez-vous, et relance les clients qui ne répondent plus.","url":"https://brayanoia.onrender.com/","offers":[{"@type":"Offer","name":"Essentiel","price":"10000","priceCurrency":"XAF"},{"@type":"Offer","name":"Pro","price":"20000","priceCurrency":"XAF"},{"@type":"Offer","name":"Business","price":"50000","priceCurrency":"XAF"}],"alternateName":"Brayano AI"}
   </script>

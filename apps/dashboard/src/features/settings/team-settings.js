@@ -1,4 +1,5 @@
 import { api } from "../../services/api.js";
+import { askFields } from "../../utils/ask.js";
 import { $, escapeHtml, showToast } from "../../utils/dom.js";
 import { formatDateTime } from "../../utils/format.js";
 import { getState } from "../../state/store.js";
@@ -48,8 +49,14 @@ async function act(member, action) {
       showToast(member.active ? "Accès suspendu." : "Accès rétabli.", "success");
     }
     if (action === "password") {
-      const password = window.prompt(`Nouveau mot de passe pour ${member.name || member.email} (8 caractères minimum) :`);
-      if (!password) return;
+      const answer = await askFields({
+        title: `Nouveau mot de passe pour ${member.name || member.email}`,
+        intro: "8 caractères minimum. Communiquez-le ensuite à l'employé.",
+        confirmLabel: "Changer le mot de passe",
+        fields: [{ name: "password", label: "Nouveau mot de passe", type: "password", minLength: 8, autocomplete: "new-password" }],
+      });
+      if (!answer) return;
+      const { password } = answer;
       await api(`${base()}/${member.id}`, { method: "PUT", body: JSON.stringify({ password }) });
       showToast("Mot de passe modifié. Communiquez-le à l'employé.", "success");
     }
