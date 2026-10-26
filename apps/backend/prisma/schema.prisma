@@ -17,6 +17,7 @@ model Organization {
   users                    User[]
   whatsappAccounts         WhatsAppAccount[]
   contacts                 Contact[]
+  ignoredContacts          IgnoredContact[]
   conversations            Conversation[]
   aiSettings               AiSettings?
   locations                Location[]
@@ -62,6 +63,10 @@ model AiSettings {
   followUpEnabled      Boolean  @default(false) @map("follow_up_enabled")
   followUpDelayHours   Int      @default(24) @map("follow_up_delay_hours")
   followUpMax          Int      @default(1) @map("follow_up_max")
+  agentDomain          String?  @map("agent_domain")
+  agentRole            String?  @map("agent_role")
+  agentTone            String?  @map("agent_tone")
+  personaPromptedAt    DateTime? @map("persona_prompted_at")
   createdAt            DateTime @default(now()) @map("created_at")
   updatedAt            DateTime @updatedAt @map("updated_at")
 
@@ -272,6 +277,21 @@ model Contact {
   @@unique([organizationId, whatsappJid])
   @@index([organizationId])
   @@map("contacts")
+}
+
+/** Numéros auxquels l'IA ne doit jamais répondre automatiquement (famille, fournisseurs…). Le propriétaire garde la main pour répondre lui-même. */
+model IgnoredContact {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  whatsappNumber String   @map("whatsapp_number")
+  label          String?
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  @@unique([organizationId, whatsappNumber])
+  @@index([organizationId])
+  @@map("ignored_contacts")
 }
 
 enum ConversationStatus {

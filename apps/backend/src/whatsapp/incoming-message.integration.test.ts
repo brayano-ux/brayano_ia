@@ -318,6 +318,51 @@ describe.skipIf(!integrationEnabled)("traitement d'un message entrant (base rée
     });
   });
 
+  describe("contacts à ignorer", () => {
+    it("ne répond jamais, ne prévient pas le propriétaire, mais garde le message dans la conversation", async () => {
+      const { organization } = await createTestOrganization();
+      await prisma.ignoredContact.create({ data: { organizationId: organization.id, whatsappNumber: JID_NUMBER, label: "Maman" } });
+      const calls = installScriptedAi([aiReply()]);
+      const whatsapp = new FakeWhatsApp();
+
+      await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "Coucou, tu es là ?"));
+      await flushEmails();
+
+      expect(calls).toHaveLength(0);
+      expect(whatsapp.sent).toHaveLength(0);
+      expect(hoisted.sentEmails).toHaveLength(0);
+      const stored = await prisma.message.findFirstOrThrow({ where: { direction: "INBOUND" } });
+      expect(stored.content).toBe("Coucou, tu es là ?");
+    });
+
+    it("recommence à répondre normalement une fois le numéro retiré de la liste", async () => {
+      const { organization } = await createTestOrganization();
+      const ignored = await prisma.ignoredContact.create({ data: { organizationId: organization.id, whatsappNumber: JID_NUMBER } });
+      installScriptedAi([aiReply({ reply: "Ne devrait pas partir." })]);
+      const whatsapp = new FakeWhatsApp();
+      await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "Message ignoré"));
+      expect(whatsapp.sent).toHaveLength(0);
+
+      await prisma.ignoredContact.delete({ where: { id: ignored.id } });
+      installScriptedAi([aiReply({ reply: "Oui, bonjour !" })]);
+      await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "Vous êtes là ?"));
+
+      expect(whatsapp.sent.map((item) => item.text)).toEqual(["Oui, bonjour !"]);
+    });
+
+    it("n'affecte pas les autres contacts de la même entreprise", async () => {
+      const { organization } = await createTestOrganization();
+      await prisma.ignoredContact.create({ data: { organizationId: organization.id, whatsappNumber: JID_NUMBER } });
+      installScriptedAi([aiReply({ reply: "Bonjour, ravi de vous aider." })]);
+      const whatsapp = new FakeWhatsApp();
+      const OTHER_NUMBER = "237655000099";
+
+      await deliver(organization.id, whatsapp, inbound(OTHER_NUMBER, "Bonjour"));
+
+      expect(whatsapp.sent.map((item) => item.text)).toEqual(["Bonjour, ravi de vous aider."]);
+    });
+  });
+
   describe("étiquettes de suivi", () => {
     it("passe de Nouveau à Intéressé après une demande de prix", async () => {
       const { organization } = await createTestOrganization();

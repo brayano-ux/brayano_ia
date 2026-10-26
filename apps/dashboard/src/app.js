@@ -17,6 +17,8 @@ import { initBroadcasts, loadBroadcastsView } from "./features/broadcasts/broadc
 import { initHelp } from "./features/help/help.js";
 import { initBilling, loadBilling, refreshBillingBanner } from "./features/billing/billing.js";
 import { initTeamSettings, loadTeam } from "./features/settings/team-settings.js";
+import { initIgnoredContacts, loadIgnoredContacts } from "./features/settings/ignored-contacts.js";
+import { checkFirstLoginPersona, initPersonaPicker } from "./features/persona/persona.js";
 import { loadRole } from "./features/navigation/roles.js";
 import { initConfigAssistant } from "./features/config-assistant/config-assistant.js";
 import { readSession } from "./services/storage.js";
@@ -46,6 +48,7 @@ const viewLoaders = {
     loadDelaySettings();
     loadRoutingConfig();
     loadTeam();
+    loadIgnoredContacts();
   },
   whatsapp: loadWhatsApp,
 };
@@ -64,6 +67,7 @@ async function onAuthenticated() {
   await loadRole();
   try {
     await loadOrganizations(refreshAll);
+    void checkFirstLoginPersona();
   } catch (error) {
     showToast(isNetworkError(error) ? "API inaccessible. Réessayez plus tard." : error.message, "error");
   }
@@ -107,6 +111,8 @@ function bootstrap() {
   initBilling();
   initHelp();
   initTeamSettings();
+  initIgnoredContacts();
+  initPersonaPicker();
   initDelaySettings();
   initRoutingSettings();
   initWhatsapp();

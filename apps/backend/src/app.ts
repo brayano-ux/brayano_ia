@@ -10,6 +10,7 @@ import { aiCorrectionsRoute } from "./ai/corrections.route.js";
 import { statsRoute } from "./analytics/stats.route.js";
 import { broadcastsRoute } from "./broadcasts/broadcasts.route.js";
 import { teamRoute } from "./team/team.route.js";
+import { ignoredContactsRoute } from "./contacts/ignored-contacts.route.js";
 import { aiSettingsRoute } from "./routes/ai-settings.route.js";
 import { aiTestRoute } from "./routes/ai-test.route.js";
 import { authRoute, requireAuth } from "./routes/auth.route.js";
@@ -174,6 +175,7 @@ export async function buildServer(options: { restoreConnections?: boolean } = {}
   await app.register(statsRoute);
   await app.register(broadcastsRoute);
   await app.register(teamRoute);
+  await app.register(ignoredContactsRoute);
   await app.register(billingRoute);
   await app.register(routingRoute);
   await app.register(whatsappRoute);

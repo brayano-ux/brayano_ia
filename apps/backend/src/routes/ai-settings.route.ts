@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import {
   getOrCreateAiSettings,
+  markPersonaSeen,
   updateAiSettings,
 } from "../ai/ai-settings.service.js";
 import { isValidTimezone } from "../appointments/availability.js";
@@ -39,6 +40,9 @@ const updateAiSettingsSchema = z.object({
   followUpEnabled: z.boolean().optional(),
   followUpDelayHours: z.number().int().min(2).max(72).optional(),
   followUpMax: z.number().int().min(1).max(2).optional(),
+  agentDomain: z.string().trim().max(60).optional(),
+  agentRole: z.string().trim().max(60).optional(),
+  agentTone: z.string().trim().max(60).optional(),
 });
 
 export async function aiSettingsRoute(app: FastifyInstance) {
@@ -72,6 +76,9 @@ export async function aiSettingsRoute(app: FastifyInstance) {
       followUpEnabled?: boolean | undefined;
       followUpDelayHours?: number | undefined;
       followUpMax?: number | undefined;
+      agentDomain?: string | undefined;
+      agentRole?: string | undefined;
+      agentTone?: string | undefined;
     } = {};
 
     if (parsed.data.agentName !== undefined) settingsInput.agentName = parsed.data.agentName;
@@ -92,8 +99,17 @@ export async function aiSettingsRoute(app: FastifyInstance) {
     if (parsed.data.followUpEnabled !== undefined) settingsInput.followUpEnabled = parsed.data.followUpEnabled;
     if (parsed.data.followUpDelayHours !== undefined) settingsInput.followUpDelayHours = parsed.data.followUpDelayHours;
     if (parsed.data.followUpMax !== undefined) settingsInput.followUpMax = parsed.data.followUpMax;
+    if (parsed.data.agentDomain !== undefined) settingsInput.agentDomain = parsed.data.agentDomain;
+    if (parsed.data.agentRole !== undefined) settingsInput.agentRole = parsed.data.agentRole;
+    if (parsed.data.agentTone !== undefined) settingsInput.agentTone = parsed.data.agentTone;
 
     const settings = await updateAiSettings(orgId, settingsInput);
     return { settings };
+  });
+
+  app.post("/organizations/:orgId/ai-settings/persona-seen", async (request) => {
+    const { orgId } = request.params as { orgId: string };
+    await markPersonaSeen(orgId);
+    return { success: true };
   });
 }

@@ -7,6 +7,7 @@ import { classifyByCaption, describeMediaKindLabel, type MediaAnalysis, type Med
 import { decideWelcome, placeWelcomeBeforeClientMessages } from "../ai/welcome.js";
 import { isOptOutRequest, OPT_OUT_CONFIRMATION } from "../ai/opt-out.js";
 import { setContactOptOut } from "../contacts/contacts.service.js";
+import { isIgnoredNumber } from "../contacts/ignored-contacts.service.js";
 import {
   advanceConversationStage,
   getRecentHistoryForAi,
@@ -192,6 +193,12 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
 
     // Pas de contenu de message ni de numéro dans les journaux : ce sont des données de vos clients.
     console.log(`📩 [org:${organizationId}] Message enregistré (${message.text.length} caractères).`);
+
+    // Numéro ignoré (famille, fournisseur…) : le message reste visible dans la boîte de réception, mais l'IA ne répond jamais et le propriétaire n'est pas notifié.
+    if (await isIgnoredNumber(organizationId, message.fromJid)) {
+      console.log(`🙈 [org:${organizationId}] Numéro ignoré : aucune réponse automatique.`);
+      return;
+    }
 
     if (received) {
       await reportReceivedMedia({

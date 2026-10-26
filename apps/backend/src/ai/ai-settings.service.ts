@@ -26,6 +26,9 @@ export interface AiSettingsInput {
   followUpEnabled?: boolean | undefined;
   followUpDelayHours?: number | undefined;
   followUpMax?: number | undefined;
+  agentDomain?: string | undefined;
+  agentRole?: string | undefined;
+  agentTone?: string | undefined;
 }
 
 export function resolveResponseDelaySeconds(value: unknown): ResponseDelaySeconds {
@@ -83,6 +86,10 @@ export async function updateAiSettings(organizationId: string, input: AiSettings
     ...(input.followUpEnabled !== undefined ? { followUpEnabled: input.followUpEnabled } : {}),
     ...(input.followUpDelayHours !== undefined ? { followUpDelayHours: input.followUpDelayHours } : {}),
     ...(input.followUpMax !== undefined ? { followUpMax: input.followUpMax } : {}),
+    ...(input.agentDomain !== undefined ? { agentDomain: input.agentDomain || null } : {}),
+    ...(input.agentRole !== undefined ? { agentRole: input.agentRole || null } : {}),
+    ...(input.agentTone !== undefined ? { agentTone: input.agentTone || null } : {}),
+    ...(input.agentRole && input.agentTone ? { personaPromptedAt: new Date() } : {}),
   };
 
   return prisma.aiSettings.upsert({
@@ -99,6 +106,26 @@ export async function updateAiSettings(organizationId: string, input: AiSettings
       aiEnabled: input.aiEnabled ?? true,
       responseDelaySeconds: resolveResponseDelaySeconds(input.responseDelaySeconds),
       ...updatePayload,
+    },
+  });
+}
+
+/** L'utilisateur ferme la fenêtre de personnalisation sans choisir : on ne la propose plus, sans rien changer d'autre. */
+export async function markPersonaSeen(organizationId: string) {
+  const organization = await prisma.organization.findUnique({ where: { id: organizationId }, select: { id: true } });
+  if (!organization) {
+    throw new NotFoundError("Entreprise introuvable.");
+  }
+
+  return prisma.aiSettings.upsert({
+    where: { organizationId },
+    update: { personaPromptedAt: new Date() },
+    create: {
+      organizationId,
+      agentName: env.AI_AGENT_NAME,
+      systemPrompt: env.AI_SYSTEM_PROMPT,
+      responseDelaySeconds: DEFAULT_RESPONSE_DELAY_SECONDS,
+      personaPromptedAt: new Date(),
     },
   });
 }
