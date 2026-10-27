@@ -22,8 +22,16 @@ export const aiReplySchema = z.object({
   productIds: z.array(z.string().uuid()).max(10).optional().catch(undefined),
   booking: bookingRequestSchema,
   order: orderRequestSchema,
-  /** Rempli seulement quand un « sujet autorisé » est actif pour cette entreprise (voir ai/prompt.ts). */
-  onTopic: z.boolean().optional(),
+  /**
+   * Rempli seulement quand un « sujet autorisé » est actif pour cette entreprise (voir ai/prompt.ts).
+   * Un modèle écrit parfois "true"/"false" en texte plutôt qu'un booléen JSON : on l'accepte aussi, pour
+   * qu'une simple différence de format ne fasse pas échouer TOUTE la réponse (et ne bloque pas le client
+   * par erreur — voir ai-orchestrator.ts, qui rejette l'intégralité de la réponse si un seul champ est invalide).
+   */
+  onTopic: z.preprocess(
+    (value) => (typeof value === "string" ? value.trim().toLowerCase() === "true" : value),
+    z.boolean(),
+  ).optional(),
 });
 
 export type AIReply = z.infer<typeof aiReplySchema>;
