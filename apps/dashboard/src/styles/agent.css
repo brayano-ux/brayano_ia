@@ -122,6 +122,7 @@
 .bh-row .agenda-range input::-webkit-calendar-picker-indicator { display: none; }
 .bh-section { padding-top: var(--space-5); border-top: 1px solid var(--line-soft); }
 .bh-section h2 { font-size: var(--text-lg); }
+.agent-pane-save { margin-top: var(--space-5); padding-top: var(--space-5); border-top: 1px solid var(--line-soft); justify-content: flex-end; }
 @media (min-width: 640px) { .bh-row { grid-template-columns: 110px minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: var(--space-4); } }
 
 /* ----- Apprentissage ----- */
