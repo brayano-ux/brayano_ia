@@ -2673,6 +2673,9 @@ export const AiSettingsScalarFieldEnum = {
   topicGateEnabled: 'topicGateEnabled',
   topicGateTopic: 'topicGateTopic',
   adOnlyEnabled: 'adOnlyEnabled',
+  shopLatitude: 'shopLatitude',
+  shopLongitude: 'shopLongitude',
+  shopLocationLabel: 'shopLocationLabel',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -3225,6 +3228,20 @@ export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$Prisma
 
 
 /**
+ * Reference to a field of type 'Float'
+ */
+export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+/**
+ * Reference to a field of type 'Float[]'
+ */
+export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+/**
  * Reference to a field of type 'Bytes'
  */
 export type BytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes'>
@@ -3501,20 +3518,6 @@ export type EnumBroadcastRecipientStatusFieldRefInput<$PrismaModel> = FieldRefIn
  * Reference to a field of type 'BroadcastRecipientStatus[]'
  */
 export type ListEnumBroadcastRecipientStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BroadcastRecipientStatus[]'>
-    
-
-
-/**
- * Reference to a field of type 'Float'
- */
-export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
-    
-
-
-/**
- * Reference to a field of type 'Float[]'
- */
-export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
     
 
 /**

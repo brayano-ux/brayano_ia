@@ -467,6 +467,48 @@ describe.skipIf(!integrationEnabled)("traitement d'un message entrant (base rée
     });
   });
 
+  describe("localisation de la boutique", () => {
+    async function orgWithShopLocation() {
+      const { organization } = await createTestOrganization();
+      await prisma.aiSettings.update({
+        where: { organizationId: organization.id },
+        data: { shopLatitude: 4.0511, shopLongitude: 9.7679, shopLocationLabel: "Salon Éclat — Akwa" },
+      });
+      return organization;
+    }
+
+    it("envoie la position GPS quand le client demande où se trouve la boutique", async () => {
+      const organization = await orgWithShopLocation();
+      installScriptedAi([aiReply({ reply: "Nous sommes à Akwa, je vous envoie la position." })]);
+      const whatsapp = new FakeWhatsApp();
+
+      await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "Vous êtes où exactement ?"));
+
+      expect(whatsapp.sent.map((item) => item.kind)).toEqual(["text", "location"]);
+      expect(whatsapp.sent[1]).toMatchObject({ latitude: 4.0511, longitude: 9.7679, text: "Salon Éclat — Akwa" });
+    });
+
+    it("n'envoie pas de position pour une question sans rapport", async () => {
+      const organization = await orgWithShopLocation();
+      installScriptedAi([aiReply({ reply: "La coupe coûte 5 000 FCFA." })]);
+      const whatsapp = new FakeWhatsApp();
+
+      await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "Combien coûte la coupe ?"));
+
+      expect(whatsapp.sent.map((item) => item.kind)).toEqual(["text"]);
+    });
+
+    it("n'envoie rien quand le propriétaire n'a pas configuré de position", async () => {
+      const { organization } = await createTestOrganization();
+      installScriptedAi([aiReply({ reply: "Bonjour !" })]);
+      const whatsapp = new FakeWhatsApp();
+
+      await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "Vous êtes où ?"));
+
+      expect(whatsapp.sent.map((item) => item.kind)).toEqual(["text"]);
+    });
+  });
+
   describe("étiquettes de suivi", () => {
     it("passe de Nouveau à Intéressé après une demande de prix", async () => {
       const { organization } = await createTestOrganization();

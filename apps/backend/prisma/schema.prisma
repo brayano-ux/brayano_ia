@@ -70,6 +70,9 @@ model AiSettings {
   topicGateEnabled     Boolean  @default(false) @map("topic_gate_enabled")
   topicGateTopic       String?  @map("topic_gate_topic")
   adOnlyEnabled        Boolean  @default(false) @map("ad_only_enabled")
+  shopLatitude         Float?   @map("shop_latitude")
+  shopLongitude        Float?   @map("shop_longitude")
+  shopLocationLabel    String?  @map("shop_location_label")
   createdAt            DateTime @default(now()) @map("created_at")
   updatedAt            DateTime @updatedAt @map("updated_at")
 

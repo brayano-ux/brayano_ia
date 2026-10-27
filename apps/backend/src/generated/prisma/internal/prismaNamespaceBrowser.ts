@@ -141,6 +141,9 @@ export const AiSettingsScalarFieldEnum = {
   topicGateEnabled: 'topicGateEnabled',
   topicGateTopic: 'topicGateTopic',
   adOnlyEnabled: 'adOnlyEnabled',
+  shopLatitude: 'shopLatitude',
+  shopLongitude: 'shopLongitude',
+  shopLocationLabel: 'shopLocationLabel',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
