@@ -111,6 +111,24 @@
             <span id="business-info-counter" class="agent-counter" data-counter-for="business-info"></span>
           </label>
           <p id="business-info-tip" class="agent-tip">Jusqu’à 50 000 caractères. Organisez votre texte par rubriques : présentation, services, tarifs, horaires, livraison et conditions. 💡 Plus c’est précis (horaires, tarifs, quartiers livrés, moyens de paiement), moins l’agent devra vous solliciter. N’écrivez que des informations exactes.</p>
+
+          <div class="agent-pane-head bh-section">
+            <h2>Localisation de la boutique</h2>
+            <p class="muted">L’agent peut envoyer automatiquement cette position GPS (comme une localisation WhatsApp, avec la carte et l’itinéraire) à un client qui demande où vous trouver.</p>
+          </div>
+          <div class="shop-location-actions">
+            <button type="button" class="primary" id="shop-location-capture">📍 Utiliser ma position actuelle</button>
+            <span id="shop-location-status" class="muted" aria-live="polite">Aucune position enregistrée.</span>
+          </div>
+          <div id="shop-location-set" class="shop-location-set hidden">
+            <iframe id="shop-location-map" class="shop-location-map" title="Aperçu de la position de la boutique" loading="lazy"></iframe>
+            <label>
+              <span class="field-label">Nom affiché au client (facultatif)</span>
+              <input id="shop-location-label" type="text" maxlength="80" placeholder="Ex. Boutique Awa — Akwa" />
+            </label>
+            <button type="button" class="text-button danger-text" id="shop-location-clear">Retirer la position</button>
+          </div>
+          <p class="agent-tip">📱 Pour une position exacte, ouvrez cette page depuis le téléphone qui est physiquement dans votre boutique, puis cliquez sur « Utiliser ma position actuelle ». Votre navigateur demandera la permission d’accéder à votre position.</p>
         </div>
 
         <div class="agent-pane hidden" data-agent-pane="behavior">

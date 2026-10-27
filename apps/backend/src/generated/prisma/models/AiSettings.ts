@@ -30,12 +30,16 @@ export type AiSettingsAvgAggregateOutputType = {
   responseDelaySeconds: number | null
   followUpDelayHours: number | null
   followUpMax: number | null
+  shopLatitude: number | null
+  shopLongitude: number | null
 }
 
 export type AiSettingsSumAggregateOutputType = {
   responseDelaySeconds: number | null
   followUpDelayHours: number | null
   followUpMax: number | null
+  shopLatitude: number | null
+  shopLongitude: number | null
 }
 
 export type AiSettingsMinAggregateOutputType = {
@@ -62,6 +66,9 @@ export type AiSettingsMinAggregateOutputType = {
   topicGateEnabled: boolean | null
   topicGateTopic: string | null
   adOnlyEnabled: boolean | null
+  shopLatitude: number | null
+  shopLongitude: number | null
+  shopLocationLabel: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -90,6 +97,9 @@ export type AiSettingsMaxAggregateOutputType = {
   topicGateEnabled: boolean | null
   topicGateTopic: string | null
   adOnlyEnabled: boolean | null
+  shopLatitude: number | null
+  shopLongitude: number | null
+  shopLocationLabel: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -120,6 +130,9 @@ export type AiSettingsCountAggregateOutputType = {
   topicGateEnabled: number
   topicGateTopic: number
   adOnlyEnabled: number
+  shopLatitude: number
+  shopLongitude: number
+  shopLocationLabel: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -130,12 +143,16 @@ export type AiSettingsAvgAggregateInputType = {
   responseDelaySeconds?: true
   followUpDelayHours?: true
   followUpMax?: true
+  shopLatitude?: true
+  shopLongitude?: true
 }
 
 export type AiSettingsSumAggregateInputType = {
   responseDelaySeconds?: true
   followUpDelayHours?: true
   followUpMax?: true
+  shopLatitude?: true
+  shopLongitude?: true
 }
 
 export type AiSettingsMinAggregateInputType = {
@@ -162,6 +179,9 @@ export type AiSettingsMinAggregateInputType = {
   topicGateEnabled?: true
   topicGateTopic?: true
   adOnlyEnabled?: true
+  shopLatitude?: true
+  shopLongitude?: true
+  shopLocationLabel?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -190,6 +210,9 @@ export type AiSettingsMaxAggregateInputType = {
   topicGateEnabled?: true
   topicGateTopic?: true
   adOnlyEnabled?: true
+  shopLatitude?: true
+  shopLongitude?: true
+  shopLocationLabel?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -220,6 +243,9 @@ export type AiSettingsCountAggregateInputType = {
   topicGateEnabled?: true
   topicGateTopic?: true
   adOnlyEnabled?: true
+  shopLatitude?: true
+  shopLongitude?: true
+  shopLocationLabel?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -337,6 +363,9 @@ export type AiSettingsGroupByOutputType = {
   topicGateEnabled: boolean
   topicGateTopic: string | null
   adOnlyEnabled: boolean
+  shopLatitude: number | null
+  shopLongitude: number | null
+  shopLocationLabel: string | null
   createdAt: Date
   updatedAt: Date
   _count: AiSettingsCountAggregateOutputType | null
@@ -390,6 +419,9 @@ export type AiSettingsWhereInput = {
   topicGateEnabled?: Prisma.BoolFilter<"AiSettings"> | boolean
   topicGateTopic?: Prisma.StringNullableFilter<"AiSettings"> | string | null
   adOnlyEnabled?: Prisma.BoolFilter<"AiSettings"> | boolean
+  shopLatitude?: Prisma.FloatNullableFilter<"AiSettings"> | number | null
+  shopLongitude?: Prisma.FloatNullableFilter<"AiSettings"> | number | null
+  shopLocationLabel?: Prisma.StringNullableFilter<"AiSettings"> | string | null
   createdAt?: Prisma.DateTimeFilter<"AiSettings"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AiSettings"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
@@ -421,6 +453,9 @@ export type AiSettingsOrderByWithRelationInput = {
   topicGateEnabled?: Prisma.SortOrder
   topicGateTopic?: Prisma.SortOrderInput | Prisma.SortOrder
   adOnlyEnabled?: Prisma.SortOrder
+  shopLatitude?: Prisma.SortOrderInput | Prisma.SortOrder
+  shopLongitude?: Prisma.SortOrderInput | Prisma.SortOrder
+  shopLocationLabel?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   organization?: Prisma.OrganizationOrderByWithRelationInput
@@ -455,6 +490,9 @@ export type AiSettingsWhereUniqueInput = Prisma.AtLeast<{
   topicGateEnabled?: Prisma.BoolFilter<"AiSettings"> | boolean
   topicGateTopic?: Prisma.StringNullableFilter<"AiSettings"> | string | null
   adOnlyEnabled?: Prisma.BoolFilter<"AiSettings"> | boolean
+  shopLatitude?: Prisma.FloatNullableFilter<"AiSettings"> | number | null
+  shopLongitude?: Prisma.FloatNullableFilter<"AiSettings"> | number | null
+  shopLocationLabel?: Prisma.StringNullableFilter<"AiSettings"> | string | null
   createdAt?: Prisma.DateTimeFilter<"AiSettings"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AiSettings"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
@@ -486,6 +524,9 @@ export type AiSettingsOrderByWithAggregationInput = {
   topicGateEnabled?: Prisma.SortOrder
   topicGateTopic?: Prisma.SortOrderInput | Prisma.SortOrder
   adOnlyEnabled?: Prisma.SortOrder
+  shopLatitude?: Prisma.SortOrderInput | Prisma.SortOrder
+  shopLongitude?: Prisma.SortOrderInput | Prisma.SortOrder
+  shopLocationLabel?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.AiSettingsCountOrderByAggregateInput
@@ -524,6 +565,9 @@ export type AiSettingsScalarWhereWithAggregatesInput = {
   topicGateEnabled?: Prisma.BoolWithAggregatesFilter<"AiSettings"> | boolean
   topicGateTopic?: Prisma.StringNullableWithAggregatesFilter<"AiSettings"> | string | null
   adOnlyEnabled?: Prisma.BoolWithAggregatesFilter<"AiSettings"> | boolean
+  shopLatitude?: Prisma.FloatNullableWithAggregatesFilter<"AiSettings"> | number | null
+  shopLongitude?: Prisma.FloatNullableWithAggregatesFilter<"AiSettings"> | number | null
+  shopLocationLabel?: Prisma.StringNullableWithAggregatesFilter<"AiSettings"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"AiSettings"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"AiSettings"> | Date | string
 }
@@ -553,6 +597,9 @@ export type AiSettingsCreateInput = {
   topicGateEnabled?: boolean
   topicGateTopic?: string | null
   adOnlyEnabled?: boolean
+  shopLatitude?: number | null
+  shopLongitude?: number | null
+  shopLocationLabel?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutAiSettingsInput
@@ -584,6 +631,9 @@ export type AiSettingsUncheckedCreateInput = {
   topicGateEnabled?: boolean
   topicGateTopic?: string | null
   adOnlyEnabled?: boolean
+  shopLatitude?: number | null
+  shopLongitude?: number | null
+  shopLocationLabel?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -613,6 +663,9 @@ export type AiSettingsUpdateInput = {
   topicGateEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   topicGateTopic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   adOnlyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shopLatitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  shopLongitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  shopLocationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutAiSettingsNestedInput
@@ -644,6 +697,9 @@ export type AiSettingsUncheckedUpdateInput = {
   topicGateEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   topicGateTopic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   adOnlyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shopLatitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  shopLongitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  shopLocationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -674,6 +730,9 @@ export type AiSettingsCreateManyInput = {
   topicGateEnabled?: boolean
   topicGateTopic?: string | null
   adOnlyEnabled?: boolean
+  shopLatitude?: number | null
+  shopLongitude?: number | null
+  shopLocationLabel?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -703,6 +762,9 @@ export type AiSettingsUpdateManyMutationInput = {
   topicGateEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   topicGateTopic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   adOnlyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shopLatitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  shopLongitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  shopLocationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -733,6 +795,9 @@ export type AiSettingsUncheckedUpdateManyInput = {
   topicGateEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   topicGateTopic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   adOnlyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shopLatitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  shopLongitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  shopLocationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -768,6 +833,9 @@ export type AiSettingsCountOrderByAggregateInput = {
   topicGateEnabled?: Prisma.SortOrder
   topicGateTopic?: Prisma.SortOrder
   adOnlyEnabled?: Prisma.SortOrder
+  shopLatitude?: Prisma.SortOrder
+  shopLongitude?: Prisma.SortOrder
+  shopLocationLabel?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -776,6 +844,8 @@ export type AiSettingsAvgOrderByAggregateInput = {
   responseDelaySeconds?: Prisma.SortOrder
   followUpDelayHours?: Prisma.SortOrder
   followUpMax?: Prisma.SortOrder
+  shopLatitude?: Prisma.SortOrder
+  shopLongitude?: Prisma.SortOrder
 }
 
 export type AiSettingsMaxOrderByAggregateInput = {
@@ -802,6 +872,9 @@ export type AiSettingsMaxOrderByAggregateInput = {
   topicGateEnabled?: Prisma.SortOrder
   topicGateTopic?: Prisma.SortOrder
   adOnlyEnabled?: Prisma.SortOrder
+  shopLatitude?: Prisma.SortOrder
+  shopLongitude?: Prisma.SortOrder
+  shopLocationLabel?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -830,6 +903,9 @@ export type AiSettingsMinOrderByAggregateInput = {
   topicGateEnabled?: Prisma.SortOrder
   topicGateTopic?: Prisma.SortOrder
   adOnlyEnabled?: Prisma.SortOrder
+  shopLatitude?: Prisma.SortOrder
+  shopLongitude?: Prisma.SortOrder
+  shopLocationLabel?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -838,6 +914,8 @@ export type AiSettingsSumOrderByAggregateInput = {
   responseDelaySeconds?: Prisma.SortOrder
   followUpDelayHours?: Prisma.SortOrder
   followUpMax?: Prisma.SortOrder
+  shopLatitude?: Prisma.SortOrder
+  shopLongitude?: Prisma.SortOrder
 }
 
 export type AiSettingsCreateNestedOneWithoutOrganizationInput = {
@@ -872,6 +950,14 @@ export type AiSettingsUncheckedUpdateOneWithoutOrganizationNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.AiSettingsUpdateToOneWithWhereWithoutOrganizationInput, Prisma.AiSettingsUpdateWithoutOrganizationInput>, Prisma.AiSettingsUncheckedUpdateWithoutOrganizationInput>
 }
 
+export type NullableFloatFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
 export type AiSettingsCreateWithoutOrganizationInput = {
   id?: string
   agentName?: string
@@ -897,6 +983,9 @@ export type AiSettingsCreateWithoutOrganizationInput = {
   topicGateEnabled?: boolean
   topicGateTopic?: string | null
   adOnlyEnabled?: boolean
+  shopLatitude?: number | null
+  shopLongitude?: number | null
+  shopLocationLabel?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -926,6 +1015,9 @@ export type AiSettingsUncheckedCreateWithoutOrganizationInput = {
   topicGateEnabled?: boolean
   topicGateTopic?: string | null
   adOnlyEnabled?: boolean
+  shopLatitude?: number | null
+  shopLongitude?: number | null
+  shopLocationLabel?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -971,6 +1063,9 @@ export type AiSettingsUpdateWithoutOrganizationInput = {
   topicGateEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   topicGateTopic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   adOnlyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shopLatitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  shopLongitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  shopLocationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1000,6 +1095,9 @@ export type AiSettingsUncheckedUpdateWithoutOrganizationInput = {
   topicGateEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   topicGateTopic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   adOnlyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shopLatitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  shopLongitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  shopLocationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1032,6 +1130,9 @@ export type AiSettingsSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   topicGateEnabled?: boolean
   topicGateTopic?: boolean
   adOnlyEnabled?: boolean
+  shopLatitude?: boolean
+  shopLongitude?: boolean
+  shopLocationLabel?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -1063,6 +1164,9 @@ export type AiSettingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   topicGateEnabled?: boolean
   topicGateTopic?: boolean
   adOnlyEnabled?: boolean
+  shopLatitude?: boolean
+  shopLongitude?: boolean
+  shopLocationLabel?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -1094,6 +1198,9 @@ export type AiSettingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   topicGateEnabled?: boolean
   topicGateTopic?: boolean
   adOnlyEnabled?: boolean
+  shopLatitude?: boolean
+  shopLongitude?: boolean
+  shopLocationLabel?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -1125,11 +1232,14 @@ export type AiSettingsSelectScalar = {
   topicGateEnabled?: boolean
   topicGateTopic?: boolean
   adOnlyEnabled?: boolean
+  shopLatitude?: boolean
+  shopLongitude?: boolean
+  shopLocationLabel?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type AiSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "agentName" | "businessInfo" | "onboardingTestHash" | "agentImageUrl" | "systemPrompt" | "welcomeMessage" | "qualificationFields" | "aiEnabled" | "responseDelaySeconds" | "businessHoursEnabled" | "businessHours" | "businessTimezone" | "closedMessage" | "followUpEnabled" | "followUpDelayHours" | "followUpMax" | "agentDomain" | "agentRole" | "agentTone" | "personaPromptedAt" | "topicGateEnabled" | "topicGateTopic" | "adOnlyEnabled" | "createdAt" | "updatedAt", ExtArgs["result"]["aiSettings"]>
+export type AiSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "agentName" | "businessInfo" | "onboardingTestHash" | "agentImageUrl" | "systemPrompt" | "welcomeMessage" | "qualificationFields" | "aiEnabled" | "responseDelaySeconds" | "businessHoursEnabled" | "businessHours" | "businessTimezone" | "closedMessage" | "followUpEnabled" | "followUpDelayHours" | "followUpMax" | "agentDomain" | "agentRole" | "agentTone" | "personaPromptedAt" | "topicGateEnabled" | "topicGateTopic" | "adOnlyEnabled" | "shopLatitude" | "shopLongitude" | "shopLocationLabel" | "createdAt" | "updatedAt", ExtArgs["result"]["aiSettings"]>
 export type AiSettingsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
 }
@@ -1171,6 +1281,9 @@ export type $AiSettingsPayload<ExtArgs extends runtime.Types.Extensions.Internal
     topicGateEnabled: boolean
     topicGateTopic: string | null
     adOnlyEnabled: boolean
+    shopLatitude: number | null
+    shopLongitude: number | null
+    shopLocationLabel: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["aiSettings"]>
@@ -1622,6 +1735,9 @@ export interface AiSettingsFieldRefs {
   readonly topicGateEnabled: Prisma.FieldRef<"AiSettings", 'Boolean'>
   readonly topicGateTopic: Prisma.FieldRef<"AiSettings", 'String'>
   readonly adOnlyEnabled: Prisma.FieldRef<"AiSettings", 'Boolean'>
+  readonly shopLatitude: Prisma.FieldRef<"AiSettings", 'Float'>
+  readonly shopLongitude: Prisma.FieldRef<"AiSettings", 'Float'>
+  readonly shopLocationLabel: Prisma.FieldRef<"AiSettings", 'String'>
   readonly createdAt: Prisma.FieldRef<"AiSettings", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"AiSettings", 'DateTime'>
 }

@@ -31,6 +31,9 @@ export interface AiSettingsInput {
   topicGateEnabled?: boolean | undefined;
   topicGateTopic?: string | null | undefined;
   adOnlyEnabled?: boolean | undefined;
+  shopLatitude?: number | null | undefined;
+  shopLongitude?: number | null | undefined;
+  shopLocationLabel?: string | null | undefined;
 }
 
 export function resolveResponseDelaySeconds(value: unknown): ResponseDelaySeconds {
@@ -93,6 +96,9 @@ export async function updateAiSettings(organizationId: string, input: AiSettings
     ...(input.topicGateEnabled !== undefined ? { topicGateEnabled: input.topicGateEnabled } : {}),
     ...(input.topicGateTopic !== undefined ? { topicGateTopic: input.topicGateTopic?.trim() || null } : {}),
     ...(input.adOnlyEnabled !== undefined ? { adOnlyEnabled: input.adOnlyEnabled } : {}),
+    ...(input.shopLatitude !== undefined ? { shopLatitude: input.shopLatitude } : {}),
+    ...(input.shopLongitude !== undefined ? { shopLongitude: input.shopLongitude } : {}),
+    ...(input.shopLocationLabel !== undefined ? { shopLocationLabel: input.shopLocationLabel?.trim() || null } : {}),
   };
 
   return prisma.aiSettings.upsert({

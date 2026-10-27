@@ -153,3 +153,8 @@
 .chip-button:hover:not(:disabled) { border-color: var(--brand-200); background: var(--brand-50); color: var(--brand-700); }
 .chip-button:disabled { opacity: 0.5; cursor: not-allowed; }
 @media (max-width: 639px) { .agent-learning { padding: var(--space-4); } }
+
+/* ----- Localisation de la boutique ----- */
+.shop-location-actions { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+.shop-location-set { display: grid; gap: var(--space-3); margin-top: var(--space-2); }
+.shop-location-map { width: 100%; height: 220px; border: 1px solid var(--line); border-radius: var(--radius-md); }

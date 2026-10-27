@@ -8,6 +8,7 @@ import { decideWelcome, placeWelcomeBeforeClientMessages } from "../ai/welcome.j
 import { isOptOutRequest, OPT_OUT_CONFIRMATION } from "../ai/opt-out.js";
 import { setContactOptOut } from "../contacts/contacts.service.js";
 import { isIgnoredNumber } from "../contacts/ignored-contacts.service.js";
+import { isLocationRequested } from "./location-request.js";
 import {
   advanceConversationStage,
   getRecentHistoryForAi,
@@ -459,6 +460,7 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
     // Une photo REÇUE du client ([Photo reçue]) n'est pas une demande de photo.
     const requestText = message.media ? message.media.caption ?? "" : message.text;
     const photoProducts = resolveRequestedProductPhotos({ message: requestText, productId: aiReply.productId, productIds: aiReply.productIds, products });
+    const locationRequested = settings.shopLatitude != null && settings.shopLongitude != null && isLocationRequested(requestText);
 
     const selectedProduct = photoProducts.length === 1 ? photoProducts[0]! : null;
     const outboundText = selectedProduct
@@ -531,6 +533,17 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
         await instance.sendMessage(message.fromJid, textToSend);
       }
 
+      // Le client demande où se trouve la boutique / comment y aller : on envoie le point GPS configuré par le propriétaire.
+      let locationSent = false;
+      if (locationRequested) {
+        try {
+          await instance.sendLocation(message.fromJid, settings.shopLatitude!, settings.shopLongitude!, settings.shopLocationLabel ?? settings.agentName);
+          locationSent = true;
+        } catch (error) {
+          console.error(`❌ [org:${organizationId}] Localisation de la boutique non envoyée :`, error instanceof Error ? error.message : error);
+        }
+      }
+
       // Journal : pourquoi l'IA a répondu ainsi (affiché au propriétaire dans la conversation).
       await recordOutboundMessage({
         conversationId: conversation.id,
@@ -547,6 +560,7 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
           imageSent: Boolean(photoProducts.length),
           photosSent: photoProducts.length - imagesFailed,
           ...(imagesFailed ? { imagesFailed } : {}),
+          ...(locationRequested ? { locationSent } : {}),
           actions,
           claimRetried,
           claimsUnresolved: unbackedClaims,

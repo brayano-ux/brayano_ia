@@ -29,10 +29,12 @@ export async function createTestOrganization(name = "Salon Éclat", options: { e
 }
 
 export interface SentMessage {
-  kind: "text" | "image";
+  kind: "text" | "image" | "location";
   jid: string;
   text: string;
   imageUrl?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export class FakeWhatsApp implements WhatsAppProvider {
@@ -52,6 +54,9 @@ export class FakeWhatsApp implements WhatsAppProvider {
   async sendImage(jid: string, imageUrl: string, caption?: string) {
     if (this.failImages > 0) { this.failImages -= 1; throw new Error("image download failed"); }
     this.sent.push({ kind: "image", jid, text: caption ?? "", imageUrl }); }
+  async sendLocation(jid: string, latitude: number, longitude: number, label?: string) {
+    this.sent.push({ kind: "location", jid, text: label ?? "", latitude, longitude });
+  }
   onMessage() {}
   onConnectionUpdate() {}
 }

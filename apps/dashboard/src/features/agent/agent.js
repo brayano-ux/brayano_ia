@@ -5,6 +5,7 @@ import { APP_CONFIG } from "../../config.js";
 import { applyPlatformSuspension } from "../suspension/suspension.js";
 import { initLearning, loadLearning } from "./learning.js";
 import { initHoursSettings, fillHoursSettings, readHoursSettings, hoursSnapshot, validateHours } from "./hours-settings.js";
+import { initShopLocation, fillShopLocation, readShopLocation, shopLocationSnapshot } from "./shop-location.js";
 import { initTester } from "./tester.js";
 
 /**
@@ -35,6 +36,7 @@ export async function loadSettings() {
     $("#system-prompt").value = settings.systemPrompt || "";
     $("#welcome-message").value = settings.welcomeMessage || "";
     fillHoursSettings(settings);
+    fillShopLocation(settings);
 
     $$('input[name="qualification-field"]').forEach((input) => {
       input.checked = qualificationFields.includes(input.value);
@@ -76,6 +78,7 @@ async function saveSettings(event) {
         welcomeMessage: $("#welcome-message").value,
         qualificationFields,
         ...readHoursSettings(),
+        ...readShopLocation(),
       }),
     });
     markClean();
@@ -133,6 +136,7 @@ function snapshot() {
     $("#welcome-message").value, $("#global-ai-enabled").checked,
     $$('input[name="qualification-field"]:checked, .custom-qualification-field:checked').map((input) => input.value).sort(),
     hoursSnapshot(),
+    shopLocationSnapshot(),
   ]);
 }
 
@@ -304,6 +308,7 @@ export function initAgent() {
     }
   };
   initHoursSettings();
+  initShopLocation();
   initLearning();
   initTester();
 }

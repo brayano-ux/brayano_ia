@@ -340,6 +340,24 @@ export class BaileysWhatsAppProvider implements WhatsAppProvider {
     await this.socket.sendMessage(jid, payload as any, { messageId });
   }
 
+  async sendLocation(jid: string, latitude: number, longitude: number, label?: string): Promise<void> {
+    if (!this.socket) {
+      throw new Error("Le socket WhatsApp n'est pas connecté.");
+    }
+
+    const payload: Record<string, unknown> = {
+      location: { degreesLatitude: latitude, degreesLongitude: longitude },
+    };
+    const normalizedLabel = label?.trim();
+    if (normalizedLabel) {
+      (payload.location as Record<string, unknown>).name = normalizedLabel;
+    }
+
+    const messageId = generateMessageID();
+    this.botSentIds.add(messageId);
+    await this.socket.sendMessage(jid, payload as any, { messageId });
+  }
+
   onMessage(handler: (message: IncomingWhatsAppMessage) => void): void {
     this.messageHandlers.push(handler);
   }

@@ -63,6 +63,7 @@ export interface WhatsAppProvider {
   getPairingCode?(): string | null;
   sendMessage(jid: string, text: string): Promise<void>;
   sendImage(jid: string, imageUrl: string, caption?: string): Promise<void>;
+  sendLocation(jid: string, latitude: number, longitude: number, label?: string): Promise<void>;
   onMessage(handler: (message: IncomingWhatsAppMessage) => void): void;
   /** Un humain écrit à un prospect depuis le téléphone : l'IA doit se mettre en pause. */
   onHumanMessage?(handler: (message: HumanOutgoingMessage) => void): void;
