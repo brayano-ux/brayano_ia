@@ -162,6 +162,11 @@ export async function openTopicGate(conversationId: string) {
   await prisma.$executeRaw`UPDATE conversations SET topic_gate_opened = true WHERE id = ${conversationId}`;
 }
 
+/** Sauvegarde l'état de négociation de prix en cours pour cette conversation (voir ai/price-negotiation.ts). */
+export async function setConversationNegotiationState(conversationId: string, state: Prisma.InputJsonValue) {
+  await prisma.conversation.update({ where: { id: conversationId }, data: { negotiationState: state } });
+}
+
 /** Fait avancer l'étiquette d'un client d'après ce que l'IA vient de faire (sans effet si le propriétaire l'a fixée à la main). */
 export async function advanceConversationStage(conversationId: string, signals: StageSignals) {
   const conversation = await prisma.conversation.findUnique({ where: { id: conversationId }, select: { stage: true, stageLocked: true } });

@@ -3,6 +3,17 @@ import { orderRequestSchema } from "../orders/order-logic.js";
 import { bookingRequestSchema } from "../appointments/booking.js";
 
 /**
+ * Un modèle écrit parfois "true"/"false" en texte plutôt qu'un booléen JSON : on l'accepte aussi, pour
+ * qu'une simple différence de format ne fasse pas échouer TOUTE la réponse (et ne bloque pas le client
+ * par erreur — voir ai-orchestrator.ts, qui rejette l'intégralité de la réponse si un seul champ est invalide).
+ */
+const tolerantBoolean = () =>
+  z.preprocess(
+    (value) => (typeof value === "string" ? value.trim().toLowerCase() === "true" : value),
+    z.boolean(),
+  );
+
+/**
  * NE JAMAIS FAIRE CONFIANCE AU JSON RENVOYÉ PAR LE LLM (Phase 0).
  * Ce schéma est la seule porte d'entrée de la réponse IA vers le reste
  * de l'application. Si la validation échoue, l'orchestrateur bascule
@@ -22,16 +33,14 @@ export const aiReplySchema = z.object({
   productIds: z.array(z.string().uuid()).max(10).optional().catch(undefined),
   booking: bookingRequestSchema,
   order: orderRequestSchema,
+  /** Rempli seulement quand un « sujet autorisé » est actif pour cette entreprise (voir ai/prompt.ts). */
+  onTopic: tolerantBoolean().optional(),
   /**
-   * Rempli seulement quand un « sujet autorisé » est actif pour cette entreprise (voir ai/prompt.ts).
-   * Un modèle écrit parfois "true"/"false" en texte plutôt qu'un booléen JSON : on l'accepte aussi, pour
-   * qu'une simple différence de format ne fasse pas échouer TOUTE la réponse (et ne bloque pas le client
-   * par erreur — voir ai-orchestrator.ts, qui rejette l'intégralité de la réponse si un seul champ est invalide).
+   * Rempli seulement quand la négociation de prix est active (voir ai/prompt.ts) : le client demande une
+   * réduction / un meilleur prix. Le serveur calcule ensuite lui-même le prix exact à proposer (voir
+   * ai/price-negotiation.ts) — l'IA ne fait que signaler la demande, jamais le montant.
    */
-  onTopic: z.preprocess(
-    (value) => (typeof value === "string" ? value.trim().toLowerCase() === "true" : value),
-    z.boolean(),
-  ).optional(),
+  wantsDiscount: tolerantBoolean().optional(),
 });
 
 export type AIReply = z.infer<typeof aiReplySchema>;

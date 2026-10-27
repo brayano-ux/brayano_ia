@@ -30,6 +30,7 @@ export type AiSettingsAvgAggregateOutputType = {
   responseDelaySeconds: number | null
   followUpDelayHours: number | null
   followUpMax: number | null
+  negotiationMaxDiscountPercent: number | null
   shopLatitude: number | null
   shopLongitude: number | null
 }
@@ -38,6 +39,7 @@ export type AiSettingsSumAggregateOutputType = {
   responseDelaySeconds: number | null
   followUpDelayHours: number | null
   followUpMax: number | null
+  negotiationMaxDiscountPercent: number | null
   shopLatitude: number | null
   shopLongitude: number | null
 }
@@ -66,6 +68,8 @@ export type AiSettingsMinAggregateOutputType = {
   topicGateEnabled: boolean | null
   topicGateTopic: string | null
   adOnlyEnabled: boolean | null
+  negotiationEnabled: boolean | null
+  negotiationMaxDiscountPercent: number | null
   shopLatitude: number | null
   shopLongitude: number | null
   shopLocationLabel: string | null
@@ -97,6 +101,8 @@ export type AiSettingsMaxAggregateOutputType = {
   topicGateEnabled: boolean | null
   topicGateTopic: string | null
   adOnlyEnabled: boolean | null
+  negotiationEnabled: boolean | null
+  negotiationMaxDiscountPercent: number | null
   shopLatitude: number | null
   shopLongitude: number | null
   shopLocationLabel: string | null
@@ -130,6 +136,8 @@ export type AiSettingsCountAggregateOutputType = {
   topicGateEnabled: number
   topicGateTopic: number
   adOnlyEnabled: number
+  negotiationEnabled: number
+  negotiationMaxDiscountPercent: number
   shopLatitude: number
   shopLongitude: number
   shopLocationLabel: number
@@ -143,6 +151,7 @@ export type AiSettingsAvgAggregateInputType = {
   responseDelaySeconds?: true
   followUpDelayHours?: true
   followUpMax?: true
+  negotiationMaxDiscountPercent?: true
   shopLatitude?: true
   shopLongitude?: true
 }
@@ -151,6 +160,7 @@ export type AiSettingsSumAggregateInputType = {
   responseDelaySeconds?: true
   followUpDelayHours?: true
   followUpMax?: true
+  negotiationMaxDiscountPercent?: true
   shopLatitude?: true
   shopLongitude?: true
 }
@@ -179,6 +189,8 @@ export type AiSettingsMinAggregateInputType = {
   topicGateEnabled?: true
   topicGateTopic?: true
   adOnlyEnabled?: true
+  negotiationEnabled?: true
+  negotiationMaxDiscountPercent?: true
   shopLatitude?: true
   shopLongitude?: true
   shopLocationLabel?: true
@@ -210,6 +222,8 @@ export type AiSettingsMaxAggregateInputType = {
   topicGateEnabled?: true
   topicGateTopic?: true
   adOnlyEnabled?: true
+  negotiationEnabled?: true
+  negotiationMaxDiscountPercent?: true
   shopLatitude?: true
   shopLongitude?: true
   shopLocationLabel?: true
@@ -243,6 +257,8 @@ export type AiSettingsCountAggregateInputType = {
   topicGateEnabled?: true
   topicGateTopic?: true
   adOnlyEnabled?: true
+  negotiationEnabled?: true
+  negotiationMaxDiscountPercent?: true
   shopLatitude?: true
   shopLongitude?: true
   shopLocationLabel?: true
@@ -363,6 +379,8 @@ export type AiSettingsGroupByOutputType = {
   topicGateEnabled: boolean
   topicGateTopic: string | null
   adOnlyEnabled: boolean
+  negotiationEnabled: boolean
+  negotiationMaxDiscountPercent: number | null
   shopLatitude: number | null
   shopLongitude: number | null
   shopLocationLabel: string | null
@@ -419,6 +437,8 @@ export type AiSettingsWhereInput = {
   topicGateEnabled?: Prisma.BoolFilter<"AiSettings"> | boolean
   topicGateTopic?: Prisma.StringNullableFilter<"AiSettings"> | string | null
   adOnlyEnabled?: Prisma.BoolFilter<"AiSettings"> | boolean
+  negotiationEnabled?: Prisma.BoolFilter<"AiSettings"> | boolean
+  negotiationMaxDiscountPercent?: Prisma.IntNullableFilter<"AiSettings"> | number | null
   shopLatitude?: Prisma.FloatNullableFilter<"AiSettings"> | number | null
   shopLongitude?: Prisma.FloatNullableFilter<"AiSettings"> | number | null
   shopLocationLabel?: Prisma.StringNullableFilter<"AiSettings"> | string | null
@@ -453,6 +473,8 @@ export type AiSettingsOrderByWithRelationInput = {
   topicGateEnabled?: Prisma.SortOrder
   topicGateTopic?: Prisma.SortOrderInput | Prisma.SortOrder
   adOnlyEnabled?: Prisma.SortOrder
+  negotiationEnabled?: Prisma.SortOrder
+  negotiationMaxDiscountPercent?: Prisma.SortOrderInput | Prisma.SortOrder
   shopLatitude?: Prisma.SortOrderInput | Prisma.SortOrder
   shopLongitude?: Prisma.SortOrderInput | Prisma.SortOrder
   shopLocationLabel?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -490,6 +512,8 @@ export type AiSettingsWhereUniqueInput = Prisma.AtLeast<{
   topicGateEnabled?: Prisma.BoolFilter<"AiSettings"> | boolean
   topicGateTopic?: Prisma.StringNullableFilter<"AiSettings"> | string | null
   adOnlyEnabled?: Prisma.BoolFilter<"AiSettings"> | boolean
+  negotiationEnabled?: Prisma.BoolFilter<"AiSettings"> | boolean
+  negotiationMaxDiscountPercent?: Prisma.IntNullableFilter<"AiSettings"> | number | null
   shopLatitude?: Prisma.FloatNullableFilter<"AiSettings"> | number | null
   shopLongitude?: Prisma.FloatNullableFilter<"AiSettings"> | number | null
   shopLocationLabel?: Prisma.StringNullableFilter<"AiSettings"> | string | null
@@ -524,6 +548,8 @@ export type AiSettingsOrderByWithAggregationInput = {
   topicGateEnabled?: Prisma.SortOrder
   topicGateTopic?: Prisma.SortOrderInput | Prisma.SortOrder
   adOnlyEnabled?: Prisma.SortOrder
+  negotiationEnabled?: Prisma.SortOrder
+  negotiationMaxDiscountPercent?: Prisma.SortOrderInput | Prisma.SortOrder
   shopLatitude?: Prisma.SortOrderInput | Prisma.SortOrder
   shopLongitude?: Prisma.SortOrderInput | Prisma.SortOrder
   shopLocationLabel?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -565,6 +591,8 @@ export type AiSettingsScalarWhereWithAggregatesInput = {
   topicGateEnabled?: Prisma.BoolWithAggregatesFilter<"AiSettings"> | boolean
   topicGateTopic?: Prisma.StringNullableWithAggregatesFilter<"AiSettings"> | string | null
   adOnlyEnabled?: Prisma.BoolWithAggregatesFilter<"AiSettings"> | boolean
+  negotiationEnabled?: Prisma.BoolWithAggregatesFilter<"AiSettings"> | boolean
+  negotiationMaxDiscountPercent?: Prisma.IntNullableWithAggregatesFilter<"AiSettings"> | number | null
   shopLatitude?: Prisma.FloatNullableWithAggregatesFilter<"AiSettings"> | number | null
   shopLongitude?: Prisma.FloatNullableWithAggregatesFilter<"AiSettings"> | number | null
   shopLocationLabel?: Prisma.StringNullableWithAggregatesFilter<"AiSettings"> | string | null
@@ -597,6 +625,8 @@ export type AiSettingsCreateInput = {
   topicGateEnabled?: boolean
   topicGateTopic?: string | null
   adOnlyEnabled?: boolean
+  negotiationEnabled?: boolean
+  negotiationMaxDiscountPercent?: number | null
   shopLatitude?: number | null
   shopLongitude?: number | null
   shopLocationLabel?: string | null
@@ -631,6 +661,8 @@ export type AiSettingsUncheckedCreateInput = {
   topicGateEnabled?: boolean
   topicGateTopic?: string | null
   adOnlyEnabled?: boolean
+  negotiationEnabled?: boolean
+  negotiationMaxDiscountPercent?: number | null
   shopLatitude?: number | null
   shopLongitude?: number | null
   shopLocationLabel?: string | null
@@ -663,6 +695,8 @@ export type AiSettingsUpdateInput = {
   topicGateEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   topicGateTopic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   adOnlyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  negotiationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  negotiationMaxDiscountPercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   shopLatitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   shopLongitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   shopLocationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -697,6 +731,8 @@ export type AiSettingsUncheckedUpdateInput = {
   topicGateEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   topicGateTopic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   adOnlyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  negotiationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  negotiationMaxDiscountPercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   shopLatitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   shopLongitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   shopLocationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -730,6 +766,8 @@ export type AiSettingsCreateManyInput = {
   topicGateEnabled?: boolean
   topicGateTopic?: string | null
   adOnlyEnabled?: boolean
+  negotiationEnabled?: boolean
+  negotiationMaxDiscountPercent?: number | null
   shopLatitude?: number | null
   shopLongitude?: number | null
   shopLocationLabel?: string | null
@@ -762,6 +800,8 @@ export type AiSettingsUpdateManyMutationInput = {
   topicGateEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   topicGateTopic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   adOnlyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  negotiationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  negotiationMaxDiscountPercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   shopLatitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   shopLongitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   shopLocationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -795,6 +835,8 @@ export type AiSettingsUncheckedUpdateManyInput = {
   topicGateEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   topicGateTopic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   adOnlyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  negotiationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  negotiationMaxDiscountPercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   shopLatitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   shopLongitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   shopLocationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -833,6 +875,8 @@ export type AiSettingsCountOrderByAggregateInput = {
   topicGateEnabled?: Prisma.SortOrder
   topicGateTopic?: Prisma.SortOrder
   adOnlyEnabled?: Prisma.SortOrder
+  negotiationEnabled?: Prisma.SortOrder
+  negotiationMaxDiscountPercent?: Prisma.SortOrder
   shopLatitude?: Prisma.SortOrder
   shopLongitude?: Prisma.SortOrder
   shopLocationLabel?: Prisma.SortOrder
@@ -844,6 +888,7 @@ export type AiSettingsAvgOrderByAggregateInput = {
   responseDelaySeconds?: Prisma.SortOrder
   followUpDelayHours?: Prisma.SortOrder
   followUpMax?: Prisma.SortOrder
+  negotiationMaxDiscountPercent?: Prisma.SortOrder
   shopLatitude?: Prisma.SortOrder
   shopLongitude?: Prisma.SortOrder
 }
@@ -872,6 +917,8 @@ export type AiSettingsMaxOrderByAggregateInput = {
   topicGateEnabled?: Prisma.SortOrder
   topicGateTopic?: Prisma.SortOrder
   adOnlyEnabled?: Prisma.SortOrder
+  negotiationEnabled?: Prisma.SortOrder
+  negotiationMaxDiscountPercent?: Prisma.SortOrder
   shopLatitude?: Prisma.SortOrder
   shopLongitude?: Prisma.SortOrder
   shopLocationLabel?: Prisma.SortOrder
@@ -903,6 +950,8 @@ export type AiSettingsMinOrderByAggregateInput = {
   topicGateEnabled?: Prisma.SortOrder
   topicGateTopic?: Prisma.SortOrder
   adOnlyEnabled?: Prisma.SortOrder
+  negotiationEnabled?: Prisma.SortOrder
+  negotiationMaxDiscountPercent?: Prisma.SortOrder
   shopLatitude?: Prisma.SortOrder
   shopLongitude?: Prisma.SortOrder
   shopLocationLabel?: Prisma.SortOrder
@@ -914,6 +963,7 @@ export type AiSettingsSumOrderByAggregateInput = {
   responseDelaySeconds?: Prisma.SortOrder
   followUpDelayHours?: Prisma.SortOrder
   followUpMax?: Prisma.SortOrder
+  negotiationMaxDiscountPercent?: Prisma.SortOrder
   shopLatitude?: Prisma.SortOrder
   shopLongitude?: Prisma.SortOrder
 }
@@ -950,6 +1000,14 @@ export type AiSettingsUncheckedUpdateOneWithoutOrganizationNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.AiSettingsUpdateToOneWithWhereWithoutOrganizationInput, Prisma.AiSettingsUpdateWithoutOrganizationInput>, Prisma.AiSettingsUncheckedUpdateWithoutOrganizationInput>
 }
 
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
 export type NullableFloatFieldUpdateOperationsInput = {
   set?: number | null
   increment?: number
@@ -983,6 +1041,8 @@ export type AiSettingsCreateWithoutOrganizationInput = {
   topicGateEnabled?: boolean
   topicGateTopic?: string | null
   adOnlyEnabled?: boolean
+  negotiationEnabled?: boolean
+  negotiationMaxDiscountPercent?: number | null
   shopLatitude?: number | null
   shopLongitude?: number | null
   shopLocationLabel?: string | null
@@ -1015,6 +1075,8 @@ export type AiSettingsUncheckedCreateWithoutOrganizationInput = {
   topicGateEnabled?: boolean
   topicGateTopic?: string | null
   adOnlyEnabled?: boolean
+  negotiationEnabled?: boolean
+  negotiationMaxDiscountPercent?: number | null
   shopLatitude?: number | null
   shopLongitude?: number | null
   shopLocationLabel?: string | null
@@ -1063,6 +1125,8 @@ export type AiSettingsUpdateWithoutOrganizationInput = {
   topicGateEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   topicGateTopic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   adOnlyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  negotiationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  negotiationMaxDiscountPercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   shopLatitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   shopLongitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   shopLocationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1095,6 +1159,8 @@ export type AiSettingsUncheckedUpdateWithoutOrganizationInput = {
   topicGateEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   topicGateTopic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   adOnlyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  negotiationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  negotiationMaxDiscountPercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   shopLatitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   shopLongitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   shopLocationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1130,6 +1196,8 @@ export type AiSettingsSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   topicGateEnabled?: boolean
   topicGateTopic?: boolean
   adOnlyEnabled?: boolean
+  negotiationEnabled?: boolean
+  negotiationMaxDiscountPercent?: boolean
   shopLatitude?: boolean
   shopLongitude?: boolean
   shopLocationLabel?: boolean
@@ -1164,6 +1232,8 @@ export type AiSettingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   topicGateEnabled?: boolean
   topicGateTopic?: boolean
   adOnlyEnabled?: boolean
+  negotiationEnabled?: boolean
+  negotiationMaxDiscountPercent?: boolean
   shopLatitude?: boolean
   shopLongitude?: boolean
   shopLocationLabel?: boolean
@@ -1198,6 +1268,8 @@ export type AiSettingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   topicGateEnabled?: boolean
   topicGateTopic?: boolean
   adOnlyEnabled?: boolean
+  negotiationEnabled?: boolean
+  negotiationMaxDiscountPercent?: boolean
   shopLatitude?: boolean
   shopLongitude?: boolean
   shopLocationLabel?: boolean
@@ -1232,6 +1304,8 @@ export type AiSettingsSelectScalar = {
   topicGateEnabled?: boolean
   topicGateTopic?: boolean
   adOnlyEnabled?: boolean
+  negotiationEnabled?: boolean
+  negotiationMaxDiscountPercent?: boolean
   shopLatitude?: boolean
   shopLongitude?: boolean
   shopLocationLabel?: boolean
@@ -1239,7 +1313,7 @@ export type AiSettingsSelectScalar = {
   updatedAt?: boolean
 }
 
-export type AiSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "agentName" | "businessInfo" | "onboardingTestHash" | "agentImageUrl" | "systemPrompt" | "welcomeMessage" | "qualificationFields" | "aiEnabled" | "responseDelaySeconds" | "businessHoursEnabled" | "businessHours" | "businessTimezone" | "closedMessage" | "followUpEnabled" | "followUpDelayHours" | "followUpMax" | "agentDomain" | "agentRole" | "agentTone" | "personaPromptedAt" | "topicGateEnabled" | "topicGateTopic" | "adOnlyEnabled" | "shopLatitude" | "shopLongitude" | "shopLocationLabel" | "createdAt" | "updatedAt", ExtArgs["result"]["aiSettings"]>
+export type AiSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "agentName" | "businessInfo" | "onboardingTestHash" | "agentImageUrl" | "systemPrompt" | "welcomeMessage" | "qualificationFields" | "aiEnabled" | "responseDelaySeconds" | "businessHoursEnabled" | "businessHours" | "businessTimezone" | "closedMessage" | "followUpEnabled" | "followUpDelayHours" | "followUpMax" | "agentDomain" | "agentRole" | "agentTone" | "personaPromptedAt" | "topicGateEnabled" | "topicGateTopic" | "adOnlyEnabled" | "negotiationEnabled" | "negotiationMaxDiscountPercent" | "shopLatitude" | "shopLongitude" | "shopLocationLabel" | "createdAt" | "updatedAt", ExtArgs["result"]["aiSettings"]>
 export type AiSettingsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
 }
@@ -1281,6 +1355,8 @@ export type $AiSettingsPayload<ExtArgs extends runtime.Types.Extensions.Internal
     topicGateEnabled: boolean
     topicGateTopic: string | null
     adOnlyEnabled: boolean
+    negotiationEnabled: boolean
+    negotiationMaxDiscountPercent: number | null
     shopLatitude: number | null
     shopLongitude: number | null
     shopLocationLabel: string | null
@@ -1735,6 +1811,8 @@ export interface AiSettingsFieldRefs {
   readonly topicGateEnabled: Prisma.FieldRef<"AiSettings", 'Boolean'>
   readonly topicGateTopic: Prisma.FieldRef<"AiSettings", 'String'>
   readonly adOnlyEnabled: Prisma.FieldRef<"AiSettings", 'Boolean'>
+  readonly negotiationEnabled: Prisma.FieldRef<"AiSettings", 'Boolean'>
+  readonly negotiationMaxDiscountPercent: Prisma.FieldRef<"AiSettings", 'Int'>
   readonly shopLatitude: Prisma.FieldRef<"AiSettings", 'Float'>
   readonly shopLongitude: Prisma.FieldRef<"AiSettings", 'Float'>
   readonly shopLocationLabel: Prisma.FieldRef<"AiSettings", 'String'>

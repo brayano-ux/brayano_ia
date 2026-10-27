@@ -31,6 +31,8 @@ export interface AiSettingsInput {
   topicGateEnabled?: boolean | undefined;
   topicGateTopic?: string | null | undefined;
   adOnlyEnabled?: boolean | undefined;
+  negotiationEnabled?: boolean | undefined;
+  negotiationMaxDiscountPercent?: number | null | undefined;
   shopLatitude?: number | null | undefined;
   shopLongitude?: number | null | undefined;
   shopLocationLabel?: string | null | undefined;
@@ -96,6 +98,10 @@ export async function updateAiSettings(organizationId: string, input: AiSettings
     ...(input.topicGateEnabled !== undefined ? { topicGateEnabled: input.topicGateEnabled } : {}),
     ...(input.topicGateTopic !== undefined ? { topicGateTopic: input.topicGateTopic?.trim() || null } : {}),
     ...(input.adOnlyEnabled !== undefined ? { adOnlyEnabled: input.adOnlyEnabled } : {}),
+    ...(input.negotiationEnabled !== undefined ? { negotiationEnabled: input.negotiationEnabled } : {}),
+    ...(input.negotiationMaxDiscountPercent !== undefined
+      ? { negotiationMaxDiscountPercent: input.negotiationMaxDiscountPercent }
+      : {}),
     ...(input.shopLatitude !== undefined ? { shopLatitude: input.shopLatitude } : {}),
     ...(input.shopLongitude !== undefined ? { shopLongitude: input.shopLongitude } : {}),
     ...(input.shopLocationLabel !== undefined ? { shopLocationLabel: input.shopLocationLabel?.trim() || null } : {}),

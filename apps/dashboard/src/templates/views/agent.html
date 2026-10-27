@@ -256,6 +256,28 @@
             <span>Ne répondre qu’aux clients venus d’une publicité</span>
           </label>
           <p class="agent-tip">⚠️ Ne détecte que les clients qui ont réellement cliqué sur le bouton de la publicité (identifiant technique transmis par WhatsApp). Un client qui a vu la publicité puis écrit de lui-même, ou un ancien client, ne sera pas reconnu et ne recevra aucune réponse automatique tant que cette option est activée.</p>
+
+          <div class="agent-pane-head bh-section">
+            <h2>Négociation de prix</h2>
+            <p class="muted">Si activé, l’agent peut accorder une petite remise naturelle quand un client négocie — jamais plus que la marge que vous autorisez, et jamais en dessous du prix plancher qu’il calcule lui-même pour chaque produit.</p>
+          </div>
+          <label class="agenda-switch">
+            <input id="neg-enabled" type="checkbox" />
+            <span>Autoriser l’agent à négocier les prix</span>
+          </label>
+          <div id="neg-details" class="bh-details">
+            <label>
+              <span class="field-label">Remise maximale autorisée</span>
+              <select id="neg-max-discount">
+                <option value="5">5 %</option>
+                <option value="10" selected>10 %</option>
+                <option value="15">15 %</option>
+                <option value="20">20 %</option>
+                <option value="25">25 %</option>
+              </select>
+            </label>
+            <p class="agent-tip">💬 L’agent ne lâche jamais tout d’un coup : il propose au maximum 2 à 3 petites baisses progressives, en restant naturel et chaleureux, comme un vrai vendeur. Fonctionne uniquement sur les produits dont le prix est écrit avec des chiffres (ex. « 25 000 FCFA ») ; les prix « sur devis » ne sont pas négociés.</p>
+          </div>
         </div>
 
         <div class="agent-pane hidden" data-agent-pane="features">

@@ -54,6 +54,7 @@ function syncVisibility() {
   $("#bh-details").classList.toggle("is-off", !$("#bh-enabled").checked);
   $("#fu-details").classList.toggle("is-off", !$("#fu-enabled").checked);
   $("#tg-details").classList.toggle("is-off", !$("#tg-enabled").checked);
+  $("#neg-details").classList.toggle("is-off", !$("#neg-enabled").checked);
 }
 
 function ensureOption(select, value) {
@@ -76,6 +77,12 @@ export function fillHoursSettings(settings) {
   $("#tg-enabled").checked = Boolean(settings.topicGateEnabled);
   $("#tg-topic").value = settings.topicGateTopic || "";
   $("#ad-only-enabled").checked = Boolean(settings.adOnlyEnabled);
+  $("#neg-enabled").checked = Boolean(settings.negotiationEnabled);
+  const maxDiscountSelect = $("#neg-max-discount");
+  const maxDiscountValue = String(settings.negotiationMaxDiscountPercent || 10);
+  maxDiscountSelect.value = [...maxDiscountSelect.options].some((option) => option.value === maxDiscountValue)
+    ? maxDiscountValue
+    : "10";
   syncVisibility();
 }
 
@@ -91,6 +98,8 @@ export function readHoursSettings() {
     topicGateEnabled: $("#tg-enabled").checked,
     topicGateTopic: $("#tg-topic").value.trim() || null,
     adOnlyEnabled: $("#ad-only-enabled").checked,
+    negotiationEnabled: $("#neg-enabled").checked,
+    negotiationMaxDiscountPercent: Number($("#neg-max-discount").value),
   };
 }
 
@@ -128,4 +137,5 @@ export function initHoursSettings() {
   renderRows(DEFAULT_HOURS);
   $("#bh-enabled").addEventListener("change", syncVisibility);
   $("#fu-enabled").addEventListener("change", syncVisibility);
+  $("#neg-enabled").addEventListener("change", syncVisibility);
 }
