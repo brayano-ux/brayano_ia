@@ -40,6 +40,7 @@ export function conversationMarkup(item) {
         <span class="conversation-tags">
           <span class="stage-chip stage-${STAGE_TONES[stage] || "neutral"}">${escapeHtml(STAGE_LABELS[stage] || stage)}</span>
           ${item.paymentCheckPending ? '<span class="stage-chip stage-warning" title="Le client a envoyé une preuve de paiement">💳 Paiement à vérifier</span>' : ""}
+          ${item.startedFromAd ? '<span class="stage-chip stage-info" title="Ce client est arrivé en cliquant sur une publicité Facebook/Instagram">📢 Venu d’une pub</span>' : ""}
         </span>
       </div>
       <div class="conversation-meta">
