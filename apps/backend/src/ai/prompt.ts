@@ -19,7 +19,7 @@ SUJET AUTORISÉ
 
 Cette entreprise ne souhaite des réponses que sur : "${topic}".
 
-Remplis le champ onTopic avec true si CE message du client se rapporte à ce sujet, même reformulé différemment ou précédé d'une salutation. Mets false s'il porte sur autre chose.
+Remplis le champ onTopic avec true si CE message du client se rapporte à ce sujet, même reformulé différemment ou précédé d'une salutation. Mets false s'il porte sur autre chose. onTopic doit être un booléen JSON (true ou false, sans guillemets), jamais le texte "true" ou "false".
 
 Réponds quand même normalement dans le champ reply (elle ne sera pas forcément envoyée au client), mais ne refuse jamais de remplir onTopic : choisis toujours true ou false, jamais les deux à la fois ni aucun des deux.
 `.trim();
