@@ -48,7 +48,8 @@ function filteredConversations() {
   const needle = searchText.trim().toLowerCase();
   return getState().conversations.filter((item) => {
     if (stageFilter === "TO_HANDLE") return needsAttention(item);
-    if (stageFilter && item.stage !== stageFilter) return false;
+    if (stageFilter === "FROM_AD") { if (!item.startedFromAd) return false; }
+    else if (stageFilter && item.stage !== stageFilter) return false;
     if (!needle) return true;
     const haystack = `${contactName(item.contact)} ${item.contact?.whatsappJid || ""}`.toLowerCase();
     return haystack.includes(needle);
@@ -58,11 +59,13 @@ function filteredConversations() {
 function renderStageFilters() {
   const { conversations } = getState();
   const toHandle = conversations.filter(needsAttention).length;
+  const fromAd = conversations.filter((item) => item.startedFromAd).length;
   const counts = Object.fromEntries(STAGES.map((stage) => [stage, conversations.filter((item) => item.stage === stage).length]));
   const chips = [
     { value: "", label: "Toutes", count: conversations.length },
     { value: "TO_HANDLE", label: "À traiter", count: toHandle },
     ...STAGES.map((stage) => ({ value: stage, label: STAGE_LABELS[stage], count: counts[stage] })),
+    ...(fromAd ? [{ value: "FROM_AD", label: "Venu d'une pub", count: fromAd }] : []),
   ];
   $("#inbox-stage-filters").innerHTML = chips
     .map((chip) => `<button type="button" class="stage-filter${chip.value === stageFilter ? " active" : ""}" data-stage-filter="${chip.value}" role="tab" aria-selected="${chip.value === stageFilter}">${escapeHtml(chip.label)} <b>${chip.count}</b></button>`)
