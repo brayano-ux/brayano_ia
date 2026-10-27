@@ -1,7 +1,14 @@
 import { getOrCreateAiSettings, resolveResponseDelaySeconds } from "../ai/ai-settings.service.js";
 import { getAiOrchestrator } from "../ai/ai.factory.js";
 import { buildBusinessHoursPrompt } from "../ai/business-hours.js";
-import { buildSystemPrompt, buildTopicGateSection } from "../ai/prompt.js";
+import { buildNegotiationSection, buildSystemPrompt, buildTopicGateSection } from "../ai/prompt.js";
+import {
+  buildNegotiationInstruction,
+  isNegotiationState,
+  nextNegotiationOffer,
+  startNegotiation,
+} from "../ai/price-negotiation.js";
+import { parsePriceAmount } from "../products/price-parsing.js";
 import { loadMemorySections } from "../ai/memory.service.js";
 import { classifyByCaption, describeMediaKindLabel, type MediaAnalysis, type MediaKind } from "../ai/media-analysis.js";
 import { decideWelcome, placeWelcomeBeforeClientMessages } from "../ai/welcome.js";
@@ -17,6 +24,7 @@ import {
   recordOutboundMessage,
   isConversationUpdateStillCurrent,
   setConversationAiEnabled,
+  setConversationNegotiationState,
   setPaymentCheckPending,
   shouldReactivateAiAfterHandoff,
   updateConversationQualification,
@@ -333,6 +341,7 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
       examplesSection: memory.examples,
       welcomeSent,
       topicGateSection: topicGateActive ? buildTopicGateSection(settings.topicGateTopic!.trim()) : null,
+      negotiationSection: settings.negotiationEnabled ? buildNegotiationSection() : null,
     });
     const recentHistory = await getRecentHistoryForAi(conversation.id);
     const history = welcomeSent && welcomeDecision.welcome ? placeWelcomeBeforeClientMessages(recentHistory, welcomeDecision.welcome) : recentHistory;
@@ -384,6 +393,34 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
     } catch (error) {
       console.error(`❌ [org:${organizationId}] Contrôle des promesses IA ignoré :`, error);
       unbackedClaims = [];
+    }
+
+    // Négociation de prix : le client marchande, le CODE calcule le prix exact (jamais l'IA), par palier
+    // dégressif jusqu'au plancher configuré ; on redemande ensuite à l'IA de le présenter naturellement.
+    if (settings.negotiationEnabled && aiReply.wantsDiscount) {
+      try {
+        const existingNegotiation = isNegotiationState(conversation.negotiationState) ? conversation.negotiationState : null;
+        const negotiationProductId = aiReply.productId || existingNegotiation?.productId || null;
+        const negotiationProduct = negotiationProductId ? products.find((item) => item.id === negotiationProductId) : null;
+        const basePrice = negotiationProduct ? parsePriceAmount(negotiationProduct.price) : null;
+        if (negotiationProduct && basePrice) {
+          const baseState = existingNegotiation && existingNegotiation.productId === negotiationProduct.id
+            ? existingNegotiation
+            : startNegotiation(negotiationProduct.id, basePrice, settings.negotiationMaxDiscountPercent ?? 10);
+          const { price: negotiatedPrice, state: nextNegotiationState, isFinal: negotiationFinal } = nextNegotiationOffer(baseState);
+          await setConversationNegotiationState(conversation.id, nextNegotiationState as object);
+          const retry = await getAiOrchestrator().getReply(
+            conversation.id,
+            `${systemPrompt}\n\n${buildNegotiationInstruction(negotiatedPrice, negotiationFinal)}`,
+            history,
+          );
+          if (retry.intent !== "erreur_traitement") {
+            aiReply = retry;
+          }
+        }
+      } catch (error) {
+        console.error(`❌ [org:${organizationId}] Négociation de prix ignorée :`, error);
+      }
     }
 
     const configuredQualificationFields = Array.isArray(settings.qualificationFields)
@@ -562,6 +599,7 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
           ...(imagesFailed ? { imagesFailed } : {}),
           ...(locationRequested ? { locationSent } : {}),
           actions,
+          ...(aiReply.wantsDiscount ? { negotiationRequested: true } : {}),
           claimRetried,
           claimsUnresolved: unbackedClaims,
           correctionsUsed: memory.correctionIds.length,

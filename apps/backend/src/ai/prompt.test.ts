@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildSystemPrompt, buildTopicGateSection } from "./prompt.js";
+import { buildNegotiationSection, buildSystemPrompt, buildTopicGateSection } from "./prompt.js";
 import { aiReplySchema } from "./schemas.js";
 
 const baseSettings = {
@@ -19,6 +19,20 @@ describe("sujet autorisé dans le prompt", () => {
     expect(prompt).toContain("SUJET AUTORISÉ");
     expect(prompt).toContain('"nos vêtements"');
     expect(prompt).toContain("onTopic");
+  });
+});
+
+describe("négociation de prix dans le prompt", () => {
+  it("n'apparaît pas quand aucune section n'est fournie", () => {
+    const prompt = buildSystemPrompt({ ...baseSettings });
+    expect(prompt).not.toContain("NÉGOCIATION DE PRIX");
+    expect(prompt).not.toContain("wantsDiscount");
+  });
+
+  it("demande de signaler la demande de remise sans jamais proposer de prix soi-même", () => {
+    const prompt = buildSystemPrompt({ ...baseSettings, negotiationSection: buildNegotiationSection() });
+    expect(prompt).toContain("NÉGOCIATION DE PRIX");
+    expect(prompt).toContain("wantsDiscount");
   });
 });
 

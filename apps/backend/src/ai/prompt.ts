@@ -25,6 +25,15 @@ Réponds quand même normalement dans le champ reply (elle ne sera pas forcémen
 `.trim();
 }
 
+/** Instruction permanente pour signaler une demande de négociation (voir ai/schemas.ts : wantsDiscount). */
+export function buildNegotiationSection(): string {
+  return `
+NÉGOCIATION DE PRIX
+
+Cette entreprise autorise une petite marge de négociation sur ses prix. Si le client demande une réduction, un meilleur prix, ou marchande d'une façon ou d'une autre, remplis wantsDiscount avec true dans ta réponse JSON (booléen, jamais le texte "true"). Ne propose JAMAIS toi-même un prix réduit ni un pourcentage : contente-toi de signaler la demande, le serveur te redira ensuite exactement quel prix proposer.
+`.trim();
+}
+
 export interface AgentSettingsForPrompt {
   agentName: string;
   businessInfo: string | null;
@@ -43,6 +52,8 @@ export interface AgentSettingsForPrompt {
   examplesSection?: string | null;
   /** Instruction de classification « sujet autorisé » (voir ai/schemas.ts : onTopic). Absente si le filtre n'est pas actif. */
   topicGateSection?: string | null;
+  /** Instruction de négociation de prix (voir ai/schemas.ts : wantsDiscount). Absente si la négociation n'est pas activée. */
+  negotiationSection?: string | null;
   /** Le message d'accueil de l'entreprise vient d'être envoyé juste avant cette réponse. */
   welcomeSent?: boolean;
   products?: Array<{
@@ -163,7 +174,7 @@ ${settings.systemPrompt}
 
 ${settings.correctionsSection ? `${settings.correctionsSection}\n\n` : ""}${settings.welcomeSent ? `${WELCOME_ALREADY_SENT_INSTRUCTION}\n\n` : ""}${settings.examplesSection ? `${settings.examplesSection}\n\n` : ""}${MEDIA_RULES}
 
-${settings.topicGateSection ? `${settings.topicGateSection}\n\n` : ""}RÈGLE PRIORITAIRE : AUTONOMIE
+${settings.topicGateSection ? `${settings.topicGateSection}\n\n` : ""}${settings.negotiationSection ? `${settings.negotiationSection}\n\n` : ""}RÈGLE PRIORITAIRE : AUTONOMIE
 
 Tu dois répondre toi-même à toutes les demandes que
 tu peux traiter à partir des informations disponibles.
@@ -307,7 +318,7 @@ avant ou après, avec exactement cette structure :
   "nextAction": "continue",
   "leadData": {},
   "productId": "",
-  "productIds": []${settings.topicGateSection ? ',\n  "onTopic": true' : ""}
+  "productIds": []${settings.topicGateSection ? ',\n  "onTopic": true' : ""}${settings.negotiationSection ? ',\n  "wantsDiscount": false' : ""}
 }
 
 RÈGLES JSON
@@ -323,7 +334,7 @@ RÈGLES JSON
 - leadData : objet contenant uniquement les données connues.
 - productId : identifiant d’un produit actif du catalogue, uniquement pour joindre sa photo à une demande explicite du prospect; sinon chaîne vide.
 - productIds : liste d'identifiants de produits du catalogue quand le prospect demande les photos de PLUSIEURS produits (3 photos au maximum seront envoyées, choisis les plus pertinentes) ; sinon liste vide ou absente.
-${settings.agenda ? '- booking : null, ou une demande de rendez-vous {"action":"book"|"reschedule"|"cancel","date":"AAAA-MM-JJ","time":"HH:mm","service":"…"} (voir la section PRISE DE RENDEZ-VOUS).\n' : ""}${settings.orders ? '- order : null, ou une commande confirmée {"action":"create","items":[{"productId":"…","quantity":1}],"customerName":"…","address":"…"} ou {"action":"cancel"} pour annuler la commande du client (voir la section PRISE DE COMMANDE).\n' : ""}${settings.topicGateSection ? "- onTopic : booléen obligatoire quand le filtre « sujet autorisé » est actif (voir plus haut) ; absent sinon.\n" : ""}
+${settings.agenda ? '- booking : null, ou une demande de rendez-vous {"action":"book"|"reschedule"|"cancel","date":"AAAA-MM-JJ","time":"HH:mm","service":"…"} (voir la section PRISE DE RENDEZ-VOUS).\n' : ""}${settings.orders ? '- order : null, ou une commande confirmée {"action":"create","items":[{"productId":"…","quantity":1}],"customerName":"…","address":"…"} ou {"action":"cancel"} pour annuler la commande du client (voir la section PRISE DE COMMANDE).\n' : ""}${settings.topicGateSection ? "- onTopic : booléen obligatoire quand le filtre « sujet autorisé » est actif (voir plus haut) ; absent sinon.\n" : ""}${settings.negotiationSection ? "- wantsDiscount : booléen obligatoire quand la négociation de prix est active (voir plus haut) ; absent sinon.\n" : ""}
 Cohérence obligatoire :
 
 - Si needsHuman = true, nextAction doit être "handoff".

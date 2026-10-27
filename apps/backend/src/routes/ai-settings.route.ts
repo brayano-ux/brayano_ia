@@ -32,6 +32,8 @@ const updateAiSettingsSchema = z.object({
   topicGateEnabled: z.boolean().optional(),
   topicGateTopic: z.string().trim().max(200).nullable().optional(),
   adOnlyEnabled: z.boolean().optional(),
+  negotiationEnabled: z.boolean().optional(),
+  negotiationMaxDiscountPercent: z.number().int().min(1).max(50).nullable().optional(),
   shopLatitude: z.number().min(-90).max(90).nullable().optional(),
   shopLongitude: z.number().min(-180).max(180).nullable().optional(),
   shopLocationLabel: z.string().trim().max(80).nullable().optional(),
@@ -73,6 +75,8 @@ export async function aiSettingsRoute(app: FastifyInstance) {
       topicGateEnabled?: boolean | undefined;
       topicGateTopic?: string | null | undefined;
       adOnlyEnabled?: boolean | undefined;
+      negotiationEnabled?: boolean | undefined;
+      negotiationMaxDiscountPercent?: number | null | undefined;
       shopLatitude?: number | null | undefined;
       shopLongitude?: number | null | undefined;
       shopLocationLabel?: string | null | undefined;
@@ -101,6 +105,10 @@ export async function aiSettingsRoute(app: FastifyInstance) {
     if (parsed.data.topicGateEnabled !== undefined) settingsInput.topicGateEnabled = parsed.data.topicGateEnabled;
     if (parsed.data.topicGateTopic !== undefined) settingsInput.topicGateTopic = parsed.data.topicGateTopic;
     if (parsed.data.adOnlyEnabled !== undefined) settingsInput.adOnlyEnabled = parsed.data.adOnlyEnabled;
+    if (parsed.data.negotiationEnabled !== undefined) settingsInput.negotiationEnabled = parsed.data.negotiationEnabled;
+    if (parsed.data.negotiationMaxDiscountPercent !== undefined) {
+      settingsInput.negotiationMaxDiscountPercent = parsed.data.negotiationMaxDiscountPercent;
+    }
     if (parsed.data.shopLatitude !== undefined) settingsInput.shopLatitude = parsed.data.shopLatitude;
     if (parsed.data.shopLongitude !== undefined) settingsInput.shopLongitude = parsed.data.shopLongitude;
     if (parsed.data.shopLocationLabel !== undefined) settingsInput.shopLocationLabel = parsed.data.shopLocationLabel;
