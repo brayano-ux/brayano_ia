@@ -59,7 +59,11 @@ async function saveSettings(event) {
     return focusInvalid("knowledge", "#business-info", "Les informations sur votre activité dépassent 50 000 caractères. Raccourcissez le texte avant d’enregistrer ; votre saisie est conservée.");
   }
   const hoursError = validateHours();
-  if (hoursError) return focusInvalid("hours", $("#tg-enabled").checked && !$("#tg-topic").value.trim() ? "#tg-topic" : "#bh-rows", hoursError);
+  if (hoursError) {
+    return $("#tg-enabled").checked && !$("#tg-topic").value.trim()
+      ? focusInvalid("rules", "#tg-topic", hoursError)
+      : focusInvalid("hours", "#bh-rows", hoursError);
+  }
   const saveButton = $("#save-agent");
   saveButton.disabled = true;
   try {
