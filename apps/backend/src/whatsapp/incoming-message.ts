@@ -567,12 +567,14 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
       // Une photo qui ne part pas ne doit jamais laisser le client sans réponse : le texte part toujours,
       // et on prévient honnêtement le client si une photo manque.
       let imagesFailed = 0;
+      const sentProductNames: string[] = [];
       if (photoProducts.length) {
         await instance.sendMessage(message.fromJid, textToSend);
         const failedNames: string[] = [];
         for (const product of photoProducts) {
           try {
             const sentImageId = await instance.sendImage(message.fromJid, product.imageUrl, buildProductImageCaption(product));
+            sentProductNames.push(product.name);
             await recordSentProductImage(conversation.id, product.id, sentImageId).catch((error) => {
               console.error(`❌ [org:${organizationId}] Association photo → produit non enregistrée :`, error);
             });
@@ -612,7 +614,7 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
           qualificationStatus: aiReply.qualificationStatus,
           needsHuman: aiReply.needsHuman,
           nextAction: aiReply.nextAction,
-          ...(photoProducts.length ? { productNames: photoProducts.map((product) => product.name) } : {}),
+          ...(sentProductNames.length ? { productNames: sentProductNames } : {}),
           imageSent: Boolean(photoProducts.length),
           photosSent: photoProducts.length - imagesFailed,
           ...(imagesFailed ? { imagesFailed } : {}),
