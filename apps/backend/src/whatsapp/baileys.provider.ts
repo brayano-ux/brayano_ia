@@ -266,8 +266,17 @@ export class BaileysWhatsAppProvider implements WhatsAppProvider {
   }
 
   async disconnect(): Promise<void> {
-    await this.socket?.logout();
+    const socket = this.socket;
     this.socket = null;
+    try {
+      await socket?.logout();
+    } catch (error) {
+      // logout() envoie d'abord une requête à WhatsApp avant de fermer le socket : si cette requête échoue
+      // (réseau, serveur WhatsApp indisponible...), le socket reste ouvert et continue de recevoir des messages
+      // en arrière-plan malgré la déconnexion affichée dans le tableau de bord. On force sa fermeture.
+      console.error("❌ Déconnexion WhatsApp (logout) échouée, fermeture forcée du socket :", error instanceof Error ? error.message : error);
+      socket?.end(new Boom("Déconnexion manuelle", { statusCode: DisconnectReason.loggedOut }));
+    }
     this.setStatus("DISCONNECTED", undefined, "manual");
   }
 

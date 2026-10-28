@@ -22,6 +22,7 @@ function createSocket() {
     sendMessage: vi.fn(),
     requestPairingCode: vi.fn(),
     logout: vi.fn(async () => undefined),
+    end: vi.fn(),
   };
 }
 
@@ -63,6 +64,22 @@ describe("raison des déconnexions transmise au moniteur", () => {
   it("reports a voluntary disconnect as manual", async () => {
     await provider.disconnect();
     expect(updates.at(-1)).toMatchObject({ status: "DISCONNECTED", reason: "manual" });
+  });
+
+  it("force-closes the socket when logout() fails, so it can't keep receiving messages in the background", async () => {
+    mocks.socket.logout = vi.fn(async () => {
+      throw new Error("réseau indisponible");
+    });
+    await provider.disconnect();
+    expect(mocks.socket.end).toHaveBeenCalledTimes(1);
+    expect(updates.at(-1)).toMatchObject({ status: "DISCONNECTED", reason: "manual" });
+  });
+
+  it("never throws even when logout() fails", async () => {
+    mocks.socket.logout = vi.fn(async () => {
+      throw new Error("réseau indisponible");
+    });
+    await expect(provider.disconnect()).resolves.toBeUndefined();
   });
 
   it("reports a successful connection with the phone number and no reason", async () => {
