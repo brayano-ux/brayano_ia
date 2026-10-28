@@ -116,6 +116,20 @@ model ProductImage {
   @@map("product_images")
 }
 
+/// Associe l'identifiant WhatsApp d'une photo de produit envoyée au produit concerné : permet de retrouver
+/// de quel produit parle le client quand il répond directement à cette photo (voir whatsapp/quoted-reply.ts).
+model SentProductImage {
+  whatsappMessageId String   @id @map("whatsapp_message_id")
+  conversationId    String   @map("conversation_id")
+  productId         String   @map("product_id")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@map("sent_product_images")
+}
+
 enum BillingPaymentStatus {
   PENDING
   SUCCESS
@@ -344,11 +358,12 @@ model Conversation {
   createdAt           DateTime            @default(now()) @map("created_at")
   updatedAt           DateTime            @updatedAt @map("updated_at")
 
-  organization  Organization   @relation(fields: [organizationId], references: [id])
-  contact       Contact        @relation(fields: [contactId], references: [id])
-  messages      Message[]
-  aiRuns        AiRun[]
-  prospectLeads ProspectLead[]
+  organization      Organization       @relation(fields: [organizationId], references: [id])
+  contact           Contact            @relation(fields: [contactId], references: [id])
+  messages          Message[]
+  aiRuns            AiRun[]
+  prospectLeads     ProspectLead[]
+  sentProductImages SentProductImage[]
 
   @@index([organizationId])
   @@index([contactId])

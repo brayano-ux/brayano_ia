@@ -29,6 +29,7 @@ export async function createTestOrganization(name = "Salon Éclat", options: { e
 }
 
 export interface SentMessage {
+  id: string;
   kind: "text" | "image" | "location";
   jid: string;
   text: string;
@@ -36,6 +37,8 @@ export interface SentMessage {
   latitude?: number;
   longitude?: number;
 }
+
+let fakeMessageCounter = 0;
 
 export class FakeWhatsApp implements WhatsAppProvider {
   sent: SentMessage[] = [];
@@ -49,13 +52,16 @@ export class FakeWhatsApp implements WhatsAppProvider {
   getQRCode() { return null; }
   async sendMessage(jid: string, text: string) {
     if (this.failNextSend) { this.failNextSend = false; throw new Error("send failed"); }
-    this.sent.push({ kind: "text", jid, text });
+    this.sent.push({ id: `FAKE-${fakeMessageCounter++}`, kind: "text", jid, text });
   }
   async sendImage(jid: string, imageUrl: string, caption?: string) {
     if (this.failImages > 0) { this.failImages -= 1; throw new Error("image download failed"); }
-    this.sent.push({ kind: "image", jid, text: caption ?? "", imageUrl }); }
+    const id = `FAKE-${fakeMessageCounter++}`;
+    this.sent.push({ id, kind: "image", jid, text: caption ?? "", imageUrl });
+    return id;
+  }
   async sendLocation(jid: string, latitude: number, longitude: number, label?: string) {
-    this.sent.push({ kind: "location", jid, text: label ?? "", latitude, longitude });
+    this.sent.push({ id: `FAKE-${fakeMessageCounter++}`, kind: "location", jid, text: label ?? "", latitude, longitude });
   }
   onMessage() {}
   onConnectionUpdate() {}

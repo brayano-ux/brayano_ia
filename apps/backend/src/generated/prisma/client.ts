@@ -63,6 +63,12 @@ export type Product = Prisma.ProductModel
  */
 export type ProductImage = Prisma.ProductImageModel
 /**
+ * Model SentProductImage
+ * Associe l'identifiant WhatsApp d'une photo de produit envoyée au produit concerné : permet de retrouver
+ * de quel produit parle le client quand il répond directement à cette photo (voir whatsapp/quoted-reply.ts).
+ */
+export type SentProductImage = Prisma.SentProductImageModel
+/**
  * Model BillingPayment
  * 
  */

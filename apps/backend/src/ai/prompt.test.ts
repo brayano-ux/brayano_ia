@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildNegotiationSection, buildSystemPrompt, buildTopicGateSection } from "./prompt.js";
+import { buildNegotiationSection, buildQuotedProductSection, buildSystemPrompt, buildTopicGateSection } from "./prompt.js";
 import { aiReplySchema } from "./schemas.js";
 
 const baseSettings = {
@@ -33,6 +33,23 @@ describe("négociation de prix dans le prompt", () => {
     const prompt = buildSystemPrompt({ ...baseSettings, negotiationSection: buildNegotiationSection() });
     expect(prompt).toContain("NÉGOCIATION DE PRIX");
     expect(prompt).toContain("wantsDiscount");
+  });
+});
+
+describe("photo citée par le client dans le prompt", () => {
+  it("n'apparaît pas quand le client ne répond à aucune photo", () => {
+    const prompt = buildSystemPrompt({ ...baseSettings });
+    expect(prompt).not.toContain("PHOTO SÉLECTIONNÉE PAR LE CLIENT");
+  });
+
+  it("précise de quel produit il s'agit quand le client répond à sa photo", () => {
+    const prompt = buildSystemPrompt({
+      ...baseSettings,
+      quotedProductSection: buildQuotedProductSection({ name: "Robe rouge", price: "12 000 FCFA", category: "Vêtements" }),
+    });
+    expect(prompt).toContain("PHOTO SÉLECTIONNÉE PAR LE CLIENT");
+    expect(prompt).toContain("Robe rouge");
+    expect(prompt).toContain("12 000 FCFA");
   });
 });
 

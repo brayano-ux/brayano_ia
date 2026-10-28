@@ -70,7 +70,8 @@ La page est découpée en six onglets : Identité, Connaissances, Comportement, 
 # PAGE « PRODUITS »
 - « Ajouter un produit » : photo (JPEG, PNG ou WebP), nom (obligatoire), description et caractéristiques (obligatoire : matière, tailles, usages, livraison… l'agent s'en sert pour répondre), catégorie, prix (texte libre, ex. « 25 000 FCFA »), case « Produit disponible ». Puis « Ajouter au catalogue ».
 - L'agent ne recommande et n'envoie que les produits actifs (« disponible » coché). Pour un produit en rupture : décocher « disponible » plutôt que le supprimer. Dans la liste « Catalogue », chaque produit a un bouton « Modifier » et un bouton « Supprimer ».
-- Quand le client demande à voir un produit, l'agent envoie la photo avec le prix. Si la photo ne part pas : vérifier que la photo a bien été ajoutée au produit et réessayer en la remplaçant.
+- Quand le client demande à voir un produit, l'agent envoie la photo avec le prix (jusqu'à 5 photos d'un coup si plusieurs produits sont demandés). Si la photo ne part pas : vérifier que la photo a bien été ajoutée au produit et réessayer en la remplaçant.
+- Si le client répond directement à l'une des photos envoyées (fonction « répondre » de WhatsApp) pour demander le prix ou poser une question, l'agent sait reconnaître de quel produit il s'agit, même si le client ne le nomme pas.
 - Écrire le prix toujours de la même façon (avec FCFA) pour éviter les confusions.
 
 # PAGE « RENDEZ-VOUS »
