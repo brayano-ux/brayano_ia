@@ -1,7 +1,7 @@
 import { getOrCreateAiSettings, resolveResponseDelaySeconds } from "../ai/ai-settings.service.js";
 import { getAiOrchestrator } from "../ai/ai.factory.js";
 import { buildBusinessHoursPrompt } from "../ai/business-hours.js";
-import { buildNegotiationSection, buildSystemPrompt, buildTopicGateSection } from "../ai/prompt.js";
+import { buildNegotiationSection, buildQuotedProductSection, buildSystemPrompt, buildTopicGateSection } from "../ai/prompt.js";
 import {
   buildNegotiationInstruction,
   isNegotiationState,
@@ -46,6 +46,7 @@ import {
   resolveRequestedProductPhotos,
 } from "../products/product-image-selection.js";
 import { listProductsForAssistant } from "../products/products.service.js";
+import { findProductIdForSentImage, recordSentProductImage } from "../products/sent-product-images.service.js";
 import type { IncomingWhatsAppMessage, WhatsAppProvider } from "./whatsapp.types.js";
 
 export interface IncomingMessageContext {
@@ -330,6 +331,20 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
     // Sujet autorisé : tant que le client n'a pas encore écrit dessus, l'IA classe le message sans qu'on l'envoie.
     // Une fois ouvert pour cette conversation, elle reste ouverte pour toujours : plus besoin de reclasser.
     const topicGateActive = Boolean(settings.topicGateEnabled && settings.topicGateTopic?.trim() && !conversation.topicGateOpened);
+
+    // Le client répond directement à une photo de produit envoyée plus tôt : on dit à l'IA de quel produit il s'agit,
+    // sans attendre qu'il le nomme (voir products/sent-product-images.service.ts).
+    let quotedProductSection: string | null = null;
+    if (message.quotedMessageId) {
+      try {
+        const quotedProductId = await findProductIdForSentImage(message.quotedMessageId);
+        const quotedProduct = quotedProductId ? products.find((product) => product.id === quotedProductId) : null;
+        if (quotedProduct) quotedProductSection = buildQuotedProductSection(quotedProduct);
+      } catch (error) {
+        console.error(`❌ [org:${organizationId}] Résolution de la photo citée ignorée :`, error);
+      }
+    }
+
     const systemPrompt = buildSystemPrompt({
       ...settings,
       knownLeadData: previousLeadData,
@@ -342,6 +357,7 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
       welcomeSent,
       topicGateSection: topicGateActive ? buildTopicGateSection(settings.topicGateTopic!.trim()) : null,
       negotiationSection: settings.negotiationEnabled ? buildNegotiationSection() : null,
+      quotedProductSection,
     });
     const recentHistory = await getRecentHistoryForAi(conversation.id);
     const history = welcomeSent && welcomeDecision.welcome ? placeWelcomeBeforeClientMessages(recentHistory, welcomeDecision.welcome) : recentHistory;
@@ -556,7 +572,10 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
         const failedNames: string[] = [];
         for (const product of photoProducts) {
           try {
-            await instance.sendImage(message.fromJid, product.imageUrl, buildProductImageCaption(product));
+            const sentImageId = await instance.sendImage(message.fromJid, product.imageUrl, buildProductImageCaption(product));
+            await recordSentProductImage(conversation.id, product.id, sentImageId).catch((error) => {
+              console.error(`❌ [org:${organizationId}] Association photo → produit non enregistrée :`, error);
+            });
           } catch (error) {
             console.error(`❌ [org:${organizationId}] Photo du produit « ${product.name} » non envoyée :`, error instanceof Error ? error.message : error);
             failedNames.push(product.name);

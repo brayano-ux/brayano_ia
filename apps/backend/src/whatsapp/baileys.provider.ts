@@ -14,6 +14,7 @@ import QRCode from "qrcode";
 import { describeCloseCode } from "./disconnect-reasons.js";
 import { BotSentIds, extractHumanOutgoing } from "./outgoing-detection.js";
 import { startedFromAdClick } from "./ad-referral.js";
+import { extractQuotedMessageId } from "./quoted-reply.js";
 import type {
   ConnectionLossReason,
   ConnectionUpdatePayload,
@@ -213,6 +214,7 @@ export class BaileysWhatsAppProvider implements WhatsAppProvider {
         if (!text || !msg.key.id) continue;
 
         const startedFromAd = startedFromAdClick(unwrapped);
+        const quotedMessageId = extractQuotedMessageId(unwrapped);
 
         const incoming: IncomingWhatsAppMessage = {
           externalId: msg.key.id,
@@ -222,6 +224,7 @@ export class BaileysWhatsAppProvider implements WhatsAppProvider {
           ...(audio ? { audio } : {}),
           ...(media ? { media } : {}),
           ...(startedFromAd ? { startedFromAd: true } : {}),
+          ...(quotedMessageId ? { quotedMessageId } : {}),
         };
 
         for (const handler of this.messageHandlers) {
@@ -318,7 +321,7 @@ export class BaileysWhatsAppProvider implements WhatsAppProvider {
     await this.socket.sendMessage(jid, { text }, { messageId });
   }
 
-  async sendImage(jid: string, imageUrl: string, caption?: string): Promise<void> {
+  async sendImage(jid: string, imageUrl: string, caption?: string): Promise<string> {
     if (!this.socket) {
       throw new Error("Le socket WhatsApp n'est pas connecté.");
     }
@@ -338,6 +341,7 @@ export class BaileysWhatsAppProvider implements WhatsAppProvider {
     const messageId = generateMessageID();
     this.botSentIds.add(messageId);
     await this.socket.sendMessage(jid, payload as any, { messageId });
+    return messageId;
   }
 
   async sendLocation(jid: string, latitude: number, longitude: number, label?: string): Promise<void> {

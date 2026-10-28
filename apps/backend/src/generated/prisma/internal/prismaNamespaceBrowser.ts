@@ -55,6 +55,7 @@ export const ModelName = {
   AiSettings: 'AiSettings',
   Product: 'Product',
   ProductImage: 'ProductImage',
+  SentProductImage: 'SentProductImage',
   BillingPayment: 'BillingPayment',
   BillingSubscription: 'BillingSubscription',
   User: 'User',
@@ -178,6 +179,16 @@ export const ProductImageScalarFieldEnum = {
 } as const
 
 export type ProductImageScalarFieldEnum = (typeof ProductImageScalarFieldEnum)[keyof typeof ProductImageScalarFieldEnum]
+
+
+export const SentProductImageScalarFieldEnum = {
+  whatsappMessageId: 'whatsappMessageId',
+  conversationId: 'conversationId',
+  productId: 'productId',
+  createdAt: 'createdAt'
+} as const
+
+export type SentProductImageScalarFieldEnum = (typeof SentProductImageScalarFieldEnum)[keyof typeof SentProductImageScalarFieldEnum]
 
 
 export const BillingPaymentScalarFieldEnum = {

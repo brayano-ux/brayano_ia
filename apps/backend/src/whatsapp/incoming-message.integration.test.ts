@@ -183,6 +183,24 @@ describe.skipIf(!integrationEnabled)("traitement d'un message entrant (base rée
       ]);
     });
 
+    it("comprend de quel produit parle le client quand il répond directement à sa photo", async () => {
+      const { organization } = await createTestOrganization();
+      const { robe, sac } = await seedProducts(organization.id);
+      installScriptedAi([aiReply({ reply: "Voici nos modèles.", productIds: [robe.id, sac.id] })]);
+      const whatsapp = new FakeWhatsApp();
+
+      await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "Montrez-moi la robe et le sac"));
+      const sentRobeImage = whatsapp.sent.find((item) => item.kind === "image" && item.text.startsWith("Robe"));
+      expect(sentRobeImage).toBeDefined();
+
+      const calls = installScriptedAi([aiReply({ reply: "12 000 FCFA, taille unique." })]);
+      await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "c'est combien ?", { quotedMessageId: sentRobeImage!.id }));
+
+      expect(calls[0]!.systemPrompt).toContain("PHOTO SÉLECTIONNÉE PAR LE CLIENT");
+      expect(calls[0]!.systemPrompt).toContain("« Robe »");
+      expect(calls[0]!.systemPrompt).not.toContain("« Sac »");
+    });
+
     it("quand la photo ne part pas, le client reçoit quand même le texte et une explication honnête", async () => {
       const { organization } = await createTestOrganization();
       const { robe } = await seedProducts(organization.id);

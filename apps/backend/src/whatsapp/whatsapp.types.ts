@@ -21,6 +21,8 @@ export interface IncomingWhatsAppMessage {
   media?: IncomingMedia;
   /** Vrai si ce message vient du bouton d'une publicité Facebook/Instagram « Cliquer pour WhatsApp » (identifiant ctwaClid présent). */
   startedFromAd?: boolean;
+  /** Identifiant WhatsApp du message auquel le client répond directement (« swipe to reply »), s'il y en a un. */
+  quotedMessageId?: string;
 }
 
 /** Message envoyé par un humain depuis le téléphone du numéro connecté (pas par l'application). */
@@ -62,7 +64,8 @@ export interface WhatsAppProvider {
   getQRCode(): string | null; // data URL (image/png en base64), ou null si non disponible
   getPairingCode?(): string | null;
   sendMessage(jid: string, text: string): Promise<void>;
-  sendImage(jid: string, imageUrl: string, caption?: string): Promise<void>;
+  /** Renvoie l'identifiant WhatsApp du message envoyé (permet de retrouver plus tard à quel produit cette photo correspond). */
+  sendImage(jid: string, imageUrl: string, caption?: string): Promise<string>;
   sendLocation(jid: string, latitude: number, longitude: number, label?: string): Promise<void>;
   onMessage(handler: (message: IncomingWhatsAppMessage) => void): void;
   /** Un humain écrit à un prospect depuis le téléphone : l'IA doit se mettre en pause. */

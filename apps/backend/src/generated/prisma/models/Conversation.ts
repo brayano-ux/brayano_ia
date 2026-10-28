@@ -345,6 +345,7 @@ export type ConversationWhereInput = {
   messages?: Prisma.MessageListRelationFilter
   aiRuns?: Prisma.AiRunListRelationFilter
   prospectLeads?: Prisma.ProspectLeadListRelationFilter
+  sentProductImages?: Prisma.SentProductImageListRelationFilter
 }
 
 export type ConversationOrderByWithRelationInput = {
@@ -374,6 +375,7 @@ export type ConversationOrderByWithRelationInput = {
   messages?: Prisma.MessageOrderByRelationAggregateInput
   aiRuns?: Prisma.AiRunOrderByRelationAggregateInput
   prospectLeads?: Prisma.ProspectLeadOrderByRelationAggregateInput
+  sentProductImages?: Prisma.SentProductImageOrderByRelationAggregateInput
 }
 
 export type ConversationWhereUniqueInput = Prisma.AtLeast<{
@@ -406,6 +408,7 @@ export type ConversationWhereUniqueInput = Prisma.AtLeast<{
   messages?: Prisma.MessageListRelationFilter
   aiRuns?: Prisma.AiRunListRelationFilter
   prospectLeads?: Prisma.ProspectLeadListRelationFilter
+  sentProductImages?: Prisma.SentProductImageListRelationFilter
 }, "id">
 
 export type ConversationOrderByWithAggregationInput = {
@@ -489,6 +492,7 @@ export type ConversationCreateInput = {
   messages?: Prisma.MessageCreateNestedManyWithoutConversationInput
   aiRuns?: Prisma.AiRunCreateNestedManyWithoutConversationInput
   prospectLeads?: Prisma.ProspectLeadCreateNestedManyWithoutConversationInput
+  sentProductImages?: Prisma.SentProductImageCreateNestedManyWithoutConversationInput
 }
 
 export type ConversationUncheckedCreateInput = {
@@ -516,6 +520,7 @@ export type ConversationUncheckedCreateInput = {
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutConversationInput
   aiRuns?: Prisma.AiRunUncheckedCreateNestedManyWithoutConversationInput
   prospectLeads?: Prisma.ProspectLeadUncheckedCreateNestedManyWithoutConversationInput
+  sentProductImages?: Prisma.SentProductImageUncheckedCreateNestedManyWithoutConversationInput
 }
 
 export type ConversationUpdateInput = {
@@ -543,6 +548,7 @@ export type ConversationUpdateInput = {
   messages?: Prisma.MessageUpdateManyWithoutConversationNestedInput
   aiRuns?: Prisma.AiRunUpdateManyWithoutConversationNestedInput
   prospectLeads?: Prisma.ProspectLeadUpdateManyWithoutConversationNestedInput
+  sentProductImages?: Prisma.SentProductImageUpdateManyWithoutConversationNestedInput
 }
 
 export type ConversationUncheckedUpdateInput = {
@@ -570,6 +576,7 @@ export type ConversationUncheckedUpdateInput = {
   messages?: Prisma.MessageUncheckedUpdateManyWithoutConversationNestedInput
   aiRuns?: Prisma.AiRunUncheckedUpdateManyWithoutConversationNestedInput
   prospectLeads?: Prisma.ProspectLeadUncheckedUpdateManyWithoutConversationNestedInput
+  sentProductImages?: Prisma.SentProductImageUncheckedUpdateManyWithoutConversationNestedInput
 }
 
 export type ConversationCreateManyInput = {
@@ -652,6 +659,11 @@ export type ConversationOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type ConversationScalarRelationFilter = {
+  is?: Prisma.ConversationWhereInput
+  isNot?: Prisma.ConversationWhereInput
+}
+
 export type ConversationCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
@@ -730,11 +742,6 @@ export type ConversationSumOrderByAggregateInput = {
   followUpCount?: Prisma.SortOrder
 }
 
-export type ConversationScalarRelationFilter = {
-  is?: Prisma.ConversationWhereInput
-  isNot?: Prisma.ConversationWhereInput
-}
-
 export type ConversationNullableScalarRelationFilter = {
   is?: Prisma.ConversationWhereInput | null
   isNot?: Prisma.ConversationWhereInput | null
@@ -780,6 +787,20 @@ export type ConversationUncheckedUpdateManyWithoutOrganizationNestedInput = {
   update?: Prisma.ConversationUpdateWithWhereUniqueWithoutOrganizationInput | Prisma.ConversationUpdateWithWhereUniqueWithoutOrganizationInput[]
   updateMany?: Prisma.ConversationUpdateManyWithWhereWithoutOrganizationInput | Prisma.ConversationUpdateManyWithWhereWithoutOrganizationInput[]
   deleteMany?: Prisma.ConversationScalarWhereInput | Prisma.ConversationScalarWhereInput[]
+}
+
+export type ConversationCreateNestedOneWithoutSentProductImagesInput = {
+  create?: Prisma.XOR<Prisma.ConversationCreateWithoutSentProductImagesInput, Prisma.ConversationUncheckedCreateWithoutSentProductImagesInput>
+  connectOrCreate?: Prisma.ConversationCreateOrConnectWithoutSentProductImagesInput
+  connect?: Prisma.ConversationWhereUniqueInput
+}
+
+export type ConversationUpdateOneRequiredWithoutSentProductImagesNestedInput = {
+  create?: Prisma.XOR<Prisma.ConversationCreateWithoutSentProductImagesInput, Prisma.ConversationUncheckedCreateWithoutSentProductImagesInput>
+  connectOrCreate?: Prisma.ConversationCreateOrConnectWithoutSentProductImagesInput
+  upsert?: Prisma.ConversationUpsertWithoutSentProductImagesInput
+  connect?: Prisma.ConversationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ConversationUpdateToOneWithWhereWithoutSentProductImagesInput, Prisma.ConversationUpdateWithoutSentProductImagesInput>, Prisma.ConversationUncheckedUpdateWithoutSentProductImagesInput>
 }
 
 export type ConversationCreateNestedManyWithoutContactInput = {
@@ -904,6 +925,7 @@ export type ConversationCreateWithoutOrganizationInput = {
   messages?: Prisma.MessageCreateNestedManyWithoutConversationInput
   aiRuns?: Prisma.AiRunCreateNestedManyWithoutConversationInput
   prospectLeads?: Prisma.ProspectLeadCreateNestedManyWithoutConversationInput
+  sentProductImages?: Prisma.SentProductImageCreateNestedManyWithoutConversationInput
 }
 
 export type ConversationUncheckedCreateWithoutOrganizationInput = {
@@ -930,6 +952,7 @@ export type ConversationUncheckedCreateWithoutOrganizationInput = {
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutConversationInput
   aiRuns?: Prisma.AiRunUncheckedCreateNestedManyWithoutConversationInput
   prospectLeads?: Prisma.ProspectLeadUncheckedCreateNestedManyWithoutConversationInput
+  sentProductImages?: Prisma.SentProductImageUncheckedCreateNestedManyWithoutConversationInput
 }
 
 export type ConversationCreateOrConnectWithoutOrganizationInput = {
@@ -985,6 +1008,130 @@ export type ConversationScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Conversation"> | Date | string
 }
 
+export type ConversationCreateWithoutSentProductImagesInput = {
+  id?: string
+  aiEnabled?: boolean
+  status?: $Enums.ConversationStatus
+  qualificationStatus?: $Enums.QualificationStatus
+  leadScore?: number | null
+  leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  summary?: string | null
+  stage?: $Enums.ConversationStage
+  stageLocked?: boolean
+  paymentCheckPending?: boolean
+  topicGateOpened?: boolean
+  startedFromAd?: boolean
+  negotiationState?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastInboundAt?: Date | string | null
+  lastReadAt?: Date | string | null
+  followUpCount?: number
+  lastFollowUpAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutConversationsInput
+  contact: Prisma.ContactCreateNestedOneWithoutConversationsInput
+  messages?: Prisma.MessageCreateNestedManyWithoutConversationInput
+  aiRuns?: Prisma.AiRunCreateNestedManyWithoutConversationInput
+  prospectLeads?: Prisma.ProspectLeadCreateNestedManyWithoutConversationInput
+}
+
+export type ConversationUncheckedCreateWithoutSentProductImagesInput = {
+  id?: string
+  organizationId: string
+  contactId: string
+  aiEnabled?: boolean
+  status?: $Enums.ConversationStatus
+  qualificationStatus?: $Enums.QualificationStatus
+  leadScore?: number | null
+  leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  summary?: string | null
+  stage?: $Enums.ConversationStage
+  stageLocked?: boolean
+  paymentCheckPending?: boolean
+  topicGateOpened?: boolean
+  startedFromAd?: boolean
+  negotiationState?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastInboundAt?: Date | string | null
+  lastReadAt?: Date | string | null
+  followUpCount?: number
+  lastFollowUpAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutConversationInput
+  aiRuns?: Prisma.AiRunUncheckedCreateNestedManyWithoutConversationInput
+  prospectLeads?: Prisma.ProspectLeadUncheckedCreateNestedManyWithoutConversationInput
+}
+
+export type ConversationCreateOrConnectWithoutSentProductImagesInput = {
+  where: Prisma.ConversationWhereUniqueInput
+  create: Prisma.XOR<Prisma.ConversationCreateWithoutSentProductImagesInput, Prisma.ConversationUncheckedCreateWithoutSentProductImagesInput>
+}
+
+export type ConversationUpsertWithoutSentProductImagesInput = {
+  update: Prisma.XOR<Prisma.ConversationUpdateWithoutSentProductImagesInput, Prisma.ConversationUncheckedUpdateWithoutSentProductImagesInput>
+  create: Prisma.XOR<Prisma.ConversationCreateWithoutSentProductImagesInput, Prisma.ConversationUncheckedCreateWithoutSentProductImagesInput>
+  where?: Prisma.ConversationWhereInput
+}
+
+export type ConversationUpdateToOneWithWhereWithoutSentProductImagesInput = {
+  where?: Prisma.ConversationWhereInput
+  data: Prisma.XOR<Prisma.ConversationUpdateWithoutSentProductImagesInput, Prisma.ConversationUncheckedUpdateWithoutSentProductImagesInput>
+}
+
+export type ConversationUpdateWithoutSentProductImagesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  aiEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  status?: Prisma.EnumConversationStatusFieldUpdateOperationsInput | $Enums.ConversationStatus
+  qualificationStatus?: Prisma.EnumQualificationStatusFieldUpdateOperationsInput | $Enums.QualificationStatus
+  leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stage?: Prisma.EnumConversationStageFieldUpdateOperationsInput | $Enums.ConversationStage
+  stageLocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paymentCheckPending?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  topicGateOpened?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  startedFromAd?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  negotiationState?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastInboundAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  followUpCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lastFollowUpAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutConversationsNestedInput
+  contact?: Prisma.ContactUpdateOneRequiredWithoutConversationsNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutConversationNestedInput
+  aiRuns?: Prisma.AiRunUpdateManyWithoutConversationNestedInput
+  prospectLeads?: Prisma.ProspectLeadUpdateManyWithoutConversationNestedInput
+}
+
+export type ConversationUncheckedUpdateWithoutSentProductImagesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  contactId?: Prisma.StringFieldUpdateOperationsInput | string
+  aiEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  status?: Prisma.EnumConversationStatusFieldUpdateOperationsInput | $Enums.ConversationStatus
+  qualificationStatus?: Prisma.EnumQualificationStatusFieldUpdateOperationsInput | $Enums.QualificationStatus
+  leadScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  leadData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stage?: Prisma.EnumConversationStageFieldUpdateOperationsInput | $Enums.ConversationStage
+  stageLocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paymentCheckPending?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  topicGateOpened?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  startedFromAd?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  negotiationState?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lastInboundAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  followUpCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lastFollowUpAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutConversationNestedInput
+  aiRuns?: Prisma.AiRunUncheckedUpdateManyWithoutConversationNestedInput
+  prospectLeads?: Prisma.ProspectLeadUncheckedUpdateManyWithoutConversationNestedInput
+}
+
 export type ConversationCreateWithoutContactInput = {
   id?: string
   aiEnabled?: boolean
@@ -1009,6 +1156,7 @@ export type ConversationCreateWithoutContactInput = {
   messages?: Prisma.MessageCreateNestedManyWithoutConversationInput
   aiRuns?: Prisma.AiRunCreateNestedManyWithoutConversationInput
   prospectLeads?: Prisma.ProspectLeadCreateNestedManyWithoutConversationInput
+  sentProductImages?: Prisma.SentProductImageCreateNestedManyWithoutConversationInput
 }
 
 export type ConversationUncheckedCreateWithoutContactInput = {
@@ -1035,6 +1183,7 @@ export type ConversationUncheckedCreateWithoutContactInput = {
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutConversationInput
   aiRuns?: Prisma.AiRunUncheckedCreateNestedManyWithoutConversationInput
   prospectLeads?: Prisma.ProspectLeadUncheckedCreateNestedManyWithoutConversationInput
+  sentProductImages?: Prisma.SentProductImageUncheckedCreateNestedManyWithoutConversationInput
 }
 
 export type ConversationCreateOrConnectWithoutContactInput = {
@@ -1087,6 +1236,7 @@ export type ConversationCreateWithoutAiRunsInput = {
   contact: Prisma.ContactCreateNestedOneWithoutConversationsInput
   messages?: Prisma.MessageCreateNestedManyWithoutConversationInput
   prospectLeads?: Prisma.ProspectLeadCreateNestedManyWithoutConversationInput
+  sentProductImages?: Prisma.SentProductImageCreateNestedManyWithoutConversationInput
 }
 
 export type ConversationUncheckedCreateWithoutAiRunsInput = {
@@ -1113,6 +1263,7 @@ export type ConversationUncheckedCreateWithoutAiRunsInput = {
   updatedAt?: Date | string
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutConversationInput
   prospectLeads?: Prisma.ProspectLeadUncheckedCreateNestedManyWithoutConversationInput
+  sentProductImages?: Prisma.SentProductImageUncheckedCreateNestedManyWithoutConversationInput
 }
 
 export type ConversationCreateOrConnectWithoutAiRunsInput = {
@@ -1155,6 +1306,7 @@ export type ConversationUpdateWithoutAiRunsInput = {
   contact?: Prisma.ContactUpdateOneRequiredWithoutConversationsNestedInput
   messages?: Prisma.MessageUpdateManyWithoutConversationNestedInput
   prospectLeads?: Prisma.ProspectLeadUpdateManyWithoutConversationNestedInput
+  sentProductImages?: Prisma.SentProductImageUpdateManyWithoutConversationNestedInput
 }
 
 export type ConversationUncheckedUpdateWithoutAiRunsInput = {
@@ -1181,6 +1333,7 @@ export type ConversationUncheckedUpdateWithoutAiRunsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   messages?: Prisma.MessageUncheckedUpdateManyWithoutConversationNestedInput
   prospectLeads?: Prisma.ProspectLeadUncheckedUpdateManyWithoutConversationNestedInput
+  sentProductImages?: Prisma.SentProductImageUncheckedUpdateManyWithoutConversationNestedInput
 }
 
 export type ConversationCreateWithoutMessagesInput = {
@@ -1207,6 +1360,7 @@ export type ConversationCreateWithoutMessagesInput = {
   contact: Prisma.ContactCreateNestedOneWithoutConversationsInput
   aiRuns?: Prisma.AiRunCreateNestedManyWithoutConversationInput
   prospectLeads?: Prisma.ProspectLeadCreateNestedManyWithoutConversationInput
+  sentProductImages?: Prisma.SentProductImageCreateNestedManyWithoutConversationInput
 }
 
 export type ConversationUncheckedCreateWithoutMessagesInput = {
@@ -1233,6 +1387,7 @@ export type ConversationUncheckedCreateWithoutMessagesInput = {
   updatedAt?: Date | string
   aiRuns?: Prisma.AiRunUncheckedCreateNestedManyWithoutConversationInput
   prospectLeads?: Prisma.ProspectLeadUncheckedCreateNestedManyWithoutConversationInput
+  sentProductImages?: Prisma.SentProductImageUncheckedCreateNestedManyWithoutConversationInput
 }
 
 export type ConversationCreateOrConnectWithoutMessagesInput = {
@@ -1275,6 +1430,7 @@ export type ConversationUpdateWithoutMessagesInput = {
   contact?: Prisma.ContactUpdateOneRequiredWithoutConversationsNestedInput
   aiRuns?: Prisma.AiRunUpdateManyWithoutConversationNestedInput
   prospectLeads?: Prisma.ProspectLeadUpdateManyWithoutConversationNestedInput
+  sentProductImages?: Prisma.SentProductImageUpdateManyWithoutConversationNestedInput
 }
 
 export type ConversationUncheckedUpdateWithoutMessagesInput = {
@@ -1301,6 +1457,7 @@ export type ConversationUncheckedUpdateWithoutMessagesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   aiRuns?: Prisma.AiRunUncheckedUpdateManyWithoutConversationNestedInput
   prospectLeads?: Prisma.ProspectLeadUncheckedUpdateManyWithoutConversationNestedInput
+  sentProductImages?: Prisma.SentProductImageUncheckedUpdateManyWithoutConversationNestedInput
 }
 
 export type ConversationCreateWithoutProspectLeadsInput = {
@@ -1327,6 +1484,7 @@ export type ConversationCreateWithoutProspectLeadsInput = {
   contact: Prisma.ContactCreateNestedOneWithoutConversationsInput
   messages?: Prisma.MessageCreateNestedManyWithoutConversationInput
   aiRuns?: Prisma.AiRunCreateNestedManyWithoutConversationInput
+  sentProductImages?: Prisma.SentProductImageCreateNestedManyWithoutConversationInput
 }
 
 export type ConversationUncheckedCreateWithoutProspectLeadsInput = {
@@ -1353,6 +1511,7 @@ export type ConversationUncheckedCreateWithoutProspectLeadsInput = {
   updatedAt?: Date | string
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutConversationInput
   aiRuns?: Prisma.AiRunUncheckedCreateNestedManyWithoutConversationInput
+  sentProductImages?: Prisma.SentProductImageUncheckedCreateNestedManyWithoutConversationInput
 }
 
 export type ConversationCreateOrConnectWithoutProspectLeadsInput = {
@@ -1395,6 +1554,7 @@ export type ConversationUpdateWithoutProspectLeadsInput = {
   contact?: Prisma.ContactUpdateOneRequiredWithoutConversationsNestedInput
   messages?: Prisma.MessageUpdateManyWithoutConversationNestedInput
   aiRuns?: Prisma.AiRunUpdateManyWithoutConversationNestedInput
+  sentProductImages?: Prisma.SentProductImageUpdateManyWithoutConversationNestedInput
 }
 
 export type ConversationUncheckedUpdateWithoutProspectLeadsInput = {
@@ -1421,6 +1581,7 @@ export type ConversationUncheckedUpdateWithoutProspectLeadsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   messages?: Prisma.MessageUncheckedUpdateManyWithoutConversationNestedInput
   aiRuns?: Prisma.AiRunUncheckedUpdateManyWithoutConversationNestedInput
+  sentProductImages?: Prisma.SentProductImageUncheckedUpdateManyWithoutConversationNestedInput
 }
 
 export type ConversationCreateManyOrganizationInput = {
@@ -1470,6 +1631,7 @@ export type ConversationUpdateWithoutOrganizationInput = {
   messages?: Prisma.MessageUpdateManyWithoutConversationNestedInput
   aiRuns?: Prisma.AiRunUpdateManyWithoutConversationNestedInput
   prospectLeads?: Prisma.ProspectLeadUpdateManyWithoutConversationNestedInput
+  sentProductImages?: Prisma.SentProductImageUpdateManyWithoutConversationNestedInput
 }
 
 export type ConversationUncheckedUpdateWithoutOrganizationInput = {
@@ -1496,6 +1658,7 @@ export type ConversationUncheckedUpdateWithoutOrganizationInput = {
   messages?: Prisma.MessageUncheckedUpdateManyWithoutConversationNestedInput
   aiRuns?: Prisma.AiRunUncheckedUpdateManyWithoutConversationNestedInput
   prospectLeads?: Prisma.ProspectLeadUncheckedUpdateManyWithoutConversationNestedInput
+  sentProductImages?: Prisma.SentProductImageUncheckedUpdateManyWithoutConversationNestedInput
 }
 
 export type ConversationUncheckedUpdateManyWithoutOrganizationInput = {
@@ -1568,6 +1731,7 @@ export type ConversationUpdateWithoutContactInput = {
   messages?: Prisma.MessageUpdateManyWithoutConversationNestedInput
   aiRuns?: Prisma.AiRunUpdateManyWithoutConversationNestedInput
   prospectLeads?: Prisma.ProspectLeadUpdateManyWithoutConversationNestedInput
+  sentProductImages?: Prisma.SentProductImageUpdateManyWithoutConversationNestedInput
 }
 
 export type ConversationUncheckedUpdateWithoutContactInput = {
@@ -1594,6 +1758,7 @@ export type ConversationUncheckedUpdateWithoutContactInput = {
   messages?: Prisma.MessageUncheckedUpdateManyWithoutConversationNestedInput
   aiRuns?: Prisma.AiRunUncheckedUpdateManyWithoutConversationNestedInput
   prospectLeads?: Prisma.ProspectLeadUncheckedUpdateManyWithoutConversationNestedInput
+  sentProductImages?: Prisma.SentProductImageUncheckedUpdateManyWithoutConversationNestedInput
 }
 
 export type ConversationUncheckedUpdateManyWithoutContactInput = {
@@ -1628,12 +1793,14 @@ export type ConversationCountOutputType = {
   messages: number
   aiRuns: number
   prospectLeads: number
+  sentProductImages: number
 }
 
 export type ConversationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   messages?: boolean | ConversationCountOutputTypeCountMessagesArgs
   aiRuns?: boolean | ConversationCountOutputTypeCountAiRunsArgs
   prospectLeads?: boolean | ConversationCountOutputTypeCountProspectLeadsArgs
+  sentProductImages?: boolean | ConversationCountOutputTypeCountSentProductImagesArgs
 }
 
 /**
@@ -1667,6 +1834,13 @@ export type ConversationCountOutputTypeCountProspectLeadsArgs<ExtArgs extends ru
   where?: Prisma.ProspectLeadWhereInput
 }
 
+/**
+ * ConversationCountOutputType without action
+ */
+export type ConversationCountOutputTypeCountSentProductImagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SentProductImageWhereInput
+}
+
 
 export type ConversationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1695,6 +1869,7 @@ export type ConversationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   messages?: boolean | Prisma.Conversation$messagesArgs<ExtArgs>
   aiRuns?: boolean | Prisma.Conversation$aiRunsArgs<ExtArgs>
   prospectLeads?: boolean | Prisma.Conversation$prospectLeadsArgs<ExtArgs>
+  sentProductImages?: boolean | Prisma.Conversation$sentProductImagesArgs<ExtArgs>
   _count?: boolean | Prisma.ConversationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["conversation"]>
 
@@ -1781,6 +1956,7 @@ export type ConversationInclude<ExtArgs extends runtime.Types.Extensions.Interna
   messages?: boolean | Prisma.Conversation$messagesArgs<ExtArgs>
   aiRuns?: boolean | Prisma.Conversation$aiRunsArgs<ExtArgs>
   prospectLeads?: boolean | Prisma.Conversation$prospectLeadsArgs<ExtArgs>
+  sentProductImages?: boolean | Prisma.Conversation$sentProductImagesArgs<ExtArgs>
   _count?: boolean | Prisma.ConversationCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ConversationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1800,6 +1976,7 @@ export type $ConversationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     messages: Prisma.$MessagePayload<ExtArgs>[]
     aiRuns: Prisma.$AiRunPayload<ExtArgs>[]
     prospectLeads: Prisma.$ProspectLeadPayload<ExtArgs>[]
+    sentProductImages: Prisma.$SentProductImagePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2222,6 +2399,7 @@ export interface Prisma__ConversationClient<T, Null = never, ExtArgs extends run
   messages<T extends Prisma.Conversation$messagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Conversation$messagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   aiRuns<T extends Prisma.Conversation$aiRunsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Conversation$aiRunsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AiRunPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   prospectLeads<T extends Prisma.Conversation$prospectLeadsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Conversation$prospectLeadsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProspectLeadPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sentProductImages<T extends Prisma.Conversation$sentProductImagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Conversation$sentProductImagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SentProductImagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2742,6 +2920,30 @@ export type Conversation$prospectLeadsArgs<ExtArgs extends runtime.Types.Extensi
   take?: number
   skip?: number
   distinct?: Prisma.ProspectLeadScalarFieldEnum | Prisma.ProspectLeadScalarFieldEnum[]
+}
+
+/**
+ * Conversation.sentProductImages
+ */
+export type Conversation$sentProductImagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SentProductImage
+   */
+  select?: Prisma.SentProductImageSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SentProductImage
+   */
+  omit?: Prisma.SentProductImageOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SentProductImageInclude<ExtArgs> | null
+  where?: Prisma.SentProductImageWhereInput
+  orderBy?: Prisma.SentProductImageOrderByWithRelationInput | Prisma.SentProductImageOrderByWithRelationInput[]
+  cursor?: Prisma.SentProductImageWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SentProductImageScalarFieldEnum | Prisma.SentProductImageScalarFieldEnum[]
 }
 
 /**

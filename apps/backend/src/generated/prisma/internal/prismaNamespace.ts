@@ -401,6 +401,7 @@ export const ModelName = {
   AiSettings: 'AiSettings',
   Product: 'Product',
   ProductImage: 'ProductImage',
+  SentProductImage: 'SentProductImage',
   BillingPayment: 'BillingPayment',
   BillingSubscription: 'BillingSubscription',
   User: 'User',
@@ -441,7 +442,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "organization" | "aiSettings" | "product" | "productImage" | "billingPayment" | "billingSubscription" | "user" | "allowedEmail" | "signupVerification" | "passwordResetVerification" | "session" | "whatsAppAccount" | "contact" | "ignoredContact" | "conversation" | "aiRun" | "message" | "location" | "responsible" | "organizationRoutingSettings" | "prospectLead" | "appointmentSettings" | "appointment" | "orderSettings" | "order" | "aiCorrection" | "broadcast" | "broadcastRecipient" | "landingPageView"
+    modelProps: "organization" | "aiSettings" | "product" | "productImage" | "sentProductImage" | "billingPayment" | "billingSubscription" | "user" | "allowedEmail" | "signupVerification" | "passwordResetVerification" | "session" | "whatsAppAccount" | "contact" | "ignoredContact" | "conversation" | "aiRun" | "message" | "location" | "responsible" | "organizationRoutingSettings" | "prospectLead" | "appointmentSettings" | "appointment" | "orderSettings" | "order" | "aiCorrection" | "broadcast" | "broadcastRecipient" | "landingPageView"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -738,6 +739,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.ProductImageCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ProductImageCountAggregateOutputType> | number
+        }
+      }
+    }
+    SentProductImage: {
+      payload: Prisma.$SentProductImagePayload<ExtArgs>
+      fields: Prisma.SentProductImageFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SentProductImageFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentProductImagePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SentProductImageFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentProductImagePayload>
+        }
+        findFirst: {
+          args: Prisma.SentProductImageFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentProductImagePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SentProductImageFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentProductImagePayload>
+        }
+        findMany: {
+          args: Prisma.SentProductImageFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentProductImagePayload>[]
+        }
+        create: {
+          args: Prisma.SentProductImageCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentProductImagePayload>
+        }
+        createMany: {
+          args: Prisma.SentProductImageCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SentProductImageCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentProductImagePayload>[]
+        }
+        delete: {
+          args: Prisma.SentProductImageDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentProductImagePayload>
+        }
+        update: {
+          args: Prisma.SentProductImageUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentProductImagePayload>
+        }
+        deleteMany: {
+          args: Prisma.SentProductImageDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SentProductImageUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SentProductImageUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentProductImagePayload>[]
+        }
+        upsert: {
+          args: Prisma.SentProductImageUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentProductImagePayload>
+        }
+        aggregate: {
+          args: Prisma.SentProductImageAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSentProductImage>
+        }
+        groupBy: {
+          args: Prisma.SentProductImageGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SentProductImageGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SentProductImageCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SentProductImageCountAggregateOutputType> | number
         }
       }
     }
@@ -2712,6 +2787,16 @@ export const ProductImageScalarFieldEnum = {
 export type ProductImageScalarFieldEnum = (typeof ProductImageScalarFieldEnum)[keyof typeof ProductImageScalarFieldEnum]
 
 
+export const SentProductImageScalarFieldEnum = {
+  whatsappMessageId: 'whatsappMessageId',
+  conversationId: 'conversationId',
+  productId: 'productId',
+  createdAt: 'createdAt'
+} as const
+
+export type SentProductImageScalarFieldEnum = (typeof SentProductImageScalarFieldEnum)[keyof typeof SentProductImageScalarFieldEnum]
+
+
 export const BillingPaymentScalarFieldEnum = {
   id: 'id',
   organizationId: 'organizationId',
@@ -3678,6 +3763,7 @@ export type GlobalOmitConfig = {
   aiSettings?: Prisma.AiSettingsOmit
   product?: Prisma.ProductOmit
   productImage?: Prisma.ProductImageOmit
+  sentProductImage?: Prisma.SentProductImageOmit
   billingPayment?: Prisma.BillingPaymentOmit
   billingSubscription?: Prisma.BillingSubscriptionOmit
   user?: Prisma.UserOmit
