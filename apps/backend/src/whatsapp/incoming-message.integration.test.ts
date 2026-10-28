@@ -201,6 +201,21 @@ describe.skipIf(!integrationEnabled)("traitement d'un message entrant (base rée
       expect(calls[0]!.systemPrompt).not.toContain("« Sac »");
     });
 
+    it("se souvient dans l'historique des produits déjà montrés, pour distinguer une redemande d'« autre chose »", async () => {
+      const { organization } = await createTestOrganization();
+      const { robe, sac } = await seedProducts(organization.id);
+      installScriptedAi([aiReply({ reply: "Voici nos modèles.", productIds: [robe.id, sac.id] })]);
+      const whatsapp = new FakeWhatsApp();
+
+      await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "Montrez-moi la robe et le sac"));
+
+      const calls = installScriptedAi([aiReply({ reply: "Oui, le chapeau est aussi disponible." })]);
+      await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "vous avez autre chose ?"));
+
+      const lastAssistantTurn = calls[0]!.history.filter((entry) => entry.role === "assistant").at(-1);
+      expect(lastAssistantTurn?.content).toContain("[Photos déjà envoyées : Robe, Sac]");
+    });
+
     it("quand la photo ne part pas, le client reçoit quand même le texte et une explication honnête", async () => {
       const { organization } = await createTestOrganization();
       const { robe } = await seedProducts(organization.id);

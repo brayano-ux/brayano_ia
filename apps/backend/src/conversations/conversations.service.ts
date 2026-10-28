@@ -325,10 +325,16 @@ export async function getRecentHistoryForAi(conversationId: string) {
   return messages
     .reverse()
     .map((message) => {
-      const note = (message.aiMeta as { mediaNote?: unknown } | null)?.mediaNote;
+      const meta = message.aiMeta as { mediaNote?: unknown; productNames?: unknown } | null;
+      const lines = [message.content];
+      if (typeof meta?.mediaNote === "string" && meta.mediaNote) lines.push(meta.mediaNote);
+      if (Array.isArray(meta?.productNames) && meta.productNames.length) {
+        // Rappelle à l'IA quels produits elle a déjà montrés en photo, pour distinguer « les autres » d'une redemande.
+        lines.push(`[Photos déjà envoyées : ${meta.productNames.join(", ")}]`);
+      }
       return {
         role: message.direction === "INBOUND" ? ("user" as const) : ("assistant" as const),
-        content: typeof note === "string" && note ? `${message.content}\n${note}` : message.content,
+        content: lines.join("\n"),
       };
     });
 }

@@ -153,6 +153,12 @@ describe("sections added by the product improvements", () => {
     expect(prompt).toContain("Ne confirme JAMAIS un paiement");
   });
 
+  it("always explains the « photos déjà envoyées » reminder", () => {
+    const prompt = buildSystemPrompt({ ...baseSettings, products: [] });
+    expect(prompt).toContain("PHOTOS DE PRODUITS DÉJÀ ENVOYÉES");
+    expect(prompt).toContain("Photos déjà envoyées");
+  });
+
   it("places the owner's corrections after the company's instructions", () => {
     const prompt = buildSystemPrompt({
       ...baseSettings,
