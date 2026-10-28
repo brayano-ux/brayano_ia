@@ -78,6 +78,8 @@ describe("resolveRequestedProductPhotos", () => {
     { id: "c", imageUrl: null },
     { id: "d", imageUrl: "https://api.example.com/d.jpg" },
     { id: "e", imageUrl: "https://api.example.com/e.jpg" },
+    { id: "f", imageUrl: "https://api.example.com/f.jpg" },
+    { id: "g", imageUrl: "https://api.example.com/g.jpg" },
   ];
 
   it("renvoie les photos des produits choisis, sans doublon, dans l'ordre", () => {
@@ -90,9 +92,9 @@ describe("resolveRequestedProductPhotos", () => {
     expect(photos.map((photo) => photo.id)).toEqual(["d"]);
   });
 
-  it("limite à 3 photos par réponse", () => {
-    const photos = resolveRequestedProductPhotos({ message: "Montrez-moi tout", productIds: ["a", "b", "d", "e"], products });
-    expect(photos).toHaveLength(3);
+  it("limite à 5 photos par réponse", () => {
+    const photos = resolveRequestedProductPhotos({ message: "Montrez-moi tout", productIds: ["a", "b", "d", "e", "f", "g"], products });
+    expect(photos).toHaveLength(5);
   });
 
   it("n'envoie aucune photo si le client n'en a pas demandé", () => {

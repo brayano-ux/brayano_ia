@@ -32,7 +32,7 @@ export function isImageRequested(message: string): boolean {
 }
 
 /** Nombre maximum de photos envoyées pour une seule demande (évite d'inonder le client et de faire bloquer le numéro). */
-export const MAX_PRODUCT_PHOTOS_PER_REPLY = 3;
+export const MAX_PRODUCT_PHOTOS_PER_REPLY = 5;
 
 /**
  * Photos de PRODUITS DU CATALOGUE demandées par le client, dans l'ordre choisi par l'assistant (productId d'abord,

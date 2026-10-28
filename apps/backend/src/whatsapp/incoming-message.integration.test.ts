@@ -141,7 +141,15 @@ describe.skipIf(!integrationEnabled)("traitement d'un message entrant (base rée
     async function seedProducts(organizationId: string) {
       const make = (name: string, withImage: boolean) =>
         prisma.product.create({ data: { organizationId, name, description: `${name} description`, price: "10 000 FCFA", imageUrl: withImage ? `https://api.example.com/media/products/${organizationId}/${name}.jpg` : null } });
-      return { robe: await make("Robe", true), sac: await make("Sac", true), sans: await make("Foulard", false), chapeau: await make("Chapeau", true), ceinture: await make("Ceinture", true) };
+      return {
+        robe: await make("Robe", true),
+        sac: await make("Sac", true),
+        sans: await make("Foulard", false),
+        chapeau: await make("Chapeau", true),
+        ceinture: await make("Ceinture", true),
+        pantalon: await make("Pantalon", true),
+        veste: await make("Veste", true),
+      };
     }
 
     it("envoie la photo d'un produit demandé, avec son nom et son prix", async () => {
@@ -157,16 +165,22 @@ describe.skipIf(!integrationEnabled)("traitement d'un message entrant (base rée
       expect(whatsapp.sent[1]).toMatchObject({ imageUrl: expect.stringContaining("/Robe.jpg"), text: "Robe · 10 000 FCFA" });
     });
 
-    it("envoie jusqu'à 3 photos quand le client en demande plusieurs", async () => {
+    it("envoie jusqu'à 5 photos quand le client en demande plusieurs", async () => {
       const { organization } = await createTestOrganization();
-      const { robe, sac, sans, chapeau, ceinture } = await seedProducts(organization.id);
-      installScriptedAi([aiReply({ reply: "Voici nos modèles.", productIds: [robe.id, sans.id, sac.id, chapeau.id, ceinture.id] })]);
+      const { robe, sac, sans, chapeau, ceinture, pantalon, veste } = await seedProducts(organization.id);
+      installScriptedAi([aiReply({ reply: "Voici nos modèles.", productIds: [robe.id, sans.id, sac.id, chapeau.id, ceinture.id, pantalon.id, veste.id] })]);
       const whatsapp = new FakeWhatsApp();
 
       await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "Montrez-moi toutes les photos de vos articles"));
 
-      expect(whatsapp.sent.map((item) => item.kind)).toEqual(["text", "image", "image", "image"]);
-      expect(whatsapp.sent.slice(1).map((item) => item.text)).toEqual(["Robe · 10 000 FCFA", "Sac · 10 000 FCFA", "Chapeau · 10 000 FCFA"]);
+      expect(whatsapp.sent.map((item) => item.kind)).toEqual(["text", "image", "image", "image", "image", "image"]);
+      expect(whatsapp.sent.slice(1).map((item) => item.text)).toEqual([
+        "Robe · 10 000 FCFA",
+        "Sac · 10 000 FCFA",
+        "Chapeau · 10 000 FCFA",
+        "Ceinture · 10 000 FCFA",
+        "Pantalon · 10 000 FCFA",
+      ]);
     });
 
     it("quand la photo ne part pas, le client reçoit quand même le texte et une explication honnête", async () => {
