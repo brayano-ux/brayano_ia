@@ -45,6 +45,11 @@ export type ProductImage = Prisma.ProductImageModel
  */
 export type SentProductImage = Prisma.SentProductImageModel
 /**
+ * Model ChariowPulseDelivery
+ * 
+ */
+export type ChariowPulseDelivery = Prisma.ChariowPulseDeliveryModel
+/**
  * Model BillingPayment
  * 
  */

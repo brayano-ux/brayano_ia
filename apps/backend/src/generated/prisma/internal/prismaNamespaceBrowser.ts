@@ -56,6 +56,7 @@ export const ModelName = {
   Product: 'Product',
   ProductImage: 'ProductImage',
   SentProductImage: 'SentProductImage',
+  ChariowPulseDelivery: 'ChariowPulseDelivery',
   BillingPayment: 'BillingPayment',
   BillingSubscription: 'BillingSubscription',
   User: 'User',
@@ -189,6 +190,19 @@ export const SentProductImageScalarFieldEnum = {
 } as const
 
 export type SentProductImageScalarFieldEnum = (typeof SentProductImageScalarFieldEnum)[keyof typeof SentProductImageScalarFieldEnum]
+
+
+export const ChariowPulseDeliveryScalarFieldEnum = {
+  id: 'id',
+  deliveryId: 'deliveryId',
+  pulseId: 'pulseId',
+  event: 'event',
+  payload: 'payload',
+  receivedAt: 'receivedAt',
+  processedAt: 'processedAt'
+} as const
+
+export type ChariowPulseDeliveryScalarFieldEnum = (typeof ChariowPulseDeliveryScalarFieldEnum)[keyof typeof ChariowPulseDeliveryScalarFieldEnum]
 
 
 export const BillingPaymentScalarFieldEnum = {

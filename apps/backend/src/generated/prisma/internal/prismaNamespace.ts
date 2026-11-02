@@ -402,6 +402,7 @@ export const ModelName = {
   Product: 'Product',
   ProductImage: 'ProductImage',
   SentProductImage: 'SentProductImage',
+  ChariowPulseDelivery: 'ChariowPulseDelivery',
   BillingPayment: 'BillingPayment',
   BillingSubscription: 'BillingSubscription',
   User: 'User',
@@ -442,7 +443,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "organization" | "aiSettings" | "product" | "productImage" | "sentProductImage" | "billingPayment" | "billingSubscription" | "user" | "allowedEmail" | "signupVerification" | "passwordResetVerification" | "session" | "whatsAppAccount" | "contact" | "ignoredContact" | "conversation" | "aiRun" | "message" | "location" | "responsible" | "organizationRoutingSettings" | "prospectLead" | "appointmentSettings" | "appointment" | "orderSettings" | "order" | "aiCorrection" | "broadcast" | "broadcastRecipient" | "landingPageView"
+    modelProps: "organization" | "aiSettings" | "product" | "productImage" | "sentProductImage" | "chariowPulseDelivery" | "billingPayment" | "billingSubscription" | "user" | "allowedEmail" | "signupVerification" | "passwordResetVerification" | "session" | "whatsAppAccount" | "contact" | "ignoredContact" | "conversation" | "aiRun" | "message" | "location" | "responsible" | "organizationRoutingSettings" | "prospectLead" | "appointmentSettings" | "appointment" | "orderSettings" | "order" | "aiCorrection" | "broadcast" | "broadcastRecipient" | "landingPageView"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -813,6 +814,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.SentProductImageCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.SentProductImageCountAggregateOutputType> | number
+        }
+      }
+    }
+    ChariowPulseDelivery: {
+      payload: Prisma.$ChariowPulseDeliveryPayload<ExtArgs>
+      fields: Prisma.ChariowPulseDeliveryFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ChariowPulseDeliveryFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChariowPulseDeliveryPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ChariowPulseDeliveryFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChariowPulseDeliveryPayload>
+        }
+        findFirst: {
+          args: Prisma.ChariowPulseDeliveryFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChariowPulseDeliveryPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ChariowPulseDeliveryFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChariowPulseDeliveryPayload>
+        }
+        findMany: {
+          args: Prisma.ChariowPulseDeliveryFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChariowPulseDeliveryPayload>[]
+        }
+        create: {
+          args: Prisma.ChariowPulseDeliveryCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChariowPulseDeliveryPayload>
+        }
+        createMany: {
+          args: Prisma.ChariowPulseDeliveryCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ChariowPulseDeliveryCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChariowPulseDeliveryPayload>[]
+        }
+        delete: {
+          args: Prisma.ChariowPulseDeliveryDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChariowPulseDeliveryPayload>
+        }
+        update: {
+          args: Prisma.ChariowPulseDeliveryUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChariowPulseDeliveryPayload>
+        }
+        deleteMany: {
+          args: Prisma.ChariowPulseDeliveryDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ChariowPulseDeliveryUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ChariowPulseDeliveryUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChariowPulseDeliveryPayload>[]
+        }
+        upsert: {
+          args: Prisma.ChariowPulseDeliveryUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChariowPulseDeliveryPayload>
+        }
+        aggregate: {
+          args: Prisma.ChariowPulseDeliveryAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateChariowPulseDelivery>
+        }
+        groupBy: {
+          args: Prisma.ChariowPulseDeliveryGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ChariowPulseDeliveryGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ChariowPulseDeliveryCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ChariowPulseDeliveryCountAggregateOutputType> | number
         }
       }
     }
@@ -2797,6 +2872,19 @@ export const SentProductImageScalarFieldEnum = {
 export type SentProductImageScalarFieldEnum = (typeof SentProductImageScalarFieldEnum)[keyof typeof SentProductImageScalarFieldEnum]
 
 
+export const ChariowPulseDeliveryScalarFieldEnum = {
+  id: 'id',
+  deliveryId: 'deliveryId',
+  pulseId: 'pulseId',
+  event: 'event',
+  payload: 'payload',
+  receivedAt: 'receivedAt',
+  processedAt: 'processedAt'
+} as const
+
+export type ChariowPulseDeliveryScalarFieldEnum = (typeof ChariowPulseDeliveryScalarFieldEnum)[keyof typeof ChariowPulseDeliveryScalarFieldEnum]
+
+
 export const BillingPaymentScalarFieldEnum = {
   id: 'id',
   organizationId: 'organizationId',
@@ -3764,6 +3852,7 @@ export type GlobalOmitConfig = {
   product?: Prisma.ProductOmit
   productImage?: Prisma.ProductImageOmit
   sentProductImage?: Prisma.SentProductImageOmit
+  chariowPulseDelivery?: Prisma.ChariowPulseDeliveryOmit
   billingPayment?: Prisma.BillingPaymentOmit
   billingSubscription?: Prisma.BillingSubscriptionOmit
   user?: Prisma.UserOmit
