@@ -159,6 +159,8 @@ model BillingPayment {
   organizationId    String               @map("organization_id")
   providerReference String?              @unique @map("provider_reference")
   externalReference String               @unique @map("external_reference")
+  /** Prestataire de paiement ayant traité ce paiement ("campay" ou "chariow"). */
+  provider          String               @default("campay")
   email             String
   phone             String
   plan              String

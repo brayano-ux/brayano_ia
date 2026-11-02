@@ -38,13 +38,19 @@ vi.mock("../config/env.js", () => ({
     CAMPAY_CURRENCY: "XAF",
     CAMPAY_DEMO_AMOUNT: 25,
     CAMPAY_CALLBACK_URL: "https://app.example.com/billing/campay/callback",
+    CHARIOW_API_KEY: "sk_test_chariow",
     APP_URL: "https://app.example.com",
   },
 }));
 
-vi.mock("./auth.route.js", () => ({
-  requireAuth: vi.fn(async () => ({ email: "client@example.com", organizationId: "org-1" })),
+const authMock = vi.hoisted(() => ({
+  requireAuth: vi.fn(async (): Promise<{ email: string; organizationId: string; name: string } | null> => ({
+    email: "client@example.com",
+    organizationId: "org-1",
+    name: "Awa Fouda",
+  })),
 }));
+vi.mock("./auth.route.js", () => ({ requireAuth: authMock.requireAuth }));
 
 describe("billing checkout route", () => {
   beforeEach(() => {
@@ -172,6 +178,99 @@ describe("billing checkout route", () => {
       data: { status: "SUCCESS" },
     });
     expect(transactionMock.subscriptionUpsert).not.toHaveBeenCalled();
+
+    vi.unstubAllGlobals();
+  });
+});
+
+describe("chariow checkout route", () => {
+  beforeEach(() => {
+    fetchMock.mockReset();
+    authMock.requireAuth.mockReset().mockResolvedValue({ email: "client@example.com", organizationId: "org-1", name: "Awa Fouda" });
+  });
+
+  it("démarre un paiement Chariow pour le forfait Essentiel avec la référence d'organisation en custom_metadata", async () => {
+    const app = Fastify();
+    const { billingRoute } = await import("./billing.route.js");
+    await app.register(billingRoute);
+
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      text: async () => JSON.stringify({ data: { payment: { checkout_url: "https://pay.chariow.com/abc" }, purchase: { id: "sal_abc123" } } }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/billing/checkout/chariow",
+      payload: { plan: "starter", phone: "6 90 00 00 00" },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(JSON.parse(response.payload)).toMatchObject({ success: true, checkoutUrl: "https://pay.chariow.com/abc", plan: "starter" });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock.mock.calls[0]?.[0]).toBe("https://api.chariow.com/v1/checkout");
+    expect(fetchMock.mock.calls[0]?.[1]?.headers).toMatchObject({ Authorization: "Bearer sk_test_chariow" });
+    const body = JSON.parse(fetchMock.mock.calls[0]?.[1]?.body as string);
+    expect(body).toMatchObject({
+      product_id: "prd_qe50o9mo",
+      email: "client@example.com",
+      first_name: "Awa",
+      last_name: "Fouda",
+      phone: { number: "690000000", country_code: "CM" },
+      custom_metadata: { organization_id: "org-1" },
+    });
+
+    vi.unstubAllGlobals();
+  });
+
+  it("refuse un numéro qui n'est pas camerounais", async () => {
+    const app = Fastify();
+    const { billingRoute } = await import("./billing.route.js");
+    await app.register(billingRoute);
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/billing/checkout/chariow",
+      payload: { plan: "starter", phone: "+1 202 555 0147" },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("exige une session valide", async () => {
+    authMock.requireAuth.mockResolvedValue(null);
+    const app = Fastify();
+    const { billingRoute } = await import("./billing.route.js");
+    await app.register(billingRoute);
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/billing/checkout/chariow",
+      payload: { plan: "starter", phone: "690000000" },
+    });
+
+    expect(response.statusCode).toBe(401);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("répond 503 quand Chariow refuse la demande de paiement", async () => {
+    const app = Fastify();
+    const { billingRoute } = await import("./billing.route.js");
+    await app.register(billingRoute);
+
+    fetchMock.mockResolvedValueOnce({ ok: false, text: async () => JSON.stringify({ message: "Produit introuvable." }) });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/billing/checkout/chariow",
+      payload: { plan: "starter", phone: "690000000" },
+    });
+
+    expect(response.statusCode).toBe(503);
+    expect(JSON.parse(response.payload).success).toBe(false);
 
     vi.unstubAllGlobals();
   });
