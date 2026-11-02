@@ -213,7 +213,7 @@ describe("chariow checkout route", () => {
     expect(fetchMock.mock.calls[0]?.[1]?.headers).toMatchObject({ Authorization: "Bearer sk_test_chariow" });
     const body = JSON.parse(fetchMock.mock.calls[0]?.[1]?.body as string);
     expect(body).toMatchObject({
-      product_id: "prd_qe50o9mo",
+      product_id: "prd_3x6444o4",
       email: "client@example.com",
       first_name: "Awa",
       last_name: "Fouda",

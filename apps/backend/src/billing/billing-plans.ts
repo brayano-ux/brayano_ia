@@ -85,9 +85,9 @@ export const BILLING_PLANS: Record<BillingPlanKey, BillingPlan> = {
 
 /** Identifiant du produit Chariow (boutique "brayano service") correspondant à chaque forfait. */
 export const CHARIOW_PRODUCT_IDS: Record<BillingPlanKey, string> = {
-  starter: "prd_qe50o9mo",
-  pro: "prd_skw8907a",
-  scale: "prd_8ft40b9x",
+  starter: "prd_3x6444o4",
+  pro: "prd_gct0c3gf",
+  scale: "prd_68s06ez9",
 };
 
 /** Retrouve le forfait associé à un identifiant de produit Chariow, ou `undefined` s'il est inconnu. */

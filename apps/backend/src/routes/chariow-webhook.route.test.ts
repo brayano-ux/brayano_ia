@@ -27,7 +27,7 @@ import { chariowWebhookRoute } from "./chariow-webhook.route.js";
 const SECRET = "whsec_test_secret";
 // Forfait "starter" (Essentiel) dans CHARIOW_PRODUCT_IDS (billing-plans.ts) : la vraie correspondance,
 // pour vérifier que l'activation retrouve bien le forfait à partir du produit Chariow.
-const STARTER_PRODUCT_ID = "prd_qe50o9mo";
+const STARTER_PRODUCT_ID = "prd_3x6444o4";
 
 function sign(body: string, secret = SECRET) {
   return `sha256=${createHmac("sha256", secret).update(body).digest("hex")}`;
