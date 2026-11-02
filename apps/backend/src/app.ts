@@ -62,14 +62,18 @@ export async function buildServer(options: { restoreConnections?: boolean } = {}
 
   app.addContentTypeParser(
     ["application/json", "application/x-www-form-urlencoded"],
-    { parseAs: "string" },
+    { parseAs: "buffer" },
     (request, body, done) => {
-      if (typeof body !== "string") {
+      if (!Buffer.isBuffer(body)) {
         done(null, {});
         return;
       }
 
-      const rawBody = body.trim();
+      const rawText = body.toString("utf8");
+      if (request.headers["content-type"]?.includes("application/json")) {
+        (request as FastifyRequest & { rawBody?: Buffer }).rawBody = Buffer.from(body);
+      }
+      const rawBody = rawText.trim();
       if (rawBody === "") {
         done(null, {});
         return;
