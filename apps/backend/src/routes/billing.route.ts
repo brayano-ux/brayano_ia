@@ -6,7 +6,9 @@ import { BILLING_PLANS, TRIAL, getBillingPlan } from "../billing/billing-plans.j
 import { isBillingEnforced } from "../billing/subscription.service.js";
 import { getOrganizationBillingStatus } from "../billing/subscription.service.js";
 import { prisma } from "../database/client.js";
+import { normalizeWhatsAppNumber } from "../shared/phone.js";
 import { checkCampayPayment, createCampayCollection, getCampayChargeAmount, isCampayDemoMode } from "../services/payment.service.js";
+import { createChariowCheckout } from "../services/chariow-payment.service.js";
 import { requireAuth } from "./auth.route.js";
 
 const createCheckoutSchema = z.object({
@@ -180,6 +182,58 @@ export async function billingRoute(app: FastifyInstance) {
       return {
         success: false,
         message: "Le paiement par Mobile Money n'a pas pu démarrer. Vérifiez votre numéro puis réessayez dans quelques minutes. Si cela continue, écrivez-nous.",
+      };
+    }
+  });
+
+  app.post("/billing/checkout/chariow", async (request, reply) => {
+    const parsed = createCheckoutSchema.safeParse(request.body);
+    if (!parsed.success) {
+      reply.code(400);
+      return { success: false, message: parsed.error.issues[0]?.message ?? "Informations de paiement invalides." };
+    }
+
+    const session = await requireAuth(request.headers.authorization);
+    if (!session?.email || !session.organizationId) {
+      reply.code(401);
+      return { success: false, message: "Connectez-vous pour effectuer un paiement." };
+    }
+
+    let plan;
+    try {
+      plan = getBillingPlan(parsed.data.plan);
+    } catch (error) {
+      reply.code(400);
+      return { success: false, message: error instanceof Error ? error.message : "Forfait invalide." };
+    }
+
+    // Chariow attend un numéro et un indicatif pays séparés ; pour l'instant, seuls les numéros
+    // camerounais sont pris en charge (seul marché de Brayano IA aujourd'hui).
+    const normalized = normalizeWhatsAppNumber(parsed.data.phone);
+    if (!normalized || !normalized.startsWith("237") || normalized.length !== 12) {
+      reply.code(400);
+      return { success: false, message: "Le paiement Chariow ne prend en charge que les numéros camerounais pour l'instant (ex. 6 90 00 00 00)." };
+    }
+
+    const [firstName, ...rest] = (session.name || "Client").trim().split(/\s+/);
+
+    try {
+      const result = await createChariowCheckout({
+        plan: plan.key,
+        phoneNumber: normalized.slice(3),
+        countryCode: "CM",
+        email: session.email,
+        firstName: firstName || "Client",
+        lastName: rest.join(" ") || "Brayano",
+        organizationId: session.organizationId,
+      });
+      return { success: true, checkoutUrl: result.checkoutUrl, plan: plan.key };
+    } catch (error) {
+      app.log.error(error, "Chariow checkout failed");
+      reply.code(503);
+      return {
+        success: false,
+        message: "Le paiement n'a pas pu démarrer pour le moment. Réessayez dans quelques minutes.",
       };
     }
   });

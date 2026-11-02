@@ -210,6 +210,7 @@ export const BillingPaymentScalarFieldEnum = {
   organizationId: 'organizationId',
   providerReference: 'providerReference',
   externalReference: 'externalReference',
+  provider: 'provider',
   email: 'email',
   phone: 'phone',
   plan: 'plan',

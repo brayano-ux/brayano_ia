@@ -39,6 +39,7 @@ export type BillingPaymentMinAggregateOutputType = {
   organizationId: string | null
   providerReference: string | null
   externalReference: string | null
+  provider: string | null
   email: string | null
   phone: string | null
   plan: string | null
@@ -54,6 +55,7 @@ export type BillingPaymentMaxAggregateOutputType = {
   organizationId: string | null
   providerReference: string | null
   externalReference: string | null
+  provider: string | null
   email: string | null
   phone: string | null
   plan: string | null
@@ -69,6 +71,7 @@ export type BillingPaymentCountAggregateOutputType = {
   organizationId: number
   providerReference: number
   externalReference: number
+  provider: number
   email: number
   phone: number
   plan: number
@@ -94,6 +97,7 @@ export type BillingPaymentMinAggregateInputType = {
   organizationId?: true
   providerReference?: true
   externalReference?: true
+  provider?: true
   email?: true
   phone?: true
   plan?: true
@@ -109,6 +113,7 @@ export type BillingPaymentMaxAggregateInputType = {
   organizationId?: true
   providerReference?: true
   externalReference?: true
+  provider?: true
   email?: true
   phone?: true
   plan?: true
@@ -124,6 +129,7 @@ export type BillingPaymentCountAggregateInputType = {
   organizationId?: true
   providerReference?: true
   externalReference?: true
+  provider?: true
   email?: true
   phone?: true
   plan?: true
@@ -226,6 +232,7 @@ export type BillingPaymentGroupByOutputType = {
   organizationId: string
   providerReference: string | null
   externalReference: string
+  provider: string
   email: string
   phone: string
   plan: string
@@ -264,6 +271,7 @@ export type BillingPaymentWhereInput = {
   organizationId?: Prisma.StringFilter<"BillingPayment"> | string
   providerReference?: Prisma.StringNullableFilter<"BillingPayment"> | string | null
   externalReference?: Prisma.StringFilter<"BillingPayment"> | string
+  provider?: Prisma.StringFilter<"BillingPayment"> | string
   email?: Prisma.StringFilter<"BillingPayment"> | string
   phone?: Prisma.StringFilter<"BillingPayment"> | string
   plan?: Prisma.StringFilter<"BillingPayment"> | string
@@ -280,6 +288,7 @@ export type BillingPaymentOrderByWithRelationInput = {
   organizationId?: Prisma.SortOrder
   providerReference?: Prisma.SortOrderInput | Prisma.SortOrder
   externalReference?: Prisma.SortOrder
+  provider?: Prisma.SortOrder
   email?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   plan?: Prisma.SortOrder
@@ -299,6 +308,7 @@ export type BillingPaymentWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.BillingPaymentWhereInput[]
   NOT?: Prisma.BillingPaymentWhereInput | Prisma.BillingPaymentWhereInput[]
   organizationId?: Prisma.StringFilter<"BillingPayment"> | string
+  provider?: Prisma.StringFilter<"BillingPayment"> | string
   email?: Prisma.StringFilter<"BillingPayment"> | string
   phone?: Prisma.StringFilter<"BillingPayment"> | string
   plan?: Prisma.StringFilter<"BillingPayment"> | string
@@ -315,6 +325,7 @@ export type BillingPaymentOrderByWithAggregationInput = {
   organizationId?: Prisma.SortOrder
   providerReference?: Prisma.SortOrderInput | Prisma.SortOrder
   externalReference?: Prisma.SortOrder
+  provider?: Prisma.SortOrder
   email?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   plan?: Prisma.SortOrder
@@ -338,6 +349,7 @@ export type BillingPaymentScalarWhereWithAggregatesInput = {
   organizationId?: Prisma.StringWithAggregatesFilter<"BillingPayment"> | string
   providerReference?: Prisma.StringNullableWithAggregatesFilter<"BillingPayment"> | string | null
   externalReference?: Prisma.StringWithAggregatesFilter<"BillingPayment"> | string
+  provider?: Prisma.StringWithAggregatesFilter<"BillingPayment"> | string
   email?: Prisma.StringWithAggregatesFilter<"BillingPayment"> | string
   phone?: Prisma.StringWithAggregatesFilter<"BillingPayment"> | string
   plan?: Prisma.StringWithAggregatesFilter<"BillingPayment"> | string
@@ -352,6 +364,7 @@ export type BillingPaymentCreateInput = {
   id?: string
   providerReference?: string | null
   externalReference: string
+  provider?: string
   email: string
   phone: string
   plan: string
@@ -368,6 +381,7 @@ export type BillingPaymentUncheckedCreateInput = {
   organizationId: string
   providerReference?: string | null
   externalReference: string
+  provider?: string
   email: string
   phone: string
   plan: string
@@ -382,6 +396,7 @@ export type BillingPaymentUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   providerReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   externalReference?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.StringFieldUpdateOperationsInput | string
@@ -398,6 +413,7 @@ export type BillingPaymentUncheckedUpdateInput = {
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   providerReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   externalReference?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.StringFieldUpdateOperationsInput | string
@@ -413,6 +429,7 @@ export type BillingPaymentCreateManyInput = {
   organizationId: string
   providerReference?: string | null
   externalReference: string
+  provider?: string
   email: string
   phone: string
   plan: string
@@ -427,6 +444,7 @@ export type BillingPaymentUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   providerReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   externalReference?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.StringFieldUpdateOperationsInput | string
@@ -442,6 +460,7 @@ export type BillingPaymentUncheckedUpdateManyInput = {
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   providerReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   externalReference?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.StringFieldUpdateOperationsInput | string
@@ -467,6 +486,7 @@ export type BillingPaymentCountOrderByAggregateInput = {
   organizationId?: Prisma.SortOrder
   providerReference?: Prisma.SortOrder
   externalReference?: Prisma.SortOrder
+  provider?: Prisma.SortOrder
   email?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   plan?: Prisma.SortOrder
@@ -486,6 +506,7 @@ export type BillingPaymentMaxOrderByAggregateInput = {
   organizationId?: Prisma.SortOrder
   providerReference?: Prisma.SortOrder
   externalReference?: Prisma.SortOrder
+  provider?: Prisma.SortOrder
   email?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   plan?: Prisma.SortOrder
@@ -501,6 +522,7 @@ export type BillingPaymentMinOrderByAggregateInput = {
   organizationId?: Prisma.SortOrder
   providerReference?: Prisma.SortOrder
   externalReference?: Prisma.SortOrder
+  provider?: Prisma.SortOrder
   email?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   plan?: Prisma.SortOrder
@@ -565,6 +587,7 @@ export type BillingPaymentCreateWithoutOrganizationInput = {
   id?: string
   providerReference?: string | null
   externalReference: string
+  provider?: string
   email: string
   phone: string
   plan: string
@@ -579,6 +602,7 @@ export type BillingPaymentUncheckedCreateWithoutOrganizationInput = {
   id?: string
   providerReference?: string | null
   externalReference: string
+  provider?: string
   email: string
   phone: string
   plan: string
@@ -623,6 +647,7 @@ export type BillingPaymentScalarWhereInput = {
   organizationId?: Prisma.StringFilter<"BillingPayment"> | string
   providerReference?: Prisma.StringNullableFilter<"BillingPayment"> | string | null
   externalReference?: Prisma.StringFilter<"BillingPayment"> | string
+  provider?: Prisma.StringFilter<"BillingPayment"> | string
   email?: Prisma.StringFilter<"BillingPayment"> | string
   phone?: Prisma.StringFilter<"BillingPayment"> | string
   plan?: Prisma.StringFilter<"BillingPayment"> | string
@@ -637,6 +662,7 @@ export type BillingPaymentCreateManyOrganizationInput = {
   id?: string
   providerReference?: string | null
   externalReference: string
+  provider?: string
   email: string
   phone: string
   plan: string
@@ -651,6 +677,7 @@ export type BillingPaymentUpdateWithoutOrganizationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   providerReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   externalReference?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.StringFieldUpdateOperationsInput | string
@@ -665,6 +692,7 @@ export type BillingPaymentUncheckedUpdateWithoutOrganizationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   providerReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   externalReference?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.StringFieldUpdateOperationsInput | string
@@ -679,6 +707,7 @@ export type BillingPaymentUncheckedUpdateManyWithoutOrganizationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   providerReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   externalReference?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.StringFieldUpdateOperationsInput | string
@@ -696,6 +725,7 @@ export type BillingPaymentSelect<ExtArgs extends runtime.Types.Extensions.Intern
   organizationId?: boolean
   providerReference?: boolean
   externalReference?: boolean
+  provider?: boolean
   email?: boolean
   phone?: boolean
   plan?: boolean
@@ -712,6 +742,7 @@ export type BillingPaymentSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   organizationId?: boolean
   providerReference?: boolean
   externalReference?: boolean
+  provider?: boolean
   email?: boolean
   phone?: boolean
   plan?: boolean
@@ -728,6 +759,7 @@ export type BillingPaymentSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   organizationId?: boolean
   providerReference?: boolean
   externalReference?: boolean
+  provider?: boolean
   email?: boolean
   phone?: boolean
   plan?: boolean
@@ -744,6 +776,7 @@ export type BillingPaymentSelectScalar = {
   organizationId?: boolean
   providerReference?: boolean
   externalReference?: boolean
+  provider?: boolean
   email?: boolean
   phone?: boolean
   plan?: boolean
@@ -754,7 +787,7 @@ export type BillingPaymentSelectScalar = {
   updatedAt?: boolean
 }
 
-export type BillingPaymentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "providerReference" | "externalReference" | "email" | "phone" | "plan" | "amount" | "currency" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["billingPayment"]>
+export type BillingPaymentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "providerReference" | "externalReference" | "provider" | "email" | "phone" | "plan" | "amount" | "currency" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["billingPayment"]>
 export type BillingPaymentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
 }
@@ -775,6 +808,10 @@ export type $BillingPaymentPayload<ExtArgs extends runtime.Types.Extensions.Inte
     organizationId: string
     providerReference: string | null
     externalReference: string
+    /**
+     * * Prestataire de paiement ayant traité ce paiement ("campay" ou "chariow").
+     */
+    provider: string
     email: string
     phone: string
     plan: string
@@ -1211,6 +1248,7 @@ export interface BillingPaymentFieldRefs {
   readonly organizationId: Prisma.FieldRef<"BillingPayment", 'String'>
   readonly providerReference: Prisma.FieldRef<"BillingPayment", 'String'>
   readonly externalReference: Prisma.FieldRef<"BillingPayment", 'String'>
+  readonly provider: Prisma.FieldRef<"BillingPayment", 'String'>
   readonly email: Prisma.FieldRef<"BillingPayment", 'String'>
   readonly phone: Prisma.FieldRef<"BillingPayment", 'String'>
   readonly plan: Prisma.FieldRef<"BillingPayment", 'String'>

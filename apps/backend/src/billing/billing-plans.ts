@@ -83,6 +83,21 @@ export const BILLING_PLANS: Record<BillingPlanKey, BillingPlan> = {
   },
 };
 
+/** Identifiant du produit Chariow (boutique "brayano service") correspondant à chaque forfait. */
+export const CHARIOW_PRODUCT_IDS: Record<BillingPlanKey, string> = {
+  starter: "prd_qe50o9mo",
+  pro: "prd_skw8907a",
+  scale: "prd_8ft40b9x",
+};
+
+/** Retrouve le forfait associé à un identifiant de produit Chariow, ou `undefined` s'il est inconnu. */
+export function getBillingPlanByChariowProductId(productId: string): BillingPlan | undefined {
+  const entry = (Object.entries(CHARIOW_PRODUCT_IDS) as Array<[BillingPlanKey, string]>).find(
+    ([, id]) => id === productId,
+  );
+  return entry ? BILLING_PLANS[entry[0]] : undefined;
+}
+
 export function getBillingPlan(planName: string): BillingPlan {
   const normalized = planName.trim().toLowerCase();
   const mapping: Record<string, BillingPlanKey> = {
