@@ -15,6 +15,7 @@ import { aiSettingsRoute } from "./routes/ai-settings.route.js";
 import { aiTestRoute } from "./routes/ai-test.route.js";
 import { authRoute, requireAuth } from "./routes/auth.route.js";
 import { billingRoute } from "./routes/billing.route.js";
+import { chariowWebhookRoute } from "./routes/chariow-webhook.route.js";
 import { conversationsRoute } from "./routes/conversations.route.js";
 import { healthRoute } from "./routes/health.route.js";
 import { organizationsRoute } from "./routes/organizations.route.js";
@@ -62,14 +63,18 @@ export async function buildServer(options: { restoreConnections?: boolean } = {}
 
   app.addContentTypeParser(
     ["application/json", "application/x-www-form-urlencoded"],
-    { parseAs: "string" },
+    { parseAs: "buffer" },
     (request, body, done) => {
-      if (typeof body !== "string") {
+      if (!Buffer.isBuffer(body)) {
         done(null, {});
         return;
       }
 
-      const rawBody = body.trim();
+      const rawText = body.toString("utf8");
+      if (request.headers["content-type"]?.includes("application/json")) {
+        (request as FastifyRequest & { rawBody?: Buffer }).rawBody = Buffer.from(body);
+      }
+      const rawBody = rawText.trim();
       if (rawBody === "") {
         done(null, {});
         return;
@@ -177,6 +182,7 @@ export async function buildServer(options: { restoreConnections?: boolean } = {}
   await app.register(teamRoute);
   await app.register(ignoredContactsRoute);
   await app.register(billingRoute);
+  await app.register(chariowWebhookRoute);
   await app.register(routingRoute);
   await app.register(whatsappRoute);
   await app.register(conversationsRoute);

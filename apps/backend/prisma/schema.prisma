@@ -141,6 +141,19 @@ enum BillingSubscriptionStatus {
   INACTIVE
 }
 
+model ChariowPulseDelivery {
+  id         String   @id @default(uuid())
+  deliveryId String   @unique @map("delivery_id")
+  pulseId    String   @map("pulse_id")
+  event      String
+  payload    Json
+  receivedAt DateTime @default(now()) @map("received_at")
+  processedAt DateTime? @map("processed_at")
+
+  @@index([event, receivedAt])
+  @@map("chariow_pulse_deliveries")
+}
+
 model BillingPayment {
   id                String               @id @default(uuid())
   organizationId    String               @map("organization_id")

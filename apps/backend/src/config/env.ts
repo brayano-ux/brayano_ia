@@ -19,7 +19,9 @@ const envSchema = z.object({
   BILLING_ENFORCED: z.enum(["true", "false"]).default("false").transform((value) => value === "true"),
   BACKGROUND_JOBS: z.enum(["true", "false"]).default("true").transform((value) => value === "true"),
   CORS_ALLOWED_ORIGINS: z.string().default("http://localhost:5173,http://localhost:3000,http://localhost:4173"),
-  PAYMENT_PROVIDER: z.enum(["campay", "manual"]).default("campay"),
+  PAYMENT_PROVIDER: z.enum(["campay", "manual", "chariow"]).default("campay"),
+  /** Secret HMAC du Pulse Chariow (whsec_...), distinct de la clé API. */
+  CHARIOW_PULSE_SECRET: z.string().optional().or(z.literal("")),
   CAMPAY_BASE_URL: z.string().url().default("https://demo.campay.net/api"),
   CAMPAY_USERNAME: z.string().optional().or(z.literal("")),
   CAMPAY_PASSWORD: z.string().optional().or(z.literal("")),
