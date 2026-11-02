@@ -13,6 +13,8 @@ export function isPublicRoute(url: string) {
     || url.startsWith("/health")
     || url.startsWith("/admin/")
     || url === "/billing/plans"
+    || url === "/billing/chariow/pulse"
+    || url.startsWith("/billing/chariow/pulse?")
     || url === "/billing/campay/callback"
     || url.startsWith("/billing/campay/callback?")
     || signedProductImagePath.test(url)
