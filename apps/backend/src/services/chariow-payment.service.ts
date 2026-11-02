@@ -46,6 +46,14 @@ export async function createChariowCheckout(input: {
   const plan = getBillingPlan(input.plan);
   const productId = CHARIOW_PRODUCT_IDS[plan.key];
 
+  // Le tableau de bord est une page unique sans route par URL : on ne peut renvoyer le client que vers
+  // son adresse publique (CLIENT_DASHBOARD_URL), pas vers une page "billing.html" qui n'existe pas. Si
+  // cette variable n'est pas configurée, on laisse Chariow afficher sa propre page de remerciement :
+  // ça n'empêche pas l'activation, qui se fait côté webhook, indépendamment de ce retour navigateur.
+  const redirectUrl = env.CLIENT_DASHBOARD_URL
+    ? `${env.CLIENT_DASHBOARD_URL.replace(/\/+$/, "")}?chariow=done`
+    : undefined;
+
   const payload = await requestChariow("/checkout", {
     method: "POST",
     body: JSON.stringify({
@@ -54,7 +62,7 @@ export async function createChariowCheckout(input: {
       first_name: input.firstName,
       last_name: input.lastName,
       phone: { number: input.phoneNumber, country_code: input.countryCode },
-      redirect_url: `${env.APP_URL.replace(/\/+$/, "")}/billing.html?chariow=done`,
+      ...(redirectUrl ? { redirect_url: redirectUrl } : {}),
       custom_metadata: { organization_id: input.organizationId },
     }),
   });

@@ -15,7 +15,7 @@ import { hasUnsavedAgendaChanges, initAppointments, loadAppointments } from "./f
 import { initOrders, loadOrders } from "./features/orders/orders.js";
 import { initBroadcasts, loadBroadcastsView } from "./features/broadcasts/broadcasts.js";
 import { initHelp } from "./features/help/help.js";
-import { initBilling, loadBilling, refreshBillingBanner } from "./features/billing/billing.js";
+import { handleChariowReturn, initBilling, loadBilling, refreshBillingBanner } from "./features/billing/billing.js";
 import { initTeamSettings, loadTeam } from "./features/settings/team-settings.js";
 import { initIgnoredContacts, loadIgnoredContacts } from "./features/settings/ignored-contacts.js";
 import { checkFirstLoginPersona, initPersonaPicker } from "./features/persona/persona.js";
@@ -68,6 +68,13 @@ async function onAuthenticated() {
   try {
     await loadOrganizations(refreshAll);
     void checkFirstLoginPersona();
+    // Retour depuis la page de paiement Chariow (voir redirect_url côté serveur) : on ramène
+    // l'utilisateur directement sur « Mon forfait » et on attend la confirmation de l'activation.
+    if (new URLSearchParams(window.location.search).get("chariow") === "done") {
+      window.history.replaceState({}, "", window.location.pathname);
+      setView("billing", viewLoaders);
+      void handleChariowReturn();
+    }
   } catch (error) {
     showToast(isNetworkError(error) ? "API inaccessible. Réessayez plus tard." : error.message, "error");
   }

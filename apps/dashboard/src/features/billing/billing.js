@@ -125,7 +125,7 @@ function closePayment() {
 function openPayment(planKey) {
   const plan = plansData?.plans.find((entry) => entry.key === planKey);
   if (!plan) return;
-  paying = { plan, reference: null };
+  paying = { plan };
   $("#billing-pay-title").textContent = `Payer le forfait ${plan.name}`;
   $("#billing-pay-amount").textContent = `${money(plan.amount)} pour 30 jours`;
   $("#billing-pay-form").classList.remove("hidden");
@@ -135,36 +135,6 @@ function openPayment(planKey) {
   $("#billing-pay-phone").focus();
 }
 
-async function pollPayment(reference, startedAt) {
-  try {
-    const { status } = await api(`/billing/status/${encodeURIComponent(reference)}`);
-    if (status === "SUCCESS") {
-      const demo = paying?.demo;
-      closePayment();
-      showToast(demo ? "Test de paiement réussi. Le paiement réel n'est pas encore activé : aucun forfait n'a été changé." : "Paiement reçu : votre forfait est activé. Merci !", demo ? "info" : "success");
-      statusCache = { at: 0, value: null };
-      await loadBilling();
-      void refreshBillingBanner();
-      return;
-    }
-    if (status === "FAILED") {
-      $("#billing-pay-wait").classList.add("hidden");
-      $("#billing-pay-form").classList.remove("hidden");
-      $("#billing-pay-submit").disabled = false;
-      showToast("Le paiement a échoué ou a été refusé. Vous n'avez pas été débité. Réessayez.", "error");
-      return;
-    }
-  } catch (error) {
-    // Erreur réseau passagère : on réessaie tant que le délai n'est pas dépassé.
-  }
-  if (!paying) return;
-  if (Date.now() - startedAt > POLL_MAX_MS) {
-    $("#billing-pay-wait-text").textContent = "Nous n'avons pas encore reçu la confirmation. Si vous avez validé le paiement sur votre téléphone, votre forfait s'activera dans quelques minutes. Sinon, fermez et réessayez.";
-    return;
-  }
-  pollTimer = setTimeout(() => void pollPayment(reference, startedAt), POLL_MS);
-}
-
 async function submitPayment(event) {
   event.preventDefault();
   if (!paying) return;
@@ -172,17 +142,40 @@ async function submitPayment(event) {
   const button = $("#billing-pay-submit");
   button.disabled = true;
   try {
-    const result = await api("/billing/create-checkout", { method: "POST", body: JSON.stringify({ plan: paying.plan.key, phone }) });
-    paying.reference = result.reference;
-    paying.demo = Boolean(result.demoMode);
+    const result = await api("/billing/checkout/chariow", { method: "POST", body: JSON.stringify({ plan: paying.plan.key, phone }) });
     $("#billing-pay-form").classList.add("hidden");
     $("#billing-pay-wait").classList.remove("hidden");
-    $("#billing-pay-wait-text").innerHTML = `${escapeHtml(result.message || "Validez la demande de paiement sur votre téléphone.")}${result.ussdCode ? ` Si rien n'apparaît, composez <strong>${escapeHtml(result.ussdCode)}</strong>.` : ""}${result.demoMode ? "<br /><em>Mode test : le paiement réel n'est pas encore activé sur ce serveur.</em>" : ""}`;
-    void pollPayment(result.reference, Date.now());
+    $("#billing-pay-wait-text").textContent = "Redirection vers la page de paiement sécurisée...";
+    window.location.href = result.checkoutUrl;
   } catch (error) {
     button.disabled = false;
     showToast(error.message || "Le paiement n'est pas disponible pour le moment.", "error");
   }
+}
+
+/**
+ * Après un paiement Chariow, le client revient sur le tableau de bord (CLIENT_DASHBOARD_URL?chariow=done).
+ * L'abonnement est déjà activé côté serveur par le webhook Chariow, indépendamment de ce retour : on
+ * se contente ici de réinterroger « Mon forfait » jusqu'à voir le changement, pour ne pas laisser
+ * l'utilisateur sur un écran visiblement pas encore à jour juste après avoir payé.
+ */
+export async function handleChariowReturn() {
+  showToast("Paiement reçu, confirmation de votre forfait en cours…", "info");
+  const startedAt = Date.now();
+  const planBefore = (await getBillingStatus())?.plan ?? null;
+  const tick = async () => {
+    statusCache = { at: 0, value: null };
+    const status = await getBillingStatus({ fresh: true }).catch(() => null);
+    await loadBilling().catch(() => undefined);
+    void refreshBillingBanner();
+    if (status && status.status === "ACTIVE" && status.plan !== planBefore) {
+      showToast("Paiement confirmé : votre forfait est activé. Merci !", "success");
+      return;
+    }
+    if (Date.now() - startedAt > POLL_MAX_MS) return;
+    pollTimer = setTimeout(() => void tick(), POLL_MS);
+  };
+  await tick();
 }
 
 export function initBilling() {
