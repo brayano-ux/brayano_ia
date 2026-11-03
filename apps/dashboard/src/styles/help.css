@@ -32,7 +32,22 @@
   .help-robot-float, .help-robot-antenna, .help-robot-eyes, .help-thought { animation: none; }
 }
 
-.help-panel { width: min(400px, calc(100vw - 32px)); height: min(560px, calc(100vh - 150px)); display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-xl); box-shadow: var(--shadow-lg); overflow: hidden; }
+/*
+ * Ancré indépendamment des boutons flottants du dock (WhatsApp + robot IA), avec son propre haut ET
+ * bas : le navigateur calcule alors la hauteur disponible en continu (jamais d'en-tête coupé, jamais
+ * besoin de deviner une hauteur en pixels qui se désynchronise de la taille réelle des boutons).
+ * Le dégagement en bas = décalage du dock + 2 écarts + hauteur du bouton WhatsApp + hauteur du bloc robot.
+ */
+.help-panel {
+  position: fixed;
+  z-index: 120;
+  right: var(--space-6);
+  top: var(--space-6);
+  bottom: calc(var(--space-6) + var(--space-3) + 56px + var(--space-3) + 112px);
+  width: min(400px, calc(100vw - 32px));
+  max-height: 560px;
+  display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-xl); box-shadow: var(--shadow-lg); overflow: hidden;
+}
 .help-panel.hidden { display: none; }
 .help-head { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); background: linear-gradient(135deg, var(--brand-500), var(--brand-700)); color: #fff; }
 .help-head img { width: 30px; height: auto; background: #fff; border-radius: 8px; padding: 2px 3px; flex: none; }
@@ -74,7 +89,14 @@
 
 @media (max-width: 1023px) {
   .help-dock { right: var(--space-4); bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom) + var(--space-3)); }
-  .help-panel { width: calc(100vw - 32px); height: min(540px, calc(100vh - var(--tabbar-height) - 110px)); }
+  .help-panel {
+    right: var(--space-4);
+    left: var(--space-4);
+    width: auto;
+    top: calc(var(--space-4) + env(safe-area-inset-top, 0px));
+    bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom) + var(--space-3) + var(--space-3) + 52px + var(--space-3) + 112px);
+    max-height: 540px;
+  }
   .help-fab-wa { width: 52px; height: 52px; }
 }
 @media (prefers-reduced-motion: reduce) { .help-msg.typing i { animation: none; opacity: 0.6; } .help-fab { transition: none; } }
