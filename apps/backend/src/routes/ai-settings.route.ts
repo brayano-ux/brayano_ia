@@ -8,6 +8,7 @@ import {
 import { isValidTimezone } from "../appointments/availability.js";
 import { workingHoursSchema } from "../appointments/appointments.service.js";
 import { getPlatformSuspension } from "../organizations/platform-suspension.service.js";
+import { assertFeature } from "../billing/subscription.service.js";
 import { BUSINESS_INFO_MAX_LENGTH } from "../ai/settings-limits.js";
 import { ValidationError } from "../shared/errors.js";
 
@@ -52,6 +53,12 @@ export async function aiSettingsRoute(app: FastifyInstance) {
     const parsed = updateAiSettingsSchema.safeParse(request.body);
     if (!parsed.success) {
       throw new ValidationError(parsed.error.issues[0]?.message);
+    }
+
+    // Les relances automatiques ne sont pas incluses dans tous les forfaits (voir billing-plans.ts) ;
+    // jusqu'ici rien ne l'empêchait de s'activer ici, seul l'envoi était silencieusement sauté côté job.
+    if (parsed.data.followUpEnabled === true) {
+      await assertFeature(orgId, "followUps");
     }
 
     const settingsInput: {

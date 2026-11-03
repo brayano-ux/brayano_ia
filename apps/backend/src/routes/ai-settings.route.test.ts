@@ -1,10 +1,11 @@
 import Fastify from "fastify";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { AppError } from "../shared/errors.js";
+import { AppError, PlanLimitError } from "../shared/errors.js";
 
-const mocks = vi.hoisted(() => ({ getOrCreateAiSettings: vi.fn(), updateAiSettings: vi.fn(), getPlatformSuspension: vi.fn() }));
+const mocks = vi.hoisted(() => ({ getOrCreateAiSettings: vi.fn(), updateAiSettings: vi.fn(), getPlatformSuspension: vi.fn(), assertFeature: vi.fn() }));
 vi.mock("../ai/ai-settings.service.js", () => mocks);
 vi.mock("../organizations/platform-suspension.service.js", () => ({ getPlatformSuspension: mocks.getPlatformSuspension }));
+vi.mock("../billing/subscription.service.js", () => ({ assertFeature: mocks.assertFeature }));
 
 import { aiSettingsRoute } from "./ai-settings.route.js";
 
@@ -22,6 +23,7 @@ describe("PUT /ai-settings : horaires et relances", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.updateAiSettings.mockResolvedValue({ id: "settings-1" });
+    mocks.assertFeature.mockResolvedValue(undefined);
   });
 
   it("transmet les horaires d'ouverture et les réglages de relance", async () => {
@@ -64,6 +66,45 @@ describe("PUT /ai-settings : horaires et relances", () => {
     expect(response.statusCode).toBe(400);
     expect(mocks.updateAiSettings).not.toHaveBeenCalled();
     await app.close();
+  });
+
+  it("refuse d'activer les relances quand le forfait ne les inclut pas", async () => {
+    mocks.assertFeature.mockRejectedValue(
+      new PlanLimitError("Les relances automatiques ne sont pas incluses dans votre forfait actuel. Elles sont disponibles à partir du forfait Pro (page « Mon forfait »)."),
+    );
+    const app = await createApp();
+    try {
+      const response = await app.inject({ method: "PUT", url: "/organizations/org-1/ai-settings", payload: { followUpEnabled: true } });
+      expect(response.statusCode).toBe(402);
+      expect(response.json().message).toContain("forfait Pro");
+      expect(mocks.assertFeature).toHaveBeenCalledWith("org-1", "followUps");
+      expect(mocks.updateAiSettings).not.toHaveBeenCalled();
+    } finally {
+      await app.close();
+    }
+  });
+
+  it("n'appelle pas assertFeature quand on désactive les relances ou qu'on ne touche pas au réglage", async () => {
+    const app = await createApp();
+    try {
+      await app.inject({ method: "PUT", url: "/organizations/org-1/ai-settings", payload: { followUpEnabled: false } });
+      await app.inject({ method: "PUT", url: "/organizations/org-1/ai-settings", payload: { followUpMax: 2 } });
+      expect(mocks.assertFeature).not.toHaveBeenCalled();
+    } finally {
+      await app.close();
+    }
+  });
+
+  it("laisse passer l'activation des relances quand le forfait les inclut", async () => {
+    const app = await createApp();
+    try {
+      const response = await app.inject({ method: "PUT", url: "/organizations/org-1/ai-settings", payload: { followUpEnabled: true } });
+      expect(response.statusCode).toBe(200);
+      expect(mocks.assertFeature).toHaveBeenCalledWith("org-1", "followUps");
+      expect(mocks.updateAiSettings).toHaveBeenCalledWith("org-1", { followUpEnabled: true });
+    } finally {
+      await app.close();
+    }
   });
 });
 
