@@ -53,6 +53,17 @@ async function downloadCapped(download: () => Promise<unknown>, maxBytes: number
 
 const logger = pino({ level: "silent" }); // Baileys est très verbeux ; on garde nos propres logs applicatifs
 
+/**
+ * Backoff exponentiel plafonné à 1 min, avec un peu d'aléatoire : une perte de réseau ponctuelle se
+ * reconnecte vite, mais une série de coupures rapprochées espace de plus en plus les tentatives au lieu
+ * de marteler WhatsApp en boucle serrée — un rythme de reconnexion en rafale est un signal que les
+ * systèmes anti-automatisation de WhatsApp surveillent.
+ */
+export function computeReconnectDelayMs(attempt: number): number {
+  const base = Math.min(60_000, 2_000 * 2 ** attempt);
+  return base + Math.random() * 0.3 * base;
+}
+
 export class BaileysWhatsAppProvider implements WhatsAppProvider {
   private socket: WASocket | null = null;
   private status: WhatsAppConnectionStatus = "DISCONNECTED";
@@ -68,8 +79,14 @@ export class BaileysWhatsAppProvider implements WhatsAppProvider {
   /** Identifiants des messages envoyés par l'application : tout autre message sortant vient d'un humain. */
   private readonly botSentIds = new BotSentIds();
   private connectionHandlers: Array<(update: ConnectionUpdatePayload) => void> = [];
+  /** Reconnexions d'affilée depuis la dernière connexion réussie : sert à espacer les tentatives (voir reconnectDelayMs). */
+  private reconnectAttempts = 0;
 
-  constructor(private readonly authDir: string) {}
+  constructor(
+    private readonly authDir: string,
+    /** Injectable pour les tests (évite de vraiment attendre le backoff) ; vaut computeReconnectDelayMs en production. */
+    private readonly reconnectDelayMs: (attempt: number) => number = computeReconnectDelayMs,
+  ) {}
 
   async connect(): Promise<void> {
     const { state, saveCreds } = await useMultiFileAuthState(this.authDir);
@@ -80,6 +97,11 @@ export class BaileysWhatsAppProvider implements WhatsAppProvider {
       version,
       logger,
       printQRInTerminal: false,
+      // Un vrai client WhatsApp Web ne passe pas "en ligne" instantanément à chaque reconnexion, et nous
+      // n'avons pas besoin de tout l'historique des messages (nos conversations vivent déjà dans notre
+      // base) : ces deux réglages réduisent le comportement qui distingue le plus un bot d'un usage normal.
+      markOnlineOnConnect: false,
+      syncFullHistory: false,
     });
 
     this.socket.ev.on("creds.update", saveCreds);
@@ -97,6 +119,7 @@ export class BaileysWhatsAppProvider implements WhatsAppProvider {
       }
 
       if (connection === "open") {
+        this.reconnectAttempts = 0;
         this.rejectPairingSocketReady(new Error("Ce numéro WhatsApp est déjà connecté."));
         this.qrDataUrl = null;
         this.pairingCode = null;
@@ -118,11 +141,15 @@ export class BaileysWhatsAppProvider implements WhatsAppProvider {
         this.setStatus("DISCONNECTED", undefined, shouldReconnect ? "connection_lost" : "logged_out", describeCloseCode(statusCode));
 
         if (shouldReconnect) {
+          const delayMs = this.reconnectDelayMs(this.reconnectAttempts);
+          this.reconnectAttempts += 1;
+          await new Promise((resolve) => setTimeout(resolve, delayMs));
           await this.connect();
         } else {
           // WhatsApp a invalidé les identifiants persistés (déconnexion depuis
           // le téléphone). Un prochain clic sur la connexion par QR code doit générer un
           // nouveau QR au lieu de recharger cette session invalide.
+          this.reconnectAttempts = 0;
           fs.rmSync(this.authDir, { recursive: true, force: true });
           fs.mkdirSync(this.authDir, { recursive: true });
         }
@@ -328,6 +355,16 @@ export class BaileysWhatsAppProvider implements WhatsAppProvider {
     const messageId = generateMessageID();
     this.botSentIds.add(messageId);
     await this.socket.sendMessage(jid, { text }, { messageId });
+  }
+
+  /**
+   * Affiche « en train d'écrire… » pendant le délai de réponse configuré : une réponse qui apparaît sans
+   * ce signal, après un silence exact, est un des indices les plus visibles d'un envoi automatisé.
+   * Best-effort : une erreur ici ne doit jamais empêcher l'envoi du message qui suit.
+   */
+  async sendTypingIndicator(jid: string): Promise<void> {
+    if (!this.socket) return;
+    await this.socket.sendPresenceUpdate("composing", jid).catch(() => undefined);
   }
 
   async sendImage(jid: string, imageUrl: string, caption?: string): Promise<string> {
