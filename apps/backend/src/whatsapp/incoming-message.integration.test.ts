@@ -321,6 +321,29 @@ describe.skipIf(!integrationEnabled)("traitement d'un message entrant (base rée
       expect(whatsapp.sent[0]?.text).toContain("J'ai bien reçu votre photo");
     });
 
+    it.each([
+      ["product_photo" as const, "Transfert Orange Money de 15 000 FCFA"],
+      ["document" as const, "Carte d'identité"],
+      ["other" as const, "Capture d'écran"],
+    ])("range la photo mais n'envoie PAS d'email pour une photo reçue de type %s (seule une preuve de paiement prévient le propriétaire)", async (kind, summary) => {
+      const { organization } = await createTestOrganization();
+      const analysis: MediaAnalysis = { kind, summary };
+      setAiOrchestratorForTests({
+        async getReply() { return aiReply({ reply: "Bien reçu." }); },
+        async transcribeAudio() { return ""; },
+        async analyzeMedia() { return analysis; },
+      });
+
+      await deliver(organization.id, new FakeWhatsApp(), inbound(JID_NUMBER, "Voilà", photo("Voilà")));
+      await flushEmails();
+
+      const stored = await prisma.message.findFirstOrThrow({ where: { direction: "INBOUND" } });
+      expect(stored.type).toBe("IMAGE");
+      expect(stored.aiMeta).toMatchObject({ mediaKind: kind });
+      expect((await prisma.conversation.findFirstOrThrow()).paymentCheckPending).toBe(false);
+      expect(hoisted.sentEmails).toEqual([]);
+    });
+
     it("corrige une réponse qui confirme un paiement à la place du propriétaire", async () => {
       const { organization } = await createTestOrganization();
       const calls = installScriptedAi([
@@ -336,14 +359,14 @@ describe.skipIf(!integrationEnabled)("traitement d'un message entrant (base rée
       expect(whatsapp.sent.map((item) => item.text)).toEqual(["J'ai bien reçu votre photo, l'équipe va vérifier le paiement."]);
     });
 
-    it("ne prévient pas dix fois pour dix photos du même client, mais toujours pour un paiement", async () => {
+    it("ne prévient jamais pour de simples photos, mais toujours pour un paiement", async () => {
       const { organization } = await createTestOrganization();
       installScriptedAi([aiReply({ reply: "Bien reçu." })]);
       const whatsapp = new FakeWhatsApp();
 
       for (let index = 0; index < 3; index += 1) await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "[Photo reçue]", photo()));
       await flushEmails();
-      expect(hoisted.sentEmails.filter((email) => email.subject.includes("Photo reçue"))).toHaveLength(1);
+      expect(hoisted.sentEmails).toEqual([]);
 
       await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "Voici le reçu momo", photo("Voici le reçu momo")));
       await flushEmails();
