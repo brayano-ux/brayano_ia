@@ -93,6 +93,11 @@ textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
 select { appearance: none; padding-right: 38px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235d6479' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; }
 input::placeholder, textarea::placeholder { color: var(--subtle); }
 input:hover, textarea:hover, select:hover { border-color: #cfd3e3; }
+
+/* Indicatif pays + numéro local côte à côte (inscription, numéro WhatsApp, code d'association). */
+.phone-field-row { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+.phone-field-row select { flex: 1 1 150px; min-width: 150px; text-overflow: ellipsis; overflow: hidden; }
+.phone-field-row input { flex: 2 1 160px; min-width: 0; }
 input:focus, textarea:focus, select:focus { border-color: var(--brand-500); box-shadow: var(--ring); background: var(--surface); }
 input:disabled, textarea:disabled, select:disabled { background: var(--surface-2); color: var(--subtle); cursor: not-allowed; }
 input[type="file"] { width: 100%; padding: 6px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); font-size: var(--text-sm); color: var(--muted); }
