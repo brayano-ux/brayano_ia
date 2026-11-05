@@ -1,7 +1,7 @@
 import { withConversationSendLock } from "../conversations/conversation-send-lock.js";
 import { prisma } from "../database/client.js";
 import { NotFoundError, ValidationError } from "../shared/errors.js";
-import { BROADCAST_LIMITS, pickDelayMs, planBroadcastBatch, withOptOutFooter } from "./broadcast-rules.js";
+import { BROADCAST_LIMITS, effectiveBroadcastLimits, isReconnectCooldownActive, pickDelayMs, planBroadcastBatch, withOptOutFooter } from "./broadcast-rules.js";
 
 export type BroadcastStage = "NEW" | "INTERESTED" | "ORDERED" | "CALLBACK";
 
@@ -79,6 +79,12 @@ export async function findAudience(organizationId: string, filter: AudienceFilte
   return (await findAudienceDetailed(organizationId, filter, now)).audience;
 }
 
+/** Chronologie de connexion du numéro WhatsApp de l'entreprise (table whatsapp_accounts), pour les garde-fous d'échauffement. */
+async function connectionTiming(organizationId: string) {
+  const account = await prisma.whatsAppAccount.findFirst({ where: { organizationId }, select: { lastConnectedAt: true, createdAt: true } });
+  return { lastConnectedAt: account?.lastConnectedAt ?? null, createdAt: account?.createdAt ?? null };
+}
+
 async function quotaState(organizationId: string, now: Date) {
   const since = new Date(now.getTime() - 24 * 3600_000);
   const [sentLast24h, pendingNow] = await Promise.all([
@@ -90,7 +96,8 @@ async function quotaState(organizationId: string, now: Date) {
 
 export async function previewBroadcast(organizationId: string, filter: AudienceFilter = {}, now = new Date()) {
   const { audience, alreadyReceived } = await findAudienceDetailed(organizationId, filter, now);
-  const plan = planBroadcastBatch({ eligible: audience.length, ...(await quotaState(organizationId, now)) });
+  const limits = effectiveBroadcastLimits((await connectionTiming(organizationId)).createdAt, now);
+  const plan = planBroadcastBatch({ eligible: audience.length, ...(await quotaState(organizationId, now)) }, limits);
   const reason = !plan.ok && audience.length === 0 && alreadyReceived > 0
     ? `Les ${alreadyReceived} client${alreadyReceived > 1 ? "s" : ""} ciblé${alreadyReceived > 1 ? "s" : ""} ont déjà reçu ce message.`
     : plan.reason;
@@ -107,8 +114,8 @@ export async function previewBroadcast(organizationId: string, filter: AudienceF
     remainingToday: plan.remainingToday,
     ...(reason ? { reason } : {}),
     limits: {
-      maxRecipientsPerBroadcast: BROADCAST_LIMITS.maxRecipientsPerBroadcast,
-      maxPerDay: BROADCAST_LIMITS.maxPerDay,
+      maxRecipientsPerBroadcast: limits.maxRecipientsPerBroadcast,
+      maxPerDay: limits.maxPerDay,
       windowDays: Math.min(BROADCAST_LIMITS.maxWindowDays, filter.windowDays ?? BROADCAST_LIMITS.defaultWindowDays),
     },
   };
@@ -127,7 +134,8 @@ export async function createBroadcast(organizationId: string, input: { text: str
   if (running > 0) throw new ValidationError("Un envoi est déjà en cours. Attendez qu'il se termine ou annulez-le.");
 
   const { audience, alreadyReceived } = await findAudienceDetailed(organizationId, { ...input, text }, now);
-  const plan = planBroadcastBatch({ eligible: audience.length, ...(await quotaState(organizationId, now)) });
+  const limits = effectiveBroadcastLimits((await connectionTiming(organizationId)).createdAt, now);
+  const plan = planBroadcastBatch({ eligible: audience.length, ...(await quotaState(organizationId, now)) }, limits);
   if (!plan.ok) {
     throw new ValidationError(audience.length === 0 && alreadyReceived > 0 ? "Tous les clients ciblés ont déjà reçu ce message." : plan.reason ?? "Envoi impossible.");
   }
@@ -184,6 +192,13 @@ export async function runBroadcast(broadcastId: string, deps: BroadcastDeps): Pr
       }
       if (!deps.isConnected(broadcast.organizationId)) {
         console.warn(`⏸️  [broadcast:${broadcastId}] WhatsApp déconnecté : envoi en pause.`);
+        return;
+      }
+
+      // Laisse la connexion se stabiliser après une reconnexion avant de reprendre : voir reconnectCooldownMs.
+      // La reprise se refait d'elle-même, resumeBroadcasts tournant toutes les 5 min (jobs/runner.ts).
+      if (isReconnectCooldownActive((await connectionTiming(broadcast.organizationId)).lastConnectedAt, new Date())) {
+        console.warn(`⏸️  [broadcast:${broadcastId}] Reconnexion WhatsApp récente : envoi en pause le temps que la connexion se stabilise.`);
         return;
       }
 

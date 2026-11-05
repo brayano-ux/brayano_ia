@@ -170,6 +170,22 @@ describe.skipIf(!integrationEnabled)("messages groupés (base réelle)", () => {
       await expect(createBroadcast(organization.id, { text: "Promo" }, NOW)).rejects.toThrow("Limite de 100 messages");
       expect(await previewBroadcast(organization.id, { text: "Promo" }, NOW)).toMatchObject({ ok: false, recipients: 0, eligible: 1, remaining: 1 });
     });
+
+    it("réduit les limites d'envoi pour un numéro tout juste connecté (échauffement)", async () => {
+      const { organization } = await createTestOrganization();
+      await prisma.whatsAppAccount.create({ data: { organizationId: organization.id, status: "CONNECTED", createdAt: new Date(NOW.getTime() - 3600_000) } });
+      for (let index = 0; index < 15; index += 1) await seedClient(organization.id);
+      expect(await previewBroadcast(organization.id, { text: "Promo" }, NOW)).toMatchObject({ ok: true, eligible: 15, recipients: 10, remaining: 5, limits: { maxRecipientsPerBroadcast: 10, maxPerDay: 20 } });
+      const broadcast = await createBroadcast(organization.id, { text: "Promo" }, NOW);
+      expect(broadcast.total).toBe(10);
+    });
+
+    it("revient aux limites normales une fois le numéro connecté depuis plus de quelques jours", async () => {
+      const { organization } = await createTestOrganization();
+      await prisma.whatsAppAccount.create({ data: { organizationId: organization.id, status: "CONNECTED", createdAt: daysAgo(10) } });
+      for (let index = 0; index < 15; index += 1) await seedClient(organization.id);
+      expect(await previewBroadcast(organization.id, { text: "Promo" }, NOW)).toMatchObject({ ok: true, eligible: 15, recipients: 15, limits: { maxRecipientsPerBroadcast: 50, maxPerDay: 100 } });
+    });
   });
 
   describe("envoi", () => {
@@ -248,6 +264,32 @@ describe.skipIf(!integrationEnabled)("messages groupés (base réelle)", () => {
       await new Promise((resolve) => setTimeout(resolve, 300));
       expect(sent).toHaveLength(2);
       expect(new Set(sent).size).toBe(2);
+      expect((await prisma.broadcast.findUniqueOrThrow({ where: { id: broadcast.id } })).status).toBe("DONE");
+    });
+
+    it("se met en pause juste après une reconnexion, même si WhatsApp est bien connecté", async () => {
+      const { organization } = await createTestOrganization();
+      await seedClient(organization.id);
+      await prisma.whatsAppAccount.create({ data: { organizationId: organization.id, status: "CONNECTED", lastConnectedAt: new Date() } });
+      const broadcast = await createBroadcast(organization.id, { text: "Promo" }, NOW);
+      const { deps, sent } = makeDeps();
+
+      await runBroadcast(broadcast.id, deps);
+
+      expect(sent).toEqual([]);
+      expect((await prisma.broadcast.findUniqueOrThrow({ where: { id: broadcast.id } })).status).toBe("SENDING");
+    });
+
+    it("reprend l'envoi une fois le délai de stabilisation après reconnexion passé", async () => {
+      const { organization } = await createTestOrganization();
+      await seedClient(organization.id);
+      await prisma.whatsAppAccount.create({ data: { organizationId: organization.id, status: "CONNECTED", lastConnectedAt: new Date(Date.now() - 10 * 60_000) } });
+      const broadcast = await createBroadcast(organization.id, { text: "Promo" }, NOW);
+      const { deps, sent } = makeDeps();
+
+      await runBroadcast(broadcast.id, deps);
+
+      expect(sent).toHaveLength(1);
       expect((await prisma.broadcast.findUniqueOrThrow({ where: { id: broadcast.id } })).status).toBe("DONE");
     });
 

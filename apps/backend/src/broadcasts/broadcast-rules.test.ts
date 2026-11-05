@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { BROADCAST_LIMITS, pickDelayMs, planBroadcastBatch, withOptOutFooter } from "./broadcast-rules.js";
+import { BROADCAST_LIMITS, effectiveBroadcastLimits, isReconnectCooldownActive, pickDelayMs, planBroadcastBatch, withOptOutFooter } from "./broadcast-rules.js";
+
+const NOW = new Date("2026-11-05T10:00:00Z");
+const hoursAgo = (hours: number) => new Date(NOW.getTime() - hours * 3600_000);
+const daysAgo = (days: number) => new Date(NOW.getTime() - days * 24 * 3600_000);
 
 describe("withOptOutFooter", () => {
   it("ajoute toujours la mention STOP", () => {
@@ -42,5 +46,40 @@ describe("planBroadcastBatch", () => {
     const result = planBroadcastBatch({ eligible: 40, sentLast24h: 80, pendingNow: 20 });
     expect(result).toMatchObject({ ok: false, batchSize: 0, remaining: 40, remainingToday: 0 });
     expect(result.reason).toContain("Limite de 100 messages");
+  });
+
+  it("accepte des limites réduites (échauffement d'un numéro tout juste connecté)", () => {
+    const warmupLimits = { maxRecipientsPerBroadcast: 10, maxPerDay: 20 };
+    expect(planBroadcastBatch({ eligible: 15, sentLast24h: 0, pendingNow: 0 }, warmupLimits)).toEqual({ ok: true, batchSize: 10, remaining: 5, remainingToday: 20 });
+    expect(planBroadcastBatch({ eligible: 15, sentLast24h: 18, pendingNow: 0 }, warmupLimits)).toMatchObject({ ok: true, batchSize: 2, remaining: 13, remainingToday: 2 });
+  });
+});
+
+describe("effectiveBroadcastLimits", () => {
+  it("renvoie les limites normales quand aucun numéro n'a jamais été connecté", () => {
+    expect(effectiveBroadcastLimits(null, NOW)).toMatchObject({ maxRecipientsPerBroadcast: BROADCAST_LIMITS.maxRecipientsPerBroadcast, maxPerDay: BROADCAST_LIMITS.maxPerDay });
+  });
+
+  it("réduit les limites pendant les premiers jours suivant la toute première connexion", () => {
+    expect(effectiveBroadcastLimits(daysAgo(1), NOW)).toEqual({ maxRecipientsPerBroadcast: BROADCAST_LIMITS.warmupMaxRecipientsPerBroadcast, maxPerDay: BROADCAST_LIMITS.warmupMaxPerDay });
+    expect(effectiveBroadcastLimits(hoursAgo(1), NOW)).toEqual({ maxRecipientsPerBroadcast: BROADCAST_LIMITS.warmupMaxRecipientsPerBroadcast, maxPerDay: BROADCAST_LIMITS.warmupMaxPerDay });
+  });
+
+  it("revient aux limites normales une fois la période d'échauffement passée", () => {
+    expect(effectiveBroadcastLimits(daysAgo(BROADCAST_LIMITS.warmupWindowDays + 1), NOW)).toMatchObject({ maxRecipientsPerBroadcast: BROADCAST_LIMITS.maxRecipientsPerBroadcast, maxPerDay: BROADCAST_LIMITS.maxPerDay });
+  });
+});
+
+describe("isReconnectCooldownActive", () => {
+  it("n'est jamais actif sans date de dernière connexion", () => {
+    expect(isReconnectCooldownActive(null, NOW)).toBe(false);
+  });
+
+  it("est actif juste après une reconnexion", () => {
+    expect(isReconnectCooldownActive(new Date(NOW.getTime() - 10_000), NOW)).toBe(true);
+  });
+
+  it("n'est plus actif une fois le délai de stabilisation passé", () => {
+    expect(isReconnectCooldownActive(new Date(NOW.getTime() - BROADCAST_LIMITS.reconnectCooldownMs - 1_000), NOW)).toBe(false);
   });
 });
