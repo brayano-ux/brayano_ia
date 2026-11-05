@@ -221,6 +221,8 @@ export function initAuthFlow(onAuthenticated) {
       setState({ organizationId: result.organizationId });
       showDashboard();
       showToast("Compte créé avec succès.", "success");
+      // Pixel Meta : compte réellement créé (email vérifié), pas juste le formulaire rempli.
+      window.fbq?.("track", "CompleteRegistration");
       await onAuthenticated();
     } catch (error) {
       showToast(error.message || "Code incorrect.", "error");
