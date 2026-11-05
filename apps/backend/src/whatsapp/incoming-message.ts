@@ -78,8 +78,6 @@ function waitForConfiguredDelay(
 }
 
 const ANALYZABLE_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif", "application/pdf"]);
-/** Entre deux emails « fichier reçu » pour la même conversation (une preuve de paiement prévient toujours). */
-const MEDIA_EMAIL_THROTTLE_MS = 30 * 60_000;
 
 interface ReceivedMedia {
   stored: StoredClientMedia | null;
@@ -132,7 +130,6 @@ function jidToPhone(jid: string) {
 async function reportReceivedMedia(input: {
   organizationId: string;
   conversationId: string;
-  messageId: string;
   fromJid: string;
   leadName: string | null;
   caption: string | null;
@@ -140,20 +137,12 @@ async function reportReceivedMedia(input: {
 }) {
   const { organizationId, conversationId, received } = input;
   try {
-    if (received.kind === "payment_proof") await setPaymentCheckPending(conversationId, true);
+    // Seule une preuve de paiement prévient le propriétaire par email (il doit vérifier son solde avant de
+    // livrer) : une photo de produit, un document ou un autre fichier reste visible dans la conversation,
+    // sans email.
+    if (received.kind !== "payment_proof") return;
 
-    if (received.kind !== "payment_proof") {
-      const recentOthers = await prisma.message.count({
-        where: {
-          conversationId,
-          id: { not: input.messageId },
-          type: { in: ["IMAGE", "DOCUMENT"] },
-          direction: "INBOUND",
-          createdAt: { gte: new Date(Date.now() - MEDIA_EMAIL_THROTTLE_MS) },
-        },
-      });
-      if (recentOthers > 0) return;
-    }
+    await setPaymentCheckPending(conversationId, true);
 
     void notifyOrganizationAdmins(organizationId, (organizationName) =>
       buildMediaReceivedEmail({
@@ -230,7 +219,6 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
       await reportReceivedMedia({
         organizationId,
         conversationId: conversation.id,
-        messageId: inboundMessage.id,
         fromJid: message.fromJid,
         leadName: readLeadName(conversation.leadData),
         caption: message.media?.caption ?? null,
