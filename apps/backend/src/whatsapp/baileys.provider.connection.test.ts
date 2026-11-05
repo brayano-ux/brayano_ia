@@ -12,7 +12,7 @@ vi.mock("@whiskeysockets/baileys", () => ({
 }));
 vi.mock("qrcode", () => ({ default: { toDataURL: vi.fn() } }));
 
-import { BaileysWhatsAppProvider } from "./baileys.provider.js";
+import { BaileysWhatsAppProvider, computeReconnectDelayMs } from "./baileys.provider.js";
 
 function createSocket() {
   const ev = new EventEmitter();
@@ -34,7 +34,9 @@ describe("raison des déconnexions transmise au moniteur", () => {
     vi.clearAllMocks();
     updates.length = 0;
     mocks.socket = createSocket();
-    provider = new BaileysWhatsAppProvider("/tmp/wa-test-auth-connection");
+    // Délai de reconnexion à 0 : le vrai backoff (computeReconnectDelayMs) est testé séparément plus bas,
+    // et un délai réel ici ferait fuir des reconnexions en arrière-plan d'un test vers le suivant.
+    provider = new BaileysWhatsAppProvider("/tmp/wa-test-auth-connection", () => 0);
     provider.onConnectionUpdate((update) => updates.push(update));
     await provider.connect();
   });
@@ -85,5 +87,43 @@ describe("raison des déconnexions transmise au moniteur", () => {
   it("reports a successful connection with the phone number and no reason", async () => {
     mocks.socket.ev.emit("connection.update", { connection: "open" });
     expect(updates.at(-1)).toEqual({ status: "CONNECTED", phoneNumber: "237600000000" });
+  });
+
+  it("reconnects after a lost connection, through the injectable backoff delay (not after a logout)", async () => {
+    const baileys = await import("@whiskeysockets/baileys");
+    const makeWASocket = baileys.default as unknown as { mock: { calls: unknown[] } };
+    const attempts: number[] = [];
+    mocks.socket = createSocket();
+    const delayed = new BaileysWhatsAppProvider("/tmp/wa-test-auth-connection-2", (attempt) => {
+      attempts.push(attempt);
+      return 0;
+    });
+    await delayed.connect();
+    const callsBefore = makeWASocket.mock.calls.length;
+
+    mocks.socket.ev.emit("connection.update", { connection: "close", lastDisconnect: { error: { output: { statusCode: 515 } } } });
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    expect(makeWASocket.mock.calls.length).toBe(callsBefore + 1);
+    expect(attempts).toEqual([0]);
+  });
+
+  it("never reconnects after a logout from the phone", async () => {
+    const baileys = await import("@whiskeysockets/baileys");
+    const makeWASocket = baileys.default as unknown as { mock: { calls: unknown[] } };
+    const callsBefore = makeWASocket.mock.calls.length;
+    await close(401);
+    expect(makeWASocket.mock.calls.length).toBe(callsBefore);
+  });
+});
+
+describe("computeReconnectDelayMs", () => {
+  it("grows exponentially and caps at one minute", () => {
+    expect(computeReconnectDelayMs(0)).toBeGreaterThanOrEqual(2_000);
+    expect(computeReconnectDelayMs(0)).toBeLessThan(2_000 * 1.3);
+    expect(computeReconnectDelayMs(3)).toBeGreaterThanOrEqual(16_000);
+    expect(computeReconnectDelayMs(3)).toBeLessThan(16_000 * 1.3);
+    expect(computeReconnectDelayMs(10)).toBeLessThanOrEqual(60_000 * 1.3);
+    expect(computeReconnectDelayMs(20)).toBeLessThanOrEqual(60_000 * 1.3);
   });
 });

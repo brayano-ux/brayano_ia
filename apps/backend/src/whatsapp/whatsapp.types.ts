@@ -64,6 +64,8 @@ export interface WhatsAppProvider {
   getQRCode(): string | null; // data URL (image/png en base64), ou null si non disponible
   getPairingCode?(): string | null;
   sendMessage(jid: string, text: string): Promise<void>;
+  /** Affiche « en train d'écrire… » pendant le délai de réponse ; best-effort, jamais bloquant. */
+  sendTypingIndicator?(jid: string): Promise<void>;
   /** Renvoie l'identifiant WhatsApp du message envoyé (permet de retrouver plus tard à quel produit cette photo correspond). */
   sendImage(jid: string, imageUrl: string, caption?: string): Promise<string>;
   sendLocation(jid: string, latitude: number, longitude: number, label?: string): Promise<void>;

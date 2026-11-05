@@ -56,9 +56,17 @@ export interface IncomingMessageContext {
   wait?: (ms: number) => Promise<void>;
 }
 
-function waitForConfiguredDelay(startedAt: number, delaySeconds: unknown, wait?: (ms: number) => Promise<void>) {
+/** Affiche « en train d'écrire… » dès qu'on sait qu'on va attendre, pour que le délai de réponse ressemble à une vraie frappe plutôt qu'à un silence suivi d'un message qui apparaît d'un coup. */
+function waitForConfiguredDelay(
+  startedAt: number,
+  delaySeconds: unknown,
+  instance: Pick<WhatsAppProvider, "sendTypingIndicator">,
+  jid: string,
+  wait?: (ms: number) => Promise<void>,
+) {
   const remainingMs = resolveResponseDelaySeconds(delaySeconds) * 1000 - (Date.now() - startedAt);
   if (remainingMs <= 0) return Promise.resolve();
+  void instance.sendTypingIndicator?.(jid).catch(() => undefined);
   return wait ? wait(remainingMs) : new Promise((resolve) => setTimeout(resolve, remainingMs));
 }
 
@@ -284,7 +292,7 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
     let welcomeSent = false;
     if (welcomeDecision.welcome) {
       const welcomeText = welcomeDecision.welcome;
-      if (welcomeDecision.welcomeOnly) await waitForConfiguredDelay(replyStartedAt, settings.responseDelaySeconds, context.wait);
+      if (welcomeDecision.welcomeOnly) await waitForConfiguredDelay(replyStartedAt, settings.responseDelaySeconds, instance, message.fromJid, context.wait);
       welcomeSent = await withConversationSendLock(conversation.id, async () => {
         const stillFirst = (await prisma.message.count({ where: { conversationId: conversation.id, direction: "OUTBOUND" } })) === 0;
         if (!stillFirst || !await isConversationUpdateStillCurrent(conversation.id, conversation.updatedAt)) return false;
@@ -507,7 +515,7 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
       });
     }
 
-    await waitForConfiguredDelay(replyStartedAt, settings.responseDelaySeconds, context.wait);
+    await waitForConfiguredDelay(replyStartedAt, settings.responseDelaySeconds, instance, message.fromJid, context.wait);
 
     // Photos demandées par le client : produits du catalogue uniquement (jamais une URL inventée par le modèle).
     // Une photo REÇUE du client ([Photo reçue]) n'est pas une demande de photo.
