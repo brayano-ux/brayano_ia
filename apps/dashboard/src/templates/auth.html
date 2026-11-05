@@ -62,8 +62,11 @@
         </label>
         <label>
           <span>Numéro WhatsApp de l'entreprise</span>
-          <input id="register-whatsapp" type="tel" inputmode="tel" placeholder="+237 6 90 00 00 00" autocomplete="tel" required />
-          <small class="field-hint">Le numéro que vos clients contactent, avec l'indicatif du pays. Vous le relierez à l'agent juste après l'inscription.</small>
+          <div class="phone-field-row">
+            <select id="register-whatsapp-country" aria-label="Indicatif pays"></select>
+            <input id="register-whatsapp-local" type="tel" inputmode="numeric" placeholder="6 90 00 00 00" autocomplete="tel" required />
+          </div>
+          <small class="field-hint">Le numéro que vos clients contactent. Choisissez le pays puis saisissez le numéro sans l'indicatif. Vous le relierez à l'agent juste après l'inscription.</small>
         </label>
         <label>
           <span>Adresse email</span>

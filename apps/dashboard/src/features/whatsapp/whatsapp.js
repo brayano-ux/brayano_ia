@@ -1,6 +1,7 @@
 import { api } from "../../services/api.js";
 import { $, showToast } from "../../utils/dom.js";
 import { getState } from "../../state/store.js";
+import { populateCountrySelect, readPhoneField, setPhoneFieldFromDigits } from "../../utils/phone-field.js";
 
 /**
  * Feature "Connexion WhatsApp" : statut du numéro, QR code de liaison,
@@ -116,10 +117,14 @@ export async function loadWhatsApp({ silent = false } = {}) {
 
 /** Numéro de l'entreprise : champ pré-rempli (sans écraser une saisie en cours) et alerte si le téléphone relié est un autre numéro. */
 function renderNumberInfo(info) {
-  const input = $("#wa-number-input");
-  if (input && document.activeElement !== input && input.dataset.dirty !== "1") input.value = info.declaredDisplay || "";
-  const pairing = $("#pairing-phone");
-  if (pairing && !pairing.value && info.declaredDisplay) pairing.value = info.declaredDisplay;
+  const local = $("#wa-number-local");
+  const country = $("#wa-number-country");
+  const editing = document.activeElement === local || document.activeElement === country || local?.dataset.dirty === "1";
+  if (local && country && !editing) setPhoneFieldFromDigits(country, local, info.declaredNumber);
+
+  const pairingLocal = $("#pairing-phone-local");
+  const pairingCountry = $("#pairing-phone-country");
+  if (pairingLocal && pairingCountry && !pairingLocal.value && info.declaredNumber) setPhoneFieldFromDigits(pairingCountry, pairingLocal, info.declaredNumber);
 
   const warning = $("#wa-number-warning");
   if (!warning) return;
@@ -131,14 +136,22 @@ function renderNumberInfo(info) {
 }
 
 async function saveWhatsAppNumber() {
-  const input = $("#wa-number-input");
+  const local = $("#wa-number-local");
+  const country = $("#wa-number-country");
   const button = $("#wa-number-save");
+  const phoneNumber = readPhoneField(country, local);
+  if (!phoneNumber) {
+    showToast("Saisissez le numéro WhatsApp de l'entreprise.", "error");
+    local.focus();
+    return;
+  }
+
   try {
     button.disabled = true;
-    const info = await api(`/organizations/${getState().organizationId}/whatsapp/number`, { method: "PUT", body: JSON.stringify({ phoneNumber: input.value }) });
-    input.dataset.dirty = "0";
+    const info = await api(`/organizations/${getState().organizationId}/whatsapp/number`, { method: "PUT", body: JSON.stringify({ phoneNumber }) });
+    local.dataset.dirty = "0";
     renderNumberInfo(info);
-    $("#pairing-phone").value = info.declaredDisplay || $("#pairing-phone").value;
+    if (info.declaredNumber) setPhoneFieldFromDigits($("#pairing-phone-country"), $("#pairing-phone-local"), info.declaredNumber);
     showToast("Numéro WhatsApp enregistré.", "success");
   } catch (error) {
     showToast(error.message, "error");
@@ -165,7 +178,8 @@ async function connectWhatsApp() {
 async function connectWhatsAppWithCode(event) {
   event.preventDefault();
   const button = $("#connect-with-code");
-  const phoneNumber = $("#pairing-phone").value.trim();
+  // Champ local vide : le serveur utilisera le numéro déclaré à l'inscription.
+  const phoneNumber = readPhoneField($("#pairing-phone-country"), $("#pairing-phone-local")) || "";
   try {
     button.disabled = true;
     $("#connect-wa").disabled = true;
@@ -199,6 +213,9 @@ async function disconnectWhatsApp() {
 }
 
 export function initWhatsapp() {
+  populateCountrySelect($("#wa-number-country"));
+  populateCountrySelect($("#pairing-phone-country"));
+
   $("#connect-wa").onclick = connectWhatsApp;
   $("#show-pairing-form").onclick = () => {
     const form = $("#pairing-code-form");
@@ -207,13 +224,14 @@ export function initWhatsapp() {
     form.classList.toggle("hidden", !isOpening);
     button.setAttribute("aria-expanded", String(isOpening));
     button.textContent = isOpening ? "Masquer la saisie du numéro" : "Utiliser un code d'association";
-    if (isOpening) $("#pairing-phone").focus();
+    if (isOpening) $("#pairing-phone-local").focus();
   };
   $("#pairing-code-form").onsubmit = connectWhatsAppWithCode;
   $("#disconnect-wa").onclick = disconnectWhatsApp;
   $("#wa-number-save").onclick = saveWhatsAppNumber;
-  $("#wa-number-input").addEventListener("input", (event) => { event.target.dataset.dirty = "1"; });
-  $("#wa-number-input").addEventListener("keydown", (event) => {
+  $("#wa-number-local").addEventListener("input", (event) => { event.target.dataset.dirty = "1"; });
+  $("#wa-number-country").addEventListener("change", () => { $("#wa-number-local").dataset.dirty = "1"; });
+  $("#wa-number-local").addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
       event.preventDefault();
       void saveWhatsAppNumber();

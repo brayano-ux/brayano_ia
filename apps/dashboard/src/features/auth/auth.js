@@ -3,6 +3,7 @@ import { clearSession, isAuthenticated, readSession, writeOrganizationId, writeS
 import { askFields } from "../../utils/ask.js";
 import { $, showToast } from "../../utils/dom.js";
 import { getState, setState } from "../../state/store.js";
+import { populateCountrySelect, readPhoneField } from "../../utils/phone-field.js";
 
 /**
  * Feature "authentification" : login, inscription avec vérification
@@ -40,7 +41,7 @@ export function logoutUser(mode = "login") {
   clearSession();
   $(".app-shell").classList.add("hidden");
   $("#login-screen").classList.remove("hidden");
-  ["#login-email", "#login-password", "#register-name", "#register-company", "#register-whatsapp", "#register-email", "#register-password", "#register-verification-code"]
+  ["#login-email", "#login-password", "#register-name", "#register-company", "#register-whatsapp-local", "#register-email", "#register-password", "#register-verification-code"]
     .forEach((selector) => {
       const field = $(selector);
       if (field) field.value = "";
@@ -98,6 +99,8 @@ export function initAuthFlow(onAuthenticated) {
   const forgotPasswordLink = $("#forgot-password-link");
 
   if (!loginForm || !registerForm || !verificationForm || !toggleButton) return;
+
+  populateCountrySelect($("#register-whatsapp-country"));
 
   setUnauthorizedHandler(() => {
     logoutUser();
@@ -174,11 +177,18 @@ export function initAuthFlow(onAuthenticated) {
     const submitButton = registerForm.querySelector('button[type="submit"]');
 
     try {
+      const whatsappNumber = readPhoneField($("#register-whatsapp-country"), $("#register-whatsapp-local"));
+      if (!whatsappNumber) {
+        showToast("Saisissez le numéro WhatsApp de l'entreprise.", "error");
+        $("#register-whatsapp-local").focus();
+        return;
+      }
+
       submitButton.disabled = true;
       const payload = {
         name: $("#register-name").value,
         companyName: $("#register-company").value,
-        whatsappNumber: $("#register-whatsapp").value,
+        whatsappNumber,
         email: $("#register-email").value,
         password: $("#register-password").value,
       };

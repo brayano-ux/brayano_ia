@@ -19,9 +19,12 @@
       <p id="wa-description" class="muted">Connectez WhatsApp en scannant le QR code ou en recevant un code d'association.</p>
 
       <div class="wa-number">
-        <label for="wa-number-input">Numéro WhatsApp de votre entreprise</label>
+        <label for="wa-number-local">Numéro WhatsApp de votre entreprise</label>
         <div class="wa-number-row">
-          <input id="wa-number-input" type="tel" inputmode="tel" autocomplete="tel" placeholder="+237 6 90 00 00 00" />
+          <div class="phone-field-row">
+            <select id="wa-number-country" aria-label="Indicatif pays"></select>
+            <input id="wa-number-local" type="tel" inputmode="numeric" autocomplete="tel" placeholder="6 90 00 00 00" />
+          </div>
           <button type="button" class="ghost-button" id="wa-number-save">Enregistrer</button>
         </div>
         <p id="wa-number-warning" class="wa-number-warning hidden" role="alert"></p>
@@ -30,8 +33,11 @@
       <button class="primary" id="connect-wa" type="button">Connexion par QR code</button>
       <button class="text-button" id="show-pairing-form" type="button" aria-expanded="false" aria-controls="pairing-code-form">Utiliser un code d'association</button>
       <form id="pairing-code-form" class="pairing-form hidden">
-        <label for="pairing-phone">Numéro WhatsApp avec indicatif pays</label>
-        <input id="pairing-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+237 6..." required />
+        <label for="pairing-phone-local">Numéro WhatsApp avec indicatif pays</label>
+        <div class="phone-field-row">
+          <select id="pairing-phone-country" aria-label="Indicatif pays"></select>
+          <input id="pairing-phone-local" type="tel" inputmode="numeric" autocomplete="tel" placeholder="6 90 00 00 00" required />
+        </div>
         <button class="primary" id="connect-with-code" type="submit">Recevoir le code</button>
       </form>
       <button class="text-button hidden" id="disconnect-wa">Déconnecter ce numéro</button>
