@@ -56,6 +56,12 @@ export interface IncomingMessageContext {
   wait?: (ms: number) => Promise<void>;
 }
 
+/** ±20 % autour du délai configuré : un humain ne répond jamais exactement à la même seconde près à chaque fois. */
+export function jitteredDelayMs(delaySeconds: number, random: () => number): number {
+  const factor = 0.8 + random() * 0.4;
+  return delaySeconds * 1000 * factor;
+}
+
 /** Affiche « en train d'écrire… » dès qu'on sait qu'on va attendre, pour que le délai de réponse ressemble à une vraie frappe plutôt qu'à un silence suivi d'un message qui apparaît d'un coup. */
 function waitForConfiguredDelay(
   startedAt: number,
@@ -63,8 +69,9 @@ function waitForConfiguredDelay(
   instance: Pick<WhatsAppProvider, "sendTypingIndicator">,
   jid: string,
   wait?: (ms: number) => Promise<void>,
+  random: () => number = Math.random,
 ) {
-  const remainingMs = resolveResponseDelaySeconds(delaySeconds) * 1000 - (Date.now() - startedAt);
+  const remainingMs = jitteredDelayMs(resolveResponseDelaySeconds(delaySeconds), random) - (Date.now() - startedAt);
   if (remainingMs <= 0) return Promise.resolve();
   void instance.sendTypingIndicator?.(jid).catch(() => undefined);
   return wait ? wait(remainingMs) : new Promise((resolve) => setTimeout(resolve, remainingMs));
