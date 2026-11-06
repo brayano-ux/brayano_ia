@@ -22,8 +22,15 @@ services:
         sync: false
       - key: CORS_ALLOWED_ORIGINS
         sync: false
+      # Paiement des forfaits : Chariow (Mobile Money et carte). Campay n'est pas configuré en production.
       - key: PAYMENT_PROVIDER
-        value: campay
+        value: chariow
+      # Clé API Chariow (sk_live_...) : démarre une session de paiement depuis la page « Mon forfait ».
+      - key: CHARIOW_API_KEY
+        sync: false
+      # Secret de signature des Pulses Chariow (whsec_...) : le webhook /billing/chariow/pulse refuse tout sans lui.
+      - key: CHARIOW_PULSE_SECRET
+        sync: false
       # Signe les liens de photos : généré automatiquement par Render, ne jamais le partager.
       - key: MEDIA_SIGNING_SECRET
         generateValue: true
@@ -43,10 +50,12 @@ services:
         sync: false
       - key: BILLING_PAGE_URL
         sync: false
-      # Mettre "true" pour appliquer les forfaits (l'assistant se tait quand les messages sont épuisés).
-      # Avant : donner un forfait aux clients déjà inscrits (POST /admin/organizations/:id/subscription).
+      # Forfaits appliqués : après les 100 messages d'essai (ou un forfait épuisé/terminé), l'assistant se tait,
+      # le propriétaire reçoit un email et doit payer un forfait depuis « Mon forfait » pour le réactiver.
+      # Les clients déjà inscrits sans forfait sont coupés dès le déploiement : leur en donner un avant
+      # (POST /admin/organizations/:id/subscription) ou juste après.
       - key: BILLING_ENFORCED
-        value: "false"
+        value: "true"
       - key: PLATFORM_ADMIN_EMAILS
         sync: false
       - key: PLATFORM_ADMIN_TOKEN

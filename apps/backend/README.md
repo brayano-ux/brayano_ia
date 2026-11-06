@@ -117,9 +117,10 @@ Un « message » = une réponse envoyée par l'assistant à un client (photos et
 | Business | 50 000 FCFA | 15 000 | oui | oui | 10 |
 
 - Définition unique : `src/billing/billing-plans.ts` (la page d'accueil doit afficher les mêmes prix : un test le vérifie).
-- `BILLING_ENFORCED=false` (défaut) : les messages sont comptés mais rien n'est bloqué. `true` : sans message restant, l'assistant ne répond plus (le propriétaire est prévenu par email, au plus une fois par jour) ; messages en masse, relances et employés suivent le forfait (erreur 402).
-- Avant de passer à `true`, donner un forfait aux clients existants : `POST /admin/organizations/:orgId/subscription` avec `{ "plan": "pro", "days": 30 }` (en-tête d'administration de la plateforme). `GET /admin/organizations` montre l'état de chacun.
-- Paiement Mobile Money via Campay (page « Mon forfait » du tableau de bord). En mode démonstration (`demo.campay.net`), aucun forfait n'est activé.
+- `BILLING_ENFORCED=false` (défaut en développement) : les messages sont comptés mais rien n'est bloqué. `true` (**production**, voir `render.yaml`) : sans message restant, l'assistant ne répond plus (le propriétaire est prévenu par email, au plus une fois par jour) ; messages en masse, relances et employés suivent le forfait (erreur 402). Le client WhatsApp ne reçoit rien : son message reste dans la boîte de réception, le propriétaire peut lui répondre à la main.
+- Ce qui se passe à la fin de l'essai : à 20 messages restants, un email « plus que N réponses offertes » part une seule fois ; à 0, l'assistant se tait, l'email « essai terminé » part, un bandeau rouge s'affiche dans le tableau de bord avec un bouton vers « Mon forfait ». Dès que le paiement Chariow est confirmé (Pulse `successful.sale`), l'abonnement est créé et l'assistant répond de nouveau au message suivant, sans redémarrage.
+- Clients déjà inscrits sans forfait : ils sont coupés dès qu'un serveur avec `BILLING_ENFORCED=true` démarre. Leur donner un forfait : `POST /admin/organizations/:orgId/subscription` avec `{ "plan": "pro", "days": 30 }` (en-tête d'administration de la plateforme). `GET /admin/organizations` montre l'état de chacun.
+- Paiement via Chariow (page « Mon forfait » du tableau de bord) : `CHARIOW_API_KEY` démarre la session de paiement, `CHARIOW_PULSE_SECRET` vérifie la signature du webhook `POST /billing/chariow/pulse`, `CLIENT_DASHBOARD_URL` sert au retour après paiement et aux liens des emails. Les identifiants des produits Chariow sont dans `billing-plans.ts` (`CHARIOW_PRODUCT_IDS`). Les routes Campay restent présentes mais ne sont pas utilisées en production.
 
 ### 9. Assistant d'aide du tableau de bord
 
