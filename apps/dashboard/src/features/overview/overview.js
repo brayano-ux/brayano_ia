@@ -7,6 +7,7 @@ import { conversationMarkup, bindConversationRows } from "../inbox/conversation-
 import { updateRealtimeHeader } from "../navigation/navigation.js";
 import { updateBadges, needsAttention } from "../inbox/inbox.js";
 import { loadStats, initStats } from "./stats.js";
+import { setSystemStatus } from "../navigation/system-status.js";
 
 function getDateWindow(days) {
   if (days === "all") return null;
@@ -39,8 +40,10 @@ export function renderCommercialMetrics() {
     .map((entry) => ({ ...entry, visibleCount: countMessagesForPeriod(entry, period) }))
     .sort((a, b) => b.visibleCount - a.visibleCount);
 
+  // Sans commercial configuré (la grande majorité des commerces), le panneau n'a rien à dire : on le masque.
+  $(".commercial-panel")?.classList.toggle("hidden", !sortedMetrics.length);
   if (!sortedMetrics.length) {
-    list.innerHTML = '<div class="empty-state">Aucun commercial configuré pour le moment.</div>';
+    list.innerHTML = "";
     return;
   }
 
@@ -104,9 +107,10 @@ export async function exportProspects() {
 function updateWhatsAppMetric(status) {
   const connected = status === "CONNECTED";
   const metric = $("#metric-whatsapp");
-  metric.textContent = connected ? "Connecté" : "Déconnecté";
-  metric.style.color = connected ? "var(--green)" : "var(--orange)";
+  metric.textContent = connected ? "Connecté" : status === "QR_PENDING" ? "À relier" : "Déconnecté";
+  metric.style.color = connected ? "var(--success)" : "var(--warning)";
   $("#metric-phone").textContent = connected ? "Numéro opérationnel" : "Connexion requise";
+  setSystemStatus(status);
 }
 
 export function renderRecent(onSelectConversation) {

@@ -7,7 +7,7 @@
 .orders-filters { display: flex; gap: var(--space-2); overflow-x: auto; max-width: 100%; padding-bottom: 2px; }
 .orders-filter { flex: none; min-height: 36px; padding: 0 var(--space-4); border: 1px solid var(--line); border-radius: var(--radius-full); background: var(--surface); color: var(--ink-2); font-size: var(--text-sm); font-weight: 600; transition: var(--transition); }
 .orders-filter:hover { background: var(--surface-2); }
-.orders-filter.active { background: var(--brand-500); border-color: var(--brand-500); color: #fff; }
+.orders-filter.active { background: var(--ink); border-color: var(--ink); color: #fff; }
 
 .orders-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: var(--space-4); }
 .order-card { display: grid; gap: var(--space-3); align-content: start; padding: var(--space-5); border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow-xs); }

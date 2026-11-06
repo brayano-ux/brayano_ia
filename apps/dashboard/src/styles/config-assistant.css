@@ -7,7 +7,7 @@
 .ca-tabs { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .ca-tab { min-height: 36px; padding: 0 var(--space-4); border: 1px solid var(--line); border-radius: var(--radius-full); background: var(--surface); font-size: var(--text-sm); font-weight: 600; color: var(--ink-2); transition: var(--transition); }
 .ca-tab:hover { background: var(--surface-2); }
-.ca-tab.active { background: var(--brand-500); border-color: var(--brand-500); color: #fff; }
+.ca-tab.active { background: var(--ink); border-color: var(--ink); color: #fff; }
 .ca-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
 .ca-result { display: grid; gap: var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--line); }
 .ca-notice { padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--warning-bg); color: var(--warning); font-size: var(--text-sm); font-weight: 500; }

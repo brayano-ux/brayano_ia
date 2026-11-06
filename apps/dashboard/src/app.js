@@ -18,6 +18,7 @@ import { initHelp } from "./features/help/help.js";
 import { handleChariowReturn, initBilling, loadBilling, refreshBillingBanner } from "./features/billing/billing.js";
 import { initTeamSettings, loadTeam } from "./features/settings/team-settings.js";
 import { initIgnoredContacts, loadIgnoredContacts } from "./features/settings/ignored-contacts.js";
+import { initSettingsTabs } from "./features/settings/settings-tabs.js";
 import { checkFirstLoginPersona, initPersonaPicker } from "./features/persona/persona.js";
 import { maybeStartViewTour } from "./features/tour/tour.js";
 import { loadRole } from "./features/navigation/roles.js";
@@ -124,6 +125,7 @@ function bootstrap() {
   initHelp();
   initTeamSettings();
   initIgnoredContacts();
+  initSettingsTabs();
   initPersonaPicker(() => setView("whatsapp", viewLoaders));
   initDelaySettings();
   initRoutingSettings();

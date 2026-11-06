@@ -71,10 +71,11 @@ describe("tableau de bord : protections du navigateur", () => {
   });
 });
 
-describe("tableau de bord React : aucun identifiant préremplis", () => {
-  it("la page de connexion démarre vide", () => {
-    const page = readFileSync(path.resolve(__dirname, "../../../dashboard-react/src/features/auth/LoginPage.jsx"), "utf8");
-    expect(page).toMatch(/DEFAULT_CREDENTIALS = \{ email: '', password: '' \}/);
-    expect(page).not.toMatch(/admin@brayano\.ai/);
+describe("tableau de bord : aucun identifiant prérempli", () => {
+  it("le formulaire de connexion démarre vide", () => {
+    const auth = read("src/templates/auth.html");
+    expect(auth).not.toMatch(/value="[^"]*@/);
+    expect(auth).not.toMatch(/admin@brayano\.ai/);
+    expect(read("src/features/auth/auth.js")).not.toMatch(/admin@brayano\.ai/);
   });
 });

@@ -4,14 +4,21 @@
     <div>
       <p class="eyebrow">CONFIGURATION</p>
       <h1>Paramètres</h1>
-      <p class="muted">Réglez le délai de réponse de l’agent, votre équipe et le routage de vos prospects.</p>
+      <p class="muted">Réglez le délai de réponse de l’agent, votre équipe, les numéros à ignorer et le routage de vos prospects.</p>
     </div>
-    <button class="primary" id="save-settings">Enregistrer</button>
+  </div>
+
+  <div class="agent-tabs settings-tabs" role="tablist" aria-label="Sections des paramètres">
+    <button type="button" class="agent-tab active" role="tab" data-settings-tab="responses">Réponses</button>
+    <button type="button" class="agent-tab" role="tab" data-settings-tab="team">Équipe</button>
+    <button type="button" class="agent-tab" role="tab" data-settings-tab="ignored">Numéros à ignorer</button>
+    <button type="button" class="agent-tab" role="tab" data-settings-tab="routing">Zones et commerciaux</button>
   </div>
 
   <div class="settings-stack">
 
     <!-- ============ Délai de réponse ============ -->
+    <div class="settings-pane" data-settings-pane="responses">
     <form id="delay-form" class="panel settings-card">
       <div class="settings-card-head">
         <h2>Délai de réponse de l'IA</h2>
@@ -40,10 +47,12 @@
           <span>2 min<small>Réponse très espacée</small></span>
         </label>
       </div>
+      <div class="form-actions"><button class="primary" id="save-settings" type="button">Enregistrer le délai</button></div>
     </form>
-
+    </div>
 
     <!-- ============ Équipe ============ -->
+    <div class="settings-pane hidden" data-settings-pane="team">
     <section class="panel settings-card team-settings" aria-labelledby="team-title">
       <div class="settings-card-head">
         <h2 id="team-title">Votre équipe</h2>
@@ -61,8 +70,10 @@
         <div class="form-actions"><button type="submit" class="primary">Ajouter l’employé</button></div>
       </form>
     </section>
+    </div>
 
     <!-- ============ Contacts à ignorer ============ -->
+    <div class="settings-pane hidden" data-settings-pane="ignored">
     <section class="panel settings-card ignored-contacts" aria-labelledby="ignored-title">
       <div class="settings-card-head">
         <h2 id="ignored-title">Numéros à ignorer</h2>
@@ -77,8 +88,10 @@
         <div class="form-actions"><button type="submit" class="primary">Ajouter à la liste</button></div>
       </form>
     </section>
+    </div>
 
     <!-- ============ Zones et responsables ============ -->
+    <div class="settings-pane hidden" data-settings-pane="routing">
     <section class="routing-settings" aria-labelledby="routing-title">
       <div class="settings-card-head routing-head">
         <h2 id="routing-title">Zones et responsables</h2>
@@ -157,5 +170,6 @@
         </div>
       </div>
     </section>
+    </div>
   </div>
 </section>

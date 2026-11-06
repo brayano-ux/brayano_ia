@@ -6,7 +6,7 @@
 .product-form { display: grid; gap: var(--space-4); position: sticky; top: calc(var(--topbar-height) + var(--space-4)); }
 .product-form h2 { font-size: var(--text-lg); }
 .product-photo-block { display: grid; gap: var(--space-3); }
-.product-image-preview-wrap { position: relative; aspect-ratio: 16 / 9; max-height: 220px; display: grid; place-items: center; overflow: hidden; border: 1px dashed #cfd3e3; border-radius: var(--radius-md); background: var(--surface-2); color: var(--subtle); font-size: var(--text-sm); text-align: center; }
+.product-image-preview-wrap { position: relative; aspect-ratio: 16 / 9; max-height: 200px; display: grid; place-items: center; overflow: hidden; border: 1px dashed var(--line-strong); border-radius: var(--radius-md); background: var(--surface-2); color: var(--subtle); font-size: var(--text-sm); text-align: center; }
 .product-image-preview-wrap img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .product-photo-field { display: grid; gap: 6px; }
 .field-label { font-size: var(--text-sm); font-weight: 600; color: var(--ink-2); }
@@ -21,9 +21,9 @@
 .products-list { display: grid; gap: var(--space-3); }
 
 .product-card { display: grid; grid-template-columns: 112px minmax(0, 1fr) auto; gap: var(--space-4); align-items: center; padding: var(--space-4); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-xs); transition: var(--transition); }
-.product-card:hover { border-color: #d3d6e4; box-shadow: var(--shadow-sm); }
+.product-card:hover { border-color: var(--line-strong); box-shadow: var(--shadow-sm); }
 .product-card.is-inactive { opacity: 0.72; }
-.product-card-image { width: 112px; aspect-ratio: 1; display: grid; place-items: center; overflow: hidden; border-radius: var(--radius-md); background: var(--surface-2); color: var(--subtle); font-size: 1.6rem; }
+.product-card-image { width: 112px; aspect-ratio: 1; display: grid; place-items: center; overflow: hidden; border-radius: var(--radius-md); border: 1px solid var(--line); background: var(--surface-2); color: var(--subtle); font-size: 1.6rem; }
 .product-card-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .product-card-content { display: grid; gap: var(--space-2); min-width: 0; }
 .product-card-title-row { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
