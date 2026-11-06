@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { decideWelcome, isPureGreeting, placeWelcomeBeforeClientMessages } from "./welcome.js";
+import { decideWelcome, isPureGreeting, placeWelcomeBeforeClientMessages, splitWelcomeVariants } from "./welcome.js";
 
 describe("isPureGreeting", () => {
   it.each(["Bonjour", "bonsoir !", "Salut", "hello", "Hi", "bjr", "Bonjour monsieur", "bonsoir madame svp", "Salut ça va ?", "Good morning", "cc"])("« %s » est une simple salutation", (text) => {
@@ -23,6 +23,18 @@ describe("decideWelcome", () => {
 
   it("répond seulement par l'accueil à une simple salutation", () => {
     expect(decideWelcome({ welcomeMessage: "Bienvenue", outboundCount: 0, inboundText: "Bonsoir" })).toEqual({ welcome: "Bienvenue", welcomeOnly: true });
+  });
+
+  it("tire une variante au hasard quand le propriétaire en a écrit plusieurs, séparées par ---", () => {
+    const message = "Bonjour 👋 Bienvenue chez Belle Époque !\n---\nBonjour et bienvenue 😊 Comment puis-je vous aider ?\n ---- \nBonjour ! Ravie de vous lire.";
+    expect(splitWelcomeVariants(message)).toEqual(["Bonjour 👋 Bienvenue chez Belle Époque !", "Bonjour et bienvenue 😊 Comment puis-je vous aider ?", "Bonjour ! Ravie de vous lire."]);
+    expect(decideWelcome({ welcomeMessage: message, outboundCount: 0, inboundText: "bonjour" }, () => 0).welcome).toBe("Bonjour 👋 Bienvenue chez Belle Époque !");
+    expect(decideWelcome({ welcomeMessage: message, outboundCount: 0, inboundText: "bonjour" }, () => 0.5).welcome).toBe("Bonjour et bienvenue 😊 Comment puis-je vous aider ?");
+    expect(decideWelcome({ welcomeMessage: message, outboundCount: 0, inboundText: "bonjour" }, () => 0.999).welcome).toBe("Bonjour ! Ravie de vous lire.");
+  });
+
+  it("un tiret dans une phrase n'est pas un séparateur de variantes", () => {
+    expect(splitWelcomeVariants("Bienvenue - on vous répond vite !\nOuvert 9h - 18h")).toEqual(["Bienvenue - on vous répond vite !\nOuvert 9h - 18h"]);
   });
 
   it("envoie l'accueil puis laisse l'IA répondre à une vraie question", () => {

@@ -4,7 +4,8 @@ import { NotFoundError } from "../shared/errors.js";
 import type { WorkingHours } from "../appointments/availability.js";
 
 export const RESPONSE_DELAY_OPTIONS = [3, 5, 7, 60, 120] as const;
-export const DEFAULT_RESPONSE_DELAY_SECONDS = 3;
+/** 5 s par défaut : 3 s reste possible, mais une réponse quasi instantanée à chaque message est un signal d'automate. */
+export const DEFAULT_RESPONSE_DELAY_SECONDS = 5;
 
 export type ResponseDelaySeconds = (typeof RESPONSE_DELAY_OPTIONS)[number];
 
@@ -40,7 +41,7 @@ export interface AiSettingsInput {
 
 export function resolveResponseDelaySeconds(value: unknown): ResponseDelaySeconds {
   if (value === 60 || value === 120) return value;
-  if (value === 5 || value === 7) return value;
+  if (value === 3 || value === 5 || value === 7) return value;
   return DEFAULT_RESPONSE_DELAY_SECONDS;
 }
 

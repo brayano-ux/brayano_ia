@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BROADCAST_LIMITS, effectiveBroadcastLimits, isReconnectCooldownActive, pickDelayMs, planBroadcastBatch, withOptOutFooter } from "./broadcast-rules.js";
+import { BROADCAST_LIMITS, OPT_OUT_FOOTERS, effectiveBroadcastLimits, isReconnectCooldownActive, pickDelayMs, planBroadcastBatch, withOptOutFooter } from "./broadcast-rules.js";
 
 const NOW = new Date("2026-11-05T10:00:00Z");
 const hoursAgo = (hours: number) => new Date(NOW.getTime() - hours * 3600_000);
@@ -7,7 +7,14 @@ const daysAgo = (days: number) => new Date(NOW.getTime() - days * 24 * 3600_000)
 
 describe("withOptOutFooter", () => {
   it("ajoute toujours la mention STOP", () => {
-    expect(withOptOutFooter("  Promo ce week-end !  ")).toBe("Promo ce week-end !\n\nPour ne plus recevoir nos messages, répondez STOP.");
+    expect(withOptOutFooter("  Promo ce week-end !  ", () => 0)).toBe("Promo ce week-end !\n\nPour ne plus recevoir nos messages, répondez STOP.");
+    for (const random of [0, 0.2, 0.5, 0.8, 0.999]) expect(withOptOutFooter("Promo", () => random)).toMatch(/^Promo\n\n.+répondez STOP\.$/);
+  });
+
+  it("varie la formulation d'un envoi à l'autre, toutes terminées par « répondez STOP. »", () => {
+    const variants = new Set([0, 0.2, 0.4, 0.6, 0.8].map((random) => withOptOutFooter("Promo", () => random)));
+    expect(variants.size).toBe(OPT_OUT_FOOTERS.length);
+    for (const footer of OPT_OUT_FOOTERS) expect(footer.endsWith("répondez STOP.")).toBe(true);
   });
 });
 

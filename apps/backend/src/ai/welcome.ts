@@ -41,9 +41,25 @@ export interface WelcomeDecision {
   welcomeOnly: boolean;
 }
 
-export function decideWelcome(input: { welcomeMessage: string | null | undefined; outboundCount: number; inboundText: string }): WelcomeDecision {
-  const welcome = input.welcomeMessage?.trim() || null;
-  if (!welcome || input.outboundCount > 0) return { welcome: null, welcomeOnly: false };
+/** Séparateur entre deux variantes du message d'accueil : une ligne ne contenant que « --- ». */
+const WELCOME_VARIANT_SEPARATOR = /\n\s*-{3,}\s*\n/;
+
+/**
+ * Variantes du message d'accueil écrites par le propriétaire (séparées par une ligne « --- »). Envoyer mot pour mot
+ * le même texte à des centaines de nouveaux contacts est un motif connu de détection ; proposer plusieurs
+ * formulations permet d'en tirer une au hasard à chaque premier échange.
+ */
+export function splitWelcomeVariants(welcomeMessage: string | null | undefined): string[] {
+  return (welcomeMessage ?? "").split(WELCOME_VARIANT_SEPARATOR).map((part) => part.trim()).filter(Boolean);
+}
+
+export function decideWelcome(
+  input: { welcomeMessage: string | null | undefined; outboundCount: number; inboundText: string },
+  random: () => number = Math.random,
+): WelcomeDecision {
+  const variants = splitWelcomeVariants(input.welcomeMessage);
+  if (!variants.length || input.outboundCount > 0) return { welcome: null, welcomeOnly: false };
+  const welcome = variants[Math.min(variants.length - 1, Math.floor(random() * variants.length))]!;
   return { welcome, welcomeOnly: isPureGreeting(input.inboundText) };
 }
 

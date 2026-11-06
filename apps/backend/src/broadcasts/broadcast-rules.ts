@@ -47,10 +47,28 @@ export function isReconnectCooldownActive(lastConnectedAt: Date | null, now: Dat
   return now.getTime() - lastConnectedAt.getTime() < BROADCAST_LIMITS.reconnectCooldownMs;
 }
 
-export const OPT_OUT_FOOTER = "\n\nPour ne plus recevoir nos messages, répondez STOP.";
+/**
+ * Mention de désinscription ajoutée à chaque message groupé. Plusieurs formulations équivalentes, tirées au hasard :
+ * la même phrase envoyée mot pour mot à des dizaines de numéros est un motif connu de détection de masse.
+ * Toutes se terminent par « répondez STOP. » : le mot reconnu par l'opt-out (voir ai/opt-out.ts) reste identique.
+ */
+export const OPT_OUT_FOOTERS = [
+  "Pour ne plus recevoir nos messages, répondez STOP.",
+  "Si vous ne souhaitez plus recevoir nos messages, répondez STOP.",
+  "Vous pouvez arrêter ces messages à tout moment : répondez STOP.",
+  "Pour vous désinscrire de nos messages, répondez STOP.",
+  "Pour ne plus rien recevoir de notre part, répondez STOP.",
+] as const;
 
-export function withOptOutFooter(text: string): string {
-  return `${text.trim()}${OPT_OUT_FOOTER}`;
+/** Formulation historique, conservée pour les textes déjà enregistrés et les tests. */
+export const OPT_OUT_FOOTER = `\n\n${OPT_OUT_FOOTERS[0]}`;
+
+export function pickOptOutFooter(random: () => number = Math.random): string {
+  return OPT_OUT_FOOTERS[Math.min(OPT_OUT_FOOTERS.length - 1, Math.floor(random() * OPT_OUT_FOOTERS.length))]!;
+}
+
+export function withOptOutFooter(text: string, random: () => number = Math.random): string {
+  return `${text.trim()}\n\n${pickOptOutFooter(random)}`;
 }
 
 /** Délai aléatoire borné entre deux envois. `random` : valeur entre 0 et 1 (injectable pour les tests). */

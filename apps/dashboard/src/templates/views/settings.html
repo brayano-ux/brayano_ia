@@ -15,17 +15,17 @@
     <form id="delay-form" class="panel settings-card">
       <div class="settings-card-head">
         <h2>Délai de réponse de l'IA</h2>
-        <p class="muted">Un délai plus long rend les réponses moins robotiques et réduit le risque de restriction WhatsApp. Valeur par défaut : 3 secondes.</p>
+        <p class="muted">Un délai plus long rend les réponses moins robotiques et réduit le risque de restriction WhatsApp. Valeur par défaut : 5 secondes. L'agent attend toujours au moins le temps qu'il faudrait pour taper sa réponse, et les longues réponses partent en deux ou trois messages.</p>
       </div>
 
       <div class="delay-options" role="radiogroup" aria-label="Délai de réponse de l'IA">
         <label class="delay-option">
-          <input type="radio" name="response-delay" value="3" checked />
-          <span>3 s<small>Par défaut</small></span>
+          <input type="radio" name="response-delay" value="3" />
+          <span>3 s<small>Rapide</small></span>
         </label>
         <label class="delay-option">
-          <input type="radio" name="response-delay" value="5" />
-          <span>5 s<small>Modéré</small></span>
+          <input type="radio" name="response-delay" value="5" checked />
+          <span>5 s<small>Par défaut</small></span>
         </label>
         <label class="delay-option">
           <input type="radio" name="response-delay" value="7" />

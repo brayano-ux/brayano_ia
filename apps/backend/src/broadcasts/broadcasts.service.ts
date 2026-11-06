@@ -207,9 +207,11 @@ export async function runBroadcast(broadcastId: string, deps: BroadcastDeps): Pr
         continue;
       }
 
+      // Mention STOP tirée au hasard par destinataire ; le texte enregistré est exactement celui envoyé.
+      const outgoingText = withOptOutFooter(broadcast.text);
       let sentOk = false;
       try {
-        await deps.send(broadcast.organizationId, next.jid, withOptOutFooter(broadcast.text));
+        await deps.send(broadcast.organizationId, next.jid, outgoingText);
         sentOk = true;
       } catch (error) {
         await prisma.broadcastRecipient.update({ where: { id: next.id }, data: { status: "FAILED", error: String(error instanceof Error ? error.message : error).slice(0, 200) } });
@@ -219,7 +221,7 @@ export async function runBroadcast(broadcastId: string, deps: BroadcastDeps): Pr
       if (sentOk) {
         await prisma.broadcastRecipient.update({ where: { id: next.id }, data: { status: "SENT", sentAt: new Date() } });
         await prisma.broadcast.update({ where: { id: broadcastId }, data: { sentCount: { increment: 1 } } });
-        await recordBroadcastMessage(broadcast.organizationId, next.contactId, withOptOutFooter(broadcast.text), broadcastId);
+        await recordBroadcastMessage(broadcast.organizationId, next.contactId, outgoingText, broadcastId);
       }
 
       const remaining = await prisma.broadcastRecipient.count({ where: { broadcastId, status: "PENDING" } });
