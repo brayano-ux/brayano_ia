@@ -6,6 +6,7 @@ import nodemailer from "nodemailer";
 import { z } from "zod";
 import { prisma } from "../database/client.js";
 import { env } from "../config/env.js";
+import { DEFAULT_RESPONSE_DELAY_SECONDS } from "../ai/ai-settings.service.js";
 import { AppError } from "../shared/errors.js";
 import { burnPasswordCheck, hashPassword, needsRehash, safeEqualText, verifyPassword } from "../auth/password.js";
 import { clearRateLimit, evaluateRateLimit, isRateLimited, recordFailure } from "../auth/rate-limit.js";
@@ -142,6 +143,7 @@ async function ensureDefaultAdminOrganization(email: string) {
           organizationId: createdOrganization.id,
           agentName: env.AI_AGENT_NAME,
           systemPrompt: env.AI_SYSTEM_PROMPT,
+          responseDelaySeconds: DEFAULT_RESPONSE_DELAY_SECONDS,
         },
       });
 
@@ -422,7 +424,7 @@ export async function authRoute(app: FastifyInstance) {
           },
         });
         await tx.aiSettings.create({
-          data: { organizationId: createdOrganization.id, agentName: env.AI_AGENT_NAME, systemPrompt: env.AI_SYSTEM_PROMPT },
+          data: { organizationId: createdOrganization.id, agentName: env.AI_AGENT_NAME, systemPrompt: env.AI_SYSTEM_PROMPT, responseDelaySeconds: DEFAULT_RESPONSE_DELAY_SECONDS },
         });
         await tx.signupVerification.delete({ where: { email } });
         return { organization: createdOrganization, user: createdUser };
