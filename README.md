@@ -35,10 +35,22 @@ python -m http.server 4173 --directory apps/dashboard
 ```
 Puis ouvrir `http://localhost:4173/` (page d'accueil) ou `http://localhost:4173/app/` (tableau de bord). Le dashboard utilise l'API `http://localhost:3000` par défaut ; cette URL peut être remplacée avec `localStorage.setItem("brayano_api", "http://...")`.
 
+## Intégration continue
+
+`.github/workflows/ci.yml` tourne sur chaque pull request et chaque push vers `main` : compilation TypeScript, vérification que le client Prisma versionné est à jour, tests unitaires, puis tests d'intégration contre un PostgreSQL éphémère. Pour que les fusions soient réellement bloquées en cas d'échec, activer la protection de la branche `main` sur GitHub (Settings → Branches → « Require status checks to pass before merging ») et exiger les deux jobs « Backend · compilation et tests unitaires » et « Backend · tests d'intégration (PostgreSQL) ».
+
+En local :
+```bash
+cd apps/backend
+npm test                                   # tests unitaires (variables minimales dans .env)
+INTEGRATION_DB=1 DATABASE_URL=postgresql://.../base_de_test npm test   # avec une base de TEST vide
+```
+
 ## Livraison Render
 
 - Le service backend doit conserver le disque persistant monté sur `/data`.
 - `WHATSAPP_AUTH_DIR` doit rester égal à `/data/wa-session`.
 - Ne jamais utiliser l'action dashboard **Déconnecter ce numéro** pour une simple déconnexion de l'application : cette action supprime volontairement la session WhatsApp.
 - Avant un déploiement, vérifier que la base Render contient les colonnes du schéma actuel, notamment `qualification_fields` dans `ai_settings`.
+- Les forfaits sont appliqués en production (`BILLING_ENFORCED=true` dans `render.yaml`) : après les 100 messages d'essai, l'assistant se tait jusqu'au paiement d'un forfait via Chariow. Les variables `CHARIOW_API_KEY`, `CHARIOW_PULSE_SECRET` et `CLIENT_DASHBOARD_URL` doivent être renseignées dans Render, et le Pulse `successful.sale` de Chariow doit viser `https://<backend>/billing/chariow/pulse`. Donner un forfait aux clients existants sans abonnement (`POST /admin/organizations/:id/subscription`), sinon leur assistant est coupé.
 - L'historique Prisma de ce dépôt contient des migrations créées sur plusieurs environnements. Ne pas lancer `prisma migrate reset` en production. Vérifier `prisma migrate status` et appliquer uniquement les migrations validées sur la base Render.

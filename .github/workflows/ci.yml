@@ -1,0 +1,104 @@
+# Intégration continue : lancée sur chaque pull request et sur chaque push vers main.
+# Pour qu'elle bloque réellement les fusions, activer la protection de la branche main sur GitHub
+# (Settings → Branches → Branch protection rules → « Require status checks to pass before merging »)
+# et cocher les deux jobs ci-dessous.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Valeurs factices : les tests unitaires n'appellent ni l'IA, ni WhatsApp, ni la base.
+env:
+  NODE_ENV: test
+  APP_URL: http://localhost:3000
+  GEMINI_API_KEY: ci-fake-key
+  MEDIA_SIGNING_SECRET: ci-fake-media-signing-secret
+  BACKGROUND_JOBS: "false"
+
+jobs:
+  backend-unit:
+    name: Backend · compilation et tests unitaires
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: apps/backend
+    env:
+      # Jamais utilisée par les tests unitaires : seulement requise par le chargeur de configuration et par « prisma generate ».
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/backend/package-lock.json
+
+      - name: Installer les dépendances
+        run: npm ci --no-audit --no-fund
+
+      - name: Générer le client Prisma
+        run: npx prisma generate
+
+      - name: Vérifier que le client Prisma versionné est à jour
+        run: git diff --exit-code -- src/generated
+
+      - name: Compiler (TypeScript)
+        run: npm run build
+
+      - name: Tests unitaires
+        run: npm test
+
+  backend-integration:
+    name: Backend · tests d'intégration (PostgreSQL)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: apps/backend
+    services:
+      postgres:
+        # Même image que docker-compose.yml.
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: brayano_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci -d brayano_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/brayano_test
+      INTEGRATION_DB: "1"
+      WHATSAPP_AUTH_DIR: ${{ github.workspace }}/.ci-data/wa-session
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/backend/package-lock.json
+
+      - name: Installer les dépendances
+        run: npm ci --no-audit --no-fund
+
+      - name: Générer le client Prisma
+        run: npx prisma generate
+
+      - name: Créer le schéma dans la base de test
+        run: npx prisma db push
+
+      - name: Tests unitaires et d'intégration
+        run: npm test
