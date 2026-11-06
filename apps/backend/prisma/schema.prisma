@@ -55,7 +55,7 @@ model AiSettings {
   welcomeMessage       String?  @map("welcome_message")
   qualificationFields  Json?    @map("qualification_fields")
   aiEnabled            Boolean  @default(true) @map("ai_enabled")
-  responseDelaySeconds Int      @default(3) @map("response_delay_seconds")
+  responseDelaySeconds Int      @default(5) @map("response_delay_seconds")
   businessHoursEnabled Boolean  @default(false) @map("business_hours_enabled")
   businessHours        Json?    @map("business_hours")
   businessTimezone     String   @default("Africa/Douala") @map("business_timezone")

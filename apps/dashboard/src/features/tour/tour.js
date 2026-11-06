@@ -249,6 +249,9 @@ export function runTour(view) {
 
 /** Appelé à chaque changement d'onglet : lance le guide une seule fois par appareil. */
 export function maybeStartViewTour(view) {
+  // Un guide encore ouvert sur un autre onglet n'a plus de sens ici : ses repères pointeraient sur des éléments
+  // qui ne sont plus affichés. On le ferme plutôt que de laisser un cadre orphelin sur la nouvelle page.
+  if (active && active.view !== view) skip();
   if (!VIEW_TOURS[view] || hasSeen(view) || active || pending.has(view)) return;
   pending.add(view);
   window.setTimeout(() => {
