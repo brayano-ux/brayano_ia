@@ -19,6 +19,7 @@ import { handleChariowReturn, initBilling, loadBilling, refreshBillingBanner } f
 import { initTeamSettings, loadTeam } from "./features/settings/team-settings.js";
 import { initIgnoredContacts, loadIgnoredContacts } from "./features/settings/ignored-contacts.js";
 import { checkFirstLoginPersona, initPersonaPicker } from "./features/persona/persona.js";
+import { maybeStartViewTour } from "./features/tour/tour.js";
 import { loadRole } from "./features/navigation/roles.js";
 import { initConfigAssistant } from "./features/config-assistant/config-assistant.js";
 import { readSession } from "./services/storage.js";
@@ -74,6 +75,10 @@ async function onAuthenticated() {
       window.history.replaceState({}, "", window.location.pathname);
       setView("billing", viewLoaders);
       void handleChariowReturn();
+    } else {
+      // setView("overview", ...) n'a tourné qu'avant la connexion (écran masqué) : le guide de
+      // cet onglet n'a donc encore jamais eu l'occasion de se déclencher.
+      maybeStartViewTour("overview");
     }
   } catch (error) {
     showToast(isNetworkError(error) ? "API inaccessible. Réessayez plus tard." : error.message, "error");

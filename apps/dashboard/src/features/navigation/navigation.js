@@ -2,6 +2,7 @@ import { $, $$ } from "../../utils/dom.js";
 import { formatClock, formatFullDate } from "../../utils/format.js";
 import { getState } from "../../state/store.js";
 import { APP_CONFIG } from "../../config.js";
+import { maybeStartViewTour } from "../tour/tour.js";
 
 /** Garde-fous « modifications non enregistrées » : vue → () => true si on peut quitter la vue. */
 const leaveGuards = new Map();
@@ -41,6 +42,8 @@ export function setView(view, onViewShown = {}) {
   $("#tab-more")?.classList.toggle("active", !$(".tab-item[data-view].active"));
   window.scrollTo({ top: 0 });
   onViewShown[view]?.();
+  // Pas de guide avant la connexion : setView("overview", ...) est aussi appelé au tout premier chargement, écran de connexion encore affiché.
+  if (!$(".app-shell")?.classList.contains("hidden")) maybeStartViewTour(view);
   return true;
 }
 

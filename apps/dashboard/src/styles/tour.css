@@ -1,0 +1,83 @@
+/* ============================================================
+   GUIDE PAS À PAS — curseur simulé façon tutoriel de jeu vidéo
+============================================================ */
+.tour-root { position: fixed; inset: 0; z-index: 260; }
+
+.tour-dim { position: fixed; inset: 0; background: rgba(10, 12, 24, 0.5); animation: tour-fade 0.2s var(--ease); }
+.tour-dim.hidden { display: none; }
+
+.tour-spotlight {
+  position: fixed;
+  border-radius: var(--radius-md);
+  box-shadow: 0 0 0 9999px rgba(10, 12, 24, 0.5);
+  outline: 2px solid var(--brand-500);
+  outline-offset: 2px;
+  pointer-events: none;
+  transition: left 0.5s var(--ease), top 0.5s var(--ease), width 0.5s var(--ease), height 0.5s var(--ease);
+}
+.tour-spotlight.hidden { display: none; }
+
+.tour-cursor {
+  position: fixed;
+  width: 30px;
+  height: 30px;
+  margin: -4px 0 0 -4px;
+  color: #fff;
+  filter: drop-shadow(0 4px 10px rgba(10, 12, 24, 0.45));
+  pointer-events: none;
+  transition: left 0.5s var(--ease), top 0.5s var(--ease);
+  z-index: 2;
+}
+.tour-cursor.hidden { display: none; }
+.tour-cursor svg { width: 100%; height: 100%; transform: rotate(-12deg); }
+.tour-cursor::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--brand-500);
+  opacity: 0;
+}
+.tour-cursor.clicking::after { animation: tour-click 0.6s var(--ease); }
+
+.tour-tooltip {
+  position: fixed;
+  width: min(320px, calc(100vw - 32px));
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.2s var(--ease), transform 0.2s var(--ease);
+  pointer-events: none;
+}
+.tour-tooltip.visible { opacity: 1; transform: none; pointer-events: auto; }
+.tour-step-count { margin: 0; font-size: var(--text-xs); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--brand-600); }
+.tour-title { margin: 0; font-size: var(--text-base); font-weight: 800; }
+.tour-text { margin: 0; color: var(--muted); font-size: var(--text-sm); line-height: 1.5; }
+.tour-actions { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-top: var(--space-1); }
+
+.tour-bravo { position: fixed; inset: 0; z-index: 3; display: grid; place-items: center; padding: var(--space-4); animation: tour-fade 0.2s var(--ease); }
+.tour-bravo.hidden { display: none; }
+.tour-bravo-card { width: min(100%, 360px); display: grid; gap: var(--space-2); justify-items: center; text-align: center; padding: var(--space-8) var(--space-6); background: var(--surface); border-radius: var(--radius-xl); box-shadow: var(--shadow-lg); animation: tour-bravo-rise 0.3s var(--ease); }
+.tour-bravo-emoji { font-size: 2.5rem; line-height: 1; }
+.tour-bravo-card h3 { margin: 0; font-size: var(--text-xl); font-weight: 800; }
+.tour-bravo-card p { margin: 0 0 var(--space-2); color: var(--muted); }
+.tour-bravo-card .primary { width: 100%; }
+
+@keyframes tour-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes tour-bravo-rise { from { opacity: 0; transform: translateY(10px) scale(0.97); } to { opacity: 1; transform: none; } }
+@keyframes tour-click {
+  from { opacity: 0.55; transform: scale(0.4); }
+  to { opacity: 0; transform: scale(1.8); }
+}
+
+@media (max-width: 639px) {
+  .tour-actions { flex-direction: column-reverse; align-items: stretch; }
+}
