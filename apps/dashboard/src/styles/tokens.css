@@ -1,45 +1,52 @@
 /* ============================================================
    DESIGN TOKENS — source unique de vérité du design system.
+   Direction : SaaS professionnel (Inter, neutres froids, accent indigo,
+   bordures 1 px, ombres discrètes, coins modérés, densité maîtrisée).
    Toute nouvelle feature réutilise ces variables.
 ============================================================ */
 :root {
-  /* Marque */
-  --brand-50: #f1f0ff;
-  --brand-100: #e5e3ff;
-  --brand-200: #ccc8ff;
-  --brand-500: #5b50e8;
-  --brand-600: #4b40d6;
-  --brand-700: #3d33b5;
-  --brand-900: #1f1b5c;
+  /* Marque (indigo) */
+  --brand-50: #eef2ff;
+  --brand-100: #e0e7ff;
+  --brand-200: #c7d2fe;
+  --brand-500: #4f46e5;
+  --brand-600: #4338ca;
+  --brand-700: #3730a3;
+  --brand-900: #1e1b4b;
 
-  /* Neutres (très légèrement bleutés) */
-  --ink: #101426;
-  --ink-2: #2b3147;
-  --muted: #5d6479;
-  --subtle: #8a90a4;
-  --line: #e4e6ef;
-  --line-soft: #eef0f6;
+  /* Neutres (ardoise froide) */
+  --ink: #0f172a;
+  --ink-2: #1e293b;
+  --muted: #64748b;
+  --subtle: #94a3b8;
+  --line: #e2e8f0;
+  --line-soft: #f1f5f9;
+  --line-strong: #cbd5e1;
   --surface: #ffffff;
-  --surface-2: #f7f8fc;
-  --bg: #f3f4f9;
+  --surface-2: #f8fafc;
+  --bg: #f6f7f9;
 
   /* Sémantique */
-  --success: #0b8f63;
-  --success-bg: #e6f7f0;
-  --warning: #a35d06;
-  --warning-bg: #fff3e0;
-  --danger: #c93b3b;
-  --danger-bg: #fdeeee;
-  --info: #2563c9;
-  --info-bg: #e9f1fd;
+  --success: #047857;
+  --success-bg: #ecfdf5;
+  --success-line: #a7f3d0;
+  --warning: #b45309;
+  --warning-bg: #fffbeb;
+  --warning-line: #fde68a;
+  --danger: #b91c1c;
+  --danger-bg: #fef2f2;
+  --danger-line: #fecaca;
+  --info: #1d4ed8;
+  --info-bg: #eff6ff;
+  --info-line: #bfdbfe;
 
   /* Alias historiques (les vues existantes les utilisent encore) */
   --violet: var(--brand-500);
   --violet-dark: var(--brand-600);
   --violet-deep: var(--brand-900);
   --violet-light: var(--brand-50);
-  --violet-glow: rgba(91, 80, 232, 0.16);
-  --violet-glow-strong: rgba(91, 80, 232, 0.3);
+  --violet-glow: rgba(79, 70, 229, 0.14);
+  --violet-glow-strong: rgba(79, 70, 229, 0.28);
   --ink-light: var(--ink-2);
   --muted-light: var(--subtle);
   --line-subtle: var(--line-soft);
@@ -52,39 +59,41 @@
   --red-light: var(--danger-bg);
 
   /* Typographie */
-  --font: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --text-xs: 0.75rem;
-  --text-sm: 0.8125rem;
-  --text-base: 0.9375rem;
-  --text-lg: 1.0625rem;
-  --text-xl: 1.25rem;
-  --text-2xl: 1.625rem;
-  --text-3xl: 2rem;
+  --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-xs: 0.75rem;     /* 12 */
+  --text-sm: 0.8125rem;   /* 13 */
+  --text-base: 0.875rem;  /* 14 */
+  --text-lg: 1rem;        /* 16 */
+  --text-xl: 1.125rem;    /* 18 */
+  --text-2xl: 1.375rem;   /* 22 */
+  --text-3xl: 1.625rem;   /* 26 */
 
   /* Espacement */
   --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
   --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px;
 
   /* Formes & élévation */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
   --radius-full: 999px;
-  --shadow-xs: 0 1px 2px rgba(16, 20, 38, 0.05);
-  --shadow-sm: 0 1px 3px rgba(16, 20, 38, 0.06), 0 1px 2px rgba(16, 20, 38, 0.04);
-  --shadow-md: 0 8px 24px -8px rgba(16, 20, 38, 0.14);
-  --shadow-lg: 0 24px 56px -16px rgba(30, 24, 90, 0.25);
-  --shadow-glow: 0 1px 2px rgba(31, 27, 92, 0.2);
-  --ring: 0 0 0 3px rgba(91, 80, 232, 0.28);
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 16px -4px rgba(15, 23, 42, 0.12), 0 1px 3px rgba(15, 23, 42, 0.06);
+  --shadow-lg: 0 24px 48px -16px rgba(15, 23, 42, 0.28), 0 2px 6px rgba(15, 23, 42, 0.08);
+  --shadow-glow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 1px 2px rgba(15, 23, 42, 0.16);
+  --ring: 0 0 0 3px rgba(79, 70, 229, 0.22);
 
   /* Mise en page */
-  --sidebar-width: 264px;
-  --topbar-height: 60px;
-  --tabbar-height: 64px;
-  --content-max: 1240px;
+  --sidebar-width: 248px;
+  --topbar-height: 56px;
+  --tabbar-height: 60px;
+  --content-max: 1200px;
   --touch: 44px;
+  --control: 36px;
 
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
-  --transition: all 0.18s var(--ease);
+  --transition: all 0.16s var(--ease);
 }

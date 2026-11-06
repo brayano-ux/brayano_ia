@@ -102,3 +102,84 @@ jobs:
 
       - name: Tests unitaires et d'intégration
         run: npm test
+
+  dashboard-e2e:
+    name: Tableau de bord · parcours navigateur (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: brayano_e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci -d brayano_e2e"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/brayano_e2e
+      NODE_ENV: development
+      APP_URL: http://127.0.0.1:3000
+      CORS_ALLOWED_ORIGINS: http://127.0.0.1:4173,http://localhost:4173
+      CLIENT_DASHBOARD_URL: http://127.0.0.1:4173/app/
+      WHATSAPP_AUTH_DIR: ${{ github.workspace }}/.ci-data/wa-session
+      # Compte de démonstration : n'existe que dans cette base jetable.
+      DEFAULT_ADMIN_EMAIL: demo@brayano.test
+      DEFAULT_ADMIN_PASSWORD: DemoPassword123
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            apps/backend/package-lock.json
+            apps/dashboard/e2e/package-lock.json
+
+      - name: Installer les dépendances du backend
+        working-directory: apps/backend
+        run: npm ci --no-audit --no-fund
+
+      - name: Générer le client Prisma et créer le schéma
+        working-directory: apps/backend
+        run: |
+          npx prisma generate
+          npx prisma db push
+
+      - name: Démarrer le backend
+        working-directory: apps/backend
+        run: |
+          nohup npx tsx src/server.ts > backend.log 2>&1 &
+          for i in $(seq 1 40); do
+            if curl -sf http://127.0.0.1:3000/health > /dev/null; then echo "backend prêt"; exit 0; fi
+            sleep 1
+          done
+          echo "Le backend n'a pas démarré :"; cat backend.log; exit 1
+
+      - name: Servir le tableau de bord
+        working-directory: apps/dashboard
+        run: |
+          nohup python3 -m http.server 4173 --bind 127.0.0.1 > static.log 2>&1 &
+          sleep 1
+          curl -sf -o /dev/null http://127.0.0.1:4173/app/
+
+      - name: Installer Playwright
+        working-directory: apps/dashboard/e2e
+        run: |
+          npm ci --no-audit --no-fund
+          npx playwright install --with-deps chromium
+
+      - name: Parcours du tableau de bord
+        working-directory: apps/dashboard/e2e
+        run: npm run e2e
+
+      - name: Journal du backend en cas d'échec
+        if: failure()
+        working-directory: apps/backend
+        run: tail -n 80 backend.log || true

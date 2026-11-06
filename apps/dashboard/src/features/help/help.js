@@ -2,10 +2,13 @@ import { api } from "../../services/api.js";
 import { APP_CONFIG } from "../../config.js";
 import { getState } from "../../state/store.js";
 import { $, escapeHtml } from "../../utils/dom.js";
+import { isAgentRole } from "../navigation/roles.js";
 
 /**
- * Aide du tableau de bord : une icône WhatsApp qui ouvre une discussion avec le support, et un assistant intelligent
- * (côté serveur, avec la clé IA de la plateforme) qui connaît toute la configuration de Brayano IA.
+ * Aide du tableau de bord : un seul bouton flottant. Pour le propriétaire, il ouvre un assistant intelligent (côté
+ * serveur, avec la clé IA de la plateforme) qui connaît toute la configuration de Brayano IA ; le support WhatsApp
+ * reste accessible depuis le pied du panneau. Pour un employé (l'assistant lui est fermé), il ouvre directement
+ * la discussion WhatsApp avec le support.
  */
 
 const GREETING = "Bonjour 👋 Je suis l'assistant d'aide de Brayano IA. Je connais toute la configuration : connecter WhatsApp, régler votre agent, ajouter vos produits, les forfaits… Posez-moi votre question, je vous guide pas à pas.";
@@ -132,7 +135,7 @@ async function ask(question) {
     conversation.push({ role: "assistant", content: result.reply, openView: result.openView || null });
   } catch (error) {
     const message = error?.message || "L'assistant n'est pas disponible pour le moment.";
-    conversation.push({ role: "assistant", error: true, content: /whatsapp/i.test(message) ? message : `${message} Vous pouvez aussi nous écrire sur WhatsApp avec l'icône verte.` });
+    conversation.push({ role: "assistant", error: true, content: /whatsapp/i.test(message) ? message : `${message} Vous pouvez aussi nous écrire sur WhatsApp (lien en bas de cette fenêtre).` });
   } finally {
     busy = false;
     $("#help-send").disabled = false;
@@ -150,14 +153,18 @@ function autoGrow() {
 
 export function initHelp() {
   const refreshLinks = () => {
-    $("#help-wa").href = whatsappLink();
     $("#help-panel-wa").href = whatsappLink();
   };
   refreshLinks();
-  $("#help-wa").addEventListener("click", refreshLinks);
   $("#help-panel-wa").addEventListener("click", refreshLinks);
 
-  $("#help-toggle").onclick = () => togglePanel();
+  $("#help-toggle").onclick = () => {
+    if (isAgentRole()) {
+      window.open(whatsappLink(), "_blank", "noopener");
+      return;
+    }
+    togglePanel();
+  };
   $("#help-close").onclick = () => togglePanel(false);
   $("#help-reset").onclick = () => {
     conversation = [];

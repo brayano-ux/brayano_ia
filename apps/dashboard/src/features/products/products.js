@@ -70,6 +70,8 @@ function showImagePreview(source) {
 }
 
 function resetProductForm() {
+  const nameLabel = $("#product-image-filename");
+  if (nameLabel) nameLabel.textContent = "Aucun fichier choisi";
   $("#product-form").reset();
   $("#product-id").value = "";
   $("#product-active").checked = true;
@@ -206,6 +208,8 @@ export function initProducts() {
   $("#product-image-file").onchange = (event) => {
     const file = event.target.files?.[0];
     clearImagePreview();
+    const nameLabel = $("#product-image-filename");
+    if (nameLabel) nameLabel.textContent = file ? file.name : "Aucun fichier choisi";
     if (file) {
       previewObjectUrl = URL.createObjectURL(file);
       showImagePreview(previewObjectUrl);

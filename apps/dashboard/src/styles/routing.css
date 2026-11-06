@@ -1,18 +1,24 @@
 /* ============================================================
    PARAMÈTRES — délai de réponse + zones et responsables
 ============================================================ */
-.settings-stack { display: grid; gap: var(--space-6); }
+.settings-stack { display: grid; gap: var(--space-5); }
 .settings-card { display: grid; gap: var(--space-5); }
+/* Onglets des paramètres : un seul volet affiché à la fois (voir settings/settings-tabs.js). */
+.settings-tabs { margin-bottom: var(--space-5); }
+.settings-pane { display: grid; gap: var(--space-5); }
+.settings-pane.hidden { display: none; }
+.settings-card .form-actions { justify-content: flex-end; }
+.settings-card .form-actions .primary { flex: 0 0 auto; }
 .settings-card-head h2, .routing-head h2 { font-size: var(--text-lg); }
 .settings-card-head .muted, .routing-head .muted { margin-top: 4px; max-width: 70ch; }
 
 .delay-options { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--space-3); }
 .delay-option { position: relative; display: block; cursor: pointer; }
 .delay-option input { position: absolute; opacity: 0; pointer-events: none; }
-.delay-option span { display: grid; gap: 2px; align-content: center; justify-items: center; min-height: 76px; padding: var(--space-3); border: 1.5px solid var(--line); border-radius: var(--radius-md); background: var(--surface); font-size: var(--text-xl); font-weight: 800; letter-spacing: -0.02em; text-align: center; transition: var(--transition); }
+.delay-option span { display: grid; gap: 2px; align-content: center; justify-items: center; min-height: 72px; padding: var(--space-3); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); box-shadow: var(--shadow-xs); font-size: var(--text-xl); font-weight: 600; letter-spacing: -0.02em; text-align: center; transition: var(--transition); }
 .delay-option small { color: var(--muted); font-size: var(--text-xs); font-weight: 500; letter-spacing: 0; }
-.delay-option:hover span { border-color: #cfd3e3; background: var(--surface-2); }
-.delay-option input:checked + span { border-color: var(--brand-500); background: var(--brand-50); color: var(--brand-700); }
+.delay-option:hover span { border-color: var(--line-strong); background: var(--surface-2); }
+.delay-option input:checked + span { border-color: var(--brand-500); box-shadow: 0 0 0 1px var(--brand-500), var(--shadow-xs); background: var(--brand-50); color: var(--brand-700); }
 .delay-option input:checked + span small { color: var(--brand-700); }
 .delay-option input:focus-visible + span { box-shadow: var(--ring); }
 
@@ -25,7 +31,7 @@
 .form-actions .primary { flex: 1 1 auto; }
 .routing-list-panel { display: grid; gap: var(--space-4); }
 #routing-locations-list { display: grid; gap: var(--space-3); }
-.routing-item { display: grid; gap: var(--space-3); padding: var(--space-4); border: 1px solid var(--line-soft); border-radius: var(--radius-md); background: var(--surface-2); }
+.routing-item { display: grid; gap: var(--space-3); padding: var(--space-4); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface-2); }
 .routing-item > div { display: flex; align-items: baseline; gap: var(--space-2); flex-wrap: wrap; }
 .routing-item small { color: var(--muted); font-size: var(--text-xs); }
 .routing-item ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-1); font-size: var(--text-sm); color: var(--muted); }
@@ -37,7 +43,7 @@
 
 /* ----- Équipe ----- */
 .team-list { display: grid; gap: var(--space-2); }
-.team-member { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; padding: var(--space-3) var(--space-4); border: 1px solid var(--line-soft); border-radius: var(--radius-md); background: var(--surface-2); }
+.team-member { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; padding: var(--space-3) var(--space-4); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); }
 .team-member > div:first-child { display: grid; gap: 2px; flex: 1; min-width: 200px; }
 .team-member.is-off { opacity: 0.7; }
 .team-actions { display: flex; flex-wrap: wrap; gap: var(--space-1); }
@@ -47,7 +53,7 @@
 
 /* ----- Contacts à ignorer ----- */
 .ignored-contacts-list { display: grid; gap: var(--space-2); }
-.ignored-contact-row { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; padding: var(--space-3) var(--space-4); border: 1px solid var(--line-soft); border-radius: var(--radius-md); background: var(--surface-2); }
+.ignored-contact-row { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; padding: var(--space-3) var(--space-4); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); }
 .ignored-contact-row > div:first-child { display: grid; gap: 2px; flex: 1; min-width: 200px; }
 .ignored-contact-form { display: grid; gap: var(--space-3); padding-top: var(--space-4); border-top: 1px solid var(--line-soft); }
 .ignored-contact-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }

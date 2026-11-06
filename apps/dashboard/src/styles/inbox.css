@@ -16,7 +16,7 @@
 .detail-back { display: none; }
 
 .conversation-thread { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-5); background: var(--surface-2); }
-.thread-bubble { display: grid; gap: 4px; max-width: min(78%, 560px); padding: 10px 14px; border-radius: 16px; font-size: var(--text-sm); line-height: 1.5; word-break: break-word; box-shadow: var(--shadow-xs); }
+.thread-bubble { display: grid; gap: 4px; max-width: min(78%, 560px); padding: 9px 13px; border-radius: 12px; font-size: var(--text-sm); line-height: 1.5; word-break: break-word; box-shadow: var(--shadow-xs); }
 .thread-bubble span { white-space: pre-wrap; }
 .thread-bubble time { font-size: 0.6875rem; opacity: 0.65; justify-self: end; }
 .thread-bubble.from-contact { align-self: flex-start; background: var(--surface); border: 1px solid var(--line); border-bottom-left-radius: 4px; }
@@ -41,11 +41,11 @@
 /* ----- Étiquettes de suivi et filtres ----- */
 .inbox-search { max-width: 190px; min-height: 36px; padding: 0 12px; font-size: var(--text-sm); }
 .stage-filters { display: flex; flex-wrap: wrap; gap: var(--space-2); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--line-soft); }
-.stage-filter { flex: none; min-height: 30px; padding: 0 12px; border: 1px solid var(--line); border-radius: var(--radius-full); background: var(--surface); font-size: var(--text-xs); font-weight: 600; color: var(--ink-2); white-space: nowrap; transition: var(--transition); }
+.stage-filter { flex: none; min-height: 28px; padding: 0 11px; border: 1px solid var(--line); border-radius: var(--radius-full); background: var(--surface); font-size: var(--text-xs); font-weight: 500; color: var(--ink-2); white-space: nowrap; transition: var(--transition); }
 .stage-filter b { margin-left: 4px; color: var(--subtle); font-weight: 700; }
 .stage-filter:hover { background: var(--surface-2); }
-.stage-filter.active { background: var(--brand-500); border-color: var(--brand-500); color: #fff; }
-.stage-filter.active b { color: rgba(255, 255, 255, 0.8); }
+.stage-filter.active { background: var(--ink); border-color: var(--ink); color: #fff; font-weight: 600; }
+.stage-filter.active b { color: rgba(255, 255, 255, 0.75); }
 
 .conversation-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
 .stage-chip { padding: 2px 8px; border-radius: var(--radius-full); font-size: 0.6875rem; font-weight: 700; background: var(--line-soft); color: var(--muted); }

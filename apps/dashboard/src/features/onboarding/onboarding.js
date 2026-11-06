@@ -40,10 +40,6 @@ function render(status) {
   toggle.textContent = expanded ? "Réduire" : "Voir les étapes";
   toggle.setAttribute("aria-expanded", String(expanded));
   $("#onboarding-body").classList.toggle("hidden", !expanded);
-  const primary = $("#onboarding-next");
-  primary.classList.toggle("hidden", complete);
-  primary.textContent = next?.action || "";
-  primary.dataset.onboardingAction = next?.id || "";
   $("#onboarding-steps").innerHTML = steps.map((step, index) => `<li class="onboarding-step${step.done ? " done" : ""}${next?.id === step.id ? " next" : ""}">
     <span class="onboarding-number" aria-hidden="true">${step.done ? "✓" : index + 1}</span>
     <div><h3>${escapeHtml(step.title)}</h3><p>${escapeHtml(step.description)}</p><span class="onboarding-state">${step.done ? "Validée" : next?.id === step.id ? "Prochaine étape" : "À faire"}</span></div>
@@ -55,6 +51,9 @@ function render(status) {
   $("#onboarding-error").classList.add("hidden");
   panel.classList.remove("hidden");
   updateBanner(status);
+  // Tant que le guide est affiché et incomplet, la bannière répéterait l'étape en cours (« Connectez WhatsApp… ») :
+  // on ne la montre que si elle dit quelque chose de plus (agent en pause ou suspendu), ou une fois le démarrage terminé.
+  $(".status-banner")?.classList.toggle("hidden", !(complete || status.suspended || !status.aiEnabled));
 }
 
 export async function refreshOnboarding() {

@@ -1,6 +1,7 @@
 import { api } from "../../services/api.js";
 import { $, showToast } from "../../utils/dom.js";
 import { getState } from "../../state/store.js";
+import { setSystemStatus } from "../navigation/system-status.js";
 import { populateCountrySelect, readPhoneField, setPhoneFieldFromDigits } from "../../utils/phone-field.js";
 
 /**
@@ -47,6 +48,7 @@ export async function loadWhatsApp({ silent = false } = {}) {
     const info = await api(`/organizations/${orgId}/whatsapp/status`);
     const { status } = info;
     const connected = status === "CONNECTED";
+    setSystemStatus(status);
     renderNumberInfo(info);
     let pairingCode = null;
 

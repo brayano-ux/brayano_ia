@@ -1,0 +1,11 @@
+{
+  "name": "brayano-dashboard-e2e",
+  "private": true,
+  "description": "Test de parcours du tableau de bord (connexion, navigation, onglets) : lancé par la CI contre un backend local.",
+  "scripts": {
+    "e2e": "node smoke.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}

@@ -27,7 +27,7 @@ Voir `apps/backend/README.md` pour le flux complet (créer une entreprise → co
 Node.js, TypeScript, Fastify, Baileys (WhatsApp non officiel, multi-compte), PostgreSQL + Prisma 7, Google Gemini (`@google/genai`), dashboard HTML/CSS/JavaScript statique.
 
 ## Dashboard
-Une interface web statique est disponible dans `apps/dashboard/`. Elle permet de piloter une entreprise, consulter les conversations, reprendre la main sur un échange, configurer l'agent IA et connecter WhatsApp.
+Une interface web statique est disponible dans `apps/dashboard/` (HTML, CSS et JavaScript natifs, sans compilation ; design system dans `src/styles/tokens.css`). Elle permet de piloter une entreprise, consulter les conversations, reprendre la main sur un échange, configurer l'agent IA et connecter WhatsApp. C'est la seule interface : l'ancienne ébauche React a été retirée.
 
 Pour la prévisualiser pendant que le backend tourne sur le port 3000 :
 ```bash
@@ -37,13 +37,14 @@ Puis ouvrir `http://localhost:4173/` (page d'accueil) ou `http://localhost:4173/
 
 ## Intégration continue
 
-`.github/workflows/ci.yml` tourne sur chaque pull request et chaque push vers `main` : compilation TypeScript, vérification que le client Prisma versionné est à jour, tests unitaires, puis tests d'intégration contre un PostgreSQL éphémère. Pour que les fusions soient réellement bloquées en cas d'échec, activer la protection de la branche `main` sur GitHub (Settings → Branches → « Require status checks to pass before merging ») et exiger les deux jobs « Backend · compilation et tests unitaires » et « Backend · tests d'intégration (PostgreSQL) ».
+`.github/workflows/ci.yml` tourne sur chaque pull request et chaque push vers `main` : compilation TypeScript, vérification que le client Prisma versionné est à jour, tests unitaires, tests d'intégration contre un PostgreSQL éphémère, puis un parcours navigateur du tableau de bord (Playwright : connexion, chaque onglet, onglets des paramètres, mobile) contre un backend lancé dans la CI. Pour que les fusions soient réellement bloquées en cas d'échec, activer la protection de la branche `main` sur GitHub (Settings → Branches → « Require status checks to pass before merging ») et exiger les trois jobs « Backend · compilation et tests unitaires », « Backend · tests d'intégration (PostgreSQL) » et « Tableau de bord · parcours navigateur (Playwright) ».
 
 En local :
 ```bash
 cd apps/backend
 npm test                                   # tests unitaires (variables minimales dans .env)
 INTEGRATION_DB=1 DATABASE_URL=postgresql://.../base_de_test npm test   # avec une base de TEST vide
+cd ../dashboard/e2e && npm ci && npm run e2e   # backend sur :3000 (DEFAULT_ADMIN_EMAIL/PASSWORD) et dashboard servi sur :4173
 ```
 
 ## Livraison Render

@@ -18,11 +18,18 @@
           <img id="product-image-preview" class="hidden" alt="Aperçu du produit" />
           <span id="product-image-empty">Aucune photo sélectionnée</span>
         </div>
-        <label class="product-photo-field">
+        <div class="product-photo-field">
           <span class="field-label">Photo du produit</span>
-          <input id="product-image-file" type="file" accept="image/jpeg,image/png,image/webp" />
-          <span class="field-hint">JPEG, PNG ou WebP. L’agent la partage avec le client.</span>
-        </label>
+          <div class="file-control">
+            <label class="ghost-button" for="product-image-file">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg>
+              Choisir une photo
+            </label>
+            <input id="product-image-file" type="file" accept="image/jpeg,image/png,image/webp" />
+            <span id="product-image-filename" class="file-control-name">Aucun fichier choisi</span>
+          </div>
+          <span class="field-hint">JPEG, PNG ou WebP, 5 Mo maximum. L’agent la partage avec le client.</span>
+        </div>
       </div>
 
       <label>
