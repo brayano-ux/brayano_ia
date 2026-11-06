@@ -4,8 +4,11 @@ import { getState } from "../../state/store.js";
 import { isAgentRole } from "../navigation/roles.js";
 
 /**
- * Fenêtre affichée une seule fois, à la première connexion du propriétaire : elle compose le
- * système-prompt de l'agent à partir d'un domaine, d'un rôle et d'un ton choisis parmi des cartes.
+ * Guide de démarrage affiché une seule fois, à la première connexion du propriétaire, en trois
+ * étapes : personnalité de l'agent (domaine, rôle, ton choisis parmi des cartes), informations sur
+ * l'activité (saisies à la main ou structurées par l'IA à partir d'un texte collé), puis invitation
+ * à connecter WhatsApp. Chaque étape peut être passée ; rien n'est perdu, le reste se termine
+ * ensuite depuis le panneau de progression ou « Agent IA ».
  */
 
 const DOMAINS = [
@@ -31,9 +34,15 @@ const TONES = [
   { key: "decontracte", emoji: "😎", label: "Décontracté", blurb: "Naturel, comme une discussion WhatsApp.", suffix: "Adopte un ton décontracté et naturel, comme une conversation WhatsApp entre connaissances, tout en restant respectueux ; tu peux tutoyer si le client tutoie en premier." },
 ];
 
+const STEPS = ["persona", "business", "whatsapp"];
+const MIN_SOURCE_LENGTH = 20;
+
 let selectedDomain = null;
 let selectedRole = null;
 let selectedTone = null;
+let currentStep = "persona";
+let businessInfoDraft = "";
+let goToWhatsApp = () => {};
 
 function cardMarkup(item, selectedKey) {
   const selected = item.key === selectedKey;
@@ -45,74 +54,174 @@ function cardMarkup(item, selectedKey) {
     </button>`;
 }
 
-function render() {
+function renderPersonaCards() {
   $("#persona-domains").innerHTML = DOMAINS.map((domain) => cardMarkup(domain, selectedDomain?.key)).join("");
   $("#persona-roles").innerHTML = ROLES.map((role) => cardMarkup(role, selectedRole?.key)).join("");
   $("#persona-tones").innerHTML = TONES.map((tone) => cardMarkup(tone, selectedTone?.key)).join("");
-  $("#persona-confirm").disabled = !(selectedDomain && selectedRole && selectedTone);
+}
+
+const STEP_COPY = {
+  persona: {
+    title: "Donnez une personnalité à votre agent",
+    subtitle: "Choisissez son domaine, son rôle et son ton : il s'exprimera ainsi dès maintenant avec vos clients. Vous pourrez toujours l'ajuster plus tard dans « Agent IA ».",
+    next: "Suivant",
+  },
+  business: {
+    title: "Parlez-lui de votre activité",
+    subtitle: "Plus votre agent en sait sur votre activité, mieux il répond à vos clients.",
+    next: "Suivant",
+  },
+  whatsapp: {
+    title: "Votre agent est configuré",
+    subtitle: "Il ne reste plus qu'une étape avant qu'il commence à répondre à vos clients.",
+    next: "Connecter WhatsApp maintenant",
+  },
+};
+
+function renderStep() {
+  const index = STEPS.indexOf(currentStep);
+  $("#persona-step-indicator").textContent = `Étape ${index + 1} sur ${STEPS.length}`;
+  // La dernière étape porte déjà son propre titre dans « .persona-final » : l'en-tête générique
+  // ne doit pas répéter le même message juste au-dessus.
+  $(".persona-head").classList.toggle("hidden", currentStep === "whatsapp");
+  const copy = STEP_COPY[currentStep];
+  if (currentStep !== "whatsapp") {
+    $("#persona-title").textContent = copy.title;
+    $("#persona-subtitle").textContent = copy.subtitle;
+  }
+  STEPS.forEach((step) => $(`#persona-step-${step}`).classList.toggle("hidden", step !== currentStep));
+
+  const next = $("#persona-next");
+  next.textContent = copy.next;
+  next.disabled = currentStep === "persona" && !(selectedDomain && selectedRole && selectedTone);
+
+  const skipButton = $("#persona-skip");
+  skipButton.textContent = currentStep === "whatsapp" ? "Plus tard, depuis le tableau de bord" : "Configurer plus tard";
 }
 
 function close() {
   $("#persona-modal").classList.add("hidden");
 }
 
-async function confirm() {
-  if (!selectedDomain || !selectedRole || !selectedTone) return;
-  const button = $("#persona-confirm");
+function buildSystemPrompt() {
+  return `${selectedDomain.context} ${selectedRole.prompt} ${selectedTone.suffix}`;
+}
+
+async function savePersonaAndBusiness() {
+  await api(`/organizations/${getState().organizationId}/ai-settings`, {
+    method: "PUT",
+    body: JSON.stringify({
+      agentDomain: selectedDomain.label,
+      agentRole: selectedRole.label,
+      agentTone: selectedTone.label,
+      systemPrompt: buildSystemPrompt(),
+      ...(businessInfoDraft.trim() ? { businessInfo: businessInfoDraft.trim() } : {}),
+    }),
+  });
+}
+
+async function analyzeBusinessText() {
+  const text = $("#persona-business-text").value.trim();
+  if (text.length < MIN_SOURCE_LENGTH) {
+    showToast(`Collez un texte plus long (${MIN_SOURCE_LENGTH} caractères minimum).`, "error");
+    return;
+  }
+  const button = $("#persona-business-analyze");
+  const status = $("#persona-business-status");
+  const missing = $("#persona-business-missing");
   button.disabled = true;
-  button.textContent = "Application…";
+  status.textContent = "Analyse en cours… (jusqu'à 30 secondes)";
+  missing.classList.add("hidden");
   try {
-    const systemPrompt = `${selectedDomain.context} ${selectedRole.prompt} ${selectedTone.suffix}`;
-    await api(`/organizations/${getState().organizationId}/ai-settings`, {
-      method: "PUT",
-      body: JSON.stringify({ agentDomain: selectedDomain.label, agentRole: selectedRole.label, agentTone: selectedTone.label, systemPrompt }),
+    const { analysis } = await api(`/organizations/${getState().organizationId}/config-assistant/analyze`, {
+      method: "POST",
+      body: JSON.stringify({ kind: "text", text }),
     });
-    close();
-    showToast("Votre agent est configuré. Vous pouvez l'ajuster à tout moment dans « Agent IA ».", "success");
+    if (analysis?.businessInfo) $("#persona-business-text").value = analysis.businessInfo;
+    if (analysis?.missing?.length) {
+      missing.innerHTML = `<strong>Non trouvé dans votre texte — à compléter vous-même :</strong> ${analysis.missing.map((label) => `<span class="ca-chip">${escapeHtml(label)}</span>`).join("")}`;
+      missing.classList.remove("hidden");
+    }
+    status.textContent = "";
   } catch (error) {
+    status.textContent = "";
+    showToast(error.message || "L'analyse a échoué.", "error");
+  } finally {
     button.disabled = false;
-    button.textContent = "Appliquer et continuer";
-    showToast(error.message || "Impossible d'enregistrer pour le moment.", "error");
   }
 }
 
-async function skip() {
-  close();
-  try {
-    await api(`/organizations/${getState().organizationId}/ai-settings/persona-seen`, { method: "POST" });
-  } catch {
-    // Pas grave : on retentera à la prochaine connexion si l'enregistrement échoue.
+async function goNext() {
+  const next = $("#persona-next");
+  if (currentStep === "persona") {
+    if (!(selectedDomain && selectedRole && selectedTone)) return;
+    currentStep = "business";
+    renderStep();
+    return;
   }
+  if (currentStep === "business") {
+    businessInfoDraft = $("#persona-business-text").value;
+    next.disabled = true;
+    next.textContent = "Enregistrement…";
+    try {
+      await savePersonaAndBusiness();
+      currentStep = "whatsapp";
+      renderStep();
+    } catch (error) {
+      next.disabled = false;
+      renderStep();
+      showToast(error.message || "Impossible d'enregistrer pour le moment.", "error");
+    }
+    return;
+  }
+  // currentStep === "whatsapp"
+  close();
+  goToWhatsApp();
+}
+
+async function skip() {
+  if (currentStep !== "persona" && selectedDomain && selectedRole && selectedTone) {
+    businessInfoDraft = currentStep === "business" ? $("#persona-business-text").value : businessInfoDraft;
+    try { await savePersonaAndBusiness(); } catch { /* au pire, on retentera plus tard depuis « Agent IA ». */ }
+  } else {
+    try { await api(`/organizations/${getState().organizationId}/ai-settings/persona-seen`, { method: "POST" }); } catch { /* idem */ }
+  }
+  close();
 }
 
 function selectFrom(list, key) {
   return list.find((item) => item.key === key) ?? null;
 }
 
-export function initPersonaPicker() {
+export function initPersonaPicker(onGoToWhatsApp = () => {}) {
+  goToWhatsApp = onGoToWhatsApp;
   $("#persona-domains").addEventListener("click", (event) => {
     const button = event.target.closest(".persona-option");
     if (!button) return;
     selectedDomain = selectFrom(DOMAINS, button.dataset.key);
-    render();
+    renderPersonaCards();
+    renderStep();
   });
   $("#persona-roles").addEventListener("click", (event) => {
     const button = event.target.closest(".persona-option");
     if (!button) return;
     selectedRole = selectFrom(ROLES, button.dataset.key);
-    render();
+    renderPersonaCards();
+    renderStep();
   });
   $("#persona-tones").addEventListener("click", (event) => {
     const button = event.target.closest(".persona-option");
     if (!button) return;
     selectedTone = selectFrom(TONES, button.dataset.key);
-    render();
+    renderPersonaCards();
+    renderStep();
   });
-  $("#persona-confirm").onclick = confirm;
+  $("#persona-business-analyze").onclick = analyzeBusinessText;
+  $("#persona-next").onclick = goNext;
   $("#persona-skip").onclick = skip;
 }
 
-/** Affiche le choix de personnalité une seule fois, à la toute première connexion du propriétaire. */
+/** Affiche le guide de démarrage une seule fois, à la toute première connexion du propriétaire. */
 export async function checkFirstLoginPersona() {
   if (isAgentRole() || !getState().organizationId) return;
   try {
@@ -121,7 +230,13 @@ export async function checkFirstLoginPersona() {
     selectedDomain = null;
     selectedRole = null;
     selectedTone = null;
-    render();
+    currentStep = "persona";
+    businessInfoDraft = "";
+    $("#persona-business-text").value = "";
+    $("#persona-business-status").textContent = "";
+    $("#persona-business-missing").classList.add("hidden");
+    renderPersonaCards();
+    renderStep();
     $("#persona-modal").classList.remove("hidden");
   } catch {
     // Si la vérification échoue, on ne bloque jamais l'accès au tableau de bord.

@@ -8,6 +8,11 @@
 .persona-card { width: min(100%, 760px); max-height: min(92vh, 860px); overflow-y: auto; display: grid; gap: var(--space-6); padding: var(--space-6) var(--space-8); background: var(--surface); border-radius: var(--radius-xl); box-shadow: var(--shadow-lg); animation: persona-rise 0.25s var(--ease); }
 @keyframes persona-rise { from { opacity: 0; transform: translateY(12px) scale(0.98); } to { opacity: 1; transform: none; } }
 
+.persona-step-indicator { margin: 0; font-size: var(--text-xs); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--brand-600); text-align: center; }
+
+.persona-step { display: grid; gap: var(--space-6); }
+.persona-step.hidden { display: none; }
+
 .persona-head { text-align: center; display: grid; gap: var(--space-2); justify-items: center; }
 .persona-badge { display: grid; place-items: center; width: 56px; height: 56px; border-radius: var(--radius-full); background: linear-gradient(135deg, var(--brand-500), var(--brand-700)); color: #fff; margin-bottom: var(--space-1); }
 .persona-badge .icon { width: 28px; height: 28px; }
@@ -29,6 +34,13 @@
 
 .persona-actions { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; padding-top: var(--space-2); border-top: 1px solid var(--line-soft); }
 .persona-actions .primary { flex: 1 1 auto; min-width: 220px; }
+
+#persona-business-text { width: 100%; min-height: 160px; }
+
+.persona-final { text-align: center; display: grid; gap: var(--space-2); justify-items: center; padding: var(--space-4) 0; }
+.persona-emoji-big { font-size: 2.75rem; line-height: 1; }
+.persona-final h2 { margin: 0; }
+.persona-final p { margin: 0; max-width: 48ch; }
 
 @media (max-width: 767px) {
   .persona-card { padding: var(--space-5); }

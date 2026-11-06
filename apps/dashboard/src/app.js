@@ -119,7 +119,7 @@ function bootstrap() {
   initHelp();
   initTeamSettings();
   initIgnoredContacts();
-  initPersonaPicker();
+  initPersonaPicker(() => setView("whatsapp", viewLoaders));
   initDelaySettings();
   initRoutingSettings();
   initWhatsapp();
