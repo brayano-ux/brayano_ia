@@ -6,7 +6,7 @@ import { APP_CONFIG } from "../../config.js";
 export async function loadDelaySettings() {
   try {
     const { settings } = await api(`/organizations/${getState().organizationId}/ai-settings`);
-    const delay = APP_CONFIG.responseDelayOptions.includes(settings.responseDelaySeconds) ? settings.responseDelaySeconds : 3;
+    const delay = APP_CONFIG.responseDelayOptions.includes(settings.responseDelaySeconds) ? settings.responseDelaySeconds : 5;
     const option = document.querySelector(`input[name="response-delay"][value="${delay}"]`);
     if (option) option.checked = true;
   } catch (error) {
@@ -17,7 +17,7 @@ export async function loadDelaySettings() {
 async function saveDelaySettings(event) {
   event.preventDefault();
   const selected = document.querySelector('input[name="response-delay"]:checked');
-  const responseDelaySeconds = Number(selected?.value || 3);
+  const responseDelaySeconds = Number(selected?.value || 5);
 
   try {
     await api(`/organizations/${getState().organizationId}/ai-settings`, {

@@ -23,8 +23,23 @@ import {
 const JID_NUMBER = "237655000001";
 const JID = `${JID_NUMBER}@s.whatsapp.net`;
 
-async function flushEmails() {
-  await new Promise((resolve) => setTimeout(resolve, 50));
+/**
+ * Les emails au propriétaire partent en arrière-plan (void) après une ou deux requêtes en base : on attend que le
+ * compteur se stabilise au lieu d'un délai fixe, qui dépendait de la vitesse de la machine (flaky en CI).
+ */
+async function flushEmails(quietMs = 80, maxMs = 3_000) {
+  const startedAt = Date.now();
+  let seen = hoisted.sentEmails.length;
+  let stableSince = Date.now();
+  while (Date.now() - startedAt < maxMs) {
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    if (hoisted.sentEmails.length !== seen) {
+      seen = hoisted.sentEmails.length;
+      stableSince = Date.now();
+    } else if (Date.now() - stableSince >= quietMs) {
+      return;
+    }
+  }
 }
 
 describe.skipIf(!integrationEnabled)("traitement d'un message entrant (base réelle)", () => {

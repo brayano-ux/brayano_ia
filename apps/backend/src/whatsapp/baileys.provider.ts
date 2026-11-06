@@ -367,6 +367,15 @@ export class BaileysWhatsAppProvider implements WhatsAppProvider {
     await this.socket.sendPresenceUpdate("composing", jid).catch(() => undefined);
   }
 
+  /**
+   * Coches bleues sur les messages du client avant de lui répondre. Une réponse à un message resté « non lu » est
+   * un des signes les plus simples d'un automate. Best-effort : une erreur ici n'empêche jamais la réponse.
+   */
+  async markAsRead(jid: string, messageIds: string[]): Promise<void> {
+    if (!this.socket || !messageIds.length) return;
+    await this.socket.readMessages(messageIds.map((id) => ({ remoteJid: jid, id, fromMe: false }))).catch(() => undefined);
+  }
+
   async sendImage(jid: string, imageUrl: string, caption?: string): Promise<string> {
     if (!this.socket) {
       throw new Error("Le socket WhatsApp n'est pas connecté.");

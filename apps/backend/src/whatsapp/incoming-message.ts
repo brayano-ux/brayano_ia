@@ -47,6 +47,7 @@ import {
 } from "../products/product-image-selection.js";
 import { listProductsForAssistant } from "../products/products.service.js";
 import { findProductIdForSentImage, recordSentProductImage } from "../products/sent-product-images.service.js";
+import { humanReplyDelayMs, sendInBubbles, waitWhileTyping } from "./human-pacing.js";
 import type { IncomingWhatsAppMessage, WhatsAppProvider } from "./whatsapp.types.js";
 
 export interface IncomingMessageContext {
@@ -56,25 +57,28 @@ export interface IncomingMessageContext {
   wait?: (ms: number) => Promise<void>;
 }
 
-/** ±20 % autour du délai configuré : un humain ne répond jamais exactement à la même seconde près à chaque fois. */
-export function jitteredDelayMs(delaySeconds: number, random: () => number): number {
-  const factor = 0.8 + random() * 0.4;
-  return delaySeconds * 1000 * factor;
-}
-
-/** Affiche « en train d'écrire… » dès qu'on sait qu'on va attendre, pour que le délai de réponse ressemble à une vraie frappe plutôt qu'à un silence suivi d'un message qui apparaît d'un coup. */
+/**
+ * Attend avant d'envoyer `replyText`, en affichant « en train d'écrire… » : le délai configuré par le propriétaire
+ * (avec aléatoire), allongé si le texte est long à taper, moins le temps déjà écoulé depuis la réception
+ * (appel à l'IA compris). Le délai de réponse ressemble ainsi à une vraie frappe plutôt qu'à un silence exact
+ * suivi d'un pavé qui apparaît d'un coup.
+ */
 function waitForConfiguredDelay(
   startedAt: number,
   delaySeconds: unknown,
+  replyText: string,
   instance: Pick<WhatsAppProvider, "sendTypingIndicator">,
   jid: string,
   wait?: (ms: number) => Promise<void>,
   random: () => number = Math.random,
 ) {
-  const remainingMs = jitteredDelayMs(resolveResponseDelaySeconds(delaySeconds), random) - (Date.now() - startedAt);
-  if (remainingMs <= 0) return Promise.resolve();
-  void instance.sendTypingIndicator?.(jid).catch(() => undefined);
-  return wait ? wait(remainingMs) : new Promise((resolve) => setTimeout(resolve, remainingMs));
+  const totalMs = humanReplyDelayMs({ configuredDelaySeconds: resolveResponseDelaySeconds(delaySeconds), replyText }, random);
+  return waitWhileTyping(totalMs - (Date.now() - startedAt), instance, jid, wait);
+}
+
+/** Coches bleues sur le message du client dès qu'on sait qu'on va lui répondre : un humain lit, puis écrit. Ne lève jamais. */
+function markAsRead(instance: Pick<WhatsAppProvider, "markAsRead">, jid: string, messageId: string) {
+  return instance.markAsRead?.(jid, [messageId]).catch(() => undefined) ?? Promise.resolve();
 }
 
 const ANALYZABLE_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif", "application/pdf"]);
@@ -287,7 +291,8 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
     let welcomeSent = false;
     if (welcomeDecision.welcome) {
       const welcomeText = welcomeDecision.welcome;
-      if (welcomeDecision.welcomeOnly) await waitForConfiguredDelay(replyStartedAt, settings.responseDelaySeconds, instance, message.fromJid, context.wait);
+      await markAsRead(instance, message.fromJid, message.externalId);
+      if (welcomeDecision.welcomeOnly) await waitForConfiguredDelay(replyStartedAt, settings.responseDelaySeconds, welcomeText, instance, message.fromJid, context.wait);
       welcomeSent = await withConversationSendLock(conversation.id, async () => {
         const stillFirst = (await prisma.message.count({ where: { conversationId: conversation.id, direction: "OUTBOUND" } })) === 0;
         if (!stillFirst || !await isConversationUpdateStillCurrent(conversation.id, conversation.updatedAt)) return false;
@@ -311,6 +316,8 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
     }
     reservation = entitlement;
     if (entitlement.source === "trial") void notifyTrialLowCredits(organizationId, entitlement.remaining);
+    // On va répondre : le message passe en « lu » tout de suite, la réponse arrive après le délai de frappe.
+    if (!welcomeSent) await markAsRead(instance, message.fromJid, message.externalId);
 
     const products = await listProductsForAssistant(organizationId);
     // L'agenda est optionnel : toute erreur ici ne doit jamais empêcher la réponse.
@@ -511,7 +518,7 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
       });
     }
 
-    await waitForConfiguredDelay(replyStartedAt, settings.responseDelaySeconds, instance, message.fromJid, context.wait);
+    await waitForConfiguredDelay(replyStartedAt, settings.responseDelaySeconds, aiReply.reply, instance, message.fromJid, context.wait);
 
     // Photos demandées par le client : produits du catalogue uniquement (jamais une URL inventée par le modèle).
     // Une photo REÇUE du client ([Photo reçue]) n'est pas une demande de photo.
@@ -572,8 +579,11 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
       // et on prévient honnêtement le client si une photo manque.
       let imagesFailed = 0;
       const sentProductNames: string[] = [];
+      // Une longue réponse part en deux ou trois bulles, comme une personne qui écrit depuis son téléphone
+      // (voir human-pacing.ts). Le journal garde le texte complet en un seul message.
+      let bubbles = 1;
       if (photoProducts.length) {
-        await instance.sendMessage(message.fromJid, textToSend);
+        bubbles = await sendInBubbles(instance, message.fromJid, textToSend, { wait: context.wait });
         const failedNames: string[] = [];
         for (const product of photoProducts) {
           try {
@@ -592,7 +602,7 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
           await instance.sendMessage(message.fromJid, describeUnsentPhotos(failedNames));
         }
       } else {
-        await instance.sendMessage(message.fromJid, textToSend);
+        bubbles = await sendInBubbles(instance, message.fromJid, textToSend, { wait: context.wait });
       }
 
       // Le client demande où se trouve la boutique / comment y aller : on envoie le point GPS configuré par le propriétaire.
@@ -621,6 +631,7 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
           ...(sentProductNames.length ? { productNames: sentProductNames } : {}),
           imageSent: Boolean(photoProducts.length),
           photosSent: photoProducts.length - imagesFailed,
+          ...(bubbles > 1 ? { bubbles } : {}),
           ...(imagesFailed ? { imagesFailed } : {}),
           ...(locationRequested ? { locationSent } : {}),
           actions,
