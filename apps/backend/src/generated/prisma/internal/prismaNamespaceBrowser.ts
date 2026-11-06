@@ -234,6 +234,7 @@ export const BillingSubscriptionScalarFieldEnum = {
   status: 'status',
   startedAt: 'startedAt',
   expiresAt: 'expiresAt',
+  expiringNoticeSentAt: 'expiringNoticeSentAt',
   updatedAt: 'updatedAt'
 } as const
 

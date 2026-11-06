@@ -79,6 +79,8 @@ async function reconcilePayment(payment: {
           status: "ACTIVE",
           ...(!isEarlyRenewal ? { periodStartedAt: now, messagesUsed: 0 } : {}),
           expiresAt,
+          // Nouvelle échéance : l'avis « bientôt terminé » pourra être renvoyé pour ce prochain cycle.
+          expiringNoticeSentAt: null,
         },
       });
     });

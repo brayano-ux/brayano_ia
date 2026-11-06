@@ -10,8 +10,8 @@ import { prisma } from "../database/client.js";
 import { PlanLimitError } from "../shared/errors.js";
 import { createTestOrganization, disconnectTestDatabase, integrationEnabled, resetDatabase } from "../test-support/integration.js";
 import {
-  assertCanAddTeamMember, assertFeature, getOrganizationBillingStatus, getOrganizationFeatures, notifyQuotaReached,
-  releaseAiResponse, reserveAiResponse, setBillingEnforcedForTests,
+  assertCanAddTeamMember, assertFeature, checkExpiringSubscriptions, getOrganizationBillingStatus, getOrganizationFeatures,
+  notifyQuotaReached, notifyTrialLowCredits, releaseAiResponse, reserveAiResponse, setBillingEnforcedForTests,
 } from "./subscription.service.js";
 
 const DAY = 24 * 3600_000;
@@ -165,6 +165,43 @@ describe.skipIf(!integrationEnabled)("forfaits et messages de l'assistant (base 
       expect(await notifyQuotaReached(id, "trial_exhausted", new Date(now.getTime() + 25 * 3600_000))).toBe(true);
       await new Promise((resolve) => setTimeout(resolve, 20));
       expect(notices.calls).toHaveLength(2);
+    });
+  });
+
+  describe("avis quand l'essai gratuit touche à sa fin", () => {
+    it("prévient une seule fois, sous le seuil, jamais à zéro ni loin du seuil", async () => {
+      const id = await org({ credits: 20 });
+      expect(await notifyTrialLowCredits(id, 20)).toBe(true);
+      expect(await notifyTrialLowCredits(id, 15)).toBe(false); // déjà envoyé
+      expect((await prisma.organization.findUniqueOrThrow({ where: { id } })).trialUpgradeEmailSentAt).not.toBeNull();
+
+      expect(await notifyTrialLowCredits(await org({ credits: 21 }), 21)).toBe(false); // au-dessus du seuil
+      expect(await notifyTrialLowCredits(await org({ credits: 0 }), 0)).toBe(false); // épuisé : voir notifyQuotaReached
+
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      expect(notices.calls).toHaveLength(1);
+    });
+  });
+
+  describe("avis quand un abonnement arrive bientôt à échéance", () => {
+    it("prévient les abonnements actifs qui expirent dans la fenêtre, une seule fois", async () => {
+      const soon = await org({ plan: "pro", expiresInDays: 2 });
+      const later = await org({ plan: "pro", expiresInDays: 10 });
+      const past = await org({ plan: "pro", expiresInDays: -1 });
+      const inactive = await org({ plan: "pro", expiresInDays: 2, status: "INACTIVE" });
+
+      expect(await checkExpiringSubscriptions()).toBe(1);
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      expect(notices.calls).toHaveLength(1);
+      expect(notices.calls[0]?.organizationId).toBe(soon);
+
+      expect((await prisma.billingSubscription.findUniqueOrThrow({ where: { organizationId: soon } })).expiringNoticeSentAt).not.toBeNull();
+      expect((await prisma.billingSubscription.findUniqueOrThrow({ where: { organizationId: later } })).expiringNoticeSentAt).toBeNull();
+      expect((await prisma.billingSubscription.findUniqueOrThrow({ where: { organizationId: past } })).expiringNoticeSentAt).toBeNull();
+      expect((await prisma.billingSubscription.findUniqueOrThrow({ where: { organizationId: inactive } })).expiringNoticeSentAt).toBeNull();
+
+      // Un second passage ne renvoie rien pour celle déjà prévenue.
+      expect(await checkExpiringSubscriptions()).toBe(0);
     });
   });
 });

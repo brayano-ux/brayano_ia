@@ -2,6 +2,7 @@ import { resumeBroadcasts } from "../broadcasts/broadcasts.service.js";
 import { whatsappBroadcastDeps } from "../broadcasts/broadcasts.route.js";
 import { env } from "../config/env.js";
 import { cleanupOldClientMedia } from "../media/client-media-cleanup.js";
+import { checkExpiringSubscriptions } from "../billing/subscription.service.js";
 import { runFollowUps } from "./follow-ups.js";
 
 const TICK_MS = 5 * 60_000;
@@ -10,6 +11,7 @@ const DAY_MS = 24 * 3600_000;
 let timer: NodeJS.Timeout | null = null;
 let tickRunning = false;
 let lastCleanupAt = 0;
+let lastBillingCheckAt = 0;
 
 async function tick() {
   if (tickRunning) return;
@@ -31,6 +33,15 @@ async function tick() {
         return 0;
       });
       if (removed) console.log(`🧹 ${removed} ancien(s) fichier(s) de clients supprimé(s).`);
+    }
+
+    if (Date.now() - lastBillingCheckAt > DAY_MS) {
+      lastBillingCheckAt = Date.now();
+      const notified = await checkExpiringSubscriptions().catch((error) => {
+        console.error("❌ Vérification des abonnements bientôt terminés impossible :", error);
+        return 0;
+      });
+      if (notified) console.log(`💳 ${notified} propriétaire(s) prévenu(s) d'un abonnement bientôt terminé.`);
     }
   } finally {
     tickRunning = false;

@@ -38,7 +38,7 @@ import { prisma } from "../database/client.js";
 import { deleteClientMediaFile, saveClientMedia, type StoredClientMedia } from "../media/client-media.service.js";
 import { buildHandoffEmail, buildMediaReceivedEmail, notifyOrganizationAdmins } from "../notifications/owner-notifications.js";
 import { getPlatformSuspension } from "../organizations/platform-suspension.service.js";
-import { notifyQuotaReached, releaseAiResponse, reserveAiResponse, type AiResponseEntitlement } from "../billing/subscription.service.js";
+import { notifyQuotaReached, notifyTrialLowCredits, releaseAiResponse, reserveAiResponse, type AiResponseEntitlement } from "../billing/subscription.service.js";
 import { registerQualifiedLead } from "../lead-routing/lead-routing.service.js";
 import {
   buildProductDetailsMessage,
@@ -310,6 +310,7 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
       return;
     }
     reservation = entitlement;
+    if (entitlement.source === "trial") void notifyTrialLowCredits(organizationId, entitlement.remaining);
 
     const products = await listProductsForAssistant(organizationId);
     // L'agenda est optionnel : toute erreur ici ne doit jamais empêcher la réponse.
