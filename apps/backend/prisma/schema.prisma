@@ -186,6 +186,8 @@ model BillingSubscription {
   status          BillingSubscriptionStatus @default(ACTIVE)
   startedAt       DateTime                  @default(now()) @map("started_at")
   expiresAt       DateTime                  @map("expires_at")
+  /** Email « votre abonnement se termine bientôt » déjà envoyé pour ce renouvellement (remis à zéro à chaque nouvelle échéance). */
+  expiringNoticeSentAt DateTime?            @map("expiring_notice_sent_at")
   updatedAt       DateTime                  @updatedAt @map("updated_at")
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)

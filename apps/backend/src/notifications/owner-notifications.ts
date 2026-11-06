@@ -157,6 +157,25 @@ export function buildQuotaReachedEmail(input: { organizationName: string; reason
   };
 }
 
+/** Il reste peu de messages dans l'essai gratuit : encourage à passer à un forfait avant que l'assistant s'arrête. */
+export function buildTrialLowCreditsEmail(input: { organizationName: string; remaining: number }) {
+  const url = env.CLIENT_DASHBOARD_URL ? env.CLIENT_DASHBOARD_URL.replace(/\/+$/, "") : null;
+  return {
+    subject: `⏳ Plus que ${input.remaining} réponse${input.remaining > 1 ? "s" : ""} offerte${input.remaining > 1 ? "s" : ""} pour ${input.organizationName}`,
+    text: `Bonjour,\n\nIl ne reste plus que ${input.remaining} réponse${input.remaining > 1 ? "s" : ""} de l'assistant sur les 100 offertes pour votre essai gratuit.\n\nUne fois ce nombre atteint, l'assistant ne répondra plus automatiquement à vos clients sur WhatsApp tant qu'aucun forfait n'est actif.\n\nPour continuer sans interruption, choisissez un forfait dès maintenant depuis la page « Mon forfait ».${url ? `\n\nMon forfait : ${url}` : ""}\n\nNous vous envoyons ce message une seule fois, pendant votre essai.`,
+  };
+}
+
+/** L'abonnement arrive bientôt à échéance : évite une coupure surprise de l'assistant. */
+export function buildSubscriptionExpiringEmail(input: { organizationName: string; planName: string; expiresAt: Date }) {
+  const url = env.CLIENT_DASHBOARD_URL ? env.CLIENT_DASHBOARD_URL.replace(/\/+$/, "") : null;
+  const dateLabel = input.expiresAt.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "Africa/Douala" });
+  return {
+    subject: `⏳ Votre abonnement ${input.planName} se termine le ${dateLabel}`,
+    text: `Bonjour,\n\nVotre abonnement ${input.planName} pour ${input.organizationName} se termine le ${dateLabel}.\n\nÀ cette date, si aucun renouvellement n'est effectué, l'assistant arrêtera de répondre automatiquement à vos clients sur WhatsApp.\n\nPour renouveler sans interruption, ouvrez la page « Mon forfait » avant cette date.${url ? `\n\nMon forfait : ${url}` : ""}\n\nNous vous envoyons ce message une seule fois par échéance.`,
+  };
+}
+
 /**
  * Envoie un email à tous les administrateurs de l'entreprise.
  * Ne lève jamais : une notification ne doit jamais perturber la conversation WhatsApp.

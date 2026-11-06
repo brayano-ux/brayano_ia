@@ -814,7 +814,11 @@ describe.skipIf(!integrationEnabled)("traitement d'un message entrant (base rée
       await flushEmails();
 
       expect(whatsapp.sent.map((item) => item.text)).toEqual(["Oui, nous livrons.", "Oui, nous livrons."]);
-      expect(hoisted.sentEmails).toHaveLength(1);
+      // Avec seulement 2 messages d'essai, le premier fait déjà passer sous le seuil d'avis « plus beaucoup de réponses offertes » :
+      // un email de plus que dans un essai normal (100 messages), en plus de celui du dernier message refusé.
+      expect(hoisted.sentEmails).toHaveLength(2);
+      expect(hoisted.sentEmails[0]?.subject).toContain("Plus que 1 réponse");
+      expect(hoisted.sentEmails[1]?.subject).toContain("essai gratuit est terminé");
     });
 
     it("une panne de l'IA ne coûte aucun message au client", async () => {

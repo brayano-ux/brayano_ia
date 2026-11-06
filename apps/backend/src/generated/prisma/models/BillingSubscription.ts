@@ -46,6 +46,7 @@ export type BillingSubscriptionMinAggregateOutputType = {
   status: $Enums.BillingSubscriptionStatus | null
   startedAt: Date | null
   expiresAt: Date | null
+  expiringNoticeSentAt: Date | null
   updatedAt: Date | null
 }
 
@@ -59,6 +60,7 @@ export type BillingSubscriptionMaxAggregateOutputType = {
   status: $Enums.BillingSubscriptionStatus | null
   startedAt: Date | null
   expiresAt: Date | null
+  expiringNoticeSentAt: Date | null
   updatedAt: Date | null
 }
 
@@ -72,6 +74,7 @@ export type BillingSubscriptionCountAggregateOutputType = {
   status: number
   startedAt: number
   expiresAt: number
+  expiringNoticeSentAt: number
   updatedAt: number
   _all: number
 }
@@ -97,6 +100,7 @@ export type BillingSubscriptionMinAggregateInputType = {
   status?: true
   startedAt?: true
   expiresAt?: true
+  expiringNoticeSentAt?: true
   updatedAt?: true
 }
 
@@ -110,6 +114,7 @@ export type BillingSubscriptionMaxAggregateInputType = {
   status?: true
   startedAt?: true
   expiresAt?: true
+  expiringNoticeSentAt?: true
   updatedAt?: true
 }
 
@@ -123,6 +128,7 @@ export type BillingSubscriptionCountAggregateInputType = {
   status?: true
   startedAt?: true
   expiresAt?: true
+  expiringNoticeSentAt?: true
   updatedAt?: true
   _all?: true
 }
@@ -223,6 +229,7 @@ export type BillingSubscriptionGroupByOutputType = {
   status: $Enums.BillingSubscriptionStatus
   startedAt: Date
   expiresAt: Date
+  expiringNoticeSentAt: Date | null
   updatedAt: Date
   _count: BillingSubscriptionCountAggregateOutputType | null
   _avg: BillingSubscriptionAvgAggregateOutputType | null
@@ -259,6 +266,7 @@ export type BillingSubscriptionWhereInput = {
   status?: Prisma.EnumBillingSubscriptionStatusFilter<"BillingSubscription"> | $Enums.BillingSubscriptionStatus
   startedAt?: Prisma.DateTimeFilter<"BillingSubscription"> | Date | string
   expiresAt?: Prisma.DateTimeFilter<"BillingSubscription"> | Date | string
+  expiringNoticeSentAt?: Prisma.DateTimeNullableFilter<"BillingSubscription"> | Date | string | null
   updatedAt?: Prisma.DateTimeFilter<"BillingSubscription"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
 }
@@ -273,6 +281,7 @@ export type BillingSubscriptionOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
+  expiringNoticeSentAt?: Prisma.SortOrderInput | Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   organization?: Prisma.OrganizationOrderByWithRelationInput
 }
@@ -290,6 +299,7 @@ export type BillingSubscriptionWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.EnumBillingSubscriptionStatusFilter<"BillingSubscription"> | $Enums.BillingSubscriptionStatus
   startedAt?: Prisma.DateTimeFilter<"BillingSubscription"> | Date | string
   expiresAt?: Prisma.DateTimeFilter<"BillingSubscription"> | Date | string
+  expiringNoticeSentAt?: Prisma.DateTimeNullableFilter<"BillingSubscription"> | Date | string | null
   updatedAt?: Prisma.DateTimeFilter<"BillingSubscription"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
 }, "id" | "organizationId">
@@ -304,6 +314,7 @@ export type BillingSubscriptionOrderByWithAggregationInput = {
   status?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
+  expiringNoticeSentAt?: Prisma.SortOrderInput | Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.BillingSubscriptionCountOrderByAggregateInput
   _avg?: Prisma.BillingSubscriptionAvgOrderByAggregateInput
@@ -325,6 +336,7 @@ export type BillingSubscriptionScalarWhereWithAggregatesInput = {
   status?: Prisma.EnumBillingSubscriptionStatusWithAggregatesFilter<"BillingSubscription"> | $Enums.BillingSubscriptionStatus
   startedAt?: Prisma.DateTimeWithAggregatesFilter<"BillingSubscription"> | Date | string
   expiresAt?: Prisma.DateTimeWithAggregatesFilter<"BillingSubscription"> | Date | string
+  expiringNoticeSentAt?: Prisma.DateTimeNullableWithAggregatesFilter<"BillingSubscription"> | Date | string | null
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"BillingSubscription"> | Date | string
 }
 
@@ -337,6 +349,7 @@ export type BillingSubscriptionCreateInput = {
   status?: $Enums.BillingSubscriptionStatus
   startedAt?: Date | string
   expiresAt: Date | string
+  expiringNoticeSentAt?: Date | string | null
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutBillingSubscriptionInput
 }
@@ -351,6 +364,7 @@ export type BillingSubscriptionUncheckedCreateInput = {
   status?: $Enums.BillingSubscriptionStatus
   startedAt?: Date | string
   expiresAt: Date | string
+  expiringNoticeSentAt?: Date | string | null
   updatedAt?: Date | string
 }
 
@@ -363,6 +377,7 @@ export type BillingSubscriptionUpdateInput = {
   status?: Prisma.EnumBillingSubscriptionStatusFieldUpdateOperationsInput | $Enums.BillingSubscriptionStatus
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expiringNoticeSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutBillingSubscriptionNestedInput
 }
@@ -377,6 +392,7 @@ export type BillingSubscriptionUncheckedUpdateInput = {
   status?: Prisma.EnumBillingSubscriptionStatusFieldUpdateOperationsInput | $Enums.BillingSubscriptionStatus
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expiringNoticeSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -390,6 +406,7 @@ export type BillingSubscriptionCreateManyInput = {
   status?: $Enums.BillingSubscriptionStatus
   startedAt?: Date | string
   expiresAt: Date | string
+  expiringNoticeSentAt?: Date | string | null
   updatedAt?: Date | string
 }
 
@@ -402,6 +419,7 @@ export type BillingSubscriptionUpdateManyMutationInput = {
   status?: Prisma.EnumBillingSubscriptionStatusFieldUpdateOperationsInput | $Enums.BillingSubscriptionStatus
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expiringNoticeSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -415,6 +433,7 @@ export type BillingSubscriptionUncheckedUpdateManyInput = {
   status?: Prisma.EnumBillingSubscriptionStatusFieldUpdateOperationsInput | $Enums.BillingSubscriptionStatus
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expiringNoticeSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -433,6 +452,7 @@ export type BillingSubscriptionCountOrderByAggregateInput = {
   status?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
+  expiringNoticeSentAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
@@ -451,6 +471,7 @@ export type BillingSubscriptionMaxOrderByAggregateInput = {
   status?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
+  expiringNoticeSentAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
@@ -464,6 +485,7 @@ export type BillingSubscriptionMinOrderByAggregateInput = {
   status?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
+  expiringNoticeSentAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
@@ -517,6 +539,7 @@ export type BillingSubscriptionCreateWithoutOrganizationInput = {
   status?: $Enums.BillingSubscriptionStatus
   startedAt?: Date | string
   expiresAt: Date | string
+  expiringNoticeSentAt?: Date | string | null
   updatedAt?: Date | string
 }
 
@@ -529,6 +552,7 @@ export type BillingSubscriptionUncheckedCreateWithoutOrganizationInput = {
   status?: $Enums.BillingSubscriptionStatus
   startedAt?: Date | string
   expiresAt: Date | string
+  expiringNoticeSentAt?: Date | string | null
   updatedAt?: Date | string
 }
 
@@ -557,6 +581,7 @@ export type BillingSubscriptionUpdateWithoutOrganizationInput = {
   status?: Prisma.EnumBillingSubscriptionStatusFieldUpdateOperationsInput | $Enums.BillingSubscriptionStatus
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expiringNoticeSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -569,6 +594,7 @@ export type BillingSubscriptionUncheckedUpdateWithoutOrganizationInput = {
   status?: Prisma.EnumBillingSubscriptionStatusFieldUpdateOperationsInput | $Enums.BillingSubscriptionStatus
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expiringNoticeSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -584,6 +610,7 @@ export type BillingSubscriptionSelect<ExtArgs extends runtime.Types.Extensions.I
   status?: boolean
   startedAt?: boolean
   expiresAt?: boolean
+  expiringNoticeSentAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["billingSubscription"]>
@@ -598,6 +625,7 @@ export type BillingSubscriptionSelectCreateManyAndReturn<ExtArgs extends runtime
   status?: boolean
   startedAt?: boolean
   expiresAt?: boolean
+  expiringNoticeSentAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["billingSubscription"]>
@@ -612,6 +640,7 @@ export type BillingSubscriptionSelectUpdateManyAndReturn<ExtArgs extends runtime
   status?: boolean
   startedAt?: boolean
   expiresAt?: boolean
+  expiringNoticeSentAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["billingSubscription"]>
@@ -626,10 +655,11 @@ export type BillingSubscriptionSelectScalar = {
   status?: boolean
   startedAt?: boolean
   expiresAt?: boolean
+  expiringNoticeSentAt?: boolean
   updatedAt?: boolean
 }
 
-export type BillingSubscriptionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "plan" | "messageLimit" | "messagesUsed" | "periodStartedAt" | "status" | "startedAt" | "expiresAt" | "updatedAt", ExtArgs["result"]["billingSubscription"]>
+export type BillingSubscriptionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "plan" | "messageLimit" | "messagesUsed" | "periodStartedAt" | "status" | "startedAt" | "expiresAt" | "expiringNoticeSentAt" | "updatedAt", ExtArgs["result"]["billingSubscription"]>
 export type BillingSubscriptionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
 }
@@ -655,6 +685,10 @@ export type $BillingSubscriptionPayload<ExtArgs extends runtime.Types.Extensions
     status: $Enums.BillingSubscriptionStatus
     startedAt: Date
     expiresAt: Date
+    /**
+     * * Email « votre abonnement se termine bientôt » déjà envoyé pour ce renouvellement (remis à zéro à chaque nouvelle échéance).
+     */
+    expiringNoticeSentAt: Date | null
     updatedAt: Date
   }, ExtArgs["result"]["billingSubscription"]>
   composites: {}
@@ -1089,6 +1123,7 @@ export interface BillingSubscriptionFieldRefs {
   readonly status: Prisma.FieldRef<"BillingSubscription", 'BillingSubscriptionStatus'>
   readonly startedAt: Prisma.FieldRef<"BillingSubscription", 'DateTime'>
   readonly expiresAt: Prisma.FieldRef<"BillingSubscription", 'DateTime'>
+  readonly expiringNoticeSentAt: Prisma.FieldRef<"BillingSubscription", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"BillingSubscription", 'DateTime'>
 }
     

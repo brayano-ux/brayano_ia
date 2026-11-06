@@ -1,11 +1,15 @@
 import { env } from "../config/env.js";
 import { prisma } from "../database/client.js";
-import { notifyOrganizationAdmins, buildQuotaReachedEmail } from "../notifications/owner-notifications.js";
+import { notifyOrganizationAdmins, buildQuotaReachedEmail, buildTrialLowCreditsEmail, buildSubscriptionExpiringEmail } from "../notifications/owner-notifications.js";
 import { PlanLimitError } from "../shared/errors.js";
 import { BILLING_PLANS, TRIAL, cheapestPlanWith, getBillingPlan, type BillingPlan, type PlanFeatures } from "./billing-plans.js";
 
 const BILLING_PERIOD_MS = 30 * 24 * 60 * 60 * 1000;
 const QUOTA_NOTICE_EVERY_MS = 24 * 60 * 60 * 1000;
+/** Déclenche l'email « plus beaucoup de réponses offertes » quand il n'en reste plus que ça (sur les 100 de l'essai). */
+const TRIAL_LOW_CREDITS_THRESHOLD = 20;
+/** Déclenche l'email « abonnement bientôt terminé » ce nombre de jours avant l'échéance. */
+const SUBSCRIPTION_EXPIRING_WINDOW_DAYS = 3;
 /** Aucune fonction réservée, aucun employé : ce qu'obtient une entreprise sans forfait valable quand les forfaits sont appliqués. */
 const NO_FEATURES: PlanFeatures = { broadcasts: false, followUps: false, teamMembers: 0 };
 /** Quand les forfaits ne sont pas appliqués : tout est ouvert (limité seulement par MAX_TEAM_MEMBERS dans team.service). */
@@ -106,6 +110,59 @@ export async function notifyQuotaReached(organizationId: string, reason: DenyRea
     console.error(`[org:${organizationId}] Avis de quota ignoré :`, error);
     return false;
   }
+}
+
+/**
+ * Prévient le propriétaire (email) qu'il ne reste plus beaucoup de réponses offertes dans l'essai gratuit, une seule fois.
+ * N'a d'effet que pour une entreprise encore en essai (sans abonnement) ; ne lève jamais.
+ */
+export async function notifyTrialLowCredits(organizationId: string, remaining: number) {
+  if (remaining <= 0 || remaining > TRIAL_LOW_CREDITS_THRESHOLD) return false;
+  try {
+    const claimed = await prisma.organization.updateMany({
+      where: { id: organizationId, trialUpgradeEmailSentAt: null },
+      data: { trialUpgradeEmailSentAt: new Date() },
+    });
+    if (claimed.count === 0) return false;
+    void notifyOrganizationAdmins(organizationId, (organizationName) => buildTrialLowCreditsEmail({ organizationName, remaining }));
+    return true;
+  } catch (error) {
+    console.error(`[org:${organizationId}] Avis d'essai bientôt épuisé ignoré :`, error);
+    return false;
+  }
+}
+
+/**
+ * Parcourt les abonnements actifs qui arrivent à échéance dans les prochains jours et prévient leurs propriétaires
+ * (une fois par échéance). Conçue pour être appelée régulièrement par une tâche de fond. Ne lève jamais.
+ */
+export async function checkExpiringSubscriptions(now = new Date()): Promise<number> {
+  let notified = 0;
+  try {
+    const windowEnd = new Date(now.getTime() + SUBSCRIPTION_EXPIRING_WINDOW_DAYS * 24 * 60 * 60 * 1000);
+    const expiringSoon = await prisma.billingSubscription.findMany({
+      where: { status: "ACTIVE", expiresAt: { gt: now, lte: windowEnd }, expiringNoticeSentAt: null },
+      select: { id: true, organizationId: true, plan: true, expiresAt: true },
+    });
+    for (const subscription of expiringSoon) {
+      try {
+        const claimed = await prisma.billingSubscription.updateMany({
+          where: { id: subscription.id, expiringNoticeSentAt: null },
+          data: { expiringNoticeSentAt: now },
+        });
+        if (claimed.count === 0) continue;
+        const planName = planOrNull(subscription.plan)?.name ?? subscription.plan;
+        void notifyOrganizationAdmins(subscription.organizationId, (organizationName) =>
+          buildSubscriptionExpiringEmail({ organizationName, planName, expiresAt: subscription.expiresAt }));
+        notified += 1;
+      } catch (error) {
+        console.error(`[org:${subscription.organizationId}] Avis d'abonnement bientôt terminé ignoré :`, error);
+      }
+    }
+  } catch (error) {
+    console.error("Vérification des abonnements bientôt terminés impossible :", error);
+  }
+  return notified;
 }
 
 export interface OrganizationBillingStatus {
