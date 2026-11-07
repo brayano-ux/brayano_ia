@@ -40,6 +40,7 @@
 .modal-card { position: relative; width: min(100%, 460px); display: grid; gap: var(--space-4); padding: var(--space-6); background: var(--surface); border-radius: var(--radius-xl); box-shadow: var(--shadow-md); }
 .modal-close { position: absolute; top: 12px; right: 14px; font-size: 28px; line-height: 1; color: var(--muted); }
 .billing-pay-form { display: grid; gap: var(--space-4); }
+.billing-pay-field { display: grid; gap: 6px; }
 .billing-pay-wait { display: grid; justify-items: center; gap: var(--space-3); text-align: center; padding: var(--space-4) 0; font-size: var(--text-sm); line-height: 1.5; }
 .billing-spinner { width: 36px; height: 36px; border: 4px solid var(--line); border-top-color: var(--brand-500); border-radius: 50%; animation: billing-spin 0.9s linear infinite; }
 @keyframes billing-spin { to { transform: rotate(360deg); } }

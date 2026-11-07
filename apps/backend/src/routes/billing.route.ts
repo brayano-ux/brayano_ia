@@ -7,6 +7,7 @@ import { isBillingEnforced } from "../billing/subscription.service.js";
 import { getOrganizationBillingStatus } from "../billing/subscription.service.js";
 import { prisma } from "../database/client.js";
 import { normalizeWhatsAppNumber } from "../shared/phone.js";
+import { COUNTRIES, splitInternationalNumber } from "../shared/countries.js";
 import { checkCampayPayment, createCampayCollection, getCampayChargeAmount, isCampayDemoMode } from "../services/payment.service.js";
 import { createChariowCheckout } from "../services/chariow-payment.service.js";
 import { requireAuth } from "./auth.route.js";
@@ -209,12 +210,16 @@ export async function billingRoute(app: FastifyInstance) {
       return { success: false, message: error instanceof Error ? error.message : "Forfait invalide." };
     }
 
-    // Chariow attend un numéro et un indicatif pays séparés ; pour l'instant, seuls les numéros
-    // camerounais sont pris en charge (seul marché de Brayano IA aujourd'hui).
+    // Chariow attend un numéro et un code pays ISO séparés : on les déduit de l'indicatif du numéro,
+    // parmi les pays africains francophones acceptés à l'inscription (shared/countries.ts).
     const normalized = normalizeWhatsAppNumber(parsed.data.phone);
-    if (!normalized || !normalized.startsWith("237") || normalized.length !== 12) {
+    const split = normalized ? splitInternationalNumber(normalized) : null;
+    if (!split) {
       reply.code(400);
-      return { success: false, message: "Le paiement Chariow ne prend en charge que les numéros camerounais pour l'instant (ex. 6 90 00 00 00)." };
+      return {
+        success: false,
+        message: `Numéro non reconnu : indiquez votre numéro avec l'indicatif de votre pays (ex. +225 07 00 00 00 00). Pays acceptés : ${COUNTRIES.map((country) => country.name).join(", ")}.`,
+      };
     }
 
     const [firstName, ...rest] = (session.name || "Client").trim().split(/\s+/);
@@ -222,8 +227,8 @@ export async function billingRoute(app: FastifyInstance) {
     try {
       const result = await createChariowCheckout({
         plan: plan.key,
-        phoneNumber: normalized.slice(3),
-        countryCode: "CM",
+        phoneNumber: split.local,
+        countryCode: split.country.iso,
         email: session.email,
         firstName: firstName || "Client",
         lastName: rest.join(" ") || "Brayano",
