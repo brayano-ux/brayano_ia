@@ -24,11 +24,14 @@
       <h2 id="billing-pay-title">Payer</h2>
       <p class="muted" id="billing-pay-amount"></p>
       <form id="billing-pay-form" class="billing-pay-form">
-        <label>
+        <div class="billing-pay-field">
           <span class="field-label">Votre numéro de téléphone</span>
-          <input id="billing-pay-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="6 90 00 00 00" required />
-          <small class="field-hint">Vous allez être redirigé vers une page de paiement sécurisée (Mobile Money, carte bancaire...) pour finaliser votre paiement.</small>
-        </label>
+          <div class="phone-field-row">
+            <select id="billing-pay-country" aria-label="Indicatif pays"></select>
+            <input id="billing-pay-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="6 90 00 00 00" required aria-label="Numéro local" />
+          </div>
+          <small class="field-hint">Choisissez votre pays puis saisissez votre numéro. Vous allez être redirigé vers une page de paiement sécurisée (Mobile Money, carte bancaire…) adaptée à votre pays.</small>
+        </div>
         <div class="form-actions">
           <button type="submit" class="primary" id="billing-pay-submit">Continuer vers le paiement</button>
           <button type="button" class="text-button" id="billing-pay-cancel">Annuler</button>

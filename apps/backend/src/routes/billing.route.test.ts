@@ -224,7 +224,31 @@ describe("chariow checkout route", () => {
     vi.unstubAllGlobals();
   });
 
-  it("refuse un numéro qui n'est pas camerounais", async () => {
+  it("accepte un numéro d'un autre pays de la liste et transmet son code ISO à Chariow", async () => {
+    const app = Fastify();
+    const { billingRoute } = await import("./billing.route.js");
+    await app.register(billingRoute);
+
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      text: async () => JSON.stringify({ data: { payment: { checkout_url: "https://pay.chariow.com/ci" }, purchase: { id: "sal_ci" } } }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/billing/checkout/chariow",
+      payload: { plan: "pro", phone: "+225 07 00 00 00 00" },
+    });
+
+    expect(response.statusCode).toBe(200);
+    const body = JSON.parse(fetchMock.mock.calls[0]?.[1]?.body as string);
+    expect(body.phone).toEqual({ number: "0700000000", country_code: "CI" });
+
+    vi.unstubAllGlobals();
+  });
+
+  it("refuse un numéro d'un pays hors de la liste, en nommant les pays acceptés", async () => {
     const app = Fastify();
     const { billingRoute } = await import("./billing.route.js");
     await app.register(billingRoute);
@@ -236,6 +260,7 @@ describe("chariow checkout route", () => {
     });
 
     expect(response.statusCode).toBe(400);
+    expect(JSON.parse(response.payload).message).toContain("Côte d'Ivoire");
     expect(fetchMock).not.toHaveBeenCalled();
   });
 

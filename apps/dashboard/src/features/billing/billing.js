@@ -3,6 +3,8 @@ import { $, $$, escapeHtml, showToast } from "../../utils/dom.js";
 import { formatDateTime } from "../../utils/format.js";
 import { readSession } from "../../services/storage.js";
 import { isAgentRole } from "../navigation/roles.js";
+import { getState } from "../../state/store.js";
+import { populateCountrySelect, readPhoneField, setPhoneFieldFromDigits } from "../../utils/phone-field.js";
 
 /**
  * « Mon forfait » : où en est l'entreprise (essai ou forfait, messages utilisés), choix d'un forfait et paiement Mobile Money,
@@ -122,10 +124,25 @@ function closePayment() {
   $("#billing-pay").classList.add("hidden");
 }
 
+/** Pré-remplit le pays et le numéro avec le numéro WhatsApp déclaré de l'entreprise (une seule fois, sans écraser une saisie). */
+async function prefillPaymentPhone() {
+  const country = $("#billing-pay-country");
+  const local = $("#billing-pay-phone");
+  if (!country || !local || local.value) return;
+  try {
+    const info = await api(`/organizations/${getState().organizationId}/whatsapp/status`);
+    if (info?.declaredNumber && !local.value) setPhoneFieldFromDigits(country, local, info.declaredNumber);
+  } catch {
+    // Pas de numéro déclaré ou API indisponible : le propriétaire saisit son numéro lui-même.
+  }
+}
+
 function openPayment(planKey) {
   const plan = plansData?.plans.find((entry) => entry.key === planKey);
   if (!plan) return;
   paying = { plan };
+  populateCountrySelect($("#billing-pay-country"));
+  void prefillPaymentPhone();
   $("#billing-pay-title").textContent = `Payer le forfait ${plan.name}`;
   $("#billing-pay-amount").textContent = `${money(plan.amount)} pour 30 jours`;
   $("#billing-pay-form").classList.remove("hidden");
@@ -138,7 +155,11 @@ function openPayment(planKey) {
 async function submitPayment(event) {
   event.preventDefault();
   if (!paying) return;
-  const phone = $("#billing-pay-phone").value.trim();
+  const phone = readPhoneField($("#billing-pay-country"), $("#billing-pay-phone"));
+  if (!phone) {
+    showToast("Indiquez votre numéro de téléphone.", "error");
+    return;
+  }
   const button = $("#billing-pay-submit");
   button.disabled = true;
   try {
