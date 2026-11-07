@@ -37,12 +37,36 @@ async function login(page) {
   await page.waitForFunction(() => document.querySelector("#company-greeting")?.textContent?.trim() && document.querySelector("#company-greeting").textContent.trim() !== "Bienvenue", null, { timeout: 20_000 });
 }
 
-async function dismissOverlays(page) {
-  for (const selector of ["#persona-skip", ".tour-skip"]) {
-    const element = page.locator(selector).first();
-    if (await element.count() && await element.isVisible().catch(() => false)) {
-      await element.click().catch(() => {});
-      await page.waitForTimeout(250);
+/**
+ * Ferme ce qui peut recouvrir la page : la fenêtre de première connexion (elle arrive quelques instants après la
+ * connexion, une fois l'entreprise chargée) et un éventuel guide. On insiste un peu, car ces fenêtres apparaissent
+ * de façon asynchrone.
+ */
+async function dismissOverlays(page, attempts = 6) {
+  for (let i = 0; i < attempts; i += 1) {
+    let closed = false;
+    for (const selector of ["#persona-skip", ".tour-skip"]) {
+      const element = page.locator(selector).first();
+      if (await element.count() && await element.isVisible().catch(() => false)) {
+        await element.click().catch(() => {});
+        await page.waitForTimeout(250);
+        closed = true;
+      }
+    }
+    if (!closed && i > 0) return;
+    await page.waitForTimeout(400);
+  }
+}
+
+/** Clique un élément de navigation en refermant d'abord toute fenêtre qui intercepterait le clic. */
+async function clickNav(page, selector) {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await dismissOverlays(page, attempt === 0 ? 2 : 6);
+    try {
+      await page.click(selector, { timeout: 5_000 });
+      return;
+    } catch (error) {
+      if (attempt === 2) throw error;
     }
   }
 }
@@ -64,9 +88,8 @@ async function run() {
     await dismissOverlays(page);
 
     for (const view of VIEWS) {
-      await page.click(`.nav-item[data-view="${view}"]`);
+      await clickNav(page, `.nav-item[data-view="${view}"]`);
       await page.waitForTimeout(600);
-      await dismissOverlays(page);
       const visible = await page.isVisible(`#${view}-view`);
       if (!visible) failures.push(`La vue « ${view} » ne s'affiche pas.`);
     }
@@ -74,12 +97,12 @@ async function run() {
     const status = await page.textContent("#system-status .system-status-text");
     if (!/WhatsApp/.test(status || "")) failures.push(`La pastille d'état n'indique pas l'état WhatsApp (« ${status} »).`);
 
-    await page.click('.nav-item[data-view="settings"]');
+    await clickNav(page, '.nav-item[data-view="settings"]');
     await page.click('[data-settings-tab="team"]');
     if (!(await page.isVisible('[data-settings-pane="team"]'))) failures.push("L'onglet « Équipe » des paramètres ne s'ouvre pas.");
     if (await page.isVisible('[data-settings-pane="responses"]')) failures.push("L'onglet « Réponses » reste affiché après avoir changé d'onglet.");
 
-    await page.click("#help-toggle");
+    await clickNav(page, "#help-toggle");
     if (!(await page.isVisible("#help-panel"))) failures.push("Le panneau d'aide ne s'ouvre pas.");
     await page.click("#help-close");
 
@@ -94,10 +117,10 @@ async function run() {
     phone.on("pageerror", (error) => mobileErrors.push(error.message));
     await login(phone);
     await dismissOverlays(phone);
-    await phone.click('.tab-item[data-view="inbox"]');
+    await clickNav(phone, '.tab-item[data-view="inbox"]');
     await phone.waitForTimeout(400);
     if (!(await phone.isVisible("#inbox-view"))) failures.push("Mobile : l'onglet « Messages » n'ouvre pas la boîte de réception.");
-    await phone.click("#tab-more");
+    await clickNav(phone, "#tab-more");
     await phone.waitForTimeout(400);
     if (!(await phone.isVisible("#sidebar.mobile-open"))) failures.push("Mobile : « Plus » n'ouvre pas le menu.");
     if (mobileErrors.length) failures.push(`Erreurs JavaScript sur mobile :\n  - ${mobileErrors.join("\n  - ")}`);
