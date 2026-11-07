@@ -78,8 +78,10 @@ button.system-status:hover { filter: brightness(0.98); }
 .mobile-menu-trigger { display: none; margin-left: calc(var(--space-2) * -1); }
 
 .views-root { width: 100%; max-width: var(--content-max); margin: 0 auto; padding: var(--space-6) var(--space-6) 96px; flex: 1; }
-.view { animation: viewIn 0.28s var(--ease) both; }
-@keyframes viewIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+/* Fondu sans transform : une animation de transform (même terminée) fait de la vue le bloc conteneur de ses
+   éléments en position fixe, et les fenêtres modales (paiement…) se retrouvaient centrées sur la page entière au lieu de l'écran. */
+.view { animation: viewIn 0.22s var(--ease) both; }
+@keyframes viewIn { from { opacity: 0; } to { opacity: 1; } }
 
 /* ---------- En-tête de page ---------- */
 .page-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-5); }
