@@ -12,7 +12,7 @@ const MAX_FILE_BYTES = 3 * 1024 * 1024;
 
 /** Chaque élément : { role: "user"|"assistant", content, media?, replies?, effects? } */
 let turns = [];
-let simulation = { booking: null, order: null };
+let simulation = { booking: null, order: null, negotiation: null };
 let busy = false;
 
 const MEDIA_LABELS = {
@@ -55,6 +55,9 @@ function render() {
   }
   if (simulation.order) {
     parts.push(`🛍️ Commande simulée : ${simulation.order.items.map((line) => `${line.quantity} × ${line.name}`).join(", ")}`);
+  }
+  if (simulation.negotiation) {
+    parts.push(`🤝 Négociation simulée : ${new Intl.NumberFormat("fr-FR").format(simulation.negotiation.currentPrice).replace(/[  ]/g, " ")} FCFA (tour ${simulation.negotiation.round}/3)`);
   }
   state.classList.toggle("hidden", !parts.length);
   state.innerHTML = parts.map((part) => `<span>${escapeHtml(part)}</span>`).join("");
@@ -121,7 +124,7 @@ async function send(media, mediaTag) {
 
 export function resetTester() {
   turns = [];
-  simulation = { booking: null, order: null };
+  simulation = { booking: null, order: null, negotiation: null };
   $("#agent-test-result").classList.add("hidden");
   render();
 }

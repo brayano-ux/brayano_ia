@@ -648,6 +648,77 @@ describe.skipIf(!integrationEnabled)("traitement d'un message entrant (base rée
       expect(calls).toHaveLength(1);
     });
 
+    it("repart du vrai prix du nouvel article quand le client change de produit en cours de négociation", async () => {
+      const { organization, product: robe } = await orgWithNegotiation();
+      const sac = await prisma.product.create({
+        data: { organizationId: organization.id, name: "Sac cuir", description: "Sac en cuir", price: "18 000 FCFA" },
+      });
+
+      // 1. Le client marchande sur la robe : 25 000 → 23 900.
+      installScriptedAi([
+        aiReply({ reply: "25 000 FCFA.", discussedProductId: robe.id, wantsDiscount: true }),
+        aiReply({ reply: "23 900 FCFA pour vous." }),
+      ]);
+      await deliver(organization.id, new FakeWhatsApp(), inbound(JID_NUMBER, "La robe, un meilleur prix ?"));
+
+      // 2. Il demande le sac : prix normal, pas de remise.
+      installScriptedAi([aiReply({ reply: "Le sac cuir est à 18 000 FCFA.", discussedProductId: sac.id })]);
+      await deliver(organization.id, new FakeWhatsApp(), inbound(JID_NUMBER, "Et le sac en cuir ?"));
+
+      // 3. Il marchande sur le sac : la remise repart de 18 000 (→ 17 200), pas du prix réduit de la robe.
+      const calls = installScriptedAi([
+        aiReply({ reply: "18 000 FCFA.", discussedProductId: sac.id, wantsDiscount: true }),
+        aiReply({ reply: "17 200 FCFA pour le sac." }),
+      ]);
+      const whatsapp = new FakeWhatsApp();
+      await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "Et pour le sac, un petit effort ?"));
+
+      expect(calls).toHaveLength(2);
+      expect(calls[1]!.systemPrompt).toContain("17200");
+      expect(calls[1]!.systemPrompt).toContain("Sac cuir");
+      expect(calls[1]!.systemPrompt).not.toContain("23300");
+      expect(whatsapp.sent[0]!.text).toContain("17 200");
+      const conversation = await prisma.conversation.findFirstOrThrow();
+      expect(conversation.negotiationState).toMatchObject({ productId: sac.id, round: 1, currentPrice: 17200, floorPrice: 16200 });
+      const last = await prisma.message.findFirstOrThrow({ where: { direction: "OUTBOUND" }, orderBy: { createdAt: "desc" } });
+      expect(last.aiMeta).toMatchObject({ negotiation: { productName: "Sac cuir", price: 17200, round: 1, isFinal: false } });
+    });
+
+    it("retrouve l'article grâce à la dernière photo envoyée quand l'IA ne le nomme pas", async () => {
+      const { organization } = await orgWithNegotiation();
+      const robe = await prisma.product.create({
+        data: { organizationId: organization.id, name: "Robe soirée", description: "Robe longue", price: "30 000 FCFA", imageUrl: "https://example.com/robe.jpg" },
+      });
+
+      // 1. Le client demande la photo : elle part, et l'association photo → produit est enregistrée.
+      installScriptedAi([aiReply({ reply: "Voici la robe.", productId: robe.id })]);
+      const whatsapp = new FakeWhatsApp();
+      await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "Montre-moi la robe de soirée"));
+      expect(whatsapp.sent.some((item) => item.kind === "image")).toBe(true);
+
+      // 2. Il marchande sans nommer l'article et l'IA n'indique aucun produit : on prend la dernière photo envoyée.
+      const calls = installScriptedAi([
+        aiReply({ reply: "30 000 FCFA.", wantsDiscount: true }),
+        aiReply({ reply: "28 700 FCFA pour vous." }),
+      ]);
+      await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "C'est trop cher, fais un effort"));
+
+      expect(calls).toHaveLength(2);
+      expect(calls[1]!.systemPrompt).toContain("28700");
+      expect((await prisma.conversation.findFirstOrThrow()).negotiationState).toMatchObject({ productId: robe.id, round: 1, currentPrice: 28700 });
+    });
+
+    it("n'invente aucune remise quand l'article n'est pas identifiable, et le journal le dit", async () => {
+      const { organization } = await orgWithNegotiation();
+      const calls = installScriptedAi([aiReply({ reply: "De quel article parlez-vous ?", wantsDiscount: true })]);
+      await deliver(organization.id, new FakeWhatsApp(), inbound(JID_NUMBER, "Tu peux me faire un prix ?"));
+
+      expect(calls).toHaveLength(1);
+      const last = await prisma.message.findFirstOrThrow({ where: { direction: "OUTBOUND" }, orderBy: { createdAt: "desc" } });
+      expect(last.aiMeta).toMatchObject({ negotiationRequested: true });
+      expect((last.aiMeta as Record<string, unknown>).negotiation).toBeUndefined();
+    });
+
     it("tient le prix plancher après le nombre maximal de tours de négociation sur la même conversation", async () => {
       const { organization, product } = await orgWithNegotiation();
 

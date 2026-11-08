@@ -85,6 +85,13 @@ export function describeAiMeta(meta) {
     const names = Array.isArray(meta.productNames) && meta.productNames.length ? ` (${meta.productNames.join(", ")})` : "";
     lines.push(`Photo${meta.photosSent > 1 ? "s" : ""} envoyée${meta.photosSent > 1 ? "s" : ""}${names}.`);
   }
+  if (meta.negotiation && typeof meta.negotiation === "object") {
+    const n = meta.negotiation;
+    const amount = typeof n.price === "number" ? `${new Intl.NumberFormat("fr-FR").format(n.price).replace(/[  ]/g, " ")} FCFA` : "";
+    lines.push(`Remise calculée${n.productName ? ` sur « ${n.productName} »` : ""} : ${amount} proposé${typeof n.round === "number" ? ` (tour ${n.round}/3${n.isFinal ? ", dernier prix" : ""})` : ""}.`);
+  } else if (meta.negotiationRequested) {
+    lines.push("Le client a demandé une remise, mais l'assistant n'a pas identifié l'article : aucun prix réduit calculé.");
+  }
   if (meta.imagesFailed) lines.push(`${meta.imagesFailed} photo${meta.imagesFailed > 1 ? "s n'ont" : " n'a"} pas pu être envoyée${meta.imagesFailed > 1 ? "s" : ""} : le client en a été informé. Vérifiez la photo du produit.`);
   if (meta.welcomeSent) lines.push("Le message d'accueil a été envoyé juste avant.");
   if (meta.closedHours) lines.push("Votre entreprise était fermée : l'assistant l'a pris en compte.");

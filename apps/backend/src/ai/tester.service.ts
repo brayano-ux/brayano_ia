@@ -12,7 +12,9 @@ import { buildBusinessHoursPrompt } from "./business-hours.js";
 import { buildClaimCorrection, describeUnbackedClaims, findUnbackedClaims } from "./claim-guard.js";
 import { loadMemorySections } from "./memory.service.js";
 import { classifyByCaption, describeMediaKindLabel, type MediaAnalysis, type MediaKind } from "./media-analysis.js";
-import { buildSystemPrompt } from "./prompt.js";
+import { buildNegotiationSection, buildSystemPrompt } from "./prompt.js";
+import { buildNegotiationInstruction, isNegotiationState, nextNegotiationOffer, startNegotiation, type NegotiationState } from "./price-negotiation.js";
+import { parsePriceAmount } from "../products/price-parsing.js";
 import { decideWelcome } from "./welcome.js";
 import type { WorkingHours } from "../appointments/availability.js";
 
@@ -21,6 +23,8 @@ export interface TesterSimulation {
   booking: { startsAt: string; endsAt: string } | null;
   /** Commande fictive enregistrée pendant ce test (permet de tester « annuler »). */
   order: { items: Array<{ quantity: number; name: string }>; total: number | null } | null;
+  /** Négociation de prix en cours pendant ce test (même calcul que sur WhatsApp : paliers jusqu'au plancher). */
+  negotiation: NegotiationState | null;
 }
 
 export interface TesterMedia {
@@ -35,11 +39,11 @@ export interface TesterMedia {
 export interface TesterInput {
   message: string;
   history: AIChatMessage[];
-  simulation?: { booking?: TesterSimulation["booking"] | undefined; order?: TesterSimulation["order"] | undefined } | undefined;
+  simulation?: { booking?: TesterSimulation["booking"] | undefined; order?: TesterSimulation["order"] | undefined; negotiation?: unknown } | undefined;
   media?: TesterMedia | undefined;
 }
 
-export type TesterEffect = { type: "booking" | "order" | "photo" | "handoff" | "welcome" | "file" | "stage" | "claim"; label: string };
+export type TesterEffect = { type: "booking" | "order" | "photo" | "handoff" | "welcome" | "file" | "stage" | "claim" | "negotiation"; label: string };
 
 const ANALYZABLE = new Set(["image/jpeg", "image/png", "image/webp", "application/pdf"]);
 
@@ -50,7 +54,11 @@ const ANALYZABLE = new Set(["image/jpeg", "image/png", "image/webp", "applicatio
 export async function simulateAssistantReply(organizationId: string, input: TesterInput, now = new Date()) {
   const settings = await getOrCreateAiSettings(organizationId);
   const effects: TesterEffect[] = [];
-  const simulation: TesterSimulation = { booking: input.simulation?.booking ?? null, order: input.simulation?.order ?? null };
+  const simulation: TesterSimulation = {
+    booking: input.simulation?.booking ?? null,
+    order: input.simulation?.order ?? null,
+    negotiation: isNegotiationState(input.simulation?.negotiation) ? input.simulation.negotiation : null,
+  };
 
   // Message d'accueil (premier échange uniquement).
   const previousReplies = input.history.filter((entry) => entry.role === "assistant").length;
@@ -98,6 +106,7 @@ export async function simulateAssistantReply(organizationId: string, input: Test
     correctionsSection: memory.corrections,
     examplesSection: memory.examples,
     welcomeSent: Boolean(welcome.welcome),
+    negotiationSection: settings.negotiationEnabled ? buildNegotiationSection() : null,
   });
   const history: AIChatMessage[] = [...input.history, { role: "user", content: userText }];
   const orchestrator = getAiOrchestrator();
@@ -121,6 +130,29 @@ export async function simulateAssistantReply(organizationId: string, input: Test
     if (retry.intent !== "erreur_traitement") {
       reply = retry;
       unbacked = check(retry);
+    }
+  }
+
+  // Négociation de prix : même règle que sur WhatsApp (whatsapp/incoming-message.ts). Le testeur n'a pas de photos
+  // envoyées à retrouver : l'article vient de ce que l'IA dit être en discussion, sinon de la négociation déjà ouverte.
+  if (settings.negotiationEnabled && reply.wantsDiscount) {
+    const existing = simulation.negotiation;
+    const candidates = [reply.discussedProductId, reply.productId, existing?.productId];
+    const productId = candidates.find((candidate): candidate is string => Boolean(candidate)) ?? null;
+    const product = productId ? products.find((item) => item.id === productId) : null;
+    const basePrice = product ? parsePriceAmount(product.price) : null;
+    if (product && basePrice) {
+      const baseState = existing && existing.productId === product.id ? existing : startNegotiation(product.id, basePrice, settings.negotiationMaxDiscountPercent ?? 10);
+      const offer = nextNegotiationOffer(baseState);
+      simulation.negotiation = offer.state;
+      const retry = await orchestrator.getReply(`dashboard-test-${organizationId}`, `${systemPrompt}\n\n${buildNegotiationInstruction(offer.price, offer.isFinal, product.name)}`, history, { logRun: false });
+      if (retry.intent !== "erreur_traitement") {
+        reply = retry;
+        unbacked = check(retry);
+      }
+      effects.push({ type: "negotiation", label: `Remise calculée par le serveur sur « ${product.name} » : ${formatAmount(offer.price)} (tour ${offer.state.round}/3${offer.isFinal ? ", dernier prix" : ""})` });
+    } else {
+      effects.push({ type: "negotiation", label: "Le client demande une remise, mais l'assistant n'a pas identifié l'article : aucun prix réduit calculé" });
     }
   }
 

@@ -15,6 +15,7 @@ const mediaSchema = z.object({
 const simulationSchema = z.object({
   booking: z.object({ startsAt: z.string().datetime(), endsAt: z.string().datetime() }).nullable().optional(),
   order: z.object({ items: z.array(z.object({ quantity: z.number().int().min(1).max(999), name: z.string().max(200) })).max(20), total: z.number().nullable() }).nullable().optional(),
+  negotiation: z.object({ productId: z.string(), basePrice: z.number(), floorPrice: z.number(), round: z.number().int().min(0).max(10), currentPrice: z.number() }).nullable().optional(),
 });
 
 const testAgentSchema = z.object({
