@@ -12,6 +12,21 @@ const baseReply = {
   leadData: {},
 };
 
+describe("aiReplySchema : discussedProductId (article en discussion)", () => {
+  it("accepte un identifiant de produit, une chaîne vide ou l'absence du champ", () => {
+    const id = "3f4a8c1e-2b7d-4e0a-9c6f-1d2e3f4a5b6c";
+    expect(aiReplySchema.safeParse({ ...baseReply, discussedProductId: id }).success).toBe(true);
+    expect(aiReplySchema.safeParse({ ...baseReply, discussedProductId: "" }).success).toBe(true);
+    expect(aiReplySchema.safeParse(baseReply).success).toBe(true);
+  });
+
+  it("ignore une valeur invalide écrite par le modèle au lieu de rejeter toute la réponse", () => {
+    const parsed = aiReplySchema.safeParse({ ...baseReply, discussedProductId: "aucun" });
+    expect(parsed.success).toBe(true);
+    expect(parsed.success && parsed.data.discussedProductId).toBe("");
+  });
+});
+
 describe("aiReplySchema : onTopic (sujet autorisé)", () => {
   it("accepte un vrai booléen JSON", () => {
     expect(aiReplySchema.safeParse({ ...baseReply, onTopic: true }).success).toBe(true);

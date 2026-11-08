@@ -60,11 +60,12 @@ export function nextNegotiationOffer(
 }
 
 /** Instruction injectée dans le prompt lors du rappel IA (voir claim-guard pour le même procédé). */
-export function buildNegotiationInstruction(price: number, isFinal: boolean): string {
+export function buildNegotiationInstruction(price: number, isFinal: boolean, productName?: string): string {
+  const subject = productName ? `l'article « ${productName} »` : "ce produit";
   return `
 NÉGOCIATION EN COURS
 
-Le client cherche à obtenir un meilleur prix sur ce produit. Propose EXACTEMENT ${price} FCFA, présenté naturellement et chaleureusement, comme un effort commercial que tu fais pour lui — jamais comme un calcul automatique.
+Le client cherche à obtenir un meilleur prix sur ${subject}. Propose EXACTEMENT ${price} FCFA pour ${subject}, présenté naturellement et chaleureusement, comme un effort commercial que tu fais pour lui — jamais comme un calcul automatique. Ce prix ne concerne que cet article : ne l'applique à aucun autre produit.
 ${
     isFinal
       ? "C'est le dernier prix possible : dis-le clairement et gentiment, sans laisser croire qu'une nouvelle baisse suivra si le client insiste encore."

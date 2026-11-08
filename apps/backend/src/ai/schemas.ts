@@ -31,6 +31,13 @@ export const aiReplySchema = z.object({
   productId: z.string().uuid().optional().or(z.literal("")),
   /** Plusieurs produits dont le client veut voir les photos (5 au maximum sont envoyées). */
   productIds: z.array(z.string().uuid()).max(10).optional().catch(undefined),
+  /**
+   * Produit du catalogue dont le client parle dans CE message, photo ou pas (voir ai/prompt.ts). Sert à la
+   * négociation de prix : quand le client passe à un autre article, la remise repart de son prix à lui, jamais
+   * de celui de l'article précédent. Une valeur invalide écrite par le modèle est ignorée plutôt que de
+   * faire échouer toute la réponse.
+   */
+  discussedProductId: z.string().uuid().optional().or(z.literal("")).catch(""),
   booking: bookingRequestSchema,
   order: orderRequestSchema,
   /** Rempli seulement quand un « sujet autorisé » est actif pour cette entreprise (voir ai/prompt.ts). */

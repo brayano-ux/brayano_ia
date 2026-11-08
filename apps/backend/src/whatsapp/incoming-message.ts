@@ -46,7 +46,7 @@ import {
   resolveRequestedProductPhotos,
 } from "../products/product-image-selection.js";
 import { listProductsForAssistant } from "../products/products.service.js";
-import { findProductIdForSentImage, recordSentProductImage } from "../products/sent-product-images.service.js";
+import { findLatestSentProductId, findProductIdForSentImage, recordSentProductImage } from "../products/sent-product-images.service.js";
 import { humanReplyDelayMs, sendInBubbles, waitWhileTyping } from "./human-pacing.js";
 import type { IncomingWhatsAppMessage, WhatsAppProvider } from "./whatsapp.types.js";
 
@@ -346,9 +346,10 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
     // Le client répond directement à une photo de produit envoyée plus tôt : on dit à l'IA de quel produit il s'agit,
     // sans attendre qu'il le nomme (voir products/sent-product-images.service.ts).
     let quotedProductSection: string | null = null;
+    let quotedProductId: string | null = null;
     if (message.quotedMessageId) {
       try {
-        const quotedProductId = await findProductIdForSentImage(message.quotedMessageId);
+        quotedProductId = await findProductIdForSentImage(message.quotedMessageId);
         const quotedProduct = quotedProductId ? products.find((product) => product.id === quotedProductId) : null;
         if (quotedProduct) quotedProductSection = buildQuotedProductSection(quotedProduct);
       } catch (error) {
@@ -424,10 +425,18 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
 
     // Négociation de prix : le client marchande, le CODE calcule le prix exact (jamais l'IA), par palier
     // dégressif jusqu'au plancher configuré ; on redemande ensuite à l'IA de le présenter naturellement.
-    if (settings.negotiationEnabled && aiReply.wantsDiscount) {
+    // L'article concerné est, dans l'ordre : celui que l'IA dit être en discussion dans CE message, celui dont
+    // le client demande la photo, celui dont il cite la photo, le dernier dont une photo lui a été envoyée, et
+    // seulement en dernier recours celui d'une négociation déjà ouverte. Un changement d'article repart de son
+    // propre prix : jamais le prix réduit de l'article précédent.
+    const discountRequested = Boolean(aiReply.wantsDiscount);
+    let negotiationInfo: { productName: string; price: number; round: number; isFinal: boolean } | null = null;
+    if (settings.negotiationEnabled && discountRequested) {
       try {
         const existingNegotiation = isNegotiationState(conversation.negotiationState) ? conversation.negotiationState : null;
-        const negotiationProductId = aiReply.productId || existingNegotiation?.productId || null;
+        const latestSentProductId = aiReply.discussedProductId || aiReply.productId || quotedProductId ? null : await findLatestSentProductId(conversation.id).catch(() => null);
+        const candidates = [aiReply.discussedProductId, aiReply.productId, quotedProductId, latestSentProductId, existingNegotiation?.productId];
+        const negotiationProductId = candidates.find((candidate): candidate is string => Boolean(candidate)) ?? null;
         const negotiationProduct = negotiationProductId ? products.find((item) => item.id === negotiationProductId) : null;
         const basePrice = negotiationProduct ? parsePriceAmount(negotiationProduct.price) : null;
         if (negotiationProduct && basePrice) {
@@ -438,12 +447,15 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
           await setConversationNegotiationState(conversation.id, nextNegotiationState as object);
           const retry = await getAiOrchestrator().getReply(
             conversation.id,
-            `${systemPrompt}\n\n${buildNegotiationInstruction(negotiatedPrice, negotiationFinal)}`,
+            `${systemPrompt}\n\n${buildNegotiationInstruction(negotiatedPrice, negotiationFinal, negotiationProduct.name)}`,
             history,
           );
           if (retry.intent !== "erreur_traitement") {
             aiReply = retry;
           }
+          negotiationInfo = { productName: negotiationProduct.name, price: negotiatedPrice, round: nextNegotiationState.round, isFinal: negotiationFinal };
+        } else {
+          console.log(`[org:${organizationId}] Remise demandée mais article non identifié : aucun prix réduit calculé.`);
         }
       } catch (error) {
         console.error(`❌ [org:${organizationId}] Négociation de prix ignorée :`, error);
@@ -635,7 +647,8 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
           ...(imagesFailed ? { imagesFailed } : {}),
           ...(locationRequested ? { locationSent } : {}),
           actions,
-          ...(aiReply.wantsDiscount ? { negotiationRequested: true } : {}),
+          ...(discountRequested ? { negotiationRequested: true } : {}),
+          ...(negotiationInfo ? { negotiation: negotiationInfo } : {}),
           claimRetried,
           claimsUnresolved: unbackedClaims,
           correctionsUsed: memory.correctionIds.length,

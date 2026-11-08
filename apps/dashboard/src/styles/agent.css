@@ -147,6 +147,7 @@
 .test-effects li { padding: 6px 10px; border-radius: var(--radius-sm); background: var(--info-bg); color: var(--info); font-size: var(--text-xs); font-weight: 600; line-height: 1.4; }
 .test-effects li.effect-booking, .test-effects li.effect-order { background: var(--success-bg); color: var(--success); }
 .test-effects li.effect-handoff, .test-effects li.effect-claim, .test-effects li.effect-file { background: var(--warning-bg); color: var(--warning); }
+.test-effects li.effect-negotiation { background: var(--brand-50); color: var(--brand-700); }
 .agent-test-state { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .agent-test-state span { padding: 4px 10px; border-radius: var(--radius-full); background: var(--brand-50); color: var(--brand-700); font-size: var(--text-xs); font-weight: 700; }
 .agent-test-attach { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); font-size: var(--text-xs); }
