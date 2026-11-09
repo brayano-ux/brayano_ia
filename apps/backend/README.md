@@ -171,6 +171,12 @@ Le backend utilise une authentification par session et isole les données par or
 En production, utilise `npm run db:migrate:deploy` uniquement après avoir vérifié l'état de la base avec `npx prisma migrate status`. Ne lance jamais `prisma migrate reset` sur la base d'un client.
 
 
+## Fournisseurs IA : ordre d'essai, secours et pannes
+
+`LLM_PROVIDER` est essayé en premier, puis **tous** les autres fournisseurs dont la clé est renseignée (`GEMINI_API_KEY`, `OPENROUTER_API_KEY`, `MISTRAL_API_KEY`), dans cet ordre. Chaque appel a un délai maximal de 45 s et droit à une seconde tentative sur une erreur passagère (429 quota, 5xx, coupure réseau) avant de passer au fournisseur suivant. La réponse du modèle est lue de façon tolérante (barrières ```json retirées, nombres écrits en texte convertis, identifiant de produit invalide ignoré) : seul un texte vide pour le client fait échouer la réponse.
+
+Si aucun fournisseur ne répond, l'assistant **n'est pas coupé** : le client reçoit une seule fois un court message d'attente (journal « IA indisponible » dans la conversation), le propriétaire est prévenu par email au plus une fois par heure, le message n'est pas décompté du forfait et l'assistant réessaie au message suivant. Chaque appel est journalisé dans `ai_runs` (fournisseur, modèle, latence, validité, échecs).
+
 ## Transcription des messages vocaux avec OpenRouter
 
 Les vocaux passent par le fournisseur IA principal, puis par le fournisseur de secours si la transcription échoue, reste vide ou dépasse 60 secondes par fournisseur. Avec `LLM_PROVIDER=gemini`, OpenRouter sert de secours ; avec `LLM_PROVIDER=openrouter`, OpenRouter est appelé en premier puis Gemini (sa clé doit aussi être configurée pour ce secours).

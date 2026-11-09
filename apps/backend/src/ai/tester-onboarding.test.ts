@@ -22,7 +22,7 @@ describe("testeur et progression du démarrage", () => {
     expect(mocks.mark).toHaveBeenCalledWith(expect.objectContaining({ organizationId: "org-1" }));
   });
   it("ne valide pas un échec des fournisseurs IA", async () => {
-    mocks.reply.mockResolvedValue({ ...reply, intent: "erreur_traitement", reply: "Merci pour votre message.", needsHuman: true });
+    mocks.reply.mockResolvedValue({ ...reply, intent: "erreur_traitement", reply: "Un instant, je vérifie et je reviens vers vous 🙏", needsHuman: false });
     await simulateAssistantReply("org-1", input);
     expect(mocks.mark).not.toHaveBeenCalled();
   });

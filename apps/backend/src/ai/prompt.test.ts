@@ -86,7 +86,10 @@ describe("product catalog in the assistant prompt", () => {
     };
 
     expect(aiReplySchema.safeParse(reply).success).toBe(true);
-    expect(aiReplySchema.safeParse({ ...reply, productId: "https://example.com/image.jpg" }).success).toBe(false);
+    // Une URL ou un nom à la place de l'identifiant : neutralisé (aucune photo envoyée) sans rejeter le texte pour le client.
+    const tainted = aiReplySchema.safeParse({ ...reply, productId: "https://example.com/image.jpg" });
+    expect(tainted.success).toBe(true);
+    expect(tainted.success && tainted.data.productId).toBe("");
   });
 });
 
