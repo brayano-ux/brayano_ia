@@ -65,11 +65,16 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
   });
 }
 
-function modelNameFor(providerName: string): string {
-  if (providerName === "gemini") return env.GEMINI_MODEL;
-  if (providerName === "openrouter") return env.OPENROUTER_MODEL;
-  if (providerName === "mistral") return env.MISTRAL_MODEL;
-  return providerName;
+function modelNameFor(provider: AIProvider): string {
+  if (provider.model) return provider.model;
+  if (provider.name === "gemini") return env.GEMINI_MODEL;
+  if (provider.name === "openrouter") return env.OPENROUTER_MODEL;
+  if (provider.name === "mistral") return env.MISTRAL_MODEL;
+  return provider.name;
+}
+
+function label(provider: AIProvider): string {
+  return provider.model ? `${provider.name} (${provider.model})` : provider.name;
 }
 
 export class AiOrchestrator {
@@ -102,26 +107,26 @@ export class AiOrchestrator {
     const wait = options.wait ?? ((ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms)));
     let rawText = "";
     let latencyMs = 0;
-    let providerName = this.providers[0]!.name;
+    let used: AIProvider = this.providers[0]!;
     let parsed: AIReply | null = null;
     const failures: string[] = [];
 
     for (const provider of this.providers) {
       for (let attempt = 1; attempt <= 2 && !parsed; attempt += 1) {
         try {
-          const result = await withTimeout(provider.generateResponse({ systemPrompt, history }), AI_TIMEOUTS.replyMs, `Fournisseur ${provider.name}`);
+          const result = await withTimeout(provider.generateResponse({ systemPrompt, history }), AI_TIMEOUTS.replyMs, `Fournisseur ${label(provider)}`);
           rawText = result.rawText;
           latencyMs = result.latencyMs;
-          providerName = provider.name;
+          used = provider;
           parsed = this.parseAndValidate(rawText);
           if (!parsed) {
-            failures.push(`${provider.name} : réponse invalide`);
+            failures.push(`${label(provider)} : réponse invalide`);
             break; // Une réponse mal formée ne se corrige pas en renvoyant la même requête : fournisseur suivant.
           }
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);
           rawText = message;
-          failures.push(`${provider.name} (essai ${attempt}) : ${message.slice(0, 160)}`);
+          failures.push(`${label(provider)} (essai ${attempt}) : ${message.slice(0, 160)}`);
           if (attempt === 1 && isRetryableError(error)) {
             await wait(AI_TIMEOUTS.retryDelayMs);
             continue;
@@ -135,14 +140,14 @@ export class AiOrchestrator {
     if (!parsed) {
       console.error(`❌ Aucun fournisseur IA n'a répondu correctement :\n  - ${failures.join("\n  - ")}`);
     } else if (failures.length) {
-      console.warn(`⚠️ Réponse obtenue avec ${providerName} après : ${failures.join(" ; ")}`);
+      console.warn(`⚠️ Réponse obtenue avec ${label(used)} après : ${failures.join(" ; ")}`);
     }
 
     if (options.logRun !== false) {
       await logAiRun({
         conversationId,
-        provider: providerName,
-        model: modelNameFor(providerName),
+        provider: used.name,
+        model: modelNameFor(used),
         latencyMs,
         rawResponse: parsed ? rawText : `${rawText}\n\n[échecs : ${failures.join(" | ")}]`.slice(0, 20_000),
         isValid: parsed !== null,

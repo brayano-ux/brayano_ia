@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const config = vi.hoisted(() => ({ OPENROUTER_API_KEY: "test-key" as string | undefined, OPENROUTER_MODEL: "text-only-model", OPENROUTER_TRANSCRIPTION_MODEL: "openai/whisper-1", APP_URL: "https://example.test" }));
-vi.mock("../../config/env.js", () => ({ env: config }));
+vi.mock("../../config/env.js", async (importOriginal) => ({ ...(await importOriginal<typeof import("../../config/env.js")>()), env: config }));
 import { OpenRouterProvider } from "./openrouter.provider.js";
 const audio = { data: Buffer.from("OggS-test-audio"), mimeType: "audio/ogg; codecs=opus" };
 const response = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });

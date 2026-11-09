@@ -31,6 +31,8 @@ export interface AIAudioInput {
  */
 export interface AIProvider {
   readonly name: string;
+  /** Modèle précis utilisé par ce fournisseur, quand il en expose plusieurs (OpenRouter) : pour les journaux. */
+  readonly model?: string;
   generateResponse(input: AIRequestInput): Promise<AIRawResult>;
   transcribeAudio(input: AIAudioInput): Promise<string>;
   /** Optionnel : décrit une photo ou un document reçu (nécessite un modèle qui voit les images). */

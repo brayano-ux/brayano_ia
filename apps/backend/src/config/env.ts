@@ -50,6 +50,7 @@ const envSchema = z.object({
   MISTRAL_API_KEY: z.string().optional(),
   MISTRAL_MODEL: z.string().default("mistral-small-latest"),
   OPENROUTER_API_KEY: z.string().optional(),
+  /** Un ou plusieurs modèles OpenRouter séparés par des virgules, essayés dans l'ordre (voir openRouterModels). */
   OPENROUTER_MODEL: z.string().default("openai/gpt-4o-mini"),
   OPENROUTER_TRANSCRIPTION_MODEL: z.string().trim().min(1).default("openai/whisper-1"),
   SMTP_HOST: z.string().optional().or(z.literal("")),
@@ -89,6 +90,15 @@ const envSchema = z.object({
 });
 
 export type LlmProvider = "gemini" | "mistral" | "openrouter";
+
+/**
+ * Modèles OpenRouter à essayer dans l'ordre : « openai/gpt-4o-mini, google/gemini-2.0-flash-001 » donne deux maillons
+ * de la chaîne, chacun avec son propre délai et sa seconde tentative. Doublons et espaces ignorés.
+ */
+export function openRouterModels(value: string | undefined): string[] {
+  const models = (value ?? "").split(",").map((model) => model.trim()).filter(Boolean);
+  return models.length ? [...new Set(models)] : ["openai/gpt-4o-mini"];
+}
 
 /**
  * Fournisseur principal : celui de LLM_PROVIDER s'il est renseigné ; sinon OpenRouter dès que sa clé existe
