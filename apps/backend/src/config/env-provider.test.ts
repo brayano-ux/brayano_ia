@@ -3,7 +3,7 @@ import { openRouterModels, resolveDefaultProvider } from "./env.js";
 
 describe("openRouterModels", () => {
   it("lit une liste séparée par des virgules, sans doublon ni espace", () => {
-    expect(openRouterModels("openai/gpt-4o-mini, google/gemini-2.0-flash-001 ,openai/gpt-4o-mini,")).toEqual(["openai/gpt-4o-mini", "google/gemini-2.0-flash-001"]);
+    expect(openRouterModels("openai/gpt-4o-mini, google/gemini-2.5-flash-lite ,openai/gpt-4o-mini,")).toEqual(["openai/gpt-4o-mini", "google/gemini-2.5-flash-lite"]);
   });
 
   it("retombe sur le modèle par défaut quand la variable est vide", () => {
