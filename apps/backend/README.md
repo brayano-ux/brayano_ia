@@ -13,7 +13,7 @@ npm install
 ```bash
 copy .env.example .env
 # puis remplir .env : DATABASE_URL (déjà correct pour le docker-compose fourni),
-# GEMINI_API_KEY (obligatoire, https://aistudio.google.com/app/apikey)
+# OPENROUTER_API_KEY (fournisseur principal, https://openrouter.ai/keys) et, en secours, GEMINI_API_KEY (https://aistudio.google.com/app/apikey)
 ```
 
 ## Base de données
@@ -124,7 +124,7 @@ Un « message » = une réponse envoyée par l'assistant à un client (photos et
 
 ### 9. Assistant d'aide du tableau de bord
 
-Bouton « Besoin d'aide ? » (propriétaire uniquement) : un assistant IA répond aux questions de configuration. Il utilise la même clé IA que l'agent (`GEMINI_API_KEY`, ou le fournisseur choisi par `LLM_PROVIDER`, avec secours automatique).
+Bouton « Besoin d'aide ? » (propriétaire uniquement) : un assistant IA répond aux questions de configuration. Il utilise les mêmes fournisseurs IA que l'agent (OpenRouter en principal, puis les secours configurés).
 
 - Route : `POST /organizations/:orgId/support-assistant/chat` avec `{ "messages": [{ "role": "user", "content": "…" }] }` → `{ "reply": "…", "openView": "whatsapp" | null }`. 40 questions par heure et par entreprise.
 - Ce qu'il sait : `src/support-assistant/knowledge.ts` (toutes les pages et tous les réglages). **À mettre à jour quand une page ou un réglage change** ; un test vérifie déjà que les prix et quantités des forfaits y sont identiques à `billing-plans.ts`.
@@ -142,7 +142,7 @@ Les tests d'intégration vident la base indiquée : n'utilisez jamais celle d'un
 ## Erreurs fréquentes
 
 - **`Cannot find module '../generated/prisma/client.ts'`** — lance `npm run db:generate`.
-- **`APP_URL invalide` / `GEMINI_API_KEY est requis`** — vérifie ton `.env`.
+- **`APP_URL invalide` / `Aucune clé IA`** — vérifie ton `.env` (au moins `OPENROUTER_API_KEY` ou `GEMINI_API_KEY`).
 - **`Ce compte WhatsApp n'est pas connecté pour cette entreprise.`** en réponse à `/reply` — l'entreprise concernée n'a jamais fait `POST /whatsapp/connect`, ou le serveur a redémarré depuis (chaque redémarrage nécessite de rappeler `connect`, qui réutilise la session déjà scannée si `wa-session/<orgId>/` existe encore).
 - **PowerShell + `curl`** — utilise `curl.exe` (pas l'alias `curl` de PowerShell) pour les requêtes avec body/headers, ou `Invoke-RestMethod`.
 - **`npm audit fix --force`** — ne jamais lancer sur ce projet (dépendance Baileys non officielle, ça changerait sa version de façon incontrôlée).
@@ -173,7 +173,7 @@ En production, utilise `npm run db:migrate:deploy` uniquement après avoir véri
 
 ## Fournisseurs IA : ordre d'essai, secours et pannes
 
-`LLM_PROVIDER` est essayé en premier, puis **tous** les autres fournisseurs dont la clé est renseignée (`GEMINI_API_KEY`, `OPENROUTER_API_KEY`, `MISTRAL_API_KEY`), dans cet ordre. Chaque appel a un délai maximal de 45 s et droit à une seconde tentative sur une erreur passagère (429 quota, 5xx, coupure réseau) avant de passer au fournisseur suivant. La réponse du modèle est lue de façon tolérante (barrières ```json retirées, nombres écrits en texte convertis, identifiant de produit invalide ignoré) : seul un texte vide pour le client fait échouer la réponse.
+Le fournisseur principal est `LLM_PROVIDER` ; s'il n'est pas renseigné, OpenRouter est choisi dès que `OPENROUTER_API_KEY` existe (c'est le réglage de production), sinon Gemini, sinon Mistral. Viennent ensuite **tous** les autres fournisseurs dont la clé est renseignée (Gemini, OpenRouter, Mistral), dans cet ordre. Chaque appel a un délai maximal de 45 s et droit à une seconde tentative sur une erreur passagère (429 quota, 5xx, coupure réseau) avant de passer au fournisseur suivant. La réponse du modèle est lue de façon tolérante (barrières ```json retirées, nombres écrits en texte convertis, identifiant de produit invalide ignoré) : seul un texte vide pour le client fait échouer la réponse.
 
 Si aucun fournisseur ne répond, l'assistant **n'est pas coupé** : le client reçoit une seule fois un court message d'attente (journal « IA indisponible » dans la conversation), le propriétaire est prévenu par email au plus une fois par heure, le message n'est pas décompté du forfait et l'assistant réessaie au message suivant. Chaque appel est journalisé dans `ai_runs` (fournisseur, modèle, latence, validité, échecs).
 
