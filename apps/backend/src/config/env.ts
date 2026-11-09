@@ -43,7 +43,8 @@ const envSchema = z.object({
   TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(1),
   MEDIA_SIGNING_SECRET: z.string().min(16).optional().or(z.literal("")),
   MEDIA_URL_TTL_SECONDS: z.coerce.number().int().positive().default(60 * 60),
-  LLM_PROVIDER: z.enum(["gemini", "mistral", "openrouter"]).default("gemini"),
+  /** Fournisseur IA essayé en premier. Absent : OpenRouter si sa clé existe, sinon Gemini, sinon Mistral (voir resolveDefaultProvider). */
+  LLM_PROVIDER: z.enum(["gemini", "mistral", "openrouter"]).optional(),
   GEMINI_API_KEY: z.string().optional(),
   GEMINI_MODEL: z.string().default("gemini-3.6-flash"),
   MISTRAL_API_KEY: z.string().optional(),
@@ -63,28 +64,19 @@ const envSchema = z.object({
       "Ton rôle est d'accueillir les visiteurs, répondre à leurs questions générales, et collecter leur nom et leur besoin.",
     ),
 }).superRefine((env, ctx) => {
-  if (env.LLM_PROVIDER === "gemini" && !env.GEMINI_API_KEY) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ["GEMINI_API_KEY"],
-      message: "GEMINI_API_KEY est requis lorsque LLM_PROVIDER=gemini",
-    });
-  }
-
-  if (env.LLM_PROVIDER === "mistral" && !env.MISTRAL_API_KEY) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ["MISTRAL_API_KEY"],
-      message: "MISTRAL_API_KEY est requis lorsque LLM_PROVIDER=mistral",
-    });
-  }
-
-  if (env.LLM_PROVIDER === "openrouter" && !env.OPENROUTER_API_KEY) {
+  const provider = resolveDefaultProvider(env);
+  if (!provider) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       path: ["OPENROUTER_API_KEY"],
-      message: "OPENROUTER_API_KEY est requis lorsque LLM_PROVIDER=openrouter",
+      message: "Aucune clé IA : renseignez OPENROUTER_API_KEY (recommandé), GEMINI_API_KEY ou MISTRAL_API_KEY.",
     });
+  } else if (provider === "gemini" && !env.GEMINI_API_KEY) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["GEMINI_API_KEY"], message: "GEMINI_API_KEY est requis lorsque LLM_PROVIDER=gemini" });
+  } else if (provider === "mistral" && !env.MISTRAL_API_KEY) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["MISTRAL_API_KEY"], message: "MISTRAL_API_KEY est requis lorsque LLM_PROVIDER=mistral" });
+  } else if (provider === "openrouter" && !env.OPENROUTER_API_KEY) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["OPENROUTER_API_KEY"], message: "OPENROUTER_API_KEY est requis lorsque LLM_PROVIDER=openrouter" });
   }
 
   if (env.NODE_ENV !== "test" && (!env.MEDIA_SIGNING_SECRET || env.MEDIA_SIGNING_SECRET.length < 16 || env.MEDIA_SIGNING_SECRET === "development-media-secret")) {
@@ -96,7 +88,27 @@ const envSchema = z.object({
   }
 });
 
-export type Env = Omit<z.infer<typeof envSchema>, "PRODUCT_IMAGE_DIR" | "CLIENT_MEDIA_DIR"> & { PRODUCT_IMAGE_DIR: string; CLIENT_MEDIA_DIR: string };
+export type LlmProvider = "gemini" | "mistral" | "openrouter";
+
+/**
+ * Fournisseur principal : celui de LLM_PROVIDER s'il est renseigné ; sinon OpenRouter dès que sa clé existe
+ * (fournisseur par défaut, le plus résistant : il donne accès à de nombreux modèles derrière une seule clé),
+ * puis Gemini, puis Mistral. Renvoie null si aucune clé n'est configurée.
+ */
+export function resolveDefaultProvider(keys: {
+  LLM_PROVIDER?: LlmProvider | undefined;
+  OPENROUTER_API_KEY?: string | undefined;
+  GEMINI_API_KEY?: string | undefined;
+  MISTRAL_API_KEY?: string | undefined;
+}): LlmProvider | null {
+  if (keys.LLM_PROVIDER) return keys.LLM_PROVIDER;
+  if (keys.OPENROUTER_API_KEY) return "openrouter";
+  if (keys.GEMINI_API_KEY) return "gemini";
+  if (keys.MISTRAL_API_KEY) return "mistral";
+  return null;
+}
+
+export type Env = Omit<z.infer<typeof envSchema>, "PRODUCT_IMAGE_DIR" | "CLIENT_MEDIA_DIR" | "LLM_PROVIDER"> & { PRODUCT_IMAGE_DIR: string; CLIENT_MEDIA_DIR: string; LLM_PROVIDER: LlmProvider };
 
 function loadEnv(): Env {
   const parsed = envSchema.safeParse(process.env);
@@ -109,6 +121,7 @@ function loadEnv(): Env {
 
   return {
     ...parsed.data,
+    LLM_PROVIDER: resolveDefaultProvider(parsed.data) ?? "openrouter",
     PRODUCT_IMAGE_DIR: parsed.data.PRODUCT_IMAGE_DIR?.trim() || defaultProductImageDir(parsed.data.WHATSAPP_AUTH_DIR),
     CLIENT_MEDIA_DIR: parsed.data.CLIENT_MEDIA_DIR?.trim() || defaultClientMediaDir(parsed.data.WHATSAPP_AUTH_DIR),
   };
