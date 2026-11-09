@@ -1,4 +1,4 @@
-import { env } from "../config/env.js";
+import { env, openRouterModels } from "../config/env.js";
 import { AiOrchestrator } from "./ai-orchestrator.js";
 import type { AIProvider } from "./ai.types.js";
 import { GeminiProvider } from "./providers/gemini.provider.js";
@@ -20,10 +20,11 @@ function hasKey(name: ProviderName): boolean {
   return Boolean(env.MISTRAL_API_KEY);
 }
 
-function instantiate(name: ProviderName): AIProvider {
-  if (name === "gemini") return new GeminiProvider();
-  if (name === "openrouter") return new OpenRouterProvider();
-  return new MistralProvider();
+/** Un fournisseur par entrée, sauf OpenRouter : un par modèle listé dans OPENROUTER_MODEL. */
+function instantiate(name: ProviderName): AIProvider[] {
+  if (name === "gemini") return [new GeminiProvider()];
+  if (name === "openrouter") return openRouterModels(env.OPENROUTER_MODEL).map((model) => new OpenRouterProvider(model));
+  return [new MistralProvider()];
 }
 
 /**
@@ -41,7 +42,7 @@ export function getRawProviders(): AIProvider[] {
   const providers: AIProvider[] = [];
   for (const name of providerOrder()) {
     try {
-      providers.push(instantiate(name));
+      providers.push(...instantiate(name));
     } catch (error) {
       console.warn("Fournisseur IA indisponible :", error instanceof Error ? error.message : error);
     }
@@ -49,11 +50,16 @@ export function getRawProviders(): AIProvider[] {
   return providers;
 }
 
+/** « openrouter (openai/gpt-4o-mini) », « gemini »… pour les journaux. */
+export function describeProvider(provider: AIProvider): string {
+  return provider.model ? `${provider.name} (${provider.model})` : provider.name;
+}
+
 export function getAiOrchestrator(): AiOrchestrator {
   if (!orchestrator) {
     const providers = getRawProviders();
     orchestrator = new AiOrchestrator(providers);
-    console.log(`🤖 Fournisseurs IA, dans l'ordre d'essai : ${providers.map((provider) => provider.name).join(" → ")}`);
+    console.log(`🤖 Fournisseurs IA, dans l'ordre d'essai : ${providers.map(describeProvider).join(" → ")}`);
   }
   return orchestrator;
 }

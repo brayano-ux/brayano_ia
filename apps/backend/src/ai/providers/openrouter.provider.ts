@@ -1,8 +1,17 @@
-import { env } from "../../config/env.js";
+import { env, openRouterModels } from "../../config/env.js";
 import type { AIAudioInput, AIProvider, AIRawResult, AIRequestInput } from "../ai.types.js";
 
+/**
+ * Une instance = un modèle OpenRouter. Avec plusieurs modèles dans OPENROUTER_MODEL, la fabrique crée une instance
+ * par modèle : l'orchestrateur les essaie dans l'ordre avant de passer à Gemini ou Mistral.
+ */
 export class OpenRouterProvider implements AIProvider {
   readonly name = "openrouter";
+  readonly model: string;
+
+  constructor(model: string = openRouterModels(env.OPENROUTER_MODEL)[0]!) {
+    this.model = model;
+  }
 
   async generateResponse(input: AIRequestInput): Promise<AIRawResult> {
     if (!env.OPENROUTER_API_KEY) {
@@ -19,7 +28,7 @@ export class OpenRouterProvider implements AIProvider {
         "X-Title": "Brayano AI",
       },
       body: JSON.stringify({
-        model: env.OPENROUTER_MODEL,
+        model: this.model,
         messages: [
           { role: "system", content: input.systemPrompt },
           ...input.history.map((message) => ({ role: message.role, content: message.content })),
