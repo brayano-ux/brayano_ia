@@ -72,6 +72,7 @@ export function describeAiMeta(meta) {
   if (meta.kind === "opt_out") return ["Le client a écrit STOP : il ne recevra plus de relances ni de messages groupés."];
   if (meta.kind === "follow_up") return [`Relance automatique n°${meta.number || 1} : le client n'avait pas répondu.`];
   if (meta.kind === "broadcast") return ["Message groupé envoyé depuis la page « Messages groupés »."];
+  if (meta.kind === "ai_unavailable") return ["L'intelligence artificielle n'a pas pu répondre (fournisseurs indisponibles) : un message d'attente a été envoyé. L'assistant réessaie au prochain message du client ; vous pouvez répondre vous-même en attendant."];
 
   if (meta.intent) {
     const confidence = typeof meta.confidence === "number" ? ` (confiance ${Math.round(meta.confidence * 100)} %)` : "";

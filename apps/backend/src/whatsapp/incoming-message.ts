@@ -36,7 +36,7 @@ import { applyAiOrder, getContactOrderState, loadOrderPrompt } from "../orders/o
 import { withConversationSendLock } from "../conversations/conversation-send-lock.js";
 import { prisma } from "../database/client.js";
 import { deleteClientMediaFile, saveClientMedia, type StoredClientMedia } from "../media/client-media.service.js";
-import { buildHandoffEmail, buildMediaReceivedEmail, notifyOrganizationAdmins } from "../notifications/owner-notifications.js";
+import { buildAiUnavailableEmail, buildHandoffEmail, buildMediaReceivedEmail, notifyOrganizationAdmins } from "../notifications/owner-notifications.js";
 import { getPlatformSuspension } from "../organizations/platform-suspension.service.js";
 import { notifyQuotaReached, notifyTrialLowCredits, releaseAiResponse, reserveAiResponse, type AiResponseEntitlement } from "../billing/subscription.service.js";
 import { registerQualifiedLead } from "../lead-routing/lead-routing.service.js";
@@ -74,6 +74,52 @@ function waitForConfiguredDelay(
 ) {
   const totalMs = humanReplyDelayMs({ configuredDelaySeconds: resolveResponseDelaySeconds(delaySeconds), replyText }, random);
   return waitWhileTyping(totalMs - (Date.now() - startedAt), instance, jid, wait);
+}
+
+/** Dernier avis « IA indisponible » envoyé par entreprise : au plus un email par heure, quel que soit le nombre de clients touchés. */
+const aiUnavailableNoticeAt = new Map<string, number>();
+const AI_UNAVAILABLE_NOTICE_EVERY_MS = 60 * 60_000;
+
+/**
+ * Aucun fournisseur IA n'a répondu. On ne passe PAS la main (l'assistant réessaiera au message suivant) : on envoie un
+ * court message d'attente au client, une seule fois d'affilée pour ne pas l'inonder, et on prévient le propriétaire au
+ * plus une fois par heure. Ne lève jamais.
+ */
+async function handleAiUnavailable(input: {
+  organizationId: string;
+  conversationId: string;
+  contactJid: string;
+  instance: WhatsAppProvider;
+  fallbackText: string;
+  wait: ((ms: number) => Promise<void>) | undefined;
+}) {
+  try {
+    const lastOutbound = await prisma.message.findFirst({
+      where: { conversationId: input.conversationId, direction: "OUTBOUND" },
+      orderBy: { createdAt: "desc" },
+      select: { aiMeta: true },
+    });
+    const alreadyWaiting = (lastOutbound?.aiMeta as { kind?: unknown } | null)?.kind === "ai_unavailable";
+    if (!alreadyWaiting) {
+      await sendInBubbles(input.instance, input.contactJid, input.fallbackText, { wait: input.wait });
+      await recordOutboundMessage({ conversationId: input.conversationId, text: input.fallbackText, author: "AI", aiMeta: { kind: "ai_unavailable" } });
+    }
+    const now = Date.now();
+    const lastNotice = aiUnavailableNoticeAt.get(input.organizationId) ?? 0;
+    if (now - lastNotice >= AI_UNAVAILABLE_NOTICE_EVERY_MS) {
+      aiUnavailableNoticeAt.set(input.organizationId, now);
+      void notifyOrganizationAdmins(input.organizationId, (organizationName) =>
+        buildAiUnavailableEmail({ organizationName, contactLabel: `+${jidToPhone(input.contactJid)}`, detail: null }));
+    }
+    console.error(`❌ [org:${input.organizationId}] IA indisponible : message d'attente ${alreadyWaiting ? "déjà envoyé" : "envoyé"}, l'assistant réessaiera au prochain message.`);
+  } catch (error) {
+    console.error(`❌ [org:${input.organizationId}] Traitement de l'indisponibilité IA impossible :`, error);
+  }
+}
+
+/** Réservé aux tests : oublie les avis « IA indisponible » déjà envoyés. */
+export function resetAiUnavailableNoticesForTests() {
+  aiUnavailableNoticeAt.clear();
 }
 
 /** Coches bleues sur le message du client dès qu'on sait qu'on va lui répondre : un humain lit, puis écrit. Ne lève jamais. */
@@ -374,6 +420,13 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
     const recentHistory = await getRecentHistoryForAi(conversation.id);
     const history = welcomeSent && welcomeDecision.welcome ? placeWelcomeBeforeClientMessages(recentHistory, welcomeDecision.welcome) : recentHistory;
     let aiReply = await getAiOrchestrator().getReply(conversation.id, systemPrompt, history);
+
+    // Panne de l'IA (tous les fournisseurs en échec) : pas de passage de main, pas de décompte dans le forfait
+    // (reservation rendue dans le finally), un message d'attente et un avis au propriétaire.
+    if (aiReply.intent === "erreur_traitement") {
+      await handleAiUnavailable({ organizationId, conversationId: conversation.id, contactJid: message.fromJid, instance, fallbackText: aiReply.reply, wait: context.wait });
+      return;
+    }
 
     if (topicGateActive) {
       if (aiReply.onTopic) {

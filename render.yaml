@@ -64,7 +64,15 @@ services:
         sync: false
       - key: SUPPORT_EMAIL
         sync: false
+      # Fournisseurs IA : LLM_PROVIDER est essayé en premier, puis TOUS les autres dont la clé est renseignée
+      # (secours automatique, avec nouvelle tentative sur quota ou panne passagère). Renseigner au moins deux clés.
+      - key: LLM_PROVIDER
+        value: gemini
       - key: GEMINI_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: MISTRAL_API_KEY
         sync: false
       - key: SMTP_HOST
         sync: false

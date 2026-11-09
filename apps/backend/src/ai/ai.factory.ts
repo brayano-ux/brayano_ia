@@ -12,41 +12,48 @@ export function setAiOrchestratorForTests(fake: Pick<AiOrchestrator, "getReply" 
   orchestrator = fake as AiOrchestrator | null;
 }
 
-function createProvider(): AIProvider {
-  switch (env.LLM_PROVIDER) {
-    case "gemini":
-      return new GeminiProvider();
-    case "mistral":
-      return new MistralProvider();
-    case "openrouter":
-      return new OpenRouterProvider();
-    default:
-      throw new Error(`Fournisseur IA non supporté : ${env.LLM_PROVIDER}`);
-  }
+type ProviderName = "gemini" | "openrouter" | "mistral";
+
+function hasKey(name: ProviderName): boolean {
+  if (name === "gemini") return Boolean(env.GEMINI_API_KEY);
+  if (name === "openrouter") return Boolean(env.OPENROUTER_API_KEY);
+  return Boolean(env.MISTRAL_API_KEY);
 }
 
-function createFallbackProvider(): AIProvider | undefined {
-  if (env.LLM_PROVIDER === "gemini") return env.OPENROUTER_API_KEY ? new OpenRouterProvider() : undefined;
-  return env.GEMINI_API_KEY ? new GeminiProvider() : undefined;
+function instantiate(name: ProviderName): AIProvider {
+  if (name === "gemini") return new GeminiProvider();
+  if (name === "openrouter") return new OpenRouterProvider();
+  return new MistralProvider();
 }
 
-export function getAiOrchestrator(): AiOrchestrator {
-  if (!orchestrator) {
-    orchestrator = new AiOrchestrator(createProvider(), createFallbackProvider());
-  }
-  return orchestrator;
+/**
+ * Ordre d'essai des fournisseurs : celui choisi par LLM_PROVIDER d'abord, puis TOUS les autres dont la clé est
+ * configurée (Gemini, OpenRouter, Mistral). Une clé renseignée est donc toujours un secours réel.
+ */
+export function providerOrder(): ProviderName[] {
+  const primary = env.LLM_PROVIDER as ProviderName;
+  const others = (["gemini", "openrouter", "mistral"] as const).filter((name) => name !== primary && hasKey(name));
+  return [primary, ...others];
 }
 
-/** Fournisseurs bruts (principal puis secours) pour les tâches qui ne sont pas une réponse WhatsApp. */
+/** Fournisseurs instanciés dans l'ordre d'essai (principal puis secours). Le principal doit avoir sa clé (vérifié dans config/env.ts). */
 export function getRawProviders(): AIProvider[] {
   const providers: AIProvider[] = [];
-  for (const create of [createProvider, createFallbackProvider]) {
+  for (const name of providerOrder()) {
     try {
-      const provider = create();
-      if (provider) providers.push(provider);
+      providers.push(instantiate(name));
     } catch (error) {
       console.warn("Fournisseur IA indisponible :", error instanceof Error ? error.message : error);
     }
   }
   return providers;
+}
+
+export function getAiOrchestrator(): AiOrchestrator {
+  if (!orchestrator) {
+    const providers = getRawProviders();
+    orchestrator = new AiOrchestrator(providers);
+    console.log(`🤖 Fournisseurs IA, dans l'ordre d'essai : ${providers.map((provider) => provider.name).join(" → ")}`);
+  }
+  return orchestrator;
 }

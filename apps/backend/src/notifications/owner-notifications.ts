@@ -144,6 +144,18 @@ export function buildMediaReceivedEmail(input: {
 }
 
 /** L'assistant ne peut plus répondre : plus de messages dans le forfait (ou essai terminé, abonnement expiré). */
+/**
+ * L'IA n'a pas pu répondre (tous les fournisseurs en échec) : le propriétaire doit savoir que ce client attend,
+ * sans que l'assistant soit coupé pour autant (il réessaie au message suivant). Envoyé au plus une fois par heure.
+ */
+export function buildAiUnavailableEmail(input: { organizationName: string; contactLabel: string; detail: string | null }) {
+  const url = env.CLIENT_DASHBOARD_URL ? env.CLIENT_DASHBOARD_URL.replace(/\/+$/, "") : null;
+  return {
+    subject: `⚠️ L'assistant de ${input.organizationName} n'a pas pu répondre à un client`,
+    text: `Bonjour,\n\nL'intelligence artificielle n'a pas répondu au message de ${input.contactLabel} : un court message d'attente lui a été envoyé et l'assistant réessaiera à son prochain message.\n\nSi le problème se répète, répondez vous-même depuis l'onglet Conversations et vérifiez vos clés IA (quota ou abonnement du fournisseur).${input.detail ? `\n\nDétail technique : ${input.detail}` : ""}${url ? `\n\nConversations : ${url}` : ""}\n\nNous vous envoyons ce message au plus une fois par heure.`,
+  };
+}
+
 export function buildQuotaReachedEmail(input: { organizationName: string; reason: "trial_exhausted" | "subscription_expired" | "message_quota_exhausted" }) {
   const what = {
     trial_exhausted: { subject: "⚠️ Votre essai gratuit est terminé : l'assistant ne répond plus", line: "Votre essai gratuit (100 messages de l'assistant) est terminé." },

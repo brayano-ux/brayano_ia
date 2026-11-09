@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-const config = vi.hoisted(() => ({ LLM_PROVIDER: "openrouter", OPENROUTER_API_KEY: "test-key" as string | undefined, GEMINI_API_KEY: undefined as string | undefined, OPENROUTER_TRANSCRIPTION_MODEL: "openai/whisper-1", APP_URL: "https://example.test" }));
+const config = vi.hoisted(() => ({ LLM_PROVIDER: "openrouter", OPENROUTER_API_KEY: "test-key" as string | undefined, GEMINI_API_KEY: undefined as string | undefined, MISTRAL_API_KEY: undefined as string | undefined, OPENROUTER_TRANSCRIPTION_MODEL: "openai/whisper-1", APP_URL: "https://example.test" }));
 vi.mock("../config/env.js", () => ({ env: config }));
 vi.mock("./ai-runs.service.js", () => ({ logAiRun: vi.fn() }));
 import { getAiOrchestrator, getRawProviders, setAiOrchestratorForTests } from "./ai.factory.js";
@@ -22,5 +22,11 @@ describe("audio provider configuration", () => {
   it("keeps Gemini then OpenRouter when both are configured", () => {
     config.LLM_PROVIDER = "gemini"; config.GEMINI_API_KEY = "test-gemini-key";
     expect(getRawProviders().map(provider => provider.name)).toEqual(["gemini", "openrouter"]);
+  });
+
+  it("utilise aussi Mistral en secours dès que sa clé est configurée", () => {
+    config.LLM_PROVIDER = "gemini"; config.GEMINI_API_KEY = "test-gemini-key"; config.MISTRAL_API_KEY = "test-mistral-key";
+    expect(getRawProviders().map(provider => provider.name)).toEqual(["gemini", "openrouter", "mistral"]);
+    expect(getAiOrchestrator().providerNames).toEqual(["gemini", "openrouter", "mistral"]);
   });
 });

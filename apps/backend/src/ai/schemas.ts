@@ -13,6 +13,24 @@ const tolerantBoolean = () =>
     z.boolean(),
   );
 
+/** Un nombre écrit en texte (« 80 », « 0,9 ») est converti ; une valeur hors bornes est ramenée dans l'intervalle. */
+const tolerantNumber = (min: number, max: number, fallback: number) =>
+  z.preprocess((value) => {
+    const number = typeof value === "string" ? Number.parseFloat(value.replace(",", ".")) : value;
+    if (typeof number !== "number" || Number.isNaN(number)) return fallback;
+    return Math.min(Math.max(number, min), max);
+  }, z.number().min(min).max(max));
+
+/** Une valeur d'énumération écrite avec une casse ou des espaces différents (« Qualified ») est acceptée ; sinon la valeur de repli. */
+const tolerantEnum = <T extends [string, ...string[]]>(values: T, fallback: T[number]) =>
+  z.preprocess((value) => {
+    const normalized = typeof value === "string" ? value.trim().toLowerCase().replace(/[\s-]+/g, "_") : value;
+    return (values as readonly string[]).includes(normalized as string) ? normalized : fallback;
+  }, z.enum(values));
+
+/** Identifiant de produit : un UUID du catalogue, sinon chaîne vide (un nom de produit ou « null » écrit par le modèle est ignoré). */
+const tolerantProductId = () => z.string().uuid().optional().or(z.literal("")).catch("");
+
 /**
  * NE JAMAIS FAIRE CONFIANCE AU JSON RENVOYÉ PAR LE LLM (Phase 0).
  * Ce schéma est la seule porte d'entrée de la réponse IA vers le reste
@@ -20,15 +38,16 @@ const tolerantBoolean = () =>
  * sur needsHuman = true plutôt que de propager des données douteuses.
  */
 export const aiReplySchema = z.object({
-  reply: z.string().min(1),
-  intent: z.string().min(1),
-  confidence: z.number().min(0).max(1),
-  needsHuman: z.boolean(),
-  leadScore: z.number().min(0).max(100),
-  qualificationStatus: z.enum(["not_qualified", "qualifying", "qualified"]),
-  nextAction: z.enum(["continue", "handoff", "stop"]),
-  leadData: z.record(z.string(), z.unknown()).default({}),
-  productId: z.string().uuid().optional().or(z.literal("")),
+  // Le texte pour le client est la seule chose indispensable : tout le reste est toléré ou remplacé par une valeur sûre.
+  reply: z.string().trim().min(1),
+  intent: z.string().trim().min(1).catch("demande_information"),
+  confidence: tolerantNumber(0, 1, 0.5),
+  needsHuman: tolerantBoolean().catch(false),
+  leadScore: tolerantNumber(0, 100, 0),
+  qualificationStatus: tolerantEnum(["not_qualified", "qualifying", "qualified"], "not_qualified"),
+  nextAction: tolerantEnum(["continue", "handoff", "stop"], "continue"),
+  leadData: z.record(z.string(), z.unknown()).catch({}),
+  productId: tolerantProductId(),
   /** Plusieurs produits dont le client veut voir les photos (5 au maximum sont envoyées). */
   productIds: z.array(z.string().uuid()).max(10).optional().catch(undefined),
   /**
@@ -37,7 +56,7 @@ export const aiReplySchema = z.object({
    * de celui de l'article précédent. Une valeur invalide écrite par le modèle est ignorée plutôt que de
    * faire échouer toute la réponse.
    */
-  discussedProductId: z.string().uuid().optional().or(z.literal("")).catch(""),
+  discussedProductId: tolerantProductId(),
   booking: bookingRequestSchema,
   order: orderRequestSchema,
   /** Rempli seulement quand un « sujet autorisé » est actif pour cette entreprise (voir ai/prompt.ts). */

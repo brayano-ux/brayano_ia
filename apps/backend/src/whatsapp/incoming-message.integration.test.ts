@@ -12,7 +12,7 @@ vi.mock("../notifications/email.service.js", () => ({
 import { rmSync } from "node:fs";
 import { prisma } from "../database/client.js";
 import { recordInboundMessage } from "../conversations/conversations.service.js";
-import { processIncomingMessage } from "./incoming-message.js";
+import { processIncomingMessage, resetAiUnavailableNoticesForTests } from "./incoming-message.js";
 import { setAiOrchestratorForTests } from "../ai/ai.factory.js";
 import { setBillingEnforcedForTests } from "../billing/subscription.service.js";
 import type { MediaAnalysis } from "../ai/media-analysis.js";
@@ -912,6 +912,35 @@ describe.skipIf(!integrationEnabled)("traitement d'un message entrant (base rée
       installScriptedAi([aiReply({ reply: "Désolé, une erreur est survenue.", intent: "erreur_traitement" })]);
       await deliver(organization.id, new FakeWhatsApp(), inbound(JID_NUMBER, "Bonjour, je voudrais un prix"));
       expect(await credits(organization.id)).toBe(3);
+    });
+
+    it("une panne de l'IA ne coupe pas l'assistant : message d'attente une seule fois, propriétaire prévenu une fois par heure, reprise au message suivant", async () => {
+      resetAiUnavailableNoticesForTests();
+      // 50 messages d'essai : au-dessus du seuil de l'email « plus que N réponses », pour ne compter que l'avis de panne.
+      const organization = await orgWithCredits(50);
+      const whatsapp = new FakeWhatsApp();
+
+      // Deux pannes d'affilée : un seul message d'attente, un seul email.
+      installScriptedAi([aiReply({ reply: "Un instant, je vérifie et je reviens vers vous 🙏", intent: "erreur_traitement" })]);
+      await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "Bonjour, vous livrez ?"));
+      await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "Allô ?"));
+      await flushEmails();
+
+      expect(whatsapp.sent.map((item) => item.text)).toEqual(["Un instant, je vérifie et je reviens vers vous 🙏"]);
+      expect(hoisted.sentEmails).toHaveLength(1);
+      expect(hoisted.sentEmails[0]?.subject).toContain("n'a pas pu répondre");
+      const conversation = await prisma.conversation.findFirstOrThrow();
+      expect(conversation.status).toBe("OPEN");
+      expect(conversation.aiEnabled).toBe(true);
+      const waiting = await prisma.message.findMany({ where: { direction: "OUTBOUND" } });
+      expect(waiting).toHaveLength(1);
+      expect(waiting[0]!.aiMeta).toMatchObject({ kind: "ai_unavailable" });
+
+      // L'IA revient : le client reçoit une vraie réponse, sans intervention du propriétaire.
+      installScriptedAi([aiReply({ reply: "Oui, nous livrons à Douala sous 24 h." })]);
+      await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "Vous livrez à Douala ?"));
+      expect(whatsapp.sent.at(-1)!.text).toBe("Oui, nous livrons à Douala sous 24 h.");
+      expect(await credits(organization.id)).toBe(49);
     });
 
     it("un message d'accueil seul (simple « bonjour ») ne coûte rien", async () => {
