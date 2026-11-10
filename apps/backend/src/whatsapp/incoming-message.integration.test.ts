@@ -743,6 +743,28 @@ describe.skipIf(!integrationEnabled)("traitement d'un message entrant (base rée
       const conversation = await prisma.conversation.findFirstOrThrow();
       expect(conversation.negotiationState).toMatchObject({ round: 3, currentPrice: 22500, floorPrice: 22500 });
     });
+
+    it("avec une remise en montant fixe, descend par paliers jusqu'au prix moins ce montant, jamais plus bas", async () => {
+      const { organization, product } = await orgWithNegotiation();
+      await prisma.aiSettings.update({
+        where: { organizationId: organization.id },
+        data: { negotiationDiscountMode: "amount", negotiationMaxDiscountAmount: 2000 },
+      });
+      const offers: number[] = [];
+      for (const text of ["Un meilleur prix ?", "Encore un effort ?", "Un dernier geste ?", "Allez, encore un peu ?"]) {
+        const calls = installScriptedAi([
+          aiReply({ reply: "Voici notre prix.", productId: product.id, wantsDiscount: true }),
+          aiReply({ reply: "D'accord, je fais un effort." }),
+        ]);
+        await deliver(organization.id, new FakeWhatsApp(), inbound(JID_NUMBER, text));
+        offers.push(Number(/EXACTEMENT (\d+) FCFA/.exec(calls[1]!.systemPrompt)?.[1]));
+      }
+
+      // Robe à 25 000 FCFA, remise maximale 2 000 FCFA : plancher 23 000, atteint au troisième tour et tenu ensuite.
+      expect(offers).toEqual([24100, 23600, 23000, 23000]);
+      const conversation = await prisma.conversation.findFirstOrThrow();
+      expect(conversation.negotiationState).toMatchObject({ floorPrice: 23000, currentPrice: 23000 });
+    });
   });
 
   describe("étiquettes de suivi", () => {

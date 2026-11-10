@@ -14,7 +14,7 @@ import { buildClaimCorrection, describeUnbackedClaims, findUnbackedClaims } from
 import { loadMemorySections } from "./memory.service.js";
 import { classifyByCaption, describeMediaKindLabel, type MediaAnalysis, type MediaKind } from "./media-analysis.js";
 import { buildNegotiationSection, buildSystemPrompt } from "./prompt.js";
-import { buildNegotiationInstruction, isNegotiationState, nextNegotiationOffer, startNegotiation, type NegotiationState } from "./price-negotiation.js";
+import { buildNegotiationInstruction, isNegotiationState, nextNegotiationOffer, startNegotiation, type NegotiationState, resolveDiscountLimit } from "./price-negotiation.js";
 import { parsePriceAmount } from "../products/price-parsing.js";
 import { decideWelcome } from "./welcome.js";
 import type { WorkingHours } from "../appointments/availability.js";
@@ -149,7 +149,7 @@ export async function simulateAssistantReply(organizationId: string, input: Test
     const product = productId ? products.find((item) => item.id === productId) : null;
     const basePrice = product ? parsePriceAmount(product.price) : null;
     if (product && basePrice) {
-      const baseState = existing && existing.productId === product.id ? existing : startNegotiation(product.id, basePrice, settings.negotiationMaxDiscountPercent ?? 10);
+      const baseState = existing && existing.productId === product.id ? existing : startNegotiation(product.id, basePrice, resolveDiscountLimit(settings));
       const offer = nextNegotiationOffer(baseState);
       simulation.negotiation = offer.state;
       const retry = await orchestrator.getReply(`dashboard-test-${organizationId}`, `${systemPrompt}\n\n${buildNegotiationInstruction(offer.price, offer.isFinal, product.name)}`, history, { logRun: false });

@@ -145,6 +145,8 @@ export const AiSettingsScalarFieldEnum = {
   adOnlyEnabled: 'adOnlyEnabled',
   negotiationEnabled: 'negotiationEnabled',
   negotiationMaxDiscountPercent: 'negotiationMaxDiscountPercent',
+  negotiationDiscountMode: 'negotiationDiscountMode',
+  negotiationMaxDiscountAmount: 'negotiationMaxDiscountAmount',
   shopLatitude: 'shopLatitude',
   shopLongitude: 'shopLongitude',
   shopLocationLabel: 'shopLocationLabel',

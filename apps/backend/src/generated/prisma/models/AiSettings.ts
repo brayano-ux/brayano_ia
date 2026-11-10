@@ -31,6 +31,7 @@ export type AiSettingsAvgAggregateOutputType = {
   followUpDelayHours: number | null
   followUpMax: number | null
   negotiationMaxDiscountPercent: number | null
+  negotiationMaxDiscountAmount: number | null
   shopLatitude: number | null
   shopLongitude: number | null
 }
@@ -40,6 +41,7 @@ export type AiSettingsSumAggregateOutputType = {
   followUpDelayHours: number | null
   followUpMax: number | null
   negotiationMaxDiscountPercent: number | null
+  negotiationMaxDiscountAmount: number | null
   shopLatitude: number | null
   shopLongitude: number | null
 }
@@ -70,6 +72,8 @@ export type AiSettingsMinAggregateOutputType = {
   adOnlyEnabled: boolean | null
   negotiationEnabled: boolean | null
   negotiationMaxDiscountPercent: number | null
+  negotiationDiscountMode: string | null
+  negotiationMaxDiscountAmount: number | null
   shopLatitude: number | null
   shopLongitude: number | null
   shopLocationLabel: string | null
@@ -103,6 +107,8 @@ export type AiSettingsMaxAggregateOutputType = {
   adOnlyEnabled: boolean | null
   negotiationEnabled: boolean | null
   negotiationMaxDiscountPercent: number | null
+  negotiationDiscountMode: string | null
+  negotiationMaxDiscountAmount: number | null
   shopLatitude: number | null
   shopLongitude: number | null
   shopLocationLabel: string | null
@@ -138,6 +144,8 @@ export type AiSettingsCountAggregateOutputType = {
   adOnlyEnabled: number
   negotiationEnabled: number
   negotiationMaxDiscountPercent: number
+  negotiationDiscountMode: number
+  negotiationMaxDiscountAmount: number
   shopLatitude: number
   shopLongitude: number
   shopLocationLabel: number
@@ -152,6 +160,7 @@ export type AiSettingsAvgAggregateInputType = {
   followUpDelayHours?: true
   followUpMax?: true
   negotiationMaxDiscountPercent?: true
+  negotiationMaxDiscountAmount?: true
   shopLatitude?: true
   shopLongitude?: true
 }
@@ -161,6 +170,7 @@ export type AiSettingsSumAggregateInputType = {
   followUpDelayHours?: true
   followUpMax?: true
   negotiationMaxDiscountPercent?: true
+  negotiationMaxDiscountAmount?: true
   shopLatitude?: true
   shopLongitude?: true
 }
@@ -191,6 +201,8 @@ export type AiSettingsMinAggregateInputType = {
   adOnlyEnabled?: true
   negotiationEnabled?: true
   negotiationMaxDiscountPercent?: true
+  negotiationDiscountMode?: true
+  negotiationMaxDiscountAmount?: true
   shopLatitude?: true
   shopLongitude?: true
   shopLocationLabel?: true
@@ -224,6 +236,8 @@ export type AiSettingsMaxAggregateInputType = {
   adOnlyEnabled?: true
   negotiationEnabled?: true
   negotiationMaxDiscountPercent?: true
+  negotiationDiscountMode?: true
+  negotiationMaxDiscountAmount?: true
   shopLatitude?: true
   shopLongitude?: true
   shopLocationLabel?: true
@@ -259,6 +273,8 @@ export type AiSettingsCountAggregateInputType = {
   adOnlyEnabled?: true
   negotiationEnabled?: true
   negotiationMaxDiscountPercent?: true
+  negotiationDiscountMode?: true
+  negotiationMaxDiscountAmount?: true
   shopLatitude?: true
   shopLongitude?: true
   shopLocationLabel?: true
@@ -381,6 +397,8 @@ export type AiSettingsGroupByOutputType = {
   adOnlyEnabled: boolean
   negotiationEnabled: boolean
   negotiationMaxDiscountPercent: number | null
+  negotiationDiscountMode: string
+  negotiationMaxDiscountAmount: number | null
   shopLatitude: number | null
   shopLongitude: number | null
   shopLocationLabel: string | null
@@ -439,6 +457,8 @@ export type AiSettingsWhereInput = {
   adOnlyEnabled?: Prisma.BoolFilter<"AiSettings"> | boolean
   negotiationEnabled?: Prisma.BoolFilter<"AiSettings"> | boolean
   negotiationMaxDiscountPercent?: Prisma.IntNullableFilter<"AiSettings"> | number | null
+  negotiationDiscountMode?: Prisma.StringFilter<"AiSettings"> | string
+  negotiationMaxDiscountAmount?: Prisma.IntNullableFilter<"AiSettings"> | number | null
   shopLatitude?: Prisma.FloatNullableFilter<"AiSettings"> | number | null
   shopLongitude?: Prisma.FloatNullableFilter<"AiSettings"> | number | null
   shopLocationLabel?: Prisma.StringNullableFilter<"AiSettings"> | string | null
@@ -475,6 +495,8 @@ export type AiSettingsOrderByWithRelationInput = {
   adOnlyEnabled?: Prisma.SortOrder
   negotiationEnabled?: Prisma.SortOrder
   negotiationMaxDiscountPercent?: Prisma.SortOrderInput | Prisma.SortOrder
+  negotiationDiscountMode?: Prisma.SortOrder
+  negotiationMaxDiscountAmount?: Prisma.SortOrderInput | Prisma.SortOrder
   shopLatitude?: Prisma.SortOrderInput | Prisma.SortOrder
   shopLongitude?: Prisma.SortOrderInput | Prisma.SortOrder
   shopLocationLabel?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -514,6 +536,8 @@ export type AiSettingsWhereUniqueInput = Prisma.AtLeast<{
   adOnlyEnabled?: Prisma.BoolFilter<"AiSettings"> | boolean
   negotiationEnabled?: Prisma.BoolFilter<"AiSettings"> | boolean
   negotiationMaxDiscountPercent?: Prisma.IntNullableFilter<"AiSettings"> | number | null
+  negotiationDiscountMode?: Prisma.StringFilter<"AiSettings"> | string
+  negotiationMaxDiscountAmount?: Prisma.IntNullableFilter<"AiSettings"> | number | null
   shopLatitude?: Prisma.FloatNullableFilter<"AiSettings"> | number | null
   shopLongitude?: Prisma.FloatNullableFilter<"AiSettings"> | number | null
   shopLocationLabel?: Prisma.StringNullableFilter<"AiSettings"> | string | null
@@ -550,6 +574,8 @@ export type AiSettingsOrderByWithAggregationInput = {
   adOnlyEnabled?: Prisma.SortOrder
   negotiationEnabled?: Prisma.SortOrder
   negotiationMaxDiscountPercent?: Prisma.SortOrderInput | Prisma.SortOrder
+  negotiationDiscountMode?: Prisma.SortOrder
+  negotiationMaxDiscountAmount?: Prisma.SortOrderInput | Prisma.SortOrder
   shopLatitude?: Prisma.SortOrderInput | Prisma.SortOrder
   shopLongitude?: Prisma.SortOrderInput | Prisma.SortOrder
   shopLocationLabel?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -593,6 +619,8 @@ export type AiSettingsScalarWhereWithAggregatesInput = {
   adOnlyEnabled?: Prisma.BoolWithAggregatesFilter<"AiSettings"> | boolean
   negotiationEnabled?: Prisma.BoolWithAggregatesFilter<"AiSettings"> | boolean
   negotiationMaxDiscountPercent?: Prisma.IntNullableWithAggregatesFilter<"AiSettings"> | number | null
+  negotiationDiscountMode?: Prisma.StringWithAggregatesFilter<"AiSettings"> | string
+  negotiationMaxDiscountAmount?: Prisma.IntNullableWithAggregatesFilter<"AiSettings"> | number | null
   shopLatitude?: Prisma.FloatNullableWithAggregatesFilter<"AiSettings"> | number | null
   shopLongitude?: Prisma.FloatNullableWithAggregatesFilter<"AiSettings"> | number | null
   shopLocationLabel?: Prisma.StringNullableWithAggregatesFilter<"AiSettings"> | string | null
@@ -627,6 +655,8 @@ export type AiSettingsCreateInput = {
   adOnlyEnabled?: boolean
   negotiationEnabled?: boolean
   negotiationMaxDiscountPercent?: number | null
+  negotiationDiscountMode?: string
+  negotiationMaxDiscountAmount?: number | null
   shopLatitude?: number | null
   shopLongitude?: number | null
   shopLocationLabel?: string | null
@@ -663,6 +693,8 @@ export type AiSettingsUncheckedCreateInput = {
   adOnlyEnabled?: boolean
   negotiationEnabled?: boolean
   negotiationMaxDiscountPercent?: number | null
+  negotiationDiscountMode?: string
+  negotiationMaxDiscountAmount?: number | null
   shopLatitude?: number | null
   shopLongitude?: number | null
   shopLocationLabel?: string | null
@@ -697,6 +729,8 @@ export type AiSettingsUpdateInput = {
   adOnlyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   negotiationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   negotiationMaxDiscountPercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  negotiationDiscountMode?: Prisma.StringFieldUpdateOperationsInput | string
+  negotiationMaxDiscountAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   shopLatitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   shopLongitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   shopLocationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -733,6 +767,8 @@ export type AiSettingsUncheckedUpdateInput = {
   adOnlyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   negotiationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   negotiationMaxDiscountPercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  negotiationDiscountMode?: Prisma.StringFieldUpdateOperationsInput | string
+  negotiationMaxDiscountAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   shopLatitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   shopLongitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   shopLocationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -768,6 +804,8 @@ export type AiSettingsCreateManyInput = {
   adOnlyEnabled?: boolean
   negotiationEnabled?: boolean
   negotiationMaxDiscountPercent?: number | null
+  negotiationDiscountMode?: string
+  negotiationMaxDiscountAmount?: number | null
   shopLatitude?: number | null
   shopLongitude?: number | null
   shopLocationLabel?: string | null
@@ -802,6 +840,8 @@ export type AiSettingsUpdateManyMutationInput = {
   adOnlyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   negotiationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   negotiationMaxDiscountPercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  negotiationDiscountMode?: Prisma.StringFieldUpdateOperationsInput | string
+  negotiationMaxDiscountAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   shopLatitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   shopLongitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   shopLocationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -837,6 +877,8 @@ export type AiSettingsUncheckedUpdateManyInput = {
   adOnlyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   negotiationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   negotiationMaxDiscountPercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  negotiationDiscountMode?: Prisma.StringFieldUpdateOperationsInput | string
+  negotiationMaxDiscountAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   shopLatitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   shopLongitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   shopLocationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -877,6 +919,8 @@ export type AiSettingsCountOrderByAggregateInput = {
   adOnlyEnabled?: Prisma.SortOrder
   negotiationEnabled?: Prisma.SortOrder
   negotiationMaxDiscountPercent?: Prisma.SortOrder
+  negotiationDiscountMode?: Prisma.SortOrder
+  negotiationMaxDiscountAmount?: Prisma.SortOrder
   shopLatitude?: Prisma.SortOrder
   shopLongitude?: Prisma.SortOrder
   shopLocationLabel?: Prisma.SortOrder
@@ -889,6 +933,7 @@ export type AiSettingsAvgOrderByAggregateInput = {
   followUpDelayHours?: Prisma.SortOrder
   followUpMax?: Prisma.SortOrder
   negotiationMaxDiscountPercent?: Prisma.SortOrder
+  negotiationMaxDiscountAmount?: Prisma.SortOrder
   shopLatitude?: Prisma.SortOrder
   shopLongitude?: Prisma.SortOrder
 }
@@ -919,6 +964,8 @@ export type AiSettingsMaxOrderByAggregateInput = {
   adOnlyEnabled?: Prisma.SortOrder
   negotiationEnabled?: Prisma.SortOrder
   negotiationMaxDiscountPercent?: Prisma.SortOrder
+  negotiationDiscountMode?: Prisma.SortOrder
+  negotiationMaxDiscountAmount?: Prisma.SortOrder
   shopLatitude?: Prisma.SortOrder
   shopLongitude?: Prisma.SortOrder
   shopLocationLabel?: Prisma.SortOrder
@@ -952,6 +999,8 @@ export type AiSettingsMinOrderByAggregateInput = {
   adOnlyEnabled?: Prisma.SortOrder
   negotiationEnabled?: Prisma.SortOrder
   negotiationMaxDiscountPercent?: Prisma.SortOrder
+  negotiationDiscountMode?: Prisma.SortOrder
+  negotiationMaxDiscountAmount?: Prisma.SortOrder
   shopLatitude?: Prisma.SortOrder
   shopLongitude?: Prisma.SortOrder
   shopLocationLabel?: Prisma.SortOrder
@@ -964,6 +1013,7 @@ export type AiSettingsSumOrderByAggregateInput = {
   followUpDelayHours?: Prisma.SortOrder
   followUpMax?: Prisma.SortOrder
   negotiationMaxDiscountPercent?: Prisma.SortOrder
+  negotiationMaxDiscountAmount?: Prisma.SortOrder
   shopLatitude?: Prisma.SortOrder
   shopLongitude?: Prisma.SortOrder
 }
@@ -1043,6 +1093,8 @@ export type AiSettingsCreateWithoutOrganizationInput = {
   adOnlyEnabled?: boolean
   negotiationEnabled?: boolean
   negotiationMaxDiscountPercent?: number | null
+  negotiationDiscountMode?: string
+  negotiationMaxDiscountAmount?: number | null
   shopLatitude?: number | null
   shopLongitude?: number | null
   shopLocationLabel?: string | null
@@ -1077,6 +1129,8 @@ export type AiSettingsUncheckedCreateWithoutOrganizationInput = {
   adOnlyEnabled?: boolean
   negotiationEnabled?: boolean
   negotiationMaxDiscountPercent?: number | null
+  negotiationDiscountMode?: string
+  negotiationMaxDiscountAmount?: number | null
   shopLatitude?: number | null
   shopLongitude?: number | null
   shopLocationLabel?: string | null
@@ -1127,6 +1181,8 @@ export type AiSettingsUpdateWithoutOrganizationInput = {
   adOnlyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   negotiationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   negotiationMaxDiscountPercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  negotiationDiscountMode?: Prisma.StringFieldUpdateOperationsInput | string
+  negotiationMaxDiscountAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   shopLatitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   shopLongitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   shopLocationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1161,6 +1217,8 @@ export type AiSettingsUncheckedUpdateWithoutOrganizationInput = {
   adOnlyEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   negotiationEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   negotiationMaxDiscountPercent?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  negotiationDiscountMode?: Prisma.StringFieldUpdateOperationsInput | string
+  negotiationMaxDiscountAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   shopLatitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   shopLongitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   shopLocationLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1198,6 +1256,8 @@ export type AiSettingsSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   adOnlyEnabled?: boolean
   negotiationEnabled?: boolean
   negotiationMaxDiscountPercent?: boolean
+  negotiationDiscountMode?: boolean
+  negotiationMaxDiscountAmount?: boolean
   shopLatitude?: boolean
   shopLongitude?: boolean
   shopLocationLabel?: boolean
@@ -1234,6 +1294,8 @@ export type AiSettingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   adOnlyEnabled?: boolean
   negotiationEnabled?: boolean
   negotiationMaxDiscountPercent?: boolean
+  negotiationDiscountMode?: boolean
+  negotiationMaxDiscountAmount?: boolean
   shopLatitude?: boolean
   shopLongitude?: boolean
   shopLocationLabel?: boolean
@@ -1270,6 +1332,8 @@ export type AiSettingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   adOnlyEnabled?: boolean
   negotiationEnabled?: boolean
   negotiationMaxDiscountPercent?: boolean
+  negotiationDiscountMode?: boolean
+  negotiationMaxDiscountAmount?: boolean
   shopLatitude?: boolean
   shopLongitude?: boolean
   shopLocationLabel?: boolean
@@ -1306,6 +1370,8 @@ export type AiSettingsSelectScalar = {
   adOnlyEnabled?: boolean
   negotiationEnabled?: boolean
   negotiationMaxDiscountPercent?: boolean
+  negotiationDiscountMode?: boolean
+  negotiationMaxDiscountAmount?: boolean
   shopLatitude?: boolean
   shopLongitude?: boolean
   shopLocationLabel?: boolean
@@ -1313,7 +1379,7 @@ export type AiSettingsSelectScalar = {
   updatedAt?: boolean
 }
 
-export type AiSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "agentName" | "businessInfo" | "onboardingTestHash" | "agentImageUrl" | "systemPrompt" | "welcomeMessage" | "qualificationFields" | "aiEnabled" | "responseDelaySeconds" | "businessHoursEnabled" | "businessHours" | "businessTimezone" | "closedMessage" | "followUpEnabled" | "followUpDelayHours" | "followUpMax" | "agentDomain" | "agentRole" | "agentTone" | "personaPromptedAt" | "topicGateEnabled" | "topicGateTopic" | "adOnlyEnabled" | "negotiationEnabled" | "negotiationMaxDiscountPercent" | "shopLatitude" | "shopLongitude" | "shopLocationLabel" | "createdAt" | "updatedAt", ExtArgs["result"]["aiSettings"]>
+export type AiSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "agentName" | "businessInfo" | "onboardingTestHash" | "agentImageUrl" | "systemPrompt" | "welcomeMessage" | "qualificationFields" | "aiEnabled" | "responseDelaySeconds" | "businessHoursEnabled" | "businessHours" | "businessTimezone" | "closedMessage" | "followUpEnabled" | "followUpDelayHours" | "followUpMax" | "agentDomain" | "agentRole" | "agentTone" | "personaPromptedAt" | "topicGateEnabled" | "topicGateTopic" | "adOnlyEnabled" | "negotiationEnabled" | "negotiationMaxDiscountPercent" | "negotiationDiscountMode" | "negotiationMaxDiscountAmount" | "shopLatitude" | "shopLongitude" | "shopLocationLabel" | "createdAt" | "updatedAt", ExtArgs["result"]["aiSettings"]>
 export type AiSettingsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
 }
@@ -1357,6 +1423,11 @@ export type $AiSettingsPayload<ExtArgs extends runtime.Types.Extensions.Internal
     adOnlyEnabled: boolean
     negotiationEnabled: boolean
     negotiationMaxDiscountPercent: number | null
+    /**
+     * « percent » : remise maximale en pourcentage du prix ; « amount » : en montant fixe (FCFA), saisi par le marchand.
+     */
+    negotiationDiscountMode: string
+    negotiationMaxDiscountAmount: number | null
     shopLatitude: number | null
     shopLongitude: number | null
     shopLocationLabel: string | null
@@ -1813,6 +1884,8 @@ export interface AiSettingsFieldRefs {
   readonly adOnlyEnabled: Prisma.FieldRef<"AiSettings", 'Boolean'>
   readonly negotiationEnabled: Prisma.FieldRef<"AiSettings", 'Boolean'>
   readonly negotiationMaxDiscountPercent: Prisma.FieldRef<"AiSettings", 'Int'>
+  readonly negotiationDiscountMode: Prisma.FieldRef<"AiSettings", 'String'>
+  readonly negotiationMaxDiscountAmount: Prisma.FieldRef<"AiSettings", 'Int'>
   readonly shopLatitude: Prisma.FieldRef<"AiSettings", 'Float'>
   readonly shopLongitude: Prisma.FieldRef<"AiSettings", 'Float'>
   readonly shopLocationLabel: Prisma.FieldRef<"AiSettings", 'String'>

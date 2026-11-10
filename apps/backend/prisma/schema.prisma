@@ -72,6 +72,9 @@ model AiSettings {
   adOnlyEnabled        Boolean  @default(false) @map("ad_only_enabled")
   negotiationEnabled   Boolean  @default(false) @map("negotiation_enabled")
   negotiationMaxDiscountPercent Int? @map("negotiation_max_discount_percent")
+  /// « percent » : remise maximale en pourcentage du prix ; « amount » : en montant fixe (FCFA), saisi par le marchand.
+  negotiationDiscountMode String @default("percent") @map("negotiation_discount_mode")
+  negotiationMaxDiscountAmount Int? @map("negotiation_max_discount_amount")
   shopLatitude         Float?   @map("shop_latitude")
   shopLongitude        Float?   @map("shop_longitude")
   shopLocationLabel    String?  @map("shop_location_label")

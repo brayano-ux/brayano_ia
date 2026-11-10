@@ -34,6 +34,8 @@ export interface AiSettingsInput {
   adOnlyEnabled?: boolean | undefined;
   negotiationEnabled?: boolean | undefined;
   negotiationMaxDiscountPercent?: number | null | undefined;
+  negotiationDiscountMode?: "percent" | "amount" | undefined;
+  negotiationMaxDiscountAmount?: number | null | undefined;
   shopLatitude?: number | null | undefined;
   shopLongitude?: number | null | undefined;
   shopLocationLabel?: string | null | undefined;
@@ -103,6 +105,8 @@ export async function updateAiSettings(organizationId: string, input: AiSettings
     ...(input.negotiationMaxDiscountPercent !== undefined
       ? { negotiationMaxDiscountPercent: input.negotiationMaxDiscountPercent }
       : {}),
+    ...(input.negotiationDiscountMode !== undefined ? { negotiationDiscountMode: input.negotiationDiscountMode } : {}),
+    ...(input.negotiationMaxDiscountAmount !== undefined ? { negotiationMaxDiscountAmount: input.negotiationMaxDiscountAmount } : {}),
     ...(input.shopLatitude !== undefined ? { shopLatitude: input.shopLatitude } : {}),
     ...(input.shopLongitude !== undefined ? { shopLongitude: input.shopLongitude } : {}),
     ...(input.shopLocationLabel !== undefined ? { shopLocationLabel: input.shopLocationLabel?.trim() || null } : {}),

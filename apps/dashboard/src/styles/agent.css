@@ -160,3 +160,20 @@
 .shop-location-actions { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
 .shop-location-set { display: grid; gap: var(--space-3); margin-top: var(--space-2); }
 .shop-location-map { width: 100%; height: 220px; border: 1px solid var(--line); border-radius: var(--radius-md); }
+
+/* ----- Négociation : remise maximale en pourcentage ou en montant fixe ----- */
+.neg-limit { display: grid; gap: var(--space-3); border: 0; padding: 0; margin: 0; min-width: 0; }
+.neg-limit legend { padding: 0; margin-bottom: var(--space-2); }
+.neg-modes { display: inline-flex; gap: 4px; padding: 4px; width: fit-content; max-width: 100%; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface-2); }
+.neg-mode { position: relative; cursor: pointer; }
+.neg-mode input { position: absolute; opacity: 0; pointer-events: none; }
+.neg-mode span { display: block; padding: 7px 14px; border-radius: var(--radius-sm); font-size: var(--text-sm); font-weight: 600; color: var(--muted); white-space: nowrap; transition: background-color 0.15s var(--ease), color 0.15s var(--ease), box-shadow 0.15s var(--ease); }
+.neg-mode input:checked + span { background: var(--surface); color: var(--brand-700); box-shadow: var(--shadow-xs); }
+.neg-mode input:focus-visible + span { box-shadow: var(--ring); }
+.neg-value { display: grid; gap: var(--space-2); }
+.input-suffix { display: flex; align-items: center; width: min(100%, 220px); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); overflow: hidden; }
+.input-suffix:focus-within { box-shadow: var(--ring); border-color: var(--brand-500); }
+.input-suffix input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]):not([type="range"]) { flex: 1; min-width: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; font-variant-numeric: tabular-nums; }
+.input-suffix input:focus-visible { box-shadow: none; }
+.input-suffix span { padding: 0 12px; font-size: var(--text-sm); font-weight: 600; color: var(--muted); border-left: 1px solid var(--line); align-self: stretch; display: grid; place-items: center; background: var(--surface-2); }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
