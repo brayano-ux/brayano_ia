@@ -4,7 +4,8 @@
  *   2. la connexion avec le compte administrateur configuré (DEFAULT_ADMIN_EMAIL / PASSWORD) aboutit ;
  *   3. chaque onglet s'ouvre sans erreur JavaScript ;
  *   4. la pastille d'en-tête reflète l'état WhatsApp ; les onglets des paramètres fonctionnent ;
- *   5. sur mobile, la barre d'onglets et le menu « Plus » répondent.
+ *   5. la page d'accueil publique s'affiche et ses animations démarrent ;
+ *   6. sur mobile, la barre d'onglets et le menu « Plus » répondent.
  *
  * Variables : DASHBOARD_URL (défaut http://127.0.0.1:4173), E2E_EMAIL, E2E_PASSWORD.
  */
@@ -116,6 +117,21 @@ async function run() {
 
     if (errors.length) failures.push(`Erreurs JavaScript sur ordinateur :\n  - ${errors.join("\n  - ")}`);
     await desktop.close();
+
+    // ---- Page d'accueil publique : elle s'affiche, ses animations démarrent, sans erreur JavaScript
+    const visitor = await browser.newContext({ viewport: { width: 1366, height: 860 } });
+    const landing = await visitor.newPage();
+    const landingErrors = [];
+    landing.on("pageerror", (error) => landingErrors.push(error.message));
+    await landing.goto(`${BASE}/?accueil`, { waitUntil: "load" });
+    await landing.waitForTimeout(800);
+    if (!(await landing.isVisible(".hero h1"))) failures.push("Page d'accueil : le titre principal ne s'affiche pas.");
+    if (!(await landing.isVisible("#tarifs .plan.popular"))) failures.push("Page d'accueil : les tarifs ne s'affichent pas.");
+    if (!(await landing.$("html.has-motion [data-chat-loop].chat-live"))) failures.push("Page d'accueil : la conversation animée ne démarre pas.");
+    await landing.click('label[for="m2"]');
+    if (!(await landing.isVisible(".demo-tabs .tab-panel.p2"))) failures.push("Page d'accueil : l'onglet d'exemple « Salon » ne s'ouvre pas.");
+    if (landingErrors.length) failures.push(`Erreurs JavaScript sur la page d'accueil :\n  - ${landingErrors.join("\n  - ")}`);
+    await visitor.close();
 
     // ---- Mobile
     const mobile = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
