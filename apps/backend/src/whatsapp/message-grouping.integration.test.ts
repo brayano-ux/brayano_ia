@@ -10,7 +10,10 @@ import {
   aiReply, createTestOrganization, deliver, disconnectTestDatabase, FakeWhatsApp, inbound, installScriptedAi, integrationEnabled, resetDatabase,
 } from "../test-support/integration.js";
 import { processIncomingMessage } from "./incoming-message.js";
-import { isLatestInbound, MESSAGE_GROUPING_WINDOW_MS, resetMessageGroupingForTests } from "./message-grouping.js";
+import { groupingWindowMs, isLatestInbound, resetMessageGroupingForTests } from "./message-grouping.js";
+
+/** L'entreprise de test est réglée sur 3 secondes : c'est son silence de regroupement. */
+const GROUPING_WINDOW_MS = groupingWindowMs(3);
 
 const JID_NUMBER = "237655000009";
 
@@ -46,7 +49,7 @@ describe.skipIf(!integrationEnabled)("messages envoyés à la suite (base réell
     // arrivent donc « pendant » la fenêtre de regroupement.
     let endOfSilence!: () => void;
     const silence = new Promise<void>((resolve) => { endOfSilence = resolve; });
-    const wait = async (ms: number) => { if (ms === MESSAGE_GROUPING_WINDOW_MS) await silence; };
+    const wait = async (ms: number) => { if (ms === GROUPING_WINDOW_MS) await silence; };
 
     const pending: Array<Promise<void>> = [];
     const texts = ["Bonjour", "Vous avez des chaussures ?", "En 42"];
@@ -116,6 +119,74 @@ describe.skipIf(!integrationEnabled)("messages envoyés à la suite (base réell
     expect(calls[1]!.history.map((turn) => turn.role)).toEqual(["user", "assistant", "user"]);
     expect(calls[1]!.systemPrompt).not.toContain("MESSAGES ENVOYÉS À LA SUITE");
     expect(await credits(organization.id)).toBe(48);
+  });
+});
+
+describe.skipIf(!integrationEnabled)("rythme de la réponse (base réelle)", () => {
+  beforeEach(async () => {
+    await resetDatabase();
+    resetMessageGroupingForTests();
+  });
+
+  /** WhatsApp factice qui note l'ordre des gestes visibles par le client : lu, en train d'écrire, message. */
+  class ObservedWhatsApp extends FakeWhatsApp {
+    events: string[] = [];
+    async markAsRead() { this.events.push("lu"); }
+    async sendTypingIndicator() { this.events.push("écrit"); }
+    async stopTypingIndicator() { this.events.push("arrête d'écrire"); }
+    override async sendMessage(jid: string, text: string) { this.events.push("message"); await super.sendMessage(jid, text); }
+  }
+
+  function observedAi(whatsapp: ObservedWhatsApp, reply: Parameters<typeof aiReply>[0] = {}) {
+    setAiOrchestratorForTests({
+      async getReply() { whatsapp.events.push("IA"); return aiReply({ reply: "Oui, nous livrons à Akwa.", ...reply }); },
+      async transcribeAudio() { return ""; },
+    });
+  }
+
+  it("marque lu puis affiche « en train d'écrire » AVANT d'appeler l'IA, avec un silence de regroupement court", async () => {
+    const { organization } = await createTestOrganization(); // délai de réponse : 3 secondes
+    const whatsapp = new ObservedWhatsApp();
+    observedAi(whatsapp);
+    const waits: number[] = [];
+
+    await processIncomingMessage({ organizationId: organization.id, instance: whatsapp, wait: async (ms) => { waits.push(ms); } }, inbound(JID_NUMBER, "Vous livrez à Akwa ?"));
+
+    expect(whatsapp.events).toEqual(["lu", "écrit", "IA", "message"]);
+    expect(waits[0]).toBe(2_000);
+  });
+
+  it("avec un délai d'une minute, n'écrit pas pendant toute l'attente : silence, puis frappe juste avant l'envoi", async () => {
+    const { organization } = await createTestOrganization();
+    await prisma.aiSettings.update({ where: { organizationId: organization.id }, data: { responseDelaySeconds: 60 } });
+    const whatsapp = new ObservedWhatsApp();
+    observedAi(whatsapp);
+    const waits: number[] = [];
+
+    await processIncomingMessage({ organizationId: organization.id, instance: whatsapp, wait: async (ms) => { waits.push(ms); } }, inbound(JID_NUMBER, "Vous livrez à Akwa ?"));
+
+    expect(whatsapp.events).toEqual(["lu", "IA", "écrit", "message"]);
+    expect(waits[0]).toBe(8_000);
+    // Silence de plusieurs dizaines de secondes, puis quelques secondes de frappe.
+    expect(waits[1]).toBeGreaterThan(30_000);
+    expect(waits[2]).toBeGreaterThanOrEqual(1_500);
+    expect(waits[2]).toBeLessThan(5_000);
+  });
+
+  it("retire l'indicateur quand l'agent renonce à répondre après avoir commencé à écrire", async () => {
+    const { organization } = await createTestOrganization();
+    const whatsapp = new ObservedWhatsApp();
+    // L'IA est en panne et un message d'attente a déjà été envoyé : rien ne part cette fois-ci.
+    setAiOrchestratorForTests({
+      async getReply() { whatsapp.events.push("IA"); return aiReply({ reply: "Un instant.", intent: "erreur_traitement" }); },
+      async transcribeAudio() { return ""; },
+    });
+    await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "Bonjour, vous livrez ?", { timestamp: new Date(Date.now() - 5_000) }));
+    whatsapp.events.length = 0;
+
+    await deliver(organization.id, whatsapp, inbound(JID_NUMBER, "Allô ?"));
+
+    expect(whatsapp.events).toEqual(["lu", "écrit", "IA", "arrête d'écrire"]);
   });
 });
 

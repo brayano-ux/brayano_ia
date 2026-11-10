@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import {
-  buildGroupedMessagesSection, carryWelcomeOver, clearPendingGroup, isLatestInbound, pendingGroup, registerPendingInbound, resetMessageGroupingForTests, takeCarriedWelcome,
+  buildGroupedMessagesSection, carryWelcomeOver, clearPendingGroup, groupingWindowMs, isLatestInbound, pendingGroup, registerPendingInbound, resetMessageGroupingForTests, takeCarriedWelcome,
 } from "./message-grouping.js";
 
 const entry = (externalId: string, text = externalId) => ({ externalId, text, requestText: text, hasMedia: false });
@@ -47,6 +47,14 @@ describe("regroupement des messages envoyés à la suite", () => {
     carryWelcomeOver("conv", "Bienvenue 👋");
     expect(takeCarriedWelcome("conv")).toBe("Bienvenue 👋");
     expect(takeCarriedWelcome("conv")).toBeNull();
+  });
+
+  it("dose le silence d'après le délai configuré : court pour un agent rapide, plus long pour un agent lent", () => {
+    expect(groupingWindowMs(3)).toBe(2_000);
+    expect(groupingWindowMs(5)).toBe(3_000);
+    expect(groupingWindowMs(7)).toBe(4_000);
+    expect(groupingWindowMs(60)).toBe(8_000);
+    expect(groupingWindowMs(120)).toBe(8_000);
   });
 
   it("n'ajoute une consigne au prompt que pour plusieurs messages", () => {
