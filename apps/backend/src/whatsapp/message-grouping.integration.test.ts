@@ -54,8 +54,14 @@ describe.skipIf(!integrationEnabled)("messages envoyés à la suite (base réell
     const pending: Array<Promise<void>> = [];
     const texts = ["Bonjour", "Vous avez des chaussures ?", "En 42"];
     for (const [index, text] of texts.entries()) {
-      pending.push(processIncomingMessage({ organizationId: organization.id, instance: whatsapp, wait }, inbound(JID_NUMBER, text, { timestamp: new Date(Date.now() + index) })));
-      await until(async () => (await prisma.message.count({ where: { direction: "INBOUND" } })) === index + 1);
+      const message = inbound(JID_NUMBER, text, { timestamp: new Date(Date.now() + index) });
+      pending.push(processIncomingMessage({ organizationId: organization.id, instance: whatsapp, wait }, message));
+      // Le message suivant n'arrive qu'une fois celui-ci en attente de réponse (enregistré ET devenu le plus récent) :
+      // sinon le silence pourrait se terminer avant que le dernier message soit connu.
+      await until(async () => {
+        const conversation = await prisma.conversation.findFirst({ select: { id: true } });
+        return Boolean(conversation && isLatestInbound(conversation.id, message.externalId));
+      });
     }
     endOfSilence();
     await Promise.all(pending);
