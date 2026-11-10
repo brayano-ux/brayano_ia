@@ -288,16 +288,23 @@
             <span>Autoriser l’agent à négocier les prix</span>
           </label>
           <div id="neg-details" class="bh-details">
-            <label>
-              <span class="field-label">Remise maximale autorisée</span>
-              <select id="neg-max-discount">
-                <option value="5">5 %</option>
-                <option value="10" selected>10 %</option>
-                <option value="15">15 %</option>
-                <option value="20">20 %</option>
-                <option value="25">25 %</option>
-              </select>
-            </label>
+            <fieldset class="neg-limit">
+              <legend class="field-label">Remise maximale autorisée</legend>
+              <div class="neg-modes" role="radiogroup" aria-label="Type de remise maximale">
+                <label class="neg-mode"><input type="radio" name="neg-mode" id="neg-mode-percent" value="percent" checked /><span>En pourcentage</span></label>
+                <label class="neg-mode"><input type="radio" name="neg-mode" id="neg-mode-amount" value="amount" /><span>En montant fixe</span></label>
+              </div>
+              <div class="neg-value" id="neg-percent-field">
+                <label for="neg-max-discount" class="sr-only">Pourcentage maximal de remise</label>
+                <div class="input-suffix"><input id="neg-max-discount" type="number" inputmode="numeric" min="1" max="50" step="1" value="10" /><span>%</span></div>
+                <p class="agent-tip">De 1 à 50 %. Exemple : avec 10 %, un article à 25 000 FCFA ne descend jamais sous 22 500 FCFA.</p>
+              </div>
+              <div class="neg-value hidden" id="neg-amount-field">
+                <label for="neg-max-amount" class="sr-only">Montant maximal de remise en FCFA</label>
+                <div class="input-suffix"><input id="neg-max-amount" type="number" inputmode="numeric" min="100" step="100" placeholder="2000" /><span>FCFA</span></div>
+                <p class="agent-tip">Le même montant maximal s’applique à chaque article. Exemple : avec 2 000 FCFA, un article à 25 000 FCFA ne descend jamais sous 23 000 FCFA. Pour protéger vos petits articles, la remise ne dépasse jamais la moitié du prix.</p>
+              </div>
+            </fieldset>
             <p class="agent-tip">💬 L’agent ne lâche jamais tout d’un coup : il propose au maximum 2 à 3 petites baisses progressives, en restant naturel et chaleureux, comme un vrai vendeur. Fonctionne uniquement sur les produits dont le prix est écrit avec des chiffres (ex. « 25 000 FCFA ») ; les prix « sur devis » ne sont pas négociés.</p>
           </div>
           <div class="form-actions agent-pane-save">

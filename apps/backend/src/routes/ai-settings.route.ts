@@ -34,7 +34,9 @@ const updateAiSettingsSchema = z.object({
   topicGateTopic: z.string().trim().max(200).nullable().optional(),
   adOnlyEnabled: z.boolean().optional(),
   negotiationEnabled: z.boolean().optional(),
-  negotiationMaxDiscountPercent: z.number().int().min(1).max(50).nullable().optional(),
+  negotiationMaxDiscountPercent: z.number().int().min(1, "La remise doit être d'au moins 1 %.").max(50, "La remise ne peut pas dépasser 50 %.").nullable().optional(),
+  negotiationDiscountMode: z.enum(["percent", "amount"]).optional(),
+  negotiationMaxDiscountAmount: z.number().int("Le montant de la remise doit être un nombre entier.").min(100, "Le montant de la remise doit être d'au moins 100 FCFA.").max(10_000_000).nullable().optional(),
   shopLatitude: z.number().min(-90).max(90).nullable().optional(),
   shopLongitude: z.number().min(-180).max(180).nullable().optional(),
   shopLocationLabel: z.string().trim().max(80).nullable().optional(),
@@ -84,6 +86,8 @@ export async function aiSettingsRoute(app: FastifyInstance) {
       adOnlyEnabled?: boolean | undefined;
       negotiationEnabled?: boolean | undefined;
       negotiationMaxDiscountPercent?: number | null | undefined;
+      negotiationDiscountMode?: "percent" | "amount" | undefined;
+      negotiationMaxDiscountAmount?: number | null | undefined;
       shopLatitude?: number | null | undefined;
       shopLongitude?: number | null | undefined;
       shopLocationLabel?: string | null | undefined;
@@ -116,6 +120,15 @@ export async function aiSettingsRoute(app: FastifyInstance) {
     if (parsed.data.negotiationMaxDiscountPercent !== undefined) {
       settingsInput.negotiationMaxDiscountPercent = parsed.data.negotiationMaxDiscountPercent;
     }
+    // Remise en montant fixe : sans montant, l'agent retomberait en silence sur le pourcentage. On le refuse clairement.
+    if (parsed.data.negotiationDiscountMode === "amount" && parsed.data.negotiationEnabled !== false && !parsed.data.negotiationMaxDiscountAmount) {
+      const current = parsed.data.negotiationMaxDiscountAmount === undefined
+        ? await getOrCreateAiSettings(orgId)
+        : null;
+      if (!current?.negotiationMaxDiscountAmount) throw new ValidationError("Indiquez le montant maximal de la remise (en FCFA).");
+    }
+    if (parsed.data.negotiationDiscountMode !== undefined) settingsInput.negotiationDiscountMode = parsed.data.negotiationDiscountMode;
+    if (parsed.data.negotiationMaxDiscountAmount !== undefined) settingsInput.negotiationMaxDiscountAmount = parsed.data.negotiationMaxDiscountAmount;
     if (parsed.data.shopLatitude !== undefined) settingsInput.shopLatitude = parsed.data.shopLatitude;
     if (parsed.data.shopLongitude !== undefined) settingsInput.shopLongitude = parsed.data.shopLongitude;
     if (parsed.data.shopLocationLabel !== undefined) settingsInput.shopLocationLabel = parsed.data.shopLocationLabel;

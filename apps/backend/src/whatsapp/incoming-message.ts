@@ -6,6 +6,7 @@ import {
   buildNegotiationInstruction,
   isNegotiationState,
   nextNegotiationOffer,
+  resolveDiscountLimit,
   startNegotiation,
 } from "../ai/price-negotiation.js";
 import { parsePriceAmount } from "../products/price-parsing.js";
@@ -593,7 +594,7 @@ async function replyToPendingMessages(context: IncomingMessageContext, message: 
         if (negotiationProduct && basePrice) {
           const baseState = existingNegotiation && existingNegotiation.productId === negotiationProduct.id
             ? existingNegotiation
-            : startNegotiation(negotiationProduct.id, basePrice, settings.negotiationMaxDiscountPercent ?? 10);
+            : startNegotiation(negotiationProduct.id, basePrice, resolveDiscountLimit(settings));
           const { price: negotiatedPrice, state: nextNegotiationState, isFinal: negotiationFinal } = nextNegotiationOffer(baseState);
           await setConversationNegotiationState(conversation.id, nextNegotiationState as object);
           const retry = await getAiOrchestrator().getReply(

@@ -55,6 +55,9 @@ function syncVisibility() {
   $("#fu-details").classList.toggle("is-off", !$("#fu-enabled").checked);
   $("#tg-details").classList.toggle("is-off", !$("#tg-enabled").checked);
   $("#neg-details").classList.toggle("is-off", !$("#neg-enabled").checked);
+  const amountMode = $("#neg-mode-amount").checked;
+  $("#neg-percent-field").classList.toggle("hidden", amountMode);
+  $("#neg-amount-field").classList.toggle("hidden", !amountMode);
 }
 
 function ensureOption(select, value) {
@@ -78,11 +81,11 @@ export function fillHoursSettings(settings) {
   $("#tg-topic").value = settings.topicGateTopic || "";
   $("#ad-only-enabled").checked = Boolean(settings.adOnlyEnabled);
   $("#neg-enabled").checked = Boolean(settings.negotiationEnabled);
-  const maxDiscountSelect = $("#neg-max-discount");
-  const maxDiscountValue = String(settings.negotiationMaxDiscountPercent || 10);
-  maxDiscountSelect.value = [...maxDiscountSelect.options].some((option) => option.value === maxDiscountValue)
-    ? maxDiscountValue
-    : "10";
+  $("#neg-max-discount").value = String(settings.negotiationMaxDiscountPercent || 10);
+  $("#neg-max-amount").value = settings.negotiationMaxDiscountAmount ? String(settings.negotiationMaxDiscountAmount) : "";
+  const amountMode = settings.negotiationDiscountMode === "amount";
+  $("#neg-mode-amount").checked = amountMode;
+  $("#neg-mode-percent").checked = !amountMode;
   syncVisibility();
 }
 
@@ -99,12 +102,36 @@ export function readHoursSettings() {
     topicGateTopic: $("#tg-topic").value.trim() || null,
     adOnlyEnabled: $("#ad-only-enabled").checked,
     negotiationEnabled: $("#neg-enabled").checked,
-    negotiationMaxDiscountPercent: Number($("#neg-max-discount").value),
+    negotiationDiscountMode: $("#neg-mode-amount").checked ? "amount" : "percent",
+    // Un champ vide ou hors limites ne doit pas effacer la valeur de l'autre mode : on garde alors une valeur sûre.
+    negotiationMaxDiscountPercent: readWholeNumber("#neg-max-discount", 1, 50) ?? 10,
+    negotiationMaxDiscountAmount: readWholeNumber("#neg-max-amount", 100, 10_000_000),
   };
+}
+
+/** Nombre entier saisi dans un champ, ou null s'il est vide, non entier ou hors des bornes. */
+function readWholeNumber(selector, min, max) {
+  const raw = $(selector).value.trim();
+  if (!raw) return null;
+  const value = Number(raw);
+  return Number.isInteger(value) && value >= min && value <= max ? value : null;
 }
 
 export function hoursSnapshot() {
   return JSON.stringify(readHoursSettings());
+}
+
+/** Remise maximale de la négociation : renvoie { message, selector } pour le champ à corriger, ou null si tout est correct. */
+export function validateNegotiation() {
+  if (!$("#neg-enabled").checked) return null;
+  if ($("#neg-mode-amount").checked) {
+    return readWholeNumber("#neg-max-amount", 100, 10_000_000) === null
+      ? { selector: "#neg-max-amount", message: "Négociation : indiquez le montant maximal de la remise, en FCFA (100 au minimum, sans virgule)." }
+      : null;
+  }
+  return readWholeNumber("#neg-max-discount", 1, 50) === null
+    ? { selector: "#neg-max-discount", message: "Négociation : indiquez un pourcentage de remise entre 1 et 50." }
+    : null;
 }
 
 /** Renvoie un message d'erreur lisible, ou "" si tout est correct. */
@@ -138,4 +165,6 @@ export function initHoursSettings() {
   $("#bh-enabled").addEventListener("change", syncVisibility);
   $("#fu-enabled").addEventListener("change", syncVisibility);
   $("#neg-enabled").addEventListener("change", syncVisibility);
+  $("#neg-mode-percent").addEventListener("change", syncVisibility);
+  $("#neg-mode-amount").addEventListener("change", syncVisibility);
 }

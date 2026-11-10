@@ -142,3 +142,53 @@ describe("PUT /ai-settings : informations d’entreprise longues", () => {
     }
   });
 });
+
+describe("PUT /ai-settings : remise maximale de la négociation", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.updateAiSettings.mockResolvedValue({ id: "settings-1" });
+    mocks.getOrCreateAiSettings.mockResolvedValue({ negotiationMaxDiscountAmount: null });
+    mocks.assertFeature.mockResolvedValue(undefined);
+  });
+
+  async function put(payload: object) {
+    const app = await createApp();
+    try {
+      return await app.inject({ method: "PUT", url: "/organizations/org-1/ai-settings", payload });
+    } finally {
+      await app.close();
+    }
+  }
+
+  it("enregistre une remise en montant fixe saisie par le marchand", async () => {
+    const response = await put({ negotiationEnabled: true, negotiationDiscountMode: "amount", negotiationMaxDiscountAmount: 2000 });
+    expect(response.statusCode).toBe(200);
+    expect(mocks.updateAiSettings).toHaveBeenCalledWith("org-1", expect.objectContaining({ negotiationDiscountMode: "amount", negotiationMaxDiscountAmount: 2000 }));
+  });
+
+  it("enregistre un pourcentage saisi librement entre 1 et 50", async () => {
+    const response = await put({ negotiationEnabled: true, negotiationDiscountMode: "percent", negotiationMaxDiscountPercent: 12 });
+    expect(response.statusCode).toBe(200);
+    expect(mocks.updateAiSettings).toHaveBeenCalledWith("org-1", expect.objectContaining({ negotiationDiscountMode: "percent", negotiationMaxDiscountPercent: 12 }));
+  });
+
+  it("refuse le mode montant fixe sans montant", async () => {
+    const response = await put({ negotiationEnabled: true, negotiationDiscountMode: "amount", negotiationMaxDiscountAmount: null });
+    expect(response.statusCode).toBe(400);
+    expect(response.json().message).toContain("montant maximal");
+    expect(mocks.updateAiSettings).not.toHaveBeenCalled();
+  });
+
+  it("accepte de passer en montant fixe quand un montant est déjà enregistré", async () => {
+    mocks.getOrCreateAiSettings.mockResolvedValue({ negotiationMaxDiscountAmount: 3000 });
+    const response = await put({ negotiationDiscountMode: "amount" });
+    expect(response.statusCode).toBe(200);
+  });
+
+  it("refuse un montant trop faible, un montant à virgule et un pourcentage hors limites", async () => {
+    expect((await put({ negotiationMaxDiscountAmount: 50 })).statusCode).toBe(400);
+    expect((await put({ negotiationMaxDiscountAmount: 1500.5 })).statusCode).toBe(400);
+    expect((await put({ negotiationMaxDiscountPercent: 80 })).statusCode).toBe(400);
+    expect((await put({ negotiationMaxDiscountPercent: 0 })).statusCode).toBe(400);
+  });
+});

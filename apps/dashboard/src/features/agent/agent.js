@@ -4,7 +4,7 @@ import { getState, setState } from "../../state/store.js";
 import { APP_CONFIG } from "../../config.js";
 import { applyPlatformSuspension } from "../suspension/suspension.js";
 import { initLearning, loadLearning } from "./learning.js";
-import { initHoursSettings, fillHoursSettings, readHoursSettings, hoursSnapshot, validateHours } from "./hours-settings.js";
+import { initHoursSettings, fillHoursSettings, readHoursSettings, hoursSnapshot, validateHours, validateNegotiation } from "./hours-settings.js";
 import { initShopLocation, fillShopLocation, readShopLocation, shopLocationSnapshot } from "./shop-location.js";
 import { initTester } from "./tester.js";
 
@@ -58,6 +58,8 @@ async function saveSettings(event) {
   if ($("#business-info").value.length > APP_CONFIG.businessInfoMaxLength) {
     return focusInvalid("knowledge", "#business-info", "Les informations sur votre activité dépassent 50 000 caractères. Raccourcissez le texte avant d’enregistrer ; votre saisie est conservée.");
   }
+  const negotiationError = validateNegotiation();
+  if (negotiationError) return focusInvalid("rules", negotiationError.selector, negotiationError.message);
   const hoursError = validateHours();
   if (hoursError) {
     return $("#tg-enabled").checked && !$("#tg-topic").value.trim()
