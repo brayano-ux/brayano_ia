@@ -48,13 +48,13 @@ import {
 import { buildCatalogIndexSection, CATALOG_DETAILED_LIMIT, selectCatalogForPrompt } from "../products/catalog-search.js";
 import { listProductsForAssistant } from "../products/products.service.js";
 import { findLatestSentProductId, findProductIdForSentImage, findRecentSentProductIds, recordSentProductImage } from "../products/sent-product-images.service.js";
-import { humanReplyDelayMs, sendInBubbles, waitWhileTyping } from "./human-pacing.js";
+import { createTypingSession, EARLY_TYPING_MAX_DELAY_SECONDS, planReplyPacing, sendInBubbles, type TypingSession } from "./human-pacing.js";
 import {
   buildGroupedMessagesSection,
   carryWelcomeOver,
   clearPendingGroup,
+  groupingWindowMs,
   isLatestInbound,
-  MESSAGE_GROUPING_WINDOW_MS,
   pendingGroup,
   registerPendingInbound,
   takeCarriedWelcome,
@@ -69,23 +69,36 @@ export interface IncomingMessageContext {
   wait?: (ms: number) => Promise<void>;
 }
 
+const realSleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
 /**
- * Attend avant d'envoyer `replyText`, en affichant « en train d'écrire… » : le délai configuré par le propriétaire
- * (avec aléatoire), allongé si le texte est long à taper, moins le temps déjà écoulé depuis la réception
- * (appel à l'IA compris). Le délai de réponse ressemble ainsi à une vraie frappe plutôt qu'à un silence exact
- * suivi d'un pavé qui apparaît d'un coup.
+ * Dernière attente avant d'envoyer `replyText` (voir planReplyPacing) : ce qu'il reste du délai configuré et du
+ * temps de frappe, en tenant compte de ce que le client a déjà vu. « En train d'écrire… » est toujours visible
+ * juste avant l'envoi : s'il n'était pas encore affiché (délai long, message d'accueil), il l'est ici.
  */
-function waitForConfiguredDelay(
-  startedAt: number,
-  delaySeconds: unknown,
-  replyText: string,
-  instance: Pick<WhatsAppProvider, "sendTypingIndicator">,
-  jid: string,
-  wait?: (ms: number) => Promise<void>,
-  random: () => number = Math.random,
-) {
-  const totalMs = humanReplyDelayMs({ configuredDelaySeconds: resolveResponseDelaySeconds(delaySeconds), replyText }, random);
-  return waitWhileTyping(totalMs - (Date.now() - startedAt), instance, jid, wait);
+async function waitBeforeSending(input: {
+  startedAt: number;
+  delaySeconds: unknown;
+  replyText: string;
+  typing: TypingSession;
+  wait: ((ms: number) => Promise<void>) | undefined;
+}, random: () => number = Math.random) {
+  const plan = planReplyPacing(
+    { configuredDelaySeconds: resolveResponseDelaySeconds(input.delaySeconds), replyText: input.replyText, elapsedMs: Date.now() - input.startedAt, typingVisibleMs: input.typing.visibleMs() },
+    random,
+  );
+  const sleep = input.wait ?? realSleep;
+  if (plan.silentMs > 0) await sleep(plan.silentMs);
+  if (plan.typingMs > 0) {
+    input.typing.start();
+    await sleep(plan.typingMs);
+  }
+}
+
+/** Délai de réponse configuré pour cette entreprise, lu avant toute décision (sert à doser le silence de regroupement). */
+async function loadResponseDelaySeconds(organizationId: string): Promise<number> {
+  const settings = await prisma.aiSettings.findUnique({ where: { organizationId }, select: { responseDelaySeconds: true } }).catch(() => null);
+  return resolveResponseDelaySeconds(settings?.responseDelaySeconds);
 }
 
 /** Dernier avis « IA indisponible » envoyé par entreprise : au plus un email par heure, quel que soit le nombre de clients touchés. */
@@ -306,8 +319,9 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
       quotedMessageId: message.quotedMessageId,
       hasMedia: Boolean(received),
     });
-    // Le client écrit peut-être encore : on lui laisse quelques secondes avant de répondre.
-    await (context.wait ?? ((ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms))))(MESSAGE_GROUPING_WINDOW_MS);
+    // Le client écrit peut-être encore : on lui laisse un court instant avant de répondre, dosé d'après le délai
+    // configuré (cette attente s'ajoute au temps de réponse de l'IA).
+    await (context.wait ?? realSleep)(groupingWindowMs(await loadResponseDelaySeconds(organizationId)));
     if (!isLatestInbound(conversation.id, message.externalId)) {
       console.log(`🧩 [org:${organizationId}] Message suivi d'un autre : une seule réponse sera envoyée pour le groupe.`);
       return;
@@ -332,6 +346,8 @@ async function replyToPendingMessages(context: IncomingMessageContext, message: 
   // Un message plus récent est arrivé : il portera la réponse, les messages en attente lui sont laissés.
   let superseded = false;
   let group: PendingInbound[] = [];
+  // « En train d'écrire… » affiché dès que l'agent sait qu'il va répondre, et maintenu pendant l'appel à l'IA.
+  const typing = createTypingSession(instance, message.fromJid, { keepAlive: !context.wait });
   try {
     if (!isLatestInbound(conversationId, message.externalId)) {
       superseded = true;
@@ -397,7 +413,7 @@ async function replyToPendingMessages(context: IncomingMessageContext, message: 
     if (welcomeDecision.welcome) {
       const welcomeText = welcomeDecision.welcome;
       await markAsRead(instance, message.fromJid, groupIds);
-      if (welcomeDecision.welcomeOnly) await waitForConfiguredDelay(replyStartedAt, settings.responseDelaySeconds, welcomeText, instance, message.fromJid, context.wait);
+      if (welcomeDecision.welcomeOnly) await waitBeforeSending({ startedAt: replyStartedAt, delaySeconds: settings.responseDelaySeconds, replyText: welcomeText, typing, wait: context.wait });
       welcomeSent = await withConversationSendLock(conversation.id, async () => {
         const stillFirst = (await prisma.message.count({ where: { conversationId: conversation.id, direction: "OUTBOUND" } })) === 0;
         if (!stillFirst || !await isConversationUpdateStillCurrent(conversation.id, conversation.updatedAt)) return false;
@@ -423,6 +439,12 @@ async function replyToPendingMessages(context: IncomingMessageContext, message: 
     if (entitlement.source === "trial") void notifyTrialLowCredits(organizationId, entitlement.remaining);
     // On va répondre : le message passe en « lu » tout de suite, la réponse arrive après le délai de frappe.
     await markAsRead(instance, message.fromJid, groupIds);
+    // Sujet autorisé : tant que le client n'a pas encore écrit dessus, l'IA classe le message sans qu'on l'envoie.
+    // Une fois ouvert pour cette conversation, elle reste ouverte pour toujours : plus besoin de reclasser.
+    const topicGateActive = Boolean(settings.topicGateEnabled && settings.topicGateTopic?.trim() && !conversation.topicGateOpened);
+    // Lu, puis « en train d'écrire… » tout de suite : le client voit l'agent travailler pendant que l'IA répond.
+    // Pas avec un délai long (l'agent écrira juste avant d'envoyer), ni tant qu'on ne sait pas si on répondra.
+    if (!topicGateActive && resolveResponseDelaySeconds(settings.responseDelaySeconds) <= EARLY_TYPING_MAX_DELAY_SECONDS) typing.start();
 
     const products = await listProductsForAssistant(organizationId);
     // L'agenda est optionnel : toute erreur ici ne doit jamais empêcher la réponse.
@@ -444,9 +466,6 @@ async function replyToPendingMessages(context: IncomingMessageContext, message: 
       new Date(),
     );
     const memory = await loadMemorySections(organizationId, conversation.id, groupText);
-    // Sujet autorisé : tant que le client n'a pas encore écrit dessus, l'IA classe le message sans qu'on l'envoie.
-    // Une fois ouvert pour cette conversation, elle reste ouverte pour toujours : plus besoin de reclasser.
-    const topicGateActive = Boolean(settings.topicGateEnabled && settings.topicGateTopic?.trim() && !conversation.topicGateOpened);
 
     // Le client répond directement à une photo de produit envoyée plus tôt : on dit à l'IA de quel produit il s'agit,
     // sans attendre qu'il le nomme (voir products/sent-product-images.service.ts).
@@ -662,7 +681,7 @@ async function replyToPendingMessages(context: IncomingMessageContext, message: 
       });
     }
 
-    await waitForConfiguredDelay(replyStartedAt, settings.responseDelaySeconds, aiReply.reply, instance, message.fromJid, context.wait);
+    await waitBeforeSending({ startedAt: replyStartedAt, delaySeconds: settings.responseDelaySeconds, replyText: aiReply.reply, typing, wait: context.wait });
 
     // Photos demandées par le client : produits du catalogue uniquement (jamais une URL inventée par le modèle).
     // Une photo REÇUE du client ([Photo reçue]) n'est pas une demande de photo.
@@ -829,6 +848,10 @@ async function replyToPendingMessages(context: IncomingMessageContext, message: 
     if (reservation && !replyDelivered) {
       await releaseAiResponse(organizationId, reservation).catch((error) => console.error(`❌ [org:${organizationId}] Message du forfait non rendu :`, error));
     }
+    typing.stop();
+    // L'agent a commencé à écrire puis ne répond finalement pas (hors sujet, prise de main humaine…) : on retire
+    // l'indicateur. Si un message plus récent prend le relais, il continue d'écrire.
+    if (typing.visibleMs() > 0 && !replyDelivered && !superseded) await instance.stopTypingIndicator?.(message.fromJid).catch(() => undefined);
     // Groupe traité (réponse envoyée ou décision de ne pas répondre) : ces messages n'attendent plus rien.
     if (!superseded) clearPendingGroup(conversationId, group.map((entry) => entry.externalId));
   }

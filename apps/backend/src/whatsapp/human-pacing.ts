@@ -32,13 +32,82 @@ export function typingDurationMs(text: string, random: () => number): number {
   return raw * (0.8 + random() * 0.4);
 }
 
+/** Jamais d'envoi « sec » : le client voit toujours l'agent écrire au moins ce temps-là avant de recevoir la réponse. */
+export const MIN_VISIBLE_TYPING_MS = 1_500;
 /**
- * Attente totale avant d'envoyer une réponse : le délai configuré par le propriétaire (avec aléatoire), mais jamais
- * moins que le temps qu'il faudrait pour taper le texte. Un délai long (1 ou 2 minutes) reste donc respecté ; un
- * délai court est allongé pour une longue réponse.
+ * Jusqu'à ce délai configuré, l'agent « écrit » dès qu'il a lu le message, pendant que l'IA prépare la réponse.
+ * Au-delà (1 ou 2 minutes), il lit, laisse passer le délai en silence, puis écrit juste avant d'envoyer : personne
+ * ne reste deux minutes « en train d'écrire ».
  */
-export function humanReplyDelayMs(input: { configuredDelaySeconds: number; replyText: string }, random: () => number): number {
-  return Math.max(jitteredDelayMs(input.configuredDelaySeconds, random), typingDurationMs(input.replyText, random));
+export const EARLY_TYPING_MAX_DELAY_SECONDS = 10;
+
+export interface ReplyPacingPlan {
+  /** Attente sans rien afficher (délais longs uniquement). */
+  silentMs: number;
+  /** Attente avec « en train d'écrire… » affiché, juste avant l'envoi. */
+  typingMs: number;
+}
+
+/**
+ * Ce qu'il reste à attendre une fois la réponse prête. Deux règles :
+ *  - le délai configuré par le propriétaire (avec aléatoire) est compté depuis la réception du message ;
+ *  - le temps de frappe plausible pour ce texte est compté depuis l'instant où « en train d'écrire… » s'est affiché,
+ *    donc le temps que l'IA a mis à répondre compte comme de la frappe quand l'indicateur était déjà visible.
+ * Une IA lente n'ajoute ainsi plus d'attente, et une IA rapide ne provoque jamais un envoi sans frappe visible.
+ */
+export function planReplyPacing(
+  input: { configuredDelaySeconds: number; replyText: string; elapsedMs: number; typingVisibleMs: number },
+  random: () => number,
+): ReplyPacingPlan {
+  const typingTarget = Math.max(typingDurationMs(input.replyText, random), MIN_VISIBLE_TYPING_MS);
+  const typingLeft = Math.max(0, typingTarget - input.typingVisibleMs);
+  const delayLeft = Math.max(0, jitteredDelayMs(input.configuredDelaySeconds, random) - input.elapsedMs);
+  // Indicateur déjà affiché : l'agent continue d'écrire jusqu'à l'envoi, sans trou.
+  if (input.typingVisibleMs > 0) return { silentMs: 0, typingMs: Math.max(typingLeft, delayLeft) };
+  return { silentMs: Math.max(0, delayLeft - typingLeft), typingMs: typingLeft };
+}
+
+export interface TypingSession {
+  /** Affiche « en train d'écrire… » et le maintient. Sans effet si c'est déjà fait. */
+  start(): void;
+  /** Depuis combien de temps l'indicateur est visible (0 s'il n'a pas été affiché). */
+  visibleMs(): number;
+  /** Arrête de rafraîchir l'indicateur. À appeler dans tous les cas (réponse envoyée ou non). */
+  stop(): void;
+}
+
+/**
+ * « En train d'écrire… » maintenu pendant une durée inconnue à l'avance (l'appel à l'IA) : WhatsApp efface
+ * l'indicateur au bout d'une dizaine de secondes, il est donc renvoyé régulièrement jusqu'à `stop()`.
+ * `keepAlive: false` (tests) : l'indicateur est envoyé une seule fois, sans minuterie.
+ */
+export function createTypingSession(
+  instance: Pick<WhatsAppProvider, "sendTypingIndicator">,
+  jid: string,
+  options: { keepAlive?: boolean; now?: () => number } = {},
+): TypingSession {
+  const now = options.now ?? Date.now;
+  const send = () => void instance.sendTypingIndicator?.(jid).catch(() => undefined);
+  let startedAt: number | null = null;
+  let timer: ReturnType<typeof setInterval> | null = null;
+  return {
+    start() {
+      if (startedAt !== null) return;
+      startedAt = now();
+      send();
+      if (options.keepAlive !== false) {
+        timer = setInterval(send, TYPING.keepAliveMs);
+        timer.unref?.();
+      }
+    },
+    visibleMs() {
+      return startedAt === null ? 0 : Math.max(1, now() - startedAt);
+    },
+    stop() {
+      if (timer !== null) clearInterval(timer);
+      timer = null;
+    },
+  };
 }
 
 /**

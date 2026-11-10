@@ -7,8 +7,17 @@
  * L'état vit en mémoire (comme les verrous de conversation) : le serveur est une instance unique par numéro WhatsApp.
  */
 
-/** Silence attendu après un message avant de répondre. Compris dans le délai de réponse configuré (5 s par défaut). */
-export const MESSAGE_GROUPING_WINDOW_MS = 4_000;
+/**
+ * Silence attendu après un message avant de répondre. Il s'ajoute au temps que met l'IA à répondre : il est donc
+ * proportionné au délai choisi par le propriétaire, pour ne pas ralentir un agent réglé sur « 3 secondes ».
+ */
+export const GROUPING_WINDOW = { minMs: 2_000, maxMs: 4_000, slowReplyMs: 8_000 } as const;
+
+/** 3 s → 2 s, 5 s → 3 s, 7 s → 4 s ; avec un délai d'une ou deux minutes, on peut attendre le client plus longtemps. */
+export function groupingWindowMs(responseDelaySeconds: number): number {
+  if (responseDelaySeconds > 10) return GROUPING_WINDOW.slowReplyMs;
+  return Math.min(GROUPING_WINDOW.maxMs, Math.max(GROUPING_WINDOW.minMs, Math.round(responseDelaySeconds * 600)));
+}
 /** Au-delà, un message resté sans réponse (assistant en pause, forfait épuisé…) n'est plus rattaché au groupe suivant. */
 const PENDING_MAX_AGE_MS = 15 * 60_000;
 const PENDING_MAX_MESSAGES = 10;

@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { BUBBLES, TYPING, bubblePauseMs, humanReplyDelayMs, jitteredDelayMs, sendInBubbles, splitIntoBubbles, typingDurationMs, waitWhileTyping } from "./human-pacing.js";
+import { describe, expect, it, vi } from "vitest";
+import { BUBBLES, MIN_VISIBLE_TYPING_MS, TYPING, bubblePauseMs, createTypingSession, jitteredDelayMs, planReplyPacing, sendInBubbles, splitIntoBubbles, typingDurationMs, waitWhileTyping } from "./human-pacing.js";
 
 const mid = () => 0.5;
 
@@ -25,15 +25,74 @@ describe("typingDurationMs", () => {
   });
 });
 
-describe("humanReplyDelayMs", () => {
-  it("respecte un délai configuré long", () => {
-    expect(humanReplyDelayMs({ configuredDelaySeconds: 60, replyText: "Bonjour !" }, mid)).toBeCloseTo(60_000);
+describe("planReplyPacing", () => {
+  const reply = "x".repeat(100); // frappe plausible : 1 200 + 100 × 32 = 4 400 ms
+
+  it("compte le temps de réponse de l'IA comme de la frappe quand l'indicateur était déjà affiché", () => {
+    // Réglage 3 s : message reçu il y a 5 s, « en train d'écrire » visible depuis 3 s.
+    const plan = planReplyPacing({ configuredDelaySeconds: 3, replyText: reply, elapsedMs: 5_000, typingVisibleMs: 3_000 }, mid);
+    expect(plan.silentMs).toBe(0);
+    expect(plan.typingMs).toBeCloseTo(1_400);
   });
 
-  it("allonge un délai court quand la réponse est longue à taper", () => {
-    const delay = humanReplyDelayMs({ configuredDelaySeconds: 3, replyText: "x".repeat(300) }, mid);
-    expect(delay).toBeGreaterThan(3_000);
-    expect(delay).toBeCloseTo(TYPING.baseMs + 300 * TYPING.perCharMs);
+  it("n'ajoute aucune attente quand l'IA a été lente", () => {
+    const plan = planReplyPacing({ configuredDelaySeconds: 3, replyText: reply, elapsedMs: 11_000, typingVisibleMs: 9_000 }, mid);
+    expect(plan).toEqual({ silentMs: 0, typingMs: 0 });
+  });
+
+  it("n'envoie jamais sans frappe visible, même pour une réponse très courte déjà en retard", () => {
+    const plan = planReplyPacing({ configuredDelaySeconds: 3, replyText: "Oui.", elapsedMs: 9_000, typingVisibleMs: 0 }, mid);
+    expect(plan.silentMs).toBe(0);
+    expect(plan.typingMs).toBe(MIN_VISIBLE_TYPING_MS);
+  });
+
+  it("avec un délai long, attend en silence puis écrit juste avant d'envoyer", () => {
+    const plan = planReplyPacing({ configuredDelaySeconds: 60, replyText: reply, elapsedMs: 12_000, typingVisibleMs: 0 }, mid);
+    expect(plan.typingMs).toBeCloseTo(4_400);
+    expect(plan.silentMs).toBeCloseTo(60_000 - 12_000 - 4_400);
+  });
+
+  it("respecte le délai configuré quand l'IA répond très vite", () => {
+    const plan = planReplyPacing({ configuredDelaySeconds: 7, replyText: "Oui.", elapsedMs: 4_500, typingVisibleMs: 500 }, mid);
+    expect(plan.silentMs).toBe(0);
+    expect(plan.typingMs).toBeCloseTo(2_500);
+  });
+});
+
+describe("createTypingSession", () => {
+  it("affiche l'indicateur une seule fois au démarrage et mesure depuis quand il est visible", () => {
+    const calls: string[] = [];
+    let clock = 1_000;
+    const session = createTypingSession({ sendTypingIndicator: async (jid) => { calls.push(jid); } }, "jid", { keepAlive: false, now: () => clock });
+    expect(session.visibleMs()).toBe(0);
+    session.start();
+    session.start();
+    clock = 3_500;
+    expect(calls).toEqual(["jid"]);
+    expect(session.visibleMs()).toBe(2_500);
+    session.stop();
+  });
+
+  it("rafraîchit l'indicateur tant que la réponse n'est pas prête, puis s'arrête", () => {
+    vi.useFakeTimers();
+    try {
+      let count = 0;
+      const session = createTypingSession({ sendTypingIndicator: async () => { count += 1; } }, "jid");
+      session.start();
+      vi.advanceTimersByTime(TYPING.keepAliveMs * 2 + 10);
+      expect(count).toBe(3);
+      session.stop();
+      vi.advanceTimersByTime(TYPING.keepAliveMs * 3);
+      expect(count).toBe(3);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("ne lève jamais si WhatsApp refuse l'indicateur", () => {
+    const session = createTypingSession({ sendTypingIndicator: async () => { throw new Error("socket fermé"); } }, "jid", { keepAlive: false });
+    expect(() => session.start()).not.toThrow();
+    session.stop();
   });
 });
 
