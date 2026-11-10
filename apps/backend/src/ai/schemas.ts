@@ -57,6 +57,11 @@ export const aiReplySchema = z.object({
    * faire échouer toute la réponse.
    */
   discussedProductId: tolerantProductId(),
+  /**
+   * Information demandée par le client que l'assistant n'avait pas (voir ai/prompt.ts). Montrée au propriétaire dans
+   * ses statistiques pour qu'il complète les informations de son entreprise. Jamais envoyée au client.
+   */
+  missingInfo: z.preprocess((value) => (typeof value === "string" ? value.trim().slice(0, 200) : ""), z.string()).optional(),
   booking: bookingRequestSchema,
   order: orderRequestSchema,
   /** Rempli seulement quand un « sujet autorisé » est actif pour cette entreprise (voir ai/prompt.ts). */

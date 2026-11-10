@@ -94,6 +94,14 @@ async function run() {
       if (!visible) failures.push(`La vue « ${view} » ne s'affiche pas.`);
     }
 
+    // Vue d'ensemble : les trois blocs « ce que l'agent rapporte » s'affichent, même sans aucune donnée.
+    await clickNav(page, '.nav-item[data-view="overview"]');
+    await page.waitForSelector(".stats-insights", { timeout: 10_000 }).catch(() => undefined);
+    const insightTitles = await page.$$eval(".stats-insights .insight-card h3", (titles) => titles.map((title) => title.textContent.trim()));
+    for (const expected of ["Conversations qui aboutissent", "Articles les plus demandés", "Questions restées sans réponse"]) {
+      if (!insightTitles.some((title) => title.startsWith(expected))) failures.push(`Vue d'ensemble : le bloc « ${expected} » est absent.`);
+    }
+
     const status = await page.textContent("#system-status .system-status-text");
     if (!/WhatsApp/.test(status || "")) failures.push(`La pastille d'état n'indique pas l'état WhatsApp (« ${status} »).`);
 

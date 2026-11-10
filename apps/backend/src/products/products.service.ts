@@ -1,4 +1,5 @@
 import { getMediaSecret, sameToken } from "../media/media-secret.js";
+import { CATALOG_MAX_PRODUCTS } from "./catalog-search.js";
 import { createHmac, randomUUID } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
@@ -95,12 +96,16 @@ export async function listProducts(organizationId: string) {
   }));
 }
 
+/**
+ * Tout le catalogue actif (les plus récemment modifiés d'abord). Le choix des fiches envoyées en détail à l'IA se
+ * fait ensuite, d'après la conversation (voir products/catalog-search.ts).
+ */
 export async function listProductsForAssistant(organizationId: string) {
   const products = await prisma.product.findMany({
     where: { organizationId, active: true },
     select: { id: true, name: true, description: true, category: true, price: true, imageUrl: true },
     orderBy: { updatedAt: "desc" },
-    take: 30,
+    take: CATALOG_MAX_PRODUCTS,
   });
   return products.map((product) => ({
     ...product,

@@ -33,8 +33,15 @@ import { showToast } from "./utils/dom.js";
  * qu'aucune d'elles n'ait besoin de connaître les autres directement.
  */
 
+/** Depuis la vue d'ensemble (conversations récentes, questions sans réponse) : affiche la boîte de réception, puis la conversation. */
+async function openConversationInInbox(id) {
+  if (!setView("inbox")) return;
+  await loadInbox();
+  await openConversation(id);
+}
+
 async function refreshAll() {
-  await Promise.all([refreshOverview(openConversation), loadPlatformSuspension(), refreshBillingBanner(), refreshOnboarding()]);
+  await Promise.all([refreshOverview(openConversationInInbox), loadPlatformSuspension(), refreshBillingBanner(), refreshOnboarding()]);
 }
 
 const viewLoaders = {
