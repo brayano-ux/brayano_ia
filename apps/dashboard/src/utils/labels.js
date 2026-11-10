@@ -98,6 +98,8 @@ export function describeAiMeta(meta) {
   if (meta.closedHours) lines.push("Votre entreprise était fermée : l'assistant l'a pris en compte.");
   if (meta.correctionsUsed) lines.push(`${meta.correctionsUsed} de vos corrections appliquée${meta.correctionsUsed > 1 ? "s" : ""}.`);
   if (meta.examplesUsed) lines.push(`Inspiré de ${meta.examplesUsed} conversation${meta.examplesUsed > 1 ? "s" : ""} passée${meta.examplesUsed > 1 ? "s" : ""} qui ${meta.examplesUsed > 1 ? "ont" : "a"} abouti.`);
+  if (meta.groupedMessages > 1) lines.push(`Une seule réponse pour ${meta.groupedMessages} messages envoyés à la suite par le client.`);
+  if (typeof meta.missingInfo === "string" && meta.missingInfo) lines.push(`Information qui a manqué à l'assistant : « ${meta.missingInfo} ». Ajoutez-la dans les informations de votre entreprise pour qu'il sache répondre la prochaine fois.`);
   if (meta.claimRetried) lines.push("L'assistant avait annoncé une action qu'il n'avait pas faite : la réponse a été corrigée.");
   if (Array.isArray(meta.claimsUnresolved) && meta.claimsUnresolved.length) lines.push("Un avertissement a été ajouté pour le client (action non réalisée).");
   if (meta.needsHuman) lines.push("L'assistant a passé la main : vous avez reçu un email.");

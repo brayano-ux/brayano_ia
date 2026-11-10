@@ -47,7 +47,58 @@ function stagesMarkup(stages) {
   }).join("")}</div>`;
 }
 
-export async function loadStats() {
+const plural = (count, one, many) => `${number(count)} ${count > 1 ? many : one}`;
+
+/** Part des conversations de la période qui ont donné une commande ou un rendez-vous. */
+function conversionMarkup(conversion) {
+  const { rate, converted, activeConversations } = conversion;
+  const detail = activeConversations
+    ? `${number(converted)} sur ${plural(activeConversations, "conversation a", "conversations ont")} donné une commande ou un rendez-vous.`
+    : "Aucune conversation sur la période.";
+  return `<section class="insight-card" aria-labelledby="insight-conversion">
+    <h3 id="insight-conversion">Conversations qui aboutissent</h3>
+    <p class="insight-figure"><strong>${rate === null ? "—" : `${rate} %`}</strong></p>
+    <div class="stage-track" aria-hidden="true"><i class="stage-fill stage-ordered" style="width:${rate ?? 0}%"></i></div>
+    <p class="insight-note">${escapeHtml(detail)}</p>
+  </section>`;
+}
+
+function topProductsMarkup(products) {
+  const rows = products.map((product, index) => {
+    const facts = [plural(product.interested, "client intéressé", "clients intéressés")];
+    if (product.photos) facts.push(plural(product.photos, "photo envoyée", "photos envoyées"));
+    if (product.ordered) facts.push(plural(product.ordered, "commandé", "commandés"));
+    return `<li><span class="insight-rank">${index + 1}</span><div><b>${escapeHtml(product.name)}</b><small>${escapeHtml(facts.join(" · "))}</small></div></li>`;
+  }).join("");
+  return `<section class="insight-card" aria-labelledby="insight-products">
+    <h3 id="insight-products">Articles les plus demandés</h3>
+    ${rows ? `<ol class="insight-list">${rows}</ol>` : '<p class="insight-note">Aucun article demandé sur la période. Ils apparaîtront ici dès que vos clients parleront de vos produits.</p>'}
+  </section>`;
+}
+
+/** Informations que les clients ont demandées et que l'agent n'avait pas : à ajouter dans « Agent IA ». */
+function unansweredMarkup(unanswered) {
+  const rows = unanswered.items.map((item) => {
+    const date = new Date(item.at).toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+    return `<li><button type="button" class="insight-question" data-conversation="${escapeHtml(item.conversationId)}" title="Ouvrir la conversation">
+      <b>${escapeHtml(item.missing)}</b>
+      ${item.question ? `<q>${escapeHtml(item.question)}</q>` : ""}
+      <small>${escapeHtml(item.contact)} · ${escapeHtml(date)}</small>
+    </button></li>`;
+  }).join("");
+  const more = unanswered.count > unanswered.items.length ? `<p class="insight-note">Et ${number(unanswered.count - unanswered.items.length)} de plus sur la période.</p>` : "";
+  return `<section class="insight-card" aria-labelledby="insight-unanswered">
+    <h3 id="insight-unanswered">Questions restées sans réponse${unanswered.count ? ` <span class="status-chip warning">${number(unanswered.count)}</span>` : ""}</h3>
+    ${rows
+      ? `<p class="insight-note">Votre agent n'avait pas ces informations. Ajoutez-les dans « Agent IA » pour qu'il sache répondre.</p><ul class="insight-list">${rows}</ul>${more}`
+      : '<p class="insight-note">Aucune sur la période. Quand un client demandera une information que votre agent n\'a pas, elle apparaîtra ici.</p>'}
+  </section>`;
+}
+
+let openConversationFromStats = null;
+
+export async function loadStats(onSelectConversation) {
+  if (onSelectConversation) openConversationFromStats = onSelectConversation;
   const body = $("#stats-body");
   if (!body || !getState().organizationId) return;
   const days = Number($("#stats-period").value) || 7;
@@ -67,7 +118,13 @@ export async function loadStats() {
     if (stats.afterHours.enabled) {
       cards.push(card("Écrits hors horaires", number(stats.afterHours.clientMessages), "messages reçus entreprise fermée"));
     }
-    body.innerHTML = `<div class="stats-grid">${cards.join("")}</div><div class="stats-lower">${chartMarkup(stats.series)}${stagesMarkup(stats.stages)}</div>`;
+    const insights = stats.conversion
+      ? `<div class="stats-insights">${conversionMarkup(stats.conversion)}${topProductsMarkup(stats.topProducts || [])}${unansweredMarkup(stats.unanswered || { count: 0, items: [] })}</div>`
+      : "";
+    body.innerHTML = `<div class="stats-grid">${cards.join("")}</div>${insights}<div class="stats-lower">${chartMarkup(stats.series)}${stagesMarkup(stats.stages)}</div>`;
+    body.querySelectorAll(".insight-question").forEach((button) => {
+      button.onclick = () => openConversationFromStats?.(button.dataset.conversation);
+    });
     $("#stats-subtitle").textContent = `Depuis le ${new Date(`${stats.from}T12:00:00`).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })} (heure de ${stats.timezone}).`;
   } catch (error) {
     body.innerHTML = `<div class="empty-state">${escapeHtml(error.message || "Impossible de charger les chiffres.")}</div>`;

@@ -1,6 +1,7 @@
 import { prisma } from "../database/client.js";
 import { getOpeningStatus } from "../ai/business-hours.js";
 import { addDays, formatLocalDate, type WorkingHours } from "../appointments/availability.js";
+import { getInsights, type Insights } from "./insights.service.js";
 
 export type StatsPeriodDays = 1 | 7 | 30;
 
@@ -21,6 +22,12 @@ export interface DashboardStats {
   estimatedMinutesSaved: number;
   stages: Record<"NEW" | "INTERESTED" | "ORDERED" | "CALLBACK", number>;
   series: Array<{ day: string; clientMessages: number; assistantMessages: number; orders: number }>;
+  /** Conversations qui aboutissent à une commande ou un rendez-vous. */
+  conversion: Insights["conversion"];
+  /** Articles qui intéressent le plus les clients sur la période. */
+  topProducts: Insights["topProducts"];
+  /** Questions auxquelles l'assistant n'a pas su répondre faute d'information. */
+  unanswered: Insights["unanswered"];
 }
 
 /** Début du premier jour local de la période, converti en date UTC. */
@@ -67,7 +74,7 @@ export async function getDashboardStats(organizationId: string, days: StatsPerio
     prisma.message.count({ where: { ...messageScope, direction: "OUTBOUND", author: "AI", aiMeta: { path: ["needsHuman"], equals: true } } }),
     prisma.order.findMany({
       where: { organizationId, createdAt: inPeriod, status: { not: "CANCELLED" } },
-      select: { total: true, paymentStatus: true },
+      select: { total: true, paymentStatus: true, items: true },
     }),
     prisma.appointment.count({ where: { organizationId, createdAt: inPeriod, status: { not: "CANCELLED" } } }),
     prisma.conversation.groupBy({ by: ["stage"], where: { organizationId }, _count: { _all: true } }),
@@ -112,6 +119,8 @@ export async function getDashboardStats(organizationId: string, days: StatsPerio
     if (entry) entry.orders += Number(row.count);
   }
 
+  const insights = await getInsights(organizationId, start, now, orders);
+
   const answered = byAssistant + byTeam;
   return {
     days,
@@ -131,5 +140,6 @@ export async function getDashboardStats(organizationId: string, days: StatsPerio
     estimatedMinutesSaved: byAssistant * ESTIMATED_MINUTES_PER_ANSWER,
     stages,
     series: [...seriesMap.values()],
+    ...insights,
   };
 }

@@ -4,6 +4,7 @@ import { computeAutoStage, STAGE_LABELS } from "../conversations/stage.js";
 import { formatAmount } from "../orders/order-logic.js";
 import { loadOrderPrompt, previewAiOrder } from "../orders/orders.service.js";
 import { buildProductDetailsMessage, buildProductImageCaption, resolveRequestedProductPhotos } from "../products/product-image-selection.js";
+import { buildCatalogIndexSection, selectCatalogForPrompt } from "../products/catalog-search.js";
 import { listProductsForAssistant } from "../products/products.service.js";
 import { getOrCreateAiSettings } from "./ai-settings.service.js";
 import { getAiOrchestrator } from "./ai.factory.js";
@@ -43,7 +44,7 @@ export interface TesterInput {
   media?: TesterMedia | undefined;
 }
 
-export type TesterEffect = { type: "booking" | "order" | "photo" | "handoff" | "welcome" | "file" | "stage" | "claim" | "negotiation"; label: string };
+export type TesterEffect = { type: "booking" | "order" | "photo" | "handoff" | "welcome" | "file" | "stage" | "claim" | "negotiation" | "missing"; label: string };
 
 const ANALYZABLE = new Set(["image/jpeg", "image/png", "image/webp", "application/pdf"]);
 
@@ -97,9 +98,15 @@ export async function simulateAssistantReply(organizationId: string, input: Test
     now,
   );
   const memory = await loadMemorySections(organizationId, "dashboard-test", input.message);
+  // Même choix des fiches que sur WhatsApp : celles qui correspondent à l'échange, le reste en index compact.
+  const catalog = selectCatalogForPrompt(products, {
+    queries: [{ text: userText, weight: 3 }, ...input.history.slice(-6).map((turn) => ({ text: turn.content, weight: 1 }))],
+    pinnedIds: [simulation.negotiation?.productId],
+  });
   const systemPrompt = buildSystemPrompt({
     ...settings,
-    products,
+    products: catalog.detailed,
+    catalogIndexSection: buildCatalogIndexSection(catalog.others),
     agenda: agenda?.section ?? null,
     orders: orderSection,
     hoursSection,
@@ -201,6 +208,7 @@ export async function simulateAssistantReply(organizationId: string, input: Test
     text = `${text}\n\n${describeUnbackedClaims(unbacked)}`;
     effects.push({ type: "claim", label: "L'assistant a annoncé une action qu'il n'a pas pu faire : un avertissement est ajouté pour le client" });
   }
+  if (reply.missingInfo) effects.push({ type: "missing", label: `Information manquante signalée : « ${reply.missingInfo} » (elle apparaîtrait dans vos statistiques, pour la compléter)` });
   if (reply.needsHuman) effects.push({ type: "handoff", label: "L'assistant passe la main : le propriétaire serait prévenu par email et l'IA se mettrait en pause pour ce client" });
 
   const stage = computeAutoStage("NEW", false, { intent: reply.intent, qualificationStatus: reply.qualificationStatus.toUpperCase() as "NOT_QUALIFIED" | "QUALIFYING" | "QUALIFIED", leadScore: reply.leadScore, converted, handoff: reply.needsHuman });

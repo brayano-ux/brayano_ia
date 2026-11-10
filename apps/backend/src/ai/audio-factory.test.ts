@@ -25,10 +25,10 @@ describe("audio provider configuration", () => {
   });
 
   it("crée un maillon par modèle OpenRouter listé, avant les autres fournisseurs", () => {
-    config.OPENROUTER_MODEL = "openai/gpt-4o-mini, google/gemini-2.0-flash-001 ,openai/gpt-4o-mini";
+    config.OPENROUTER_MODEL = "openai/gpt-4o-mini, google/gemini-2.5-flash-lite ,openai/gpt-4o-mini";
     config.GEMINI_API_KEY = "test-gemini-key";
     const providers = getRawProviders();
-    expect(providers.map((provider) => provider.model ?? provider.name)).toEqual(["openai/gpt-4o-mini", "google/gemini-2.0-flash-001", "gemini"]);
+    expect(providers.map((provider) => provider.model ?? provider.name)).toEqual(["openai/gpt-4o-mini", "google/gemini-2.5-flash-lite", "gemini"]);
     expect(getAiOrchestrator().providerNames).toEqual(["openrouter", "openrouter", "gemini"]);
   });
 

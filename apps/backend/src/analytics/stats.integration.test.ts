@@ -79,4 +79,91 @@ describe.skipIf(!integrationEnabled)("statistiques du tableau de bord (base rée
     expect(stats.orders.count).toBe(0);
     expect(stats.series.every((entry) => entry.clientMessages === 0)).toBe(true);
   });
+  describe("ce que l'assistant rapporte", () => {
+    const at = (time: string) => new Date(`2026-10-13T${time}Z`);
+
+    async function conversationWith(organizationId: string, number: string, displayName: string | null = null) {
+      const contact = await prisma.contact.create({ data: { organizationId, whatsappJid: `${number}@s.whatsapp.net`, displayName } });
+      const conversation = await prisma.conversation.create({ data: { organizationId, contactId: contact.id, createdAt: at("08:00:00") } });
+      const message = (direction: "INBOUND" | "OUTBOUND", time: string, content: string, aiMeta?: object) =>
+        prisma.message.create({ data: { conversationId: conversation.id, direction, author: direction === "INBOUND" ? "CONTACT" : "AI", type: "TEXT", content, createdAt: at(time), ...(aiMeta ? { aiMeta } : {}) } });
+      return { conversation, message };
+    }
+
+    it("calcule le taux de conversion des conversations en commandes ou rendez-vous", async () => {
+      const { organization } = await createTestOrganization();
+      const buyer = await conversationWith(organization.id, "237655000011");
+      const booker = await conversationWith(organization.id, "237655000012");
+      const browser = await conversationWith(organization.id, "237655000013");
+      const cancelled = await conversationWith(organization.id, "237655000014");
+      for (const entry of [buyer, booker, browser, cancelled]) await entry.message("INBOUND", "09:00:00", "Bonjour");
+      await prisma.order.create({ data: { organizationId: organization.id, conversationId: buyer.conversation.id, customerName: "A", deliveryAddress: "x", items: [], total: 5000, createdAt: at("10:00:00") } });
+      // Deux commandes du même client : une seule conversation convertie.
+      await prisma.order.create({ data: { organizationId: organization.id, conversationId: buyer.conversation.id, customerName: "A", deliveryAddress: "x", items: [], total: 2000, createdAt: at("11:00:00") } });
+      await prisma.appointment.create({ data: { organizationId: organization.id, conversationId: booker.conversation.id, startsAt: new Date("2026-10-20T09:00:00Z"), endsAt: new Date("2026-10-20T09:30:00Z"), createdAt: at("10:00:00") } });
+      await prisma.order.create({ data: { organizationId: organization.id, conversationId: cancelled.conversation.id, customerName: "D", deliveryAddress: "x", items: [], total: 1000, status: "CANCELLED", createdAt: at("10:00:00") } });
+
+      const stats = await getDashboardStats(organization.id, 7, NOW);
+
+      expect(stats.conversion).toEqual({ activeConversations: 4, converted: 2, rate: 50 });
+    });
+
+    it("renvoie un taux nul sans conversation sur la période", async () => {
+      const { organization } = await createTestOrganization();
+      const stats = await getDashboardStats(organization.id, 7, NOW);
+      expect(stats.conversion).toEqual({ activeConversations: 0, converted: 0, rate: null });
+      expect(stats.topProducts).toEqual([]);
+      expect(stats.unanswered).toEqual({ count: 0, items: [] });
+    });
+
+    it("classe les articles par nombre de clients intéressés, avec photos envoyées et quantités commandées", async () => {
+      const { organization } = await createTestOrganization();
+      const other = await createTestOrganization("Autre boutique");
+      const product = (organizationId: string, name: string) => prisma.product.create({ data: { organizationId, name, description: "x" } });
+      const robe = await product(organization.id, "Robe wax");
+      const sac = await product(organization.id, "Sac en cuir");
+      const foreign = await product(other.organization.id, "Produit d'une autre entreprise");
+
+      const first = await conversationWith(organization.id, "237655000021");
+      const second = await conversationWith(organization.id, "237655000022");
+      const elsewhere = await conversationWith(other.organization.id, "237655000023");
+      await first.message("OUTBOUND", "09:00:05", "Voici la robe", { discussedProductId: robe.id, discussedProductName: "Robe wax" });
+      await first.message("OUTBOUND", "09:05:05", "Elle est en coton", { discussedProductId: robe.id, discussedProductName: "Robe wax" });
+      await second.message("OUTBOUND", "09:00:05", "Le sac est à 20 000", { discussedProductId: sac.id, discussedProductName: "Sac en cuir" });
+      await elsewhere.message("OUTBOUND", "09:00:05", "x", { discussedProductId: foreign.id, discussedProductName: "Produit d'une autre entreprise" });
+      await prisma.sentProductImage.create({ data: { whatsappMessageId: "IMG-1", conversationId: second.conversation.id, productId: robe.id, createdAt: at("09:10:00") } });
+      await prisma.sentProductImage.create({ data: { whatsappMessageId: "IMG-OLD", conversationId: second.conversation.id, productId: sac.id, createdAt: new Date("2026-09-01T09:00:00Z") } });
+      await prisma.order.create({
+        data: { organizationId: organization.id, conversationId: first.conversation.id, customerName: "A", deliveryAddress: "x", total: 50000, createdAt: at("10:00:00"), items: [{ productId: robe.id, name: "Robe wax", quantity: 2 }] },
+      });
+
+      const stats = await getDashboardStats(organization.id, 7, NOW);
+
+      expect(stats.topProducts).toEqual([
+        { productId: robe.id, name: "Robe wax", interested: 2, photos: 1, ordered: 2 },
+        { productId: sac.id, name: "Sac en cuir", interested: 1, photos: 0, ordered: 0 },
+      ]);
+    });
+
+    it("liste les questions restées sans réponse, avec la question du client, de la plus récente à la plus ancienne", async () => {
+      const { organization } = await createTestOrganization();
+      const named = await conversationWith(organization.id, "237655000031", "Aïcha");
+      const anonymous = await conversationWith(organization.id, "237655000032");
+      await named.message("INBOUND", "09:00:00", "Vous livrez à Bafoussam en combien de temps ?");
+      await named.message("OUTBOUND", "09:00:05", "Je me renseigne.", { missingInfo: "délai de livraison à Bafoussam" });
+      await named.message("INBOUND", "09:10:00", "Merci");
+      await named.message("OUTBOUND", "09:10:05", "Avec plaisir.", { missingInfo: "" });
+      await anonymous.message("INBOUND", "11:00:00", "La robe existe en taille 46 ?");
+      await anonymous.message("OUTBOUND", "11:00:05", "Je vérifie.", { missingInfo: "tailles disponibles pour la robe" });
+
+      const stats = await getDashboardStats(organization.id, 7, NOW);
+
+      expect(stats.unanswered.count).toBe(2);
+      expect(stats.unanswered.items.map((item) => [item.contact, item.missing, item.question])).toEqual([
+        ["+237655000032", "tailles disponibles pour la robe", "La robe existe en taille 46 ?"],
+        ["Aïcha", "délai de livraison à Bafoussam", "Vous livrez à Bafoussam en combien de temps ?"],
+      ]);
+      expect(stats.unanswered.items[0]).toMatchObject({ conversationId: anonymous.conversation.id, at: "2026-10-13T11:00:05.000Z" });
+    });
+  });
 });

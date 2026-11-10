@@ -8,6 +8,7 @@ import type { WorkingHours } from "../appointments/availability.js";
 import { withConversationSendLock } from "../conversations/conversation-send-lock.js";
 import { getRecentHistoryForAi, recordOutboundMessage } from "../conversations/conversations.service.js";
 import { prisma } from "../database/client.js";
+import { buildCatalogIndexSection, selectCatalogForPrompt } from "../products/catalog-search.js";
 import { listProductsForAssistant } from "../products/products.service.js";
 
 export interface JobDeps {
@@ -101,17 +102,20 @@ export async function runFollowUps(deps: JobDeps): Promise<FollowUpRunResult> {
         listProductsForAssistant(organizationId),
         loadMemorySections(organizationId, conversation.id, lastClientMessage?.content ?? ""),
       ]);
+      const history = await getRecentHistoryForAi(conversation.id);
+      // La relance parle des articles évoqués dans la conversation, pas des 30 derniers modifiés.
+      const catalog = selectCatalogForPrompt(products, { queries: history.slice(-6).map((turn) => ({ text: turn.content, weight: turn.role === "user" ? 2 : 1 })) });
       const systemPrompt = [
         buildSystemPrompt({
           ...settings,
           knownLeadData: (conversation.leadData && typeof conversation.leadData === "object" && !Array.isArray(conversation.leadData) ? conversation.leadData : {}) as Record<string, unknown>,
-          products,
+          products: catalog.detailed,
+          catalogIndexSection: buildCatalogIndexSection(catalog.others),
           hoursSection: buildBusinessHoursPrompt(hours, now),
           correctionsSection: memory.corrections,
         }),
         buildFollowUpInstruction({ hoursSinceLastMessage: (now.getTime() - lastMessage.createdAt.getTime()) / 3600_000, followUpNumber }),
       ].join("\n\n");
-      const history = await getRecentHistoryForAi(conversation.id);
       const reply = await getAiOrchestrator().getReply(conversation.id, systemPrompt, history, { logRun: false });
 
       if (reply.intent === "erreur_traitement") {

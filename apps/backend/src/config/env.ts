@@ -92,7 +92,7 @@ const envSchema = z.object({
 export type LlmProvider = "gemini" | "mistral" | "openrouter";
 
 /**
- * Modèles OpenRouter à essayer dans l'ordre : « openai/gpt-4o-mini, google/gemini-2.0-flash-001 » donne deux maillons
+ * Modèles OpenRouter à essayer dans l'ordre : « openai/gpt-4o-mini, google/gemini-2.5-flash-lite » donne deux maillons
  * de la chaîne, chacun avec son propre délai et sa seconde tentative. Doublons et espaces ignorés.
  */
 export function openRouterModels(value: string | undefined): string[] {

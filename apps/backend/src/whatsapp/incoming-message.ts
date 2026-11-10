@@ -33,7 +33,7 @@ import { applyAiBooking, findContactUpcoming, loadAgendaPrompt, type ActionOutco
 import { buildClaimCorrection, describeUnbackedClaims, findUnbackedClaims, type UnbackedClaim } from "../ai/claim-guard.js";
 import type { WorkingHours } from "../appointments/availability.js";
 import { applyAiOrder, getContactOrderState, loadOrderPrompt } from "../orders/orders.service.js";
-import { withConversationSendLock } from "../conversations/conversation-send-lock.js";
+import { withConversationReplyQueue, withConversationSendLock } from "../conversations/conversation-send-lock.js";
 import { prisma } from "../database/client.js";
 import { deleteClientMediaFile, saveClientMedia, type StoredClientMedia } from "../media/client-media.service.js";
 import { buildAiUnavailableEmail, buildHandoffEmail, buildMediaReceivedEmail, notifyOrganizationAdmins } from "../notifications/owner-notifications.js";
@@ -45,9 +45,21 @@ import {
   buildProductImageCaption,
   resolveRequestedProductPhotos,
 } from "../products/product-image-selection.js";
+import { buildCatalogIndexSection, CATALOG_DETAILED_LIMIT, selectCatalogForPrompt } from "../products/catalog-search.js";
 import { listProductsForAssistant } from "../products/products.service.js";
-import { findLatestSentProductId, findProductIdForSentImage, recordSentProductImage } from "../products/sent-product-images.service.js";
+import { findLatestSentProductId, findProductIdForSentImage, findRecentSentProductIds, recordSentProductImage } from "../products/sent-product-images.service.js";
 import { humanReplyDelayMs, sendInBubbles, waitWhileTyping } from "./human-pacing.js";
+import {
+  buildGroupedMessagesSection,
+  carryWelcomeOver,
+  clearPendingGroup,
+  isLatestInbound,
+  MESSAGE_GROUPING_WINDOW_MS,
+  pendingGroup,
+  registerPendingInbound,
+  takeCarriedWelcome,
+  type PendingInbound,
+} from "./message-grouping.js";
 import type { IncomingWhatsAppMessage, WhatsAppProvider } from "./whatsapp.types.js";
 
 export interface IncomingMessageContext {
@@ -122,9 +134,9 @@ export function resetAiUnavailableNoticesForTests() {
   aiUnavailableNoticeAt.clear();
 }
 
-/** Coches bleues sur le message du client dès qu'on sait qu'on va lui répondre : un humain lit, puis écrit. Ne lève jamais. */
-function markAsRead(instance: Pick<WhatsAppProvider, "markAsRead">, jid: string, messageId: string) {
-  return instance.markAsRead?.(jid, [messageId]).catch(() => undefined) ?? Promise.resolve();
+/** Coches bleues sur les messages du client dès qu'on sait qu'on va lui répondre : un humain lit, puis écrit. Ne lève jamais. */
+function markAsRead(instance: Pick<WhatsAppProvider, "markAsRead">, jid: string, messageIds: string[]) {
+  return instance.markAsRead?.(jid, messageIds).catch(() => undefined) ?? Promise.resolve();
 }
 
 const ANALYZABLE_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif", "application/pdf"]);
@@ -216,15 +228,13 @@ function readLeadName(leadData: unknown): string | null {
 }
 
 /**
- * Traite UN message entrant d'un contact : enregistrement, décision (IA active ? suspendue ?),
- * réponse de l'IA, actions (rendez-vous, commande), envoi et enregistrement.
+ * Reçoit UN message d'un contact : transcription, enregistrement, cas sans réponse de l'IA (doublon, numéro
+ * ignoré, « STOP »). Puis attend un court silence : si le client enchaîne plusieurs messages, seul le dernier
+ * déclenche la réponse, qui porte sur tout le groupe (voir message-grouping.ts et replyToPendingMessages).
  * Ne lève jamais : une erreur ne doit pas casser le flux WhatsApp.
  */
 export async function processIncomingMessage(context: IncomingMessageContext, message: IncomingWhatsAppMessage): Promise<void> {
   const { organizationId, instance } = context;
-  // Message de l'assistant réservé dans le forfait : rendu (finally) si la réponse n'est finalement pas partie.
-  let reservation: Extract<AiResponseEntitlement, { allowed: true }> | null = null;
-  let replyDelivered = false;
   try {
     if (message.audio) {
       const transcription = await getAiOrchestrator().transcribeAudio(message.audio);
@@ -289,6 +299,52 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
       return;
     }
 
+    registerPendingInbound(conversation.id, {
+      externalId: message.externalId,
+      text: message.text,
+      requestText: message.media ? message.media.caption ?? "" : message.text,
+      quotedMessageId: message.quotedMessageId,
+      hasMedia: Boolean(received),
+    });
+    // Le client écrit peut-être encore : on lui laisse quelques secondes avant de répondre.
+    await (context.wait ?? ((ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms))))(MESSAGE_GROUPING_WINDOW_MS);
+    if (!isLatestInbound(conversation.id, message.externalId)) {
+      console.log(`🧩 [org:${organizationId}] Message suivi d'un autre : une seule réponse sera envoyée pour le groupe.`);
+      return;
+    }
+    await withConversationReplyQueue(conversation.id, () => replyToPendingMessages(context, message, conversation.id, replyStartedAt));
+  } catch (error) {
+    console.error(`❌ [org:${organizationId}] Échec du traitement du message entrant :`, error);
+  }
+}
+
+/**
+ * Répond aux messages du client restés sans réponse (un seul, ou plusieurs envoyés à la suite) : décision (IA
+ * active ? suspendue ? forfait ?), réponse de l'IA, actions (rendez-vous, commande), envoi et enregistrement.
+ * Appelée dans la file de réponse de la conversation : une seule réponse en préparation à la fois.
+ * `message` est le dernier message du groupe. Ne lève jamais.
+ */
+async function replyToPendingMessages(context: IncomingMessageContext, message: IncomingWhatsAppMessage, conversationId: string, replyStartedAt: number): Promise<void> {
+  const { organizationId, instance } = context;
+  // Message de l'assistant réservé dans le forfait : rendu (finally) si la réponse n'est finalement pas partie.
+  let reservation: Extract<AiResponseEntitlement, { allowed: true }> | null = null;
+  let replyDelivered = false;
+  // Un message plus récent est arrivé : il portera la réponse, les messages en attente lui sont laissés.
+  let superseded = false;
+  let group: PendingInbound[] = [];
+  try {
+    if (!isLatestInbound(conversationId, message.externalId)) {
+      superseded = true;
+      return;
+    }
+    // Relue ici : la réponse précédente a pu changer l'état de la conversation pendant l'attente dans la file.
+    const conversation = await prisma.conversation.findUnique({ where: { id: conversationId } });
+    if (!conversation) return;
+    group = pendingGroup(conversationId);
+    const groupIds = group.map((entry) => entry.externalId);
+    const groupText = group.map((entry) => entry.text).filter(Boolean).join("\n");
+    const answeringFile = group.some((entry) => entry.hasMedia);
+
     const shouldReactivateAi =
       conversation.status === "HUMAN_HANDOFF" &&
       conversation.aiEnabled === false &&
@@ -333,11 +389,14 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
 
     // Message d'accueil : une seule fois, au premier échange (voir ai/welcome.ts).
     const outboundCount = await prisma.message.count({ where: { conversationId: conversation.id, direction: "OUTBOUND" } });
-    const welcomeDecision = decideWelcome({ welcomeMessage: settings.welcomeMessage, outboundCount, inboundText: message.text });
-    let welcomeSent = false;
+    const welcomeDecision = decideWelcome({ welcomeMessage: settings.welcomeMessage, outboundCount, inboundText: groupText });
+    // Accueil parti juste avant une réponse abandonnée au profit de ce message : inutile de saluer à nouveau.
+    const carriedWelcome = takeCarriedWelcome(conversation.id);
+    const sentWelcomeText = welcomeDecision.welcome ?? carriedWelcome;
+    let welcomeSent = Boolean(carriedWelcome);
     if (welcomeDecision.welcome) {
       const welcomeText = welcomeDecision.welcome;
-      await markAsRead(instance, message.fromJid, message.externalId);
+      await markAsRead(instance, message.fromJid, groupIds);
       if (welcomeDecision.welcomeOnly) await waitForConfiguredDelay(replyStartedAt, settings.responseDelaySeconds, welcomeText, instance, message.fromJid, context.wait);
       welcomeSent = await withConversationSendLock(conversation.id, async () => {
         const stillFirst = (await prisma.message.count({ where: { conversationId: conversation.id, direction: "OUTBOUND" } })) === 0;
@@ -363,7 +422,7 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
     reservation = entitlement;
     if (entitlement.source === "trial") void notifyTrialLowCredits(organizationId, entitlement.remaining);
     // On va répondre : le message passe en « lu » tout de suite, la réponse arrive après le délai de frappe.
-    if (!welcomeSent) await markAsRead(instance, message.fromJid, message.externalId);
+    await markAsRead(instance, message.fromJid, groupIds);
 
     const products = await listProductsForAssistant(organizationId);
     // L'agenda est optionnel : toute erreur ici ne doit jamais empêcher la réponse.
@@ -384,7 +443,7 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
       },
       new Date(),
     );
-    const memory = await loadMemorySections(organizationId, conversation.id, message.text);
+    const memory = await loadMemorySections(organizationId, conversation.id, groupText);
     // Sujet autorisé : tant que le client n'a pas encore écrit dessus, l'IA classe le message sans qu'on l'envoie.
     // Une fois ouvert pour cette conversation, elle reste ouverte pour toujours : plus besoin de reclasser.
     const topicGateActive = Boolean(settings.topicGateEnabled && settings.topicGateTopic?.trim() && !conversation.topicGateOpened);
@@ -393,9 +452,10 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
     // sans attendre qu'il le nomme (voir products/sent-product-images.service.ts).
     let quotedProductSection: string | null = null;
     let quotedProductId: string | null = null;
-    if (message.quotedMessageId) {
+    const quotedMessageId = [...group].reverse().find((entry) => entry.quotedMessageId)?.quotedMessageId;
+    if (quotedMessageId) {
       try {
-        quotedProductId = await findProductIdForSentImage(message.quotedMessageId);
+        quotedProductId = await findProductIdForSentImage(quotedMessageId);
         const quotedProduct = quotedProductId ? products.find((product) => product.id === quotedProductId) : null;
         if (quotedProduct) quotedProductSection = buildQuotedProductSection(quotedProduct);
       } catch (error) {
@@ -403,10 +463,21 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
       }
     }
 
+    const recentHistory = await getRecentHistoryForAi(conversation.id);
+    // Grand catalogue : seules les fiches utiles à cette conversation partent en détail, le reste en index compact.
+    const largeCatalog = products.length > CATALOG_DETAILED_LIMIT;
+    const recentSentProductIds = largeCatalog ? await findRecentSentProductIds(conversation.id).catch(() => [] as string[]) : [];
+    const catalog = selectCatalogForPrompt(products, {
+      queries: [{ text: groupText, weight: 3 }, ...recentHistory.slice(-6).map((turn) => ({ text: turn.content, weight: 1 }))],
+      pinnedIds: [quotedProductId, ...recentSentProductIds, isNegotiationState(conversation.negotiationState) ? conversation.negotiationState.productId : null],
+    });
+
     const systemPrompt = buildSystemPrompt({
       ...settings,
       knownLeadData: previousLeadData,
-      products,
+      products: catalog.detailed,
+      catalogIndexSection: buildCatalogIndexSection(catalog.others),
+      groupedMessagesSection: buildGroupedMessagesSection(group.length),
       agenda: agenda?.section ?? null,
       orders: orderSection,
       hoursSection,
@@ -417,9 +488,17 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
       negotiationSection: settings.negotiationEnabled ? buildNegotiationSection() : null,
       quotedProductSection,
     });
-    const recentHistory = await getRecentHistoryForAi(conversation.id);
-    const history = welcomeSent && welcomeDecision.welcome ? placeWelcomeBeforeClientMessages(recentHistory, welcomeDecision.welcome) : recentHistory;
+    const history = welcomeSent && sentWelcomeText ? placeWelcomeBeforeClientMessages(recentHistory, sentWelcomeText) : recentHistory;
     let aiReply = await getAiOrchestrator().getReply(conversation.id, systemPrompt, history);
+
+    // Le client a écrit de nouveau pendant que l'IA préparait sa réponse : on abandonne celle-ci (rien n'a encore
+    // été modifié ni envoyé, le message du forfait est rendu) et le message le plus récent répondra à l'ensemble.
+    if (!isLatestInbound(conversation.id, message.externalId)) {
+      superseded = true;
+      if (welcomeSent && sentWelcomeText) carryWelcomeOver(conversation.id, sentWelcomeText);
+      console.log(`🧩 [org:${organizationId}] Nouveau message reçu pendant la préparation : la réponse portera sur l'ensemble.`);
+      return;
+    }
 
     // Panne de l'IA (tous les fournisseurs en échec) : pas de passage de main, pas de décompte dans le forfait
     // (reservation rendue dans le finally), un message d'attente et un avis au propriétaire.
@@ -587,7 +666,8 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
 
     // Photos demandées par le client : produits du catalogue uniquement (jamais une URL inventée par le modèle).
     // Une photo REÇUE du client ([Photo reçue]) n'est pas une demande de photo.
-    const requestText = message.media ? message.media.caption ?? "" : message.text;
+    const requestText = group.map((entry) => entry.requestText).filter(Boolean).join("\n");
+    const discussedProduct = products.find((product) => product.id === (aiReply.discussedProductId || aiReply.productId)) ?? null;
     const photoProducts = resolveRequestedProductPhotos({ message: requestText, productId: aiReply.productId, productIds: aiReply.productIds, products });
     const locationRequested = settings.shopLatitude != null && settings.shopLongitude != null && isLocationRequested(requestText);
 
@@ -708,7 +788,11 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
           examplesUsed: memory.exampleCount,
           closedHours: hoursSection ? hoursSection.includes("est FERMÉE") : false,
           welcomeSent,
-          answeringFile: Boolean(received),
+          answeringFile,
+          ...(group.length > 1 ? { groupedMessages: group.length } : {}),
+          // Pour les statistiques : article dont parlait le client, et information qui a manqué à l'assistant.
+          ...(discussedProduct ? { discussedProductId: discussedProduct.id, discussedProductName: discussedProduct.name } : {}),
+          ...(aiReply.missingInfo ? { missingInfo: aiReply.missingInfo } : {}),
         },
       });
       return true;
@@ -740,11 +824,13 @@ export async function processIncomingMessage(context: IncomingMessageContext, me
       await notifyHandoff({ organizationId, conversationId: conversation.id, fromJid: message.fromJid, intent: aiReply.intent, leadData: mergedLeadData });
     }
   } catch (error) {
-    console.error(`❌ [org:${organizationId}] Échec du traitement du message entrant :`, error);
+    console.error(`❌ [org:${organizationId}] Échec de la réponse au message entrant :`, error);
   } finally {
     if (reservation && !replyDelivered) {
       await releaseAiResponse(organizationId, reservation).catch((error) => console.error(`❌ [org:${organizationId}] Message du forfait non rendu :`, error));
     }
+    // Groupe traité (réponse envoyée ou décision de ne pas répondre) : ces messages n'attendent plus rien.
+    if (!superseded) clearPendingGroup(conversationId, group.map((entry) => entry.externalId));
   }
 }
 

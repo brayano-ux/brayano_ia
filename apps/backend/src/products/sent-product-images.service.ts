@@ -23,3 +23,9 @@ export async function findProductIdForSentImage(whatsappMessageId: string): Prom
   const row = await prisma.sentProductImage.findUnique({ where: { whatsappMessageId }, select: { productId: true } });
   return row?.productId ?? null;
 }
+
+/** Produits dont une photo a été envoyée récemment dans cette conversation (du plus récent au plus ancien, sans doublon). */
+export async function findRecentSentProductIds(conversationId: string, take = 6): Promise<string[]> {
+  const rows = await prisma.sentProductImage.findMany({ where: { conversationId }, orderBy: { createdAt: "desc" }, take: take * 2, select: { productId: true } });
+  return [...new Set(rows.map((row) => row.productId))].slice(0, take);
+}

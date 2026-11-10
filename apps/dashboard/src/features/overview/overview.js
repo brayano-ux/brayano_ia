@@ -149,7 +149,7 @@ export async function refreshOverview(onSelectConversation) {
     renderCommercialMetrics();
     renderRecent(onSelectConversation);
     updateBadges(conversations);
-    void loadStats();
+    void loadStats(onSelectConversation);
   } catch (error) {
     showToast(error.message, "error");
   }
