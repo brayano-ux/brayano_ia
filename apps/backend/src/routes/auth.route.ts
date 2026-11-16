@@ -10,6 +10,7 @@ import { DEFAULT_RESPONSE_DELAY_SECONDS } from "../ai/ai-settings.service.js";
 import { AppError } from "../shared/errors.js";
 import { burnPasswordCheck, hashPassword, needsRehash, safeEqualText, verifyPassword } from "../auth/password.js";
 import { clearRateLimit, evaluateRateLimit, isRateLimited, recordFailure } from "../auth/rate-limit.js";
+import { createGoogleSignupToken, GoogleAuthError, readGoogleSignupToken, verifyGoogleIdToken } from "../auth/google.js";
 
 export { evaluateRateLimit, hashPassword, verifyPassword };
 
@@ -44,6 +45,17 @@ const passwordResetVerifySchema = z.object({
 });
 
 const resendRegistrationSchema = z.object({ email: z.string().email() });
+
+const googleCredentialSchema = z.object({ credential: z.string().min(20, "Connexion Google invalide.").max(8_000) });
+const googleCompleteSchema = z.object({
+  signupToken: z.string().min(20, "Inscription expirée : reconnectez-vous avec Google.").max(4_000),
+  companyName: z.string().trim().min(2, "Le nom de l'entreprise est requis.").max(120, "Le nom de l'entreprise est trop long."),
+});
+
+/** Secret de signature du jeton d'inscription Google (le même que celui des liens de médias, obligatoire en production). */
+function googleSignupSecret() {
+  return env.MEDIA_SIGNING_SECRET || "development-google-signup-secret";
+}
 
 /** Adresse du client telle que la voit le serveur (trustProxy : voir app.ts). Jamais lue directement dans un en-tête. */
 function getClientKey(request: { ip?: string | undefined }) {
@@ -296,6 +308,122 @@ export async function authRoute(app: FastifyInstance) {
       app.log.error(error, "Login failed");
       reply.code(error instanceof AppError ? error.statusCode : 500);
       return { message: error instanceof AppError ? error.message : "Impossible de se connecter pour le moment." };
+    }
+  });
+
+  // ---- Connexion avec Google ----
+
+  /** Identifiant client public de Google pour le bouton du navigateur (null : connexion Google non configurée). */
+  app.get("/auth/google/config", async () => ({ clientId: env.GOOGLE_CLIENT_ID || null }));
+
+  /**
+   * Le navigateur envoie le jeton d'identité reçu de Google. Compte existant avec cet email : connexion directe.
+   * Sinon : il ne manque que le nom de l'entreprise (voir /auth/google/complete).
+   */
+  app.post("/auth/google", async (request, reply) => {
+    if (!env.GOOGLE_CLIENT_ID) {
+      reply.code(404);
+      return { message: "La connexion avec Google n'est pas activée." };
+    }
+    if (!evaluateRateLimit(`${getClientKey(request)}:google`, 20, 60_000)) {
+      reply.code(429);
+      return { message: "Trop de tentatives. Réessayez dans une minute." };
+    }
+    const parsed = googleCredentialSchema.safeParse(request.body);
+    if (!parsed.success) {
+      reply.code(400);
+      return { message: parsed.error.issues[0]?.message ?? "Connexion Google invalide." };
+    }
+
+    let identity;
+    try {
+      identity = await verifyGoogleIdToken(parsed.data.credential, env.GOOGLE_CLIENT_ID);
+    } catch (error) {
+      app.log.warn({ reason: error instanceof Error ? error.message : String(error) }, "Connexion Google refusée");
+      reply.code(error instanceof GoogleAuthError ? 401 : 503);
+      return { message: error instanceof GoogleAuthError ? error.message : "Google ne répond pas. Réessayez dans un instant." };
+    }
+
+    try {
+      const defaultAdminOrganizationId = await ensureDefaultAdminOrganization(identity.email);
+      const user = await withAuthDatabase(() => prisma.user.findUnique({ where: { email: identity.email }, select: { organizationId: true, active: true } }));
+      if (user) {
+        if (!user.active) {
+          reply.code(403);
+          return { message: "Ce compte a été désactivé. Contactez le propriétaire de l'entreprise." };
+        }
+        const organizationId = defaultAdminOrganizationId ?? user.organizationId;
+        const token = await issueToken(identity.email, organizationId);
+        return { token, organizationId, user: { email: identity.email } };
+      }
+      return {
+        signupRequired: true,
+        signupToken: createGoogleSignupToken({ email: identity.email, name: identity.name, sub: identity.sub }, googleSignupSecret()),
+        email: identity.email,
+        name: identity.name,
+      };
+    } catch (error) {
+      app.log.error(error, "Google login failed");
+      reply.code(error instanceof AppError ? error.statusCode : 500);
+      return { message: error instanceof AppError ? error.message : "Impossible de se connecter pour le moment." };
+    }
+  });
+
+  /** Dernière étape d'une inscription Google : le nom de l'entreprise suffit (email déjà vérifié par Google). */
+  app.post("/auth/google/complete", async (request, reply) => {
+    if (!evaluateRateLimit(`${getClientKey(request)}:google-complete`, 10, 60_000)) {
+      reply.code(429);
+      return { message: "Trop de tentatives. Réessayez dans une minute." };
+    }
+    const parsed = googleCompleteSchema.safeParse(request.body);
+    if (!parsed.success) {
+      reply.code(400);
+      return { message: parsed.error.issues[0]?.message ?? "Informations invalides." };
+    }
+    const pending = readGoogleSignupToken(parsed.data.signupToken, googleSignupSecret());
+    if (!pending) {
+      reply.code(401);
+      return { message: "Inscription expirée : reconnectez-vous avec Google." };
+    }
+
+    try {
+      const existing = await prisma.user.findUnique({ where: { email: pending.email }, select: { organizationId: true, active: true } });
+      if (existing) {
+        // Double clic, ou compte créé entre-temps : on connecte plutôt que de créer une seconde entreprise.
+        if (!existing.active) {
+          reply.code(403);
+          return { message: "Ce compte a été désactivé. Contactez le propriétaire de l'entreprise." };
+        }
+        const token = await issueToken(pending.email, existing.organizationId);
+        return { token, organizationId: existing.organizationId, user: { email: pending.email } };
+      }
+
+      const created = await prisma.$transaction(async (tx) => {
+        const organization = await tx.organization.create({ data: { name: parsed.data.companyName, freeAiResponsesRemaining: TRIAL.messages } });
+        await tx.user.create({
+          data: {
+            organizationId: organization.id,
+            name: pending.name || pending.email.split("@")[0]!,
+            email: pending.email,
+            // Pas de mot de passe choisi : une valeur aléatoire inutilisable. « Mot de passe oublié » permet d'en définir un.
+            passwordHash: await hashPassword(randomBytes(32).toString("hex")),
+            role: "ADMIN",
+          },
+        });
+        await tx.aiSettings.create({
+          data: { organizationId: organization.id, agentName: env.AI_AGENT_NAME, systemPrompt: env.AI_SYSTEM_PROMPT, responseDelaySeconds: DEFAULT_RESPONSE_DELAY_SECONDS },
+        });
+        // Une inscription par email commencée puis abandonnée ne doit plus pouvoir créer un second compte.
+        await tx.signupVerification.deleteMany({ where: { email: pending.email } });
+        return organization;
+      });
+
+      const token = await issueToken(pending.email, created.id);
+      return { token, organizationId: created.id, organizationName: created.name, user: { email: pending.email }, created: true };
+    } catch (error) {
+      app.log.error(error, "Google signup failed");
+      reply.code(500);
+      return { message: "Impossible de créer le compte pour le moment." };
     }
   });
 

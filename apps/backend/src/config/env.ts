@@ -38,6 +38,8 @@ const envSchema = z.object({
   SUPPORT_EMAIL: z.string().email().optional().or(z.literal("")),
   DEFAULT_ADMIN_EMAIL: z.string().trim().email().optional().or(z.literal("")),
   DEFAULT_ADMIN_PASSWORD: z.string().min(8).optional().or(z.literal("")),
+  /** Identifiant client OAuth « Application Web » de Google Cloud. Vide : le bouton « Continuer avec Google » est masqué. */
+  GOOGLE_CLIENT_ID: z.string().trim().optional().or(z.literal("")),
   SESSION_TTL_SECONDS: z.coerce.number().int().positive().default(60 * 60 * 24 * 14),
   /** Nombre de proxys de l'hébergeur devant le serveur (Render : 1). Sert à lire la vraie adresse du client. */
   TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(1),

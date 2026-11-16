@@ -28,6 +28,12 @@
       </div>
       <h1 id="auth-title" class="auth-subtitle">Connexion à l'espace de pilotage</h1>
 
+      <!-- Connexion avec Google : affichée seulement si le serveur a un identifiant client Google. -->
+      <div id="google-auth" class="google-auth hidden">
+        <div id="google-button" class="google-button" aria-label="Continuer avec Google"></div>
+        <p class="auth-divider"><span>ou avec votre email</span></p>
+      </div>
+
       <!-- Connexion -->
       <form id="login-form" class="auth-form" method="post">
         <label>
@@ -84,6 +90,18 @@
           <span class="field-hint">Minimum 8 caractères.</span>
         </label>
         <button type="submit" class="primary auth-submit">Créer mon espace</button>
+      </form>
+
+      <!-- Inscription avec Google : il ne manque que le nom de l'entreprise -->
+      <form id="google-company-form" class="auth-form hidden" method="post">
+        <p class="auth-help" id="google-company-intro">Dernière étape : le nom de votre entreprise.</p>
+        <label>
+          <span>Nom de l'entreprise</span>
+          <input id="google-company-name" type="text" placeholder="Mon entreprise" autocomplete="organization" required minlength="2" maxlength="120" />
+          <small class="field-hint">Vous relierez votre numéro WhatsApp juste après.</small>
+        </label>
+        <button type="submit" class="primary auth-submit">Créer mon espace</button>
+        <button id="google-company-cancel" type="button" class="text-button">Utiliser un autre compte</button>
       </form>
 
       <!-- Vérification de l'email -->

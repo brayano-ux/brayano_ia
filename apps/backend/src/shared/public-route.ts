@@ -9,6 +9,7 @@ export function isPublicRoute(url: string) {
     || url === "/logout"
     || url === "/register"
     || url.startsWith("/register/")
+    || url.startsWith("/auth/google")
     || url.startsWith("/password-reset/")
     || url.startsWith("/health")
     || url.startsWith("/admin/")

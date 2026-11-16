@@ -34,6 +34,10 @@ services:
       # Signe les liens de photos : généré automatiquement par Render, ne jamais le partager.
       - key: MEDIA_SIGNING_SECRET
         generateValue: true
+      # « Continuer avec Google » : identifiant client OAuth (type Application Web) créé dans Google Cloud.
+      # Vide : le bouton n'apparaît pas et l'inscription par email reste la seule possible.
+      - key: GOOGLE_CLIENT_ID
+        sync: false
       - key: TRUST_PROXY_HOPS
         value: "1"
       - key: CAMPAY_BASE_URL
