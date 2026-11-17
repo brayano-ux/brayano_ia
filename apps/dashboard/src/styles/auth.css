@@ -63,3 +63,10 @@
 
 .auth-legal { margin-top: 22px; color: var(--muted); font-size: .75rem; line-height: 1.7; }
 .auth-legal a { text-underline-offset: 3px; }
+
+/* ----- Connexion avec Google ----- */
+.google-auth { display: grid; gap: var(--space-4); margin-bottom: var(--space-4); }
+.google-button { display: flex; justify-content: center; min-height: 44px; }
+.auth-divider { display: flex; align-items: center; gap: var(--space-3); margin: 0; font-size: var(--text-xs); color: var(--subtle); }
+.auth-divider::before, .auth-divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+#google-company-cancel { justify-self: center; }

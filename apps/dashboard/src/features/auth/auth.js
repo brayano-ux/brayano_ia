@@ -24,6 +24,8 @@ function showAuthMode(mode) {
   loginForm.classList.toggle("hidden", !isLogin);
   registerForm.classList.toggle("hidden", isLogin);
   verificationForm?.classList.add("hidden");
+  $("#google-company-form")?.classList.add("hidden");
+  if (googleAvailable) $("#google-auth")?.classList.remove("hidden");
   toggleButton.classList.remove("hidden");
   authTitle.textContent = isLogin ? "Connexion à l'espace de pilotage" : "Créer mon espace client";
   authHint.textContent = isLogin ? "Connectez-vous avec votre compte." : "Créez votre entreprise et votre compte administrateur.";
@@ -41,7 +43,7 @@ export function logoutUser(mode = "login") {
   clearSession();
   $(".app-shell").classList.add("hidden");
   $("#login-screen").classList.remove("hidden");
-  ["#login-email", "#login-password", "#register-name", "#register-company", "#register-whatsapp-local", "#register-email", "#register-password", "#register-verification-code"]
+  ["#login-email", "#login-password", "#register-name", "#register-company", "#register-whatsapp-local", "#register-email", "#register-password", "#register-verification-code", "#google-company-name"]
     .forEach((selector) => {
       const field = $(selector);
       if (field) field.value = "";
@@ -65,6 +67,119 @@ async function authenticateUser(email, password) {
   if (response.organizationId) {
     writeOrganizationId(response.organizationId);
     setState({ organizationId: response.organizationId });
+  }
+}
+
+// ---- Connexion avec Google (Google Identity Services) ----
+
+const GOOGLE_SCRIPT_URL = "https://accounts.google.com/gsi/client";
+let googleAvailable = false;
+let pendingGoogleSignup = null;
+
+function loadGoogleScript() {
+  if (window.google?.accounts?.id) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = GOOGLE_SCRIPT_URL;
+    script.async = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Script Google indisponible"));
+    document.head.appendChild(script);
+  });
+}
+
+/** Session reçue du serveur → navigateur, puis tableau de bord. */
+async function openSession(result, onAuthenticated, message) {
+  writeSession({ email: result.user.email, token: result.token, organizationId: result.organizationId || null });
+  if (result.organizationId) {
+    writeOrganizationId(result.organizationId);
+    setState({ organizationId: result.organizationId });
+  }
+  showDashboard();
+  showToast(message, "success");
+  await onAuthenticated();
+}
+
+function showGoogleCompanyStep(pending) {
+  pendingGoogleSignup = pending;
+  ["#login-form", "#register-form", "#register-verification-form", "#google-auth"].forEach((selector) => $(selector)?.classList.add("hidden"));
+  $("#google-company-form").classList.remove("hidden");
+  $("#toggle-auth-mode").classList.add("hidden");
+  $("#auth-title").textContent = pending.name ? `Bienvenue, ${pending.name.split(" ")[0]} !` : "Bienvenue !";
+  $("#auth-mode-hint").textContent = `Connecté avec Google : ${pending.email}`;
+  $("#google-company-intro").textContent = "Dernière étape : comment s'appelle votre entreprise ?";
+  $("#google-company-name").focus();
+}
+
+async function handleGoogleCredential(response, onAuthenticated) {
+  try {
+    const result = await api("/auth/google", { method: "POST", body: JSON.stringify({ credential: response.credential }) });
+    if (result.signupRequired) {
+      showGoogleCompanyStep(result);
+      return;
+    }
+    await openSession(result, onAuthenticated, "Connexion réussie.");
+  } catch (error) {
+    showToast(error.message || "Connexion avec Google impossible.", "error");
+  }
+}
+
+/** Affiche « Continuer avec Google » si le serveur est configuré. Sans configuration ni réseau Google, rien ne change. */
+async function initGoogleAuth(onAuthenticated) {
+  const container = $("#google-auth");
+  const form = $("#google-company-form");
+  if (!container || !form) return;
+
+  form.onsubmit = async (event) => {
+    event.preventDefault();
+    const submitButton = form.querySelector('button[type="submit"]');
+    if (!pendingGoogleSignup) {
+      showAuthMode("register");
+      return;
+    }
+    try {
+      submitButton.disabled = true;
+      const result = await api("/auth/google/complete", {
+        method: "POST",
+        body: JSON.stringify({ signupToken: pendingGoogleSignup.signupToken, companyName: $("#google-company-name").value.trim() }),
+      });
+      pendingGoogleSignup = null;
+      // Pixel Meta : compte réellement créé.
+      if (result.created) window.fbq?.("track", "CompleteRegistration");
+      await openSession(result, onAuthenticated, result.created ? "Compte créé avec succès." : "Connexion réussie.");
+    } catch (error) {
+      showToast(error.message || "Impossible de créer votre compte.", "error");
+      if (/expirée/.test(error.message || "")) {
+        pendingGoogleSignup = null;
+        showAuthMode("register");
+      }
+    } finally {
+      submitButton.disabled = false;
+    }
+  };
+  $("#google-company-cancel").onclick = () => {
+    pendingGoogleSignup = null;
+    window.google?.accounts?.id?.disableAutoSelect?.();
+    showAuthMode("register");
+  };
+
+  try {
+    const { clientId } = await api("/auth/google/config");
+    if (!clientId) return;
+    await loadGoogleScript();
+    window.google.accounts.id.initialize({
+      client_id: clientId,
+      callback: (response) => void handleGoogleCredential(response, onAuthenticated),
+      ux_mode: "popup",
+      context: "signin",
+    });
+    const width = Math.min(400, Math.max(200, Math.round($("#google-button").getBoundingClientRect().width || 320)));
+    window.google.accounts.id.renderButton($("#google-button"), { type: "standard", theme: "outline", size: "large", shape: "pill", text: "continue_with", logo_alignment: "center", locale: "fr", width });
+    googleAvailable = true;
+    // N'apparaît que sur l'écran de connexion ou d'inscription, pas pendant une étape en cours.
+    if (!$("#login-form").classList.contains("hidden") || !$("#register-form").classList.contains("hidden")) container.classList.remove("hidden");
+  } catch {
+    // Google injoignable ou non configuré : l'inscription par email reste disponible.
   }
 }
 
@@ -198,6 +313,7 @@ export function initAuthFlow(onAuthenticated) {
       if (result.verificationRequired) {
         setState({ pendingRegistrationEmail: result.email });
         registerForm.classList.add("hidden");
+        $("#google-auth")?.classList.add("hidden");
         verificationForm.classList.remove("hidden");
         $("#auth-title").textContent = "Vérifier votre adresse email";
         $("#auth-mode-hint").textContent = "Saisissez le code reçu par email.";
@@ -251,6 +367,8 @@ export function initAuthFlow(onAuthenticated) {
       showToast(error.message, "error");
     }
   };
+
+  void initGoogleAuth(onAuthenticated);
 
   // Lien « Créer mon compte » de la page d'accueil : ouvre directement l'inscription.
   if (new URLSearchParams(window.location.search).has("inscription")) showAuthMode("register");
