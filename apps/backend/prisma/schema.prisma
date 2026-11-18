@@ -40,6 +40,9 @@ model Organization {
   suspensionReason         String?                      @map("suspension_reason")
   suspendedAt              DateTime?                    @map("suspended_at")
   whatsappNumber           String?                      @map("whatsapp_number")
+  /// Rappels « connectez votre WhatsApp » envoyés tant que le numéro n'a jamais été relié (voir notifications/whatsapp-connect-reminders.ts).
+  whatsappReminderCount    Int                          @default(0) @map("whatsapp_reminder_count")
+  whatsappReminderAt       DateTime?                    @map("whatsapp_reminder_at")
 
   @@map("organizations")
 }

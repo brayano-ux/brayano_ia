@@ -119,7 +119,7 @@ Résumé du jour : conversations actives, clients à traiter (nouveaux messages,
 - « L'agent ne dit jamais l'heure/le prix/l'adresse » : l'information n'est pas dans la fiche d'activité ou dans le produit ; l'ajouter.
 - « Mon WhatsApp se déconnecte » : ne pas ouvrir ce WhatsApp sur un autre appareil lié non prévu, ne pas supprimer l'appareil lié depuis le téléphone, garder le téléphone allumé avec internet de temps en temps. Refaire la liaison (QR code ou code).
 - « Les photos des produits ne partent pas » : vérifier que le produit est actif et qu'il a bien une photo (JPEG, PNG ou WebP), sinon la remplacer.
-- « Je n'ai pas reçu l'email » : vérifier les spams ; les emails de Brayano IA concernent la validation du compte, les nouvelles commandes/rendez-vous, les prises de main, les déconnexions WhatsApp et les messages épuisés.
+- « Je n'ai pas reçu l'email » : vérifier les spams ; les emails de Brayano IA concernent la validation du compte, les nouvelles commandes/rendez-vous, les prises de main, les déconnexions WhatsApp, les messages épuisés, et des rappels pour relier son WhatsApp si on ne l'a pas encore fait (au plus 3 : 1 jour, 3 jours puis 7 jours après l'inscription, en journée ; ils s'arrêtent dès que le numéro est relié).
 - « J'ai oublié mon mot de passe » : sur la page de connexion, « Mot de passe oublié ? » : un code est envoyé par email pour choisir un nouveau mot de passe.
 - « Je veux ajouter un employé » : Paramètres → Votre équipe (selon le forfait).
 - « Un employé ne voit pas certaines pages » : c'est normal, les employés n'ont accès qu'aux conversations, commandes et rendez-vous.

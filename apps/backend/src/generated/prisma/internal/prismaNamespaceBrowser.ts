@@ -111,7 +111,9 @@ export const OrganizationScalarFieldEnum = {
   platformSuspended: 'platformSuspended',
   suspensionReason: 'suspensionReason',
   suspendedAt: 'suspendedAt',
-  whatsappNumber: 'whatsappNumber'
+  whatsappNumber: 'whatsappNumber',
+  whatsappReminderCount: 'whatsappReminderCount',
+  whatsappReminderAt: 'whatsappReminderAt'
 } as const
 
 export type OrganizationScalarFieldEnum = (typeof OrganizationScalarFieldEnum)[keyof typeof OrganizationScalarFieldEnum]

@@ -4,6 +4,7 @@ import { env } from "../config/env.js";
 import { cleanupOldClientMedia } from "../media/client-media-cleanup.js";
 import { checkExpiringSubscriptions } from "../billing/subscription.service.js";
 import { runFollowUps } from "./follow-ups.js";
+import { runWhatsAppConnectReminders } from "../notifications/whatsapp-connect-reminders.js";
 
 const TICK_MS = 5 * 60_000;
 const DAY_MS = 24 * 3600_000;
@@ -12,6 +13,8 @@ let timer: NodeJS.Timeout | null = null;
 let tickRunning = false;
 let lastCleanupAt = 0;
 let lastBillingCheckAt = 0;
+let lastReminderCheckAt = 0;
+const HOUR_MS = 3600_000;
 
 async function tick() {
   if (tickRunning) return;
@@ -42,6 +45,16 @@ async function tick() {
         return 0;
       });
       if (notified) console.log(`💳 ${notified} propriétaire(s) prévenu(s) d'un abonnement bientôt terminé.`);
+    }
+
+    // Une fois par heure : rappel aux comptes créés sans avoir relié leur WhatsApp.
+    if (Date.now() - lastReminderCheckAt > HOUR_MS) {
+      lastReminderCheckAt = Date.now();
+      const reminded = await runWhatsAppConnectReminders().catch((error) => {
+        console.error("❌ Rappels « connectez votre WhatsApp » impossibles :", error);
+        return 0;
+      });
+      if (reminded) console.log(`📱 ${reminded} propriétaire(s) invité(s) à relier leur WhatsApp.`);
     }
   } finally {
     tickRunning = false;
