@@ -27,9 +27,28 @@ function showAuthMode(mode) {
   $("#google-company-form")?.classList.add("hidden");
   if (googleAvailable) $("#google-auth")?.classList.remove("hidden");
   toggleButton.classList.remove("hidden");
-  authTitle.textContent = isLogin ? "Connexion à l'espace de pilotage" : "Créer mon espace client";
-  authHint.textContent = isLogin ? "Connectez-vous avec votre compte." : "Créez votre entreprise et votre compte administrateur.";
+  authTitle.textContent = isLogin ? "Connexion" : "Créer votre espace";
+  authHint.textContent = isLogin ? "Connectez-vous avec votre compte." : "Quelques informations suffisent : votre agent sera prêt en quelques minutes.";
   toggleButton.textContent = isLogin ? "Créer un compte" : "Se connecter";
+  const switchLabel = $("#auth-switch-label");
+  if (switchLabel) switchLabel.textContent = isLogin ? "Pas encore de compte ?" : "Vous avez déjà un compte ?";
+  $("#login-screen").dataset.mode = mode;
+}
+
+/** Bouton « œil » d'un champ mot de passe : affiche ou masque la saisie. */
+function initPasswordToggles() {
+  document.addEventListener("click", (event) => {
+    const button = event.target.closest?.(".password-toggle");
+    if (!button) return;
+    const input = document.getElementById(button.dataset.target);
+    if (!input) return;
+    const visible = input.type === "password";
+    input.type = visible ? "text" : "password";
+    button.classList.toggle("is-visible", visible);
+    button.setAttribute("aria-pressed", String(visible));
+    button.setAttribute("aria-label", visible ? "Masquer le mot de passe" : "Afficher le mot de passe");
+    input.focus();
+  });
 }
 
 export function showDashboard() {
@@ -374,6 +393,7 @@ export function initAuthFlow(onAuthenticated) {
   };
 
   void initGoogleAuth(onAuthenticated);
+  initPasswordToggles();
 
   // Lien « Créer mon compte » de la page d'accueil : ouvre directement l'inscription.
   if (new URLSearchParams(window.location.search).has("inscription")) showAuthMode("register");

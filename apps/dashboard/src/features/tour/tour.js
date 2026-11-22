@@ -12,33 +12,33 @@ const STEP_TRANSITION_MS = 550;
 /** Onglets couverts, dans l'ordre naturel de découverte. Un onglet absent de cette liste n'a pas de guide. */
 const VIEW_TOURS = {
   overview: {
-    label: "la vue d'ensemble",
+    label: "votre page d'accueil",
     steps: [
-      { selector: ".metrics", title: "Vos chiffres du jour", text: "Conversations actives, clients à traiter et statut de votre WhatsApp, en temps réel." },
-      { selector: "#recent-conversations", title: "Conversations récentes", text: "Les derniers échanges avec vos clients apparaissent ici dès qu'ils arrivent." },
-      { selector: ".quick-panel", title: "Actions rapides", text: "Connectez WhatsApp, personnalisez votre agent ou ouvrez la boîte de réception en un clic." },
+      { selector: ".todo-card", title: "Ce qu'il y a à faire", text: "Clients qui attendent une réponse, paiements à vérifier, nouvelles commandes : tout ce qui demande une action est ici." },
+      { selector: ".recent-card", title: "Dernières conversations", text: "Les échanges les plus récents avec vos clients. Cliquez sur l'un d'eux pour l'ouvrir." },
+      { selector: ".kpi-grid", title: "Vos résultats", text: "Conversations, réponses de l'agent, commandes et ventes, comparés à la période précédente." },
     ],
   },
   whatsapp: {
     label: "la connexion WhatsApp",
     steps: [
       { selector: ".wa-number", title: "Le numéro de votre entreprise", text: "Celui que vos clients contactent déjà. Choisissez le pays, saisissez le numéro, puis enregistrez." },
-      { selector: "#connect-wa", title: "Connexion par QR code", text: "Le moyen le plus simple : scannez ce code avec WhatsApp sur votre téléphone." },
+      { selector: "#connect-wa", title: "Relier votre téléphone", text: "Le moyen le plus simple : affichez le QR code et scannez-le avec WhatsApp sur votre téléphone." },
       { selector: "#qr-container", title: "Votre code de connexion", text: "Le QR code (ou le code d'association) apparaît ici et se renouvelle automatiquement." },
     ],
   },
   agent: {
     label: "votre agent IA",
     steps: [
-      { selector: ".agent-hero", title: "État de votre agent", text: "Activez ou mettez en pause ses réponses automatiques, et suivez sa configuration en un coup d'œil." },
+      { selector: ".agent-hero", title: "État de votre agent", text: "Activez ou mettez en pause ses réponses automatiques, et voyez ce qu'il reste à configurer." },
       { selector: ".agent-tabs", title: "Les réglages de l'agent", text: "Identité, connaissances, comportement, horaires… chaque onglet règle un aspect de son comportement." },
-      { selector: "#config-assistant", title: "L'assistant de configuration", text: "Collez un texte, un site web ou un PDF : l'IA en extrait les informations de votre activité à votre place." },
+      { selector: "#agent-tester .agent-playground, #agent-test-open", title: "Testez-le avant vos clients", text: "Écrivez comme un client : vous voyez exactement ce que l'agent répondrait, sans rien envoyer." },
     ],
   },
   inbox: {
-    label: "la boîte de réception",
+    label: "vos conversations",
     steps: [
-      { selector: "#inbox-stage-filters", title: "Filtrer par étiquette", text: "Retrouvez vite les nouveaux clients, ceux qui ont commandé, ou ceux à rappeler." },
+      { selector: "#inbox-stage-filters", title: "Filtrer les conversations", text: "Retrouvez vite les clients à traiter, ceux qui ont commandé ou ceux à rappeler." },
       { selector: "#all-conversations", title: "Vos conversations", text: "Toutes les discussions WhatsApp de votre entreprise, mises à jour automatiquement." },
       { selector: "#conversation-detail", title: "Le détail d'une conversation", text: "Cliquez sur un client pour lire l'échange complet et reprendre la main si besoin." },
     ],
@@ -46,18 +46,23 @@ const VIEW_TOURS = {
   products: {
     label: "le catalogue produits",
     steps: [
-      { selector: "#product-form", title: "Ajouter un produit", text: "Photo, nom, description et prix : votre agent s'en sert pour répondre et recommander le bon article." },
-      { selector: "#products-list", title: "Votre catalogue", text: "Tous vos produits ajoutés apparaissent ici, modifiables à tout moment." },
+      { selector: "#add-product", title: "Ajouter un produit", text: "Photo, nom, description et prix : votre agent s'en sert pour répondre et recommander le bon article." },
+      { selector: "#products-list", title: "Votre catalogue", text: "Tous vos produits apparaissent ici, modifiables à tout moment." },
     ],
   },
   broadcasts: {
     label: "les messages groupés",
     steps: [
-      { selector: ".broadcast-safety", title: "Protection de votre numéro", text: "Des règles automatiques limitent les envois pour éviter tout blocage de votre WhatsApp." },
       { selector: "#broadcast-form", title: "Préparer un envoi", text: "Choisissez les clients concernés et rédigez votre annonce (promotion, nouveauté, horaires)." },
+      { selector: ".broadcast-safety", title: "Protection de votre numéro", text: "Des règles automatiques limitent les envois pour éviter tout blocage de votre WhatsApp." },
     ],
   },
 };
+
+/** Premier élément réellement affiché parmi ceux que désigne le sélecteur (un élément masqué ne peut pas être montré). */
+function visibleTarget(selector) {
+  return Array.from(document.querySelectorAll(selector)).find((element) => element.offsetParent !== null && element.getBoundingClientRect().height > 0) || null;
+}
 
 let active = null; // { steps, index, elements, onDone }
 const pending = new Set(); // vues dont le guide est programmé (setTimeout) mais pas encore lancé
@@ -86,16 +91,16 @@ function buildOverlay() {
       <h3 class="tour-title"></h3>
       <p class="tour-text"></p>
       <div class="tour-actions">
-        <button type="button" class="text-button tour-skip">Passer le guide</button>
-        <button type="button" class="primary tour-next">Suivant</button>
+        <button type="button" class="btn btn-sm btn-ghost tour-skip">Passer le guide</button>
+        <button type="button" class="btn btn-sm btn-primary tour-next">Suivant</button>
       </div>
     </div>
     <div class="tour-bravo hidden">
       <div class="tour-bravo-card">
-        <span class="tour-bravo-emoji" aria-hidden="true">🎉</span>
+        <span class="icon-tile icon-tile-lg success" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><use href="#i-check-circle"></use></svg></span>
         <h3>Bravo !</h3>
         <p></p>
-        <button type="button" class="primary tour-bravo-close">Continuer</button>
+        <button type="button" class="btn btn-primary tour-bravo-close">Continuer</button>
       </div>
     </div>`;
   document.body.append(root);
@@ -134,7 +139,10 @@ function positionTooltip(els, rect) {
   const { width: tw, height: th } = tooltip.getBoundingClientRect();
   const margin = 16;
   const spaceBelow = window.innerHeight - rect.bottom;
-  const top = spaceBelow > th + margin * 2 ? rect.bottom + margin : Math.max(margin, rect.top - th - margin);
+  // Sous la zone s'il y a la place, sinon au-dessus ; dans tous les cas l'explication reste entièrement à l'écran
+  // (quitte à recouvrir le bas d'une zone plus haute que la fenêtre).
+  const preferred = spaceBelow > th + margin * 2 ? rect.bottom + margin : rect.top - th - margin;
+  const top = Math.min(Math.max(margin, preferred), window.innerHeight - th - margin);
   let left = rect.left + rect.width / 2 - tw / 2;
   left = Math.min(Math.max(left, margin), window.innerWidth - tw - margin);
   tooltip.style.left = `${left}px`;
@@ -163,7 +171,7 @@ function waitForScrollToSettle(callback) {
 function showStep(index) {
   const { steps, els } = active;
   const step = steps[index];
-  const target = document.querySelector(step.selector);
+  const target = visibleTarget(step.selector);
   if (!target) {
     // Élément absent (pas encore chargé, ou invisible pour ce compte) : on passe l'étape sans bloquer le guide.
     if (index + 1 < steps.length) showStep(index + 1);

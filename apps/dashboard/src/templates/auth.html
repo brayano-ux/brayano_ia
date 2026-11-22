@@ -1,32 +1,38 @@
-<!-- AUTH SCREEN -->
-<div id="login-screen" class="auth-screen">
+<!-- ÉCRAN DE CONNEXION ET D'INSCRIPTION -->
+<div id="login-screen" class="auth-screen" data-mode="login">
 
-  <!-- Panneau de présentation (visible sur grand écran uniquement) -->
+  <!-- Présentation (grand écran uniquement) -->
   <aside class="auth-aside" aria-hidden="true">
     <div class="auth-brand">
-      <img class="brand-logo" src="../assets/logo-mark.png" alt="" width="40" height="38" /><span>Brayano <span class="brand-accent">IA</span></span>
+      <img class="brand-logo" src="../assets/logo-mark.png" alt="" width="36" height="34" /><span>Brayano <span class="brand-accent">IA</span></span>
     </div>
 
     <div class="auth-aside-body">
-      <h2>Vos clients écrivent sur WhatsApp. Votre agent répond.</h2>
-      <p class="auth-aside-text">Réponses automatiques, transfert vers vos commerciaux et historique de toutes vos conversations.</p>
+      <h2>Vos clients écrivent sur WhatsApp.<br />Votre agent répond, jour et nuit.</h2>
+      <ul class="auth-points">
+        <li><span class="auth-point-icon"><svg class="icon" viewBox="0 0 24 24"><use href="#i-zap"/></svg></span><div><b>Une réponse en quelques secondes</b><small>Prix, disponibilités, livraison : il connaît votre activité.</small></div></li>
+        <li><span class="auth-point-icon"><svg class="icon" viewBox="0 0 24 24"><use href="#i-bag"/></svg></span><div><b>Commandes et rendez-vous enregistrés</b><small>Vous retrouvez tout, prêt à traiter, dans votre tableau de bord.</small></div></li>
+        <li><span class="auth-point-icon"><svg class="icon" viewBox="0 0 24 24"><use href="#i-hand"/></svg></span><div><b>Vous reprenez la main quand vous voulez</b><small>L’agent vous prévient dès qu’un client a besoin de vous.</small></div></li>
+      </ul>
 
       <div class="auth-chat">
-        <p class="auth-chat-title">Exemple de conversation</p>
-        <p class="bubble in">Bonjour, vous êtes ouverts demain ?</p>
-        <p class="bubble out">Oui, nous ouvrons à 8 h. Souhaitez-vous passer commande ?</p>
-        <p class="bubble in">Je voudrais le modèle noir.</p>
-        <p class="bubble out">Parfait, je vous mets en relation avec un commercial.</p>
+        <p class="bubble in">Bonjour, la robe wax est disponible en M ?</p>
+        <p class="bubble out"><span class="bubble-author"><svg class="icon icon-xs" viewBox="0 0 24 24"><use href="#i-sparkles"/></svg>Agent IA</span>Oui 😊 Elle est à 25 000 FCFA, livrée aujourd’hui à Douala. Je vous envoie la photo ?</p>
+        <p class="bubble in">Oui, et je la prends.</p>
       </div>
     </div>
+    <p class="auth-aside-foot">Conçu pour les commerces d’Afrique francophone.</p>
   </aside>
 
   <main class="auth-main">
     <div class="auth-card">
-      <div class="auth-brand">
-        <img class="brand-logo" src="../assets/logo-mark.png" alt="" width="40" height="38" /><span>Brayano <span class="brand-accent">IA</span></span>
+      <div class="auth-brand auth-brand-mobile">
+        <img class="brand-logo" src="../assets/logo-mark.png" alt="" width="36" height="34" /><span>Brayano <span class="brand-accent">IA</span></span>
       </div>
-      <h1 id="auth-title" class="auth-subtitle">Connexion à l'espace de pilotage</h1>
+      <div class="auth-head">
+        <h1 id="auth-title" class="auth-subtitle">Connexion</h1>
+        <p class="auth-hint"><span id="auth-mode-hint">Connectez-vous avec votre compte.</span></p>
+      </div>
 
       <!-- Connexion avec Google : affichée seulement si le serveur a un identifiant client Google. -->
       <div id="google-auth" class="google-auth hidden">
@@ -36,94 +42,88 @@
 
       <!-- Connexion -->
       <form id="login-form" class="auth-form" method="post">
-        <label>
-          <span>Adresse email</span>
+        <label class="field">
+          <span class="field-label">Adresse email</span>
           <input id="login-email" type="email" placeholder="vous@entreprise.com" autocomplete="email" required />
         </label>
-        <label>
-          <span>Mot de passe</span>
+        <div class="field">
+          <span class="field-label"><label for="login-password">Mot de passe</label><button type="button" class="btn-link auth-forgot" id="forgot-password-link">Mot de passe oublié ?</button></span>
           <span class="password-field">
-            <input id="login-password" type="password" placeholder="••••••••" autocomplete="current-password" required />
+            <input id="login-password" type="password" placeholder="Votre mot de passe" autocomplete="current-password" required />
             <button type="button" class="password-toggle" data-target="login-password" aria-label="Afficher le mot de passe" aria-pressed="false">
-              <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
-              <svg class="eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.53 13.53 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><path d="m2 2 20 20"/></svg>
+              <svg class="icon eye-open" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-eye"/></svg>
+              <svg class="icon eye-off" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-eye-off"/></svg>
             </button>
           </span>
-        </label>
-        <div class="auth-row">
-          <button type="button" class="text-button" id="forgot-password-link">Mot de passe oublié ?</button>
         </div>
-        <button type="submit" class="primary auth-submit">Se connecter</button>
+        <button type="submit" class="btn btn-primary btn-lg btn-block auth-submit">Se connecter</button>
       </form>
 
       <!-- Inscription -->
       <form id="register-form" class="auth-form hidden" method="post">
-        <label>
-          <span>Nom complet</span>
-          <input id="register-name" type="text" placeholder="Votre nom" autocomplete="name" required />
+        <label class="field">
+          <span class="field-label">Votre nom</span>
+          <input id="register-name" type="text" placeholder="Prénom et nom" autocomplete="name" required />
         </label>
-        <label>
-          <span>Nom de l'entreprise</span>
-          <input id="register-company" type="text" placeholder="Mon entreprise" autocomplete="organization" required />
+        <label class="field">
+          <span class="field-label">Nom de l’entreprise</span>
+          <input id="register-company" type="text" placeholder="Ex. Boutique Awa" autocomplete="organization" required />
         </label>
-        <label>
-          <span>Numéro WhatsApp de l'entreprise</span>
+        <div class="field">
+          <label class="field-label" for="register-whatsapp-local">Numéro WhatsApp de l’entreprise</label>
           <div class="phone-field-row">
             <select id="register-whatsapp-country" aria-label="Indicatif pays"></select>
             <input id="register-whatsapp-local" type="tel" inputmode="numeric" placeholder="6 90 00 00 00" autocomplete="tel" required />
           </div>
-          <small class="field-hint">Le numéro que vos clients contactent. Choisissez le pays puis saisissez le numéro sans l'indicatif. Vous le relierez à l'agent juste après l'inscription.</small>
-        </label>
-        <label>
-          <span>Adresse email</span>
+          <span class="hint">Le numéro que vos clients contactent, sans l’indicatif. Vous le relierez à l’agent juste après.</span>
+        </div>
+        <label class="field">
+          <span class="field-label">Adresse email</span>
           <input id="register-email" type="email" placeholder="vous@entreprise.com" autocomplete="email" required />
         </label>
-        <label>
-          <span>Mot de passe</span>
+        <div class="field">
+          <label class="field-label" for="register-password">Mot de passe</label>
           <span class="password-field">
-            <input id="register-password" type="password" placeholder="Créez un mot de passe" autocomplete="new-password" required minlength="8" />
+            <input id="register-password" type="password" placeholder="8 caractères minimum" autocomplete="new-password" required minlength="8" />
             <button type="button" class="password-toggle" data-target="register-password" aria-label="Afficher le mot de passe" aria-pressed="false">
-              <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
-              <svg class="eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.53 13.53 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><path d="m2 2 20 20"/></svg>
+              <svg class="icon eye-open" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-eye"/></svg>
+              <svg class="icon eye-off" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-eye-off"/></svg>
             </button>
           </span>
-          <span class="field-hint">Minimum 8 caractères.</span>
-        </label>
-        <button type="submit" class="primary auth-submit">Créer mon espace</button>
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg btn-block auth-submit">Créer mon espace</button>
       </form>
 
       <!-- Inscription avec Google : il ne manque que le nom de l'entreprise -->
       <form id="google-company-form" class="auth-form hidden" method="post">
         <p class="auth-help" id="google-company-intro">Dernière étape : le nom de votre entreprise.</p>
-        <label>
-          <span>Nom de l'entreprise</span>
-          <input id="google-company-name" type="text" placeholder="Mon entreprise" autocomplete="organization" required minlength="2" maxlength="120" />
-          <small class="field-hint">Vous relierez votre numéro WhatsApp juste après.</small>
+        <label class="field">
+          <span class="field-label">Nom de l’entreprise</span>
+          <input id="google-company-name" type="text" placeholder="Ex. Boutique Awa" autocomplete="organization" required minlength="2" maxlength="120" />
+          <span class="hint">Vous relierez votre numéro WhatsApp juste après.</span>
         </label>
-        <button type="submit" class="primary auth-submit">Créer mon espace</button>
-        <button id="google-company-cancel" type="button" class="text-button">Utiliser un autre compte</button>
+        <button type="submit" class="btn btn-primary btn-lg btn-block auth-submit">Créer mon espace</button>
+        <button id="google-company-cancel" type="button" class="btn btn-ghost btn-block">Utiliser un autre compte</button>
       </form>
 
       <!-- Vérification de l'email -->
       <form id="register-verification-form" class="auth-form hidden" method="post">
         <p class="auth-help">Saisissez le code à 6 chiffres envoyé à votre adresse email.</p>
-        <label>
-          <span>Code reçu par email</span>
+        <label class="field">
+          <span class="field-label">Code reçu par email</span>
           <input id="register-verification-code" class="code-input" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="123456" autocomplete="one-time-code" required />
         </label>
-        <button type="submit" class="primary auth-submit">Vérifier le code</button>
-        <button id="resend-registration-code" type="button" class="text-button" disabled>Renvoyer le code</button>
+        <button type="submit" class="btn btn-primary btn-lg btn-block auth-submit">Vérifier le code</button>
+        <button id="resend-registration-code" type="button" class="btn btn-ghost btn-block" disabled>Renvoyer le code</button>
       </form>
 
-      <p class="auth-legal">Avant de créer votre espace, consultez les <a href="../conditions.html">conditions d’utilisation</a> et la <a href="../confidentialite.html">notice de confidentialité</a>.</p>
-
       <div class="auth-switch">
-        <p class="auth-hint">
-          <span id="auth-mode-hint">Accédez à votre espace de pilotage</span>
-        </p>
-        <button id="toggle-auth-mode" type="button" class="text-button">Créer un compte</button>
+        <span id="auth-switch-label">Pas encore de compte ?</span>
+        <button id="toggle-auth-mode" type="button" class="btn-link">Créer un compte</button>
       </div>
-      <a class="auth-home" href="../">← Retour à l'accueil</a>
+
+      <p class="auth-legal">En créant votre espace, vous acceptez les <a href="../conditions.html">conditions d’utilisation</a> et la <a href="../confidentialite.html">notice de confidentialité</a>.</p>
+      <a class="auth-home" href="../"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-arrow-left"/></svg>Retour à l’accueil</a>
     </div>
   </main>
 </div>
