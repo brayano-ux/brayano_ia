@@ -21,7 +21,11 @@ export interface DashboardStats {
   afterHours: { enabled: boolean; clientMessages: number };
   estimatedMinutesSaved: number;
   stages: Record<"NEW" | "INTERESTED" | "ORDERED" | "CALLBACK", number>;
-  series: Array<{ day: string; clientMessages: number; assistantMessages: number; orders: number }>;
+  series: Array<{ day: string; clientMessages: number; assistantMessages: number; orders: number; conversations: number; revenue: number }>;
+  /** Mêmes totaux sur la période précédente de même durée (jusqu'à la même heure) : sert à afficher une tendance. */
+  previous: { conversations: number; clientMessages: number; assistantMessages: number; orders: number; revenue: number; appointments: number };
+  /** Ce qui attend une action aujourd'hui, quelle que soit la période choisie. */
+  pending: { newOrders: number; unpaidOrders: number; appointmentsToday: number };
   /** Conversations qui aboutissent à une commande ou un rendez-vous. */
   conversion: Insights["conversion"];
   /** Articles qui intéressent le plus les clients sur la période. */
@@ -51,6 +55,12 @@ export async function getDashboardStats(organizationId: string, days: StatsPerio
   const { start, fromDay } = periodStartUtc(now, days, timezone);
   const inPeriod = { gte: start, lte: now };
   const messageScope = { conversation: { organizationId }, createdAt: inPeriod };
+  // Période précédente : même durée, décalée d'autant de jours, et arrêtée à la même heure (on compare des durées égales).
+  const shiftMs = days * 24 * 3600_000;
+  const inPreviousPeriod = { gte: new Date(start.getTime() - shiftMs), lte: new Date(now.getTime() - shiftMs) };
+  const previousMessageScope = { conversation: { organizationId }, createdAt: inPreviousPeriod };
+  const todayStart = periodStartUtc(now, 1, timezone).start;
+  const tomorrowStart = new Date(todayStart.getTime() + 24 * 3600_000);
 
   const [
     startedConversations,
@@ -65,6 +75,15 @@ export async function getDashboardStats(organizationId: string, days: StatsPerio
     clientMessageDates,
     messageSeries,
     orderSeries,
+    conversationSeries,
+    previousConversations,
+    previousFromClients,
+    previousByAssistant,
+    previousOrders,
+    previousAppointments,
+    newOrders,
+    unpaidOrders,
+    appointmentsToday,
   ] = await Promise.all([
     prisma.conversation.count({ where: { organizationId, createdAt: inPeriod } }),
     prisma.conversation.count({ where: { organizationId } }),
@@ -87,11 +106,24 @@ export async function getDashboardStats(organizationId: string, days: StatsPerio
       FROM messages m JOIN conversations c ON c.id = m.conversation_id
       WHERE c.organization_id = ${organizationId} AND m.created_at >= ${start} AND m.created_at <= ${now}
       GROUP BY 1, 2, 3`,
-    prisma.$queryRaw<Array<{ day: string; count: bigint }>>`
-      SELECT to_char((created_at AT TIME ZONE 'UTC') AT TIME ZONE ${timezone}, 'YYYY-MM-DD') AS day, count(*) AS count
+    prisma.$queryRaw<Array<{ day: string; count: bigint; revenue: bigint | null }>>`
+      SELECT to_char((created_at AT TIME ZONE 'UTC') AT TIME ZONE ${timezone}, 'YYYY-MM-DD') AS day, count(*) AS count, sum(total) AS revenue
       FROM orders
       WHERE organization_id = ${organizationId} AND created_at >= ${start} AND created_at <= ${now} AND status <> 'CANCELLED'
       GROUP BY 1`,
+    prisma.$queryRaw<Array<{ day: string; count: bigint }>>`
+      SELECT to_char((created_at AT TIME ZONE 'UTC') AT TIME ZONE ${timezone}, 'YYYY-MM-DD') AS day, count(*) AS count
+      FROM conversations
+      WHERE organization_id = ${organizationId} AND created_at >= ${start} AND created_at <= ${now}
+      GROUP BY 1`,
+    prisma.conversation.count({ where: { organizationId, createdAt: inPreviousPeriod } }),
+    prisma.message.count({ where: { ...previousMessageScope, direction: "INBOUND" } }),
+    prisma.message.count({ where: { ...previousMessageScope, direction: "OUTBOUND", author: "AI" } }),
+    prisma.order.aggregate({ where: { organizationId, createdAt: inPreviousPeriod, status: { not: "CANCELLED" } }, _count: { _all: true }, _sum: { total: true } }),
+    prisma.appointment.count({ where: { organizationId, createdAt: inPreviousPeriod, status: { not: "CANCELLED" } } }),
+    prisma.order.count({ where: { organizationId, status: "NEW" } }),
+    prisma.order.count({ where: { organizationId, status: { not: "CANCELLED" }, paymentStatus: "UNPAID" } }),
+    prisma.appointment.count({ where: { organizationId, status: "BOOKED", startsAt: { gte: todayStart, lt: tomorrowStart } } }),
   ]);
 
   const stages = { NEW: 0, INTERESTED: 0, ORDERED: 0, CALLBACK: 0 };
@@ -103,10 +135,10 @@ export async function getDashboardStats(organizationId: string, days: StatsPerio
     afterHoursMessages = clientMessageDates.filter((message) => !getOpeningStatus(config, message.createdAt).open).length;
   }
 
-  const seriesMap = new Map<string, { day: string; clientMessages: number; assistantMessages: number; orders: number }>();
+  const seriesMap = new Map<string, DashboardStats["series"][number]>();
   for (let offset = 0; offset < days; offset += 1) {
     const day = addDays(fromDay, offset);
-    seriesMap.set(day, { day, clientMessages: 0, assistantMessages: 0, orders: 0 });
+    seriesMap.set(day, { day, clientMessages: 0, assistantMessages: 0, orders: 0, conversations: 0, revenue: 0 });
   }
   for (const row of messageSeries) {
     const entry = seriesMap.get(row.day);
@@ -116,7 +148,13 @@ export async function getDashboardStats(organizationId: string, days: StatsPerio
   }
   for (const row of orderSeries) {
     const entry = seriesMap.get(row.day);
-    if (entry) entry.orders += Number(row.count);
+    if (!entry) continue;
+    entry.orders += Number(row.count);
+    entry.revenue += Number(row.revenue ?? 0);
+  }
+  for (const row of conversationSeries) {
+    const entry = seriesMap.get(row.day);
+    if (entry) entry.conversations += Number(row.count);
   }
 
   const insights = await getInsights(organizationId, start, now, orders);
@@ -140,6 +178,15 @@ export async function getDashboardStats(organizationId: string, days: StatsPerio
     estimatedMinutesSaved: byAssistant * ESTIMATED_MINUTES_PER_ANSWER,
     stages,
     series: [...seriesMap.values()],
+    previous: {
+      conversations: previousConversations,
+      clientMessages: previousFromClients,
+      assistantMessages: previousByAssistant,
+      orders: previousOrders._count._all,
+      revenue: previousOrders._sum.total ?? 0,
+      appointments: previousAppointments,
+    },
+    pending: { newOrders, unpaidOrders, appointmentsToday },
     ...insights,
   };
 }

@@ -40,6 +40,11 @@ function contactName(contact) {
 /* ----------------------------------------------------------------- liste */
 
 /** Conversation qui attend une action du propriétaire. */
+/** Présélectionne un filtre de la liste (« À traiter », « À rappeler »…) avant de l'afficher. */
+export function setInboxFilter(value) {
+  stageFilter = value || "";
+}
+
 export function needsAttention(item) {
   return Boolean(item.unread || item.status === "HUMAN_HANDOFF" || item.stage === "CALLBACK" || item.paymentCheckPending);
 }

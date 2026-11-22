@@ -430,8 +430,8 @@ async function main() {
   const background: Array<{ conversationId: string; contactName: string; phone: string; at: Date; ordered: boolean }> = [];
   for (let day = 1; day <= 60; day += 1) {
     const weekday = new Date(NOW - day * DAY).getUTCDay();
-    const base = day <= 30 ? 3.2 - day * 0.05 : 1.4;
-    const volume = Math.max(0, Math.round(base * (weekday === 0 ? 0.35 : weekday === 6 ? 1.3 : 1) + random() * 1.6 - 0.4));
+    const base = day <= 14 ? 9.5 - day * 0.22 : day <= 30 ? 5.2 : 3.4;
+    const volume = Math.max(0, Math.round(base * (weekday === 0 ? 0.4 : weekday === 6 ? 1.25 : 1) + random() * 3 - 1));
     for (let index = 0; index < volume; index += 1) {
       const name = `${pick(FIRST_NAMES)} ${pick(LAST_NAMES)}`;
       const phone = `2376${String(50000000 + Math.floor(random() * 49999999)).padStart(8, "0")}`;

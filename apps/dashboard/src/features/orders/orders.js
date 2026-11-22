@@ -172,3 +172,9 @@ export function initOrders() {
     };
   });
 }
+
+/** Présélectionne un filtre (« NEW », « UNPAID »…) avant d'afficher la liste. */
+export function setOrdersFilter(value) {
+  filter = value || "";
+  $$(".orders-filter").forEach((button) => button.classList.toggle("active", (button.dataset.filter || "") === filter));
+}

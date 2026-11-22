@@ -4,7 +4,7 @@ import { initAuthFlow, logoutUser } from "./features/auth/auth.js";
 import { loadOrganizations } from "./features/organizations/organizations.js";
 import { currentView, initNavigation, navigate, registerLeaveGuard, routeView, setView, updateRealtimeHeader, VIEWS } from "./features/navigation/navigation.js";
 import { exportProspects, initOverview, refreshOverview } from "./features/overview/overview.js";
-import { initInbox, loadInbox, openConversation, bindInboxRefresh } from "./features/inbox/inbox.js";
+import { initInbox, loadInbox, openConversation, bindInboxRefresh, setInboxFilter } from "./features/inbox/inbox.js";
 import { hasUnsavedAgentChanges, initAgent, loadSettings, openAgentSection } from "./features/agent/agent.js";
 import { initDelaySettings, loadDelaySettings } from "./features/settings/delay-settings.js";
 import { initRoutingSettings, loadRoutingConfig } from "./features/settings/routing-settings.js";
@@ -12,7 +12,7 @@ import { loadPlatformSuspension } from "./features/suspension/suspension.js";
 import { initWhatsapp, loadWhatsApp } from "./features/whatsapp/whatsapp.js";
 import { initProducts, loadProducts, openProductForm } from "./features/products/products.js";
 import { hasUnsavedAgendaChanges, initAppointments, loadAppointments } from "./features/appointments/appointments.js";
-import { initOrders, loadOrders } from "./features/orders/orders.js";
+import { initOrders, loadOrders, setOrdersFilter } from "./features/orders/orders.js";
 import { initBroadcasts, loadBroadcastsView } from "./features/broadcasts/broadcasts.js";
 import { initHelp } from "./features/help/help.js";
 import { handleChariowReturn, initBilling, loadBilling, refreshBillingBanner } from "./features/billing/billing.js";
@@ -46,8 +46,29 @@ async function openConversationInInbox(id) {
   await openConversation(id);
 }
 
+/** Ce que l'accueil sait ouvrir : une conversation, une liste filtrée, une page, une section de l'agent. */
+const overviewHandlers = {
+  openConversation: openConversationInInbox,
+  openInbox: async (filter) => {
+    if (!(await navigate("inbox", {}))) return;
+    setInboxFilter(filter);
+    await loadInbox();
+  },
+  openOrders: async (filter) => {
+    if (!(await navigate("orders", {}))) return;
+    setOrdersFilter(filter);
+    await loadOrders();
+  },
+  openView: async (view, options = {}) => {
+    if ((await navigate(view, viewLoaders)) && options.addProduct) openProductForm();
+  },
+  openAgentSection: async (tab, focus) => {
+    if (await navigate("agent", viewLoaders)) openAgentSection(tab, focus);
+  },
+};
+
 async function refreshAll() {
-  await Promise.all([refreshOverview(openConversationInInbox), loadPlatformSuspension(), refreshBillingBanner(), refreshOnboarding()]);
+  await Promise.all([refreshOverview(overviewHandlers), loadPlatformSuspension(), refreshBillingBanner(), refreshOnboarding()]);
 }
 
 const viewLoaders = {

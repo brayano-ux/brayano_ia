@@ -229,3 +229,17 @@
   --shadow-xl: 0 32px 64px -16px rgba(0, 0, 0, 0.8);
   --shadow-primary: 0 1px 2px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.14);
 }
+
+/* ----- Graphiques : une seule teinte pour une série, grille discrète (valeurs vérifiées pour les deux thèmes) ----- */
+:root {
+  --chart-1: #1f6bff;
+  --chart-1-soft: rgba(31, 107, 255, 0.1);
+  --chart-grid: #edf0f5;
+  --chart-axis: #d5dbe6;
+}
+:root[data-theme="dark"] {
+  --chart-1: #4d8bff;
+  --chart-1-soft: rgba(77, 139, 255, 0.14);
+  --chart-grid: #1c2536;
+  --chart-axis: #2a3449;
+}
