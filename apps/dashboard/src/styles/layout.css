@@ -217,3 +217,9 @@ body:not(.role-agent) .agent-only { display: none !important; }
   body.in-thread .topbar { display: none; }
   body.in-thread .app-banner { display: none; }
 }
+
+/* Sur téléphone, le titre de la page est déjà dans la barre du haut : on ne le répète pas (sauf le bonjour de l'accueil). */
+@media (max-width: 1023px) {
+  .view:not(#overview-view) > .page-header .page-title { display: none; }
+  .view:not(#overview-view) > .page-header .page-subtitle { margin-top: 0; }
+}

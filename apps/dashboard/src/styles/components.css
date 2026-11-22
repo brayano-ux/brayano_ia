@@ -113,7 +113,8 @@
 .setting-row .setting-title { font-weight: 600; font-size: var(--text-base); color: var(--text); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .setting-row .setting-desc { margin-top: 2px; color: var(--text-3); font-size: var(--text-sm); line-height: 1.5; }
 .setting-details { margin-top: var(--space-4); padding: var(--space-4); border-radius: var(--radius-md); background: var(--surface-2); border: 1px solid var(--border-soft); display: grid; gap: var(--space-4); }
-.is-off { display: none !important; }
+/* Détails d'un réglage désactivé : masqués tant que l'interrupteur est éteint. */
+.setting-details.is-off { display: none !important; }
 
 /* ---------- Interrupteur ---------- */
 .switch { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 500; font-size: var(--text-base); color: var(--text); user-select: none; position: relative; }

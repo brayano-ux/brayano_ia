@@ -1,6 +1,8 @@
 import { api } from "../../services/api.js";
 import { $, $$, escapeHtml, showToast } from "../../utils/dom.js";
 import { getState } from "../../state/store.js";
+import { confirmDialog } from "../../ui/confirm.js";
+import { icon } from "../../ui/icons.js";
 
 /**
  * Onglet « Apprentissage » : les corrections du propriétaire. L'assistant les applique aux questions semblables.
@@ -14,23 +16,25 @@ const base = () => `/organizations/${getState().organizationId}/ai-corrections`;
 
 function itemMarkup(item) {
   const editing = editingId === item.id;
-  const when = item.question ? `Quand le client demande : <strong>« ${escapeHtml(item.question)} »</strong>` : "<strong>Règle générale</strong> (valable pour toutes les questions)";
+  const when = item.question ? `Quand le client demande <strong>« ${escapeHtml(item.question)} »</strong>` : "<strong>Règle générale</strong>, valable pour toutes les questions";
   const used = item.usedCount ? `Appliquée ${item.usedCount} fois` : "Pas encore appliquée";
   return `
-    <article class="learning-item${item.active ? "" : " is-off"}" data-id="${escapeHtml(item.id)}">
-      <p class="learning-when">${when}</p>
-      ${editing
-        ? `<textarea class="learning-edit" rows="3" maxlength="1000" aria-label="Réponse à donner">${escapeHtml(item.correctReply)}</textarea>`
-        : `<p class="learning-answer">${escapeHtml(item.correctReply)}</p>`}
-      ${item.wrongReply && !editing ? `<p class="muted learning-wrong">Ancienne réponse jugée mauvaise : « ${escapeHtml(item.wrongReply.slice(0, 160))}${item.wrongReply.length > 160 ? "…" : ""} »</p>` : ""}
-      <footer>
-        <small class="muted">${escapeHtml(used)}</small>
+    <article class="card learning-item${item.active ? "" : " is-paused"}" data-id="${escapeHtml(item.id)}">
+      <div class="learning-body">
+        <p class="learning-when">${when}</p>
+        ${editing
+          ? `<textarea class="learning-edit" rows="3" maxlength="1000" aria-label="Réponse à donner">${escapeHtml(item.correctReply)}</textarea>`
+          : `<p class="learning-answer">${icon("reply", "icon-sm")}<span>${escapeHtml(item.correctReply)}</span></p>`}
+        ${item.wrongReply && !editing ? `<p class="learning-wrong">Ancienne réponse jugée mauvaise : « ${escapeHtml(item.wrongReply.slice(0, 160))}${item.wrongReply.length > 160 ? "…" : ""} »</p>` : ""}
+      </div>
+      <footer class="learning-foot">
+        <span class="learning-meta">${item.active ? "" : '<span class="badge neutral">En pause</span>'}<small>${escapeHtml(used)}</small></span>
         <div class="learning-actions">
           ${editing
-            ? `<button type="button" class="text-button" data-act="save">Enregistrer</button><button type="button" class="text-button" data-act="cancel">Annuler</button>`
-            : `<button type="button" class="text-button" data-act="toggle">${item.active ? "Mettre en pause" : "Réactiver"}</button>
-               <button type="button" class="text-button" data-act="edit">Modifier</button>
-               <button type="button" class="text-button danger-text" data-act="delete">Supprimer</button>`}
+            ? `<button type="button" class="btn btn-sm btn-ghost" data-act="cancel">Annuler</button><button type="button" class="btn btn-sm btn-primary" data-act="save">Enregistrer</button>`
+            : `<button type="button" class="btn btn-sm btn-ghost" data-act="toggle">${icon(item.active ? "pause" : "play")}${item.active ? "Mettre en pause" : "Réactiver"}</button>
+               <button type="button" class="btn btn-sm btn-ghost" data-act="edit">${icon("edit")}Modifier</button>
+               <button type="button" class="btn btn-sm btn-ghost btn-danger-ghost" data-act="delete">${icon("trash")}Supprimer</button>`}
         </div>
       </footer>
     </article>`;
@@ -41,7 +45,7 @@ function render() {
   if (!list) return;
   list.innerHTML = corrections.length
     ? corrections.map(itemMarkup).join("")
-    : '<div class="empty-state">Rien pour le moment. Dès que vous corrigerez une réponse dans une conversation, elle apparaîtra ici.</div>';
+    : `<div class="card"><div class="empty"><span class="empty-icon">${icon("graduation")}</span><p class="empty-title">Aucune correction pour le moment</p><p class="empty-text">Dès que vous corrigerez une réponse dans une conversation, ou que vous ajouterez une règle ci-dessus, elle apparaîtra ici.</p></div></div>`;
 }
 
 export async function loadLearning() {
@@ -50,7 +54,7 @@ export async function loadLearning() {
     ({ corrections } = await api(base()));
     render();
   } catch (error) {
-    $("#learning-list").innerHTML = `<div class="empty-state">${escapeHtml(error.message || "Impossible de charger les corrections.")}</div>`;
+    $("#learning-list").innerHTML = `<div class="card"><div class="empty"><p class="empty-text">${escapeHtml(error.message || "Impossible de charger les corrections.")}</p></div></div>`;
   }
 }
 
@@ -93,7 +97,7 @@ async function act(item, action, article) {
       await api(`${base()}/${item.id}`, { method: "PUT", body: JSON.stringify({ active: !item.active }) });
     }
     if (action === "delete") {
-      if (!window.confirm("Supprimer cette règle ? L'agent ne l'appliquera plus.")) return;
+      if (!(await confirmDialog({ title: "Supprimer cette règle ?", message: "L'agent ne l'appliquera plus. Cette action est définitive.", confirmLabel: "Supprimer", tone: "danger", iconName: "trash" }))) return;
       await api(`${base()}/${item.id}`, { method: "DELETE" });
       showToast("Règle supprimée.", "success");
     }

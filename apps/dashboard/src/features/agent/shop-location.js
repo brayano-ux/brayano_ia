@@ -50,7 +50,7 @@ function captureCurrentPosition() {
   }
   const button = $("#shop-location-capture");
   button.disabled = true;
-  button.textContent = "Recherche de la position…";
+  button.classList.add("is-loading");
   navigator.geolocation.getCurrentPosition(
     (position) => {
       latitude = position.coords.latitude;
@@ -58,7 +58,7 @@ function captureCurrentPosition() {
       render();
       showToast("Position capturée. Vérifiez la carte puis cliquez sur Enregistrer.", "success");
       button.disabled = false;
-      button.textContent = "📍 Utiliser ma position actuelle";
+      button.classList.remove("is-loading");
     },
     (error) => {
       const messages = {
@@ -68,7 +68,7 @@ function captureCurrentPosition() {
       };
       showToast(messages[error.code] || "Impossible d'obtenir votre position.", "error");
       button.disabled = false;
-      button.textContent = "📍 Utiliser ma position actuelle";
+      button.classList.remove("is-loading");
     },
     { enableHighAccuracy: true, timeout: 15_000 },
   );
