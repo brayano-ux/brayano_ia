@@ -68,7 +68,7 @@ document.addEventListener("click", (event) => {
 document.addEventListener("keydown", (event) => {
   if (event.key !== "Escape" || !open.size) return;
   // Une fenêtre de confirmation ouverte par-dessus gère elle-même la touche Échap.
-  if (document.querySelector(".modal")) return;
+  if (document.querySelector(".modal:not(.hidden)")) return;
   const last = [...open.keys()].pop();
   void closeDrawer(last);
 });

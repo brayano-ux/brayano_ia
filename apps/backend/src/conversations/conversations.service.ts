@@ -267,6 +267,14 @@ export async function setConversationAiEnabled(conversationId: string, aiEnabled
   });
 }
 
+/**
+ * Remet une conversation dans l'état où elle était (agent actif ou non, statut) : utilisé quand une réponse humaine
+ * n'a finalement pas pu partir, pour ne pas laisser l'agent en pause à cause d'un message jamais envoyé.
+ */
+export async function restoreConversationHandling(conversationId: string, previous: { aiEnabled: boolean; status: "OPEN" | "HUMAN_HANDOFF" | "CLOSED" }) {
+  return prisma.conversation.update({ where: { id: conversationId }, data: { aiEnabled: previous.aiEnabled, status: previous.status } });
+}
+
 export async function updateConversationQualification(
   conversationId: string,
   input: {

@@ -11,7 +11,7 @@ export function confirmDialog({ title, message = "", confirmLabel = "Confirmer",
   return new Promise((resolve) => {
     const previousFocus = document.activeElement;
     const overlay = document.createElement("div");
-    overlay.className = "modal";
+    overlay.className = "modal confirm-dialog";
 
     const card = document.createElement("div");
     card.className = "modal-card";
@@ -45,10 +45,12 @@ export function confirmDialog({ title, message = "", confirmLabel = "Confirmer",
     const cancel = document.createElement("button");
     cancel.type = "button";
     cancel.className = "btn btn-secondary";
+    cancel.dataset.confirm = "cancel";
     cancel.textContent = cancelLabel;
     const confirm = document.createElement("button");
     confirm.type = "button";
     confirm.className = `btn ${tone === "danger" ? "btn-danger" : "btn-primary"}`;
+    confirm.dataset.confirm = "ok";
     confirm.textContent = confirmLabel;
     actions.append(cancel, confirm);
 

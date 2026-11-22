@@ -12,6 +12,7 @@ const { mocks } = vi.hoisted(() => ({
     listProspectsForExport: vi.fn(),
     recordOutboundMessage: vi.fn(),
     setConversationAiEnabled: vi.fn(),
+    restoreConversationHandling: vi.fn(),
     shouldReactivateAiAfterHandoff: vi.fn(),
     sendWhatsAppMessageForOrg: vi.fn(),
   },
@@ -48,6 +49,7 @@ describe("conversation handoff routes", () => {
     mocks.getConversationWithMessages.mockResolvedValue(handoffConversation);
     mocks.getConversationActivity.mockResolvedValue({ orders: [], appointments: [] });
     mocks.setConversationAiEnabled.mockResolvedValue(handoffConversation);
+    mocks.restoreConversationHandling.mockResolvedValue(handoffConversation);
     mocks.sendWhatsAppMessageForOrg.mockResolvedValue(undefined);
     mocks.recordOutboundMessage.mockResolvedValue({ id: "message-1", author: "HUMAN" });
   });
@@ -118,6 +120,27 @@ describe("conversation handoff routes", () => {
     expect(photo.mediaUrl).toMatch(/^\/media\/client\/org-1\/22222222-2222-2222-2222-222222222222\.jpg\?t=\d+:[0-9a-f]{64}$/);
     expect(photo.mediaFile).toBeUndefined();
     expect(text.mediaUrl).toBeNull();
+    await app.close();
+  });
+
+  it("tells the owner clearly when a reply cannot leave because WhatsApp is not connected", async () => {
+    const { AppError, WhatsAppNotConnectedError } = await import("../shared/errors.js");
+    mocks.sendWhatsAppMessageForOrg.mockRejectedValue(new WhatsAppNotConnectedError());
+    const app = Fastify();
+    app.setErrorHandler((error, _request, reply) => {
+      if (error instanceof AppError) return reply.status(error.statusCode).send({ error: error.code, message: error.message });
+      return reply.status(500).send({ message: "Une erreur inattendue est survenue." });
+    });
+    await app.register(conversationsRoute);
+
+    const response = await app.inject({ method: "POST", url: "/organizations/org-1/conversations/conversation-1/reply", payload: { text: "Bonjour" } });
+
+    expect(response.statusCode).toBe(409);
+    expect(response.json()).toMatchObject({ error: "WHATSAPP_NOT_CONNECTED" });
+    expect(response.json().message).toContain("WhatsApp n'est pas connecté");
+    expect(mocks.recordOutboundMessage).not.toHaveBeenCalled();
+    // Rien n'est parti : la conversation retrouve son état d'avant (ici : en attente d'une personne, agent en pause).
+    expect(mocks.restoreConversationHandling).toHaveBeenCalledWith("conversation-1", { aiEnabled: false, status: "HUMAN_HANDOFF" });
     await app.close();
   });
 

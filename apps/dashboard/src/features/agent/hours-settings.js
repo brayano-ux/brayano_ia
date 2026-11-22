@@ -164,6 +164,7 @@ export function initHoursSettings() {
   renderRows(DEFAULT_HOURS);
   $("#bh-enabled").addEventListener("change", syncVisibility);
   $("#fu-enabled").addEventListener("change", syncVisibility);
+  $("#tg-enabled").addEventListener("change", syncVisibility);
   $("#neg-enabled").addEventListener("change", syncVisibility);
   $("#neg-mode-percent").addEventListener("change", syncVisibility);
   $("#neg-mode-amount").addEventListener("change", syncVisibility);
