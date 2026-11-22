@@ -1,4 +1,3 @@
-import { $ } from "../../utils/dom.js";
 import { readSession, writeSession } from "../../services/storage.js";
 import { api } from "../../services/api.js";
 
@@ -22,10 +21,8 @@ export async function loadRole() {
     const me = await api("/me");
     const role = me.user?.role === "AGENT" ? "AGENT" : "ADMIN";
     const session = readSession();
-    if (session) writeSession({ ...session, role });
+    if (session) writeSession({ ...session, role, name: me.user?.name || null });
     applyRole(role);
-    const label = $("#user-email");
-    if (label && role === "AGENT") label.textContent = `${me.user.email} · Employé`;
     return role;
   } catch {
     applyRole(readSession()?.role === "AGENT" ? "AGENT" : "ADMIN");

@@ -1,99 +1,231 @@
 /* ============================================================
-   DESIGN TOKENS — source unique de vérité du design system.
-   Direction : SaaS professionnel (Inter, neutres froids, accent indigo,
-   bordures 1 px, ombres discrètes, coins modérés, densité maîtrisée).
-   Toute nouvelle feature réutilise ces variables.
+   JETONS DE DESIGN — source unique de vérité du tableau de bord.
+
+   Direction : outil professionnel, calme et lisible. Bleu de la marque
+   (celui du logo et de la page d'accueil), neutres froids, bordures fines,
+   ombres douces. Chaque écran n'utilise que ces variables : c'est ce qui
+   garantit la cohérence et permet le thème sombre sans toucher aux vues.
+
+   Les couleurs « sémantiques » (--surface, --text, --border…) changent avec
+   le thème ; les teintes brutes (--brand-500…) ne changent jamais.
 ============================================================ */
 :root {
-  /* Marque (indigo) */
-  --brand-50: #eef2ff;
-  --brand-100: #e0e7ff;
-  --brand-200: #c7d2fe;
-  --brand-500: #4f46e5;
-  --brand-600: #4338ca;
-  --brand-700: #3730a3;
-  --brand-900: #1e1b4b;
+  color-scheme: light;
 
-  /* Neutres (ardoise froide) */
-  --ink: #0f172a;
-  --ink-2: #1e293b;
-  --muted: #64748b;
-  --subtle: #94a3b8;
-  --line: #e2e8f0;
-  --line-soft: #f1f5f9;
-  --line-strong: #cbd5e1;
+  /* ----- Teintes de la marque ----- */
+  --brand-50: #eef4ff;
+  --brand-100: #dce8ff;
+  --brand-200: #bcd3ff;
+  --brand-300: #8fb4ff;
+  --brand-400: #5a8fff;
+  --brand-500: #1f6bff;
+  --brand-600: #1257e6;
+  --brand-700: #0f45b8;
+  --brand-800: #0f3a96;
+  --brand-900: #0a1c4d;
+  --cyan-400: #19d3ff;
+  --navy-900: #061029;
+
+  /* ----- Surfaces ----- */
+  --bg: #f5f7fa;
   --surface: #ffffff;
   --surface-2: #f8fafc;
-  --bg: #f6f7f9;
+  --surface-3: #eff2f7;
+  --surface-hover: #f3f5f9;
+  --surface-raised: #ffffff;
+  --sidebar-bg: #fbfcfe;
+  --overlay: rgba(9, 15, 30, 0.48);
 
-  /* Sémantique */
-  --success: #047857;
-  --success-bg: #ecfdf5;
-  --success-line: #a7f3d0;
-  --warning: #b45309;
-  --warning-bg: #fffbeb;
-  --warning-line: #fde68a;
-  --danger: #b91c1c;
-  --danger-bg: #fef2f2;
-  --danger-line: #fecaca;
-  --info: #1d4ed8;
-  --info-bg: #eff6ff;
-  --info-line: #bfdbfe;
+  /* ----- Texte ----- */
+  --text: #0e1524;
+  --text-2: #465165;
+  --text-3: #6b778c;
+  --text-4: #98a2b3;
+  --text-inverse: #ffffff;
 
-  /* Alias historiques (les vues existantes les utilisent encore) */
-  --violet: var(--brand-500);
-  --violet-dark: var(--brand-600);
-  --violet-deep: var(--brand-900);
-  --violet-light: var(--brand-50);
-  --violet-glow: rgba(79, 70, 229, 0.14);
-  --violet-glow-strong: rgba(79, 70, 229, 0.28);
-  --ink-light: var(--ink-2);
-  --muted-light: var(--subtle);
-  --line-subtle: var(--line-soft);
-  --paper: var(--surface);
-  --green: var(--success);
-  --green-light: var(--success-bg);
-  --orange: var(--warning);
-  --orange-light: var(--warning-bg);
-  --red: var(--danger);
-  --red-light: var(--danger-bg);
+  /* ----- Bordures ----- */
+  --border: #e4e8ef;
+  --border-soft: #eef1f5;
+  --border-strong: #cdd5e1;
 
-  /* Typographie */
-  --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  --text-xs: 0.75rem;     /* 12 */
-  --text-sm: 0.8125rem;   /* 13 */
-  --text-base: 0.875rem;  /* 14 */
-  --text-lg: 1rem;        /* 16 */
-  --text-xl: 1.125rem;    /* 18 */
-  --text-2xl: 1.375rem;   /* 22 */
-  --text-3xl: 1.625rem;   /* 26 */
+  /* ----- Couleur principale ----- */
+  --primary: #1257e6;
+  --primary-hover: #0f49c4;
+  --primary-active: #0d3da6;
+  --primary-soft: #eef4ff;
+  --primary-soft-2: #dce8ff;
+  --primary-border: #bcd3ff;
+  --primary-text: #1257e6;
+  --on-primary: #ffffff;
+  --ring: 0 0 0 3px rgba(31, 107, 255, 0.22);
 
-  /* Espacement */
-  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
-  --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px;
+  /* ----- Couleurs d'état ----- */
+  --success: #0b7a43;
+  --success-solid: #12a150;
+  --success-soft: #e9f8ef;
+  --success-border: #b9e7cb;
+  --warning: #96560a;
+  --warning-solid: #f59e0b;
+  --warning-soft: #fff5df;
+  --warning-border: #f6d68a;
+  --danger: #c0271e;
+  --danger-solid: #dc3327;
+  --danger-hover: #b82a20;
+  --danger-soft: #fdecea;
+  --danger-border: #f5c3be;
+  --info: #1257e6;
+  --info-soft: #eef4ff;
+  --info-border: #bcd3ff;
+  --violet: #6d3fe0;
+  --violet-soft: #f2edff;
+  --violet-border: #d9cbfb;
+  --whatsapp: #1fa855;
 
-  /* Formes & élévation */
+  /* ----- Conversation ----- */
+  --bubble-in: #ffffff;
+  --bubble-ai: #eaf1ff;
+  --bubble-ai-border: #d3e2ff;
+  --bubble-human: #1257e6;
+  --bubble-human-text: #ffffff;
+  --thread-bg: #f3f5f9;
+
+  /* ----- Typographie ----- */
+  --font: "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --text-2xs: 0.6875rem; /* 11 */
+  --text-xs: 0.75rem;    /* 12 */
+  --text-sm: 0.8125rem;  /* 13 */
+  --text-base: 0.875rem; /* 14 */
+  --text-md: 0.9375rem;  /* 15 */
+  --text-lg: 1rem;       /* 16 */
+  --text-xl: 1.125rem;   /* 18 */
+  --text-2xl: 1.375rem;  /* 22 */
+  --text-3xl: 1.75rem;   /* 28 */
+  --text-4xl: 2.125rem;  /* 34 */
+
+  /* ----- Espacement (grille de 4 px) ----- */
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 20px;
+  --space-6: 24px; --space-8: 32px; --space-10: 40px; --space-12: 48px; --space-16: 64px;
+
+  /* ----- Formes ----- */
+  --radius-xs: 4px;
   --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 12px;
   --radius-xl: 16px;
+  --radius-2xl: 20px;
   --radius-full: 999px;
-  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.05);
-  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04);
-  --shadow-md: 0 4px 16px -4px rgba(15, 23, 42, 0.12), 0 1px 3px rgba(15, 23, 42, 0.06);
-  --shadow-lg: 0 24px 48px -16px rgba(15, 23, 42, 0.28), 0 2px 6px rgba(15, 23, 42, 0.08);
-  --shadow-glow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 1px 2px rgba(15, 23, 42, 0.16);
-  --ring: 0 0 0 3px rgba(79, 70, 229, 0.22);
 
-  /* Mise en page */
-  --sidebar-width: 248px;
-  --topbar-height: 56px;
-  --tabbar-height: 60px;
-  --content-max: 1200px;
-  --touch: 44px;
-  --control: 36px;
+  /* ----- Élévation ----- */
+  --shadow-xs: 0 1px 2px rgba(14, 21, 36, 0.05);
+  --shadow-sm: 0 1px 2px rgba(14, 21, 36, 0.06), 0 1px 3px rgba(14, 21, 36, 0.05);
+  --shadow-md: 0 4px 12px -2px rgba(14, 21, 36, 0.08), 0 2px 4px -2px rgba(14, 21, 36, 0.05);
+  --shadow-lg: 0 16px 36px -10px rgba(14, 21, 36, 0.18), 0 4px 10px -4px rgba(14, 21, 36, 0.08);
+  --shadow-xl: 0 32px 64px -16px rgba(14, 21, 36, 0.3), 0 8px 20px -8px rgba(14, 21, 36, 0.12);
+  --shadow-primary: 0 1px 2px rgba(18, 87, 230, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.16);
 
+  /* ----- Mise en page ----- */
+  --sidebar-width: 264px;
+  --topbar-height: 60px;
+  --tabbar-height: 62px;
+  --content-max: 1240px;
+  --control: 38px;
+  --control-sm: 32px;
+  --control-lg: 44px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  /* ----- Mouvement ----- */
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
-  --transition: all 0.16s var(--ease);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --fast: 0.12s;
+  --normal: 0.2s;
+  --slow: 0.32s;
+  --transition: background-color var(--fast) var(--ease), border-color var(--fast) var(--ease), color var(--fast) var(--ease), box-shadow var(--fast) var(--ease), transform var(--fast) var(--ease), opacity var(--fast) var(--ease);
+
+  /* ----- Plans (du plus bas au plus haut) ----- */
+  --z-sticky: 20;
+  --z-topbar: 30;
+  --z-sidebar: 50;
+  --z-tabbar: 45;
+  --z-drawer: 60;
+  --z-modal: 70;
+  --z-popover: 80;
+  --z-toast: 90;
+  --z-tour: 100;
+
+  /* ----- Alias conservés pour les écrans publics qui partagent quelques règles ----- */
+  --ink: var(--text);
+  --muted: var(--text-3);
+  --line: var(--border);
+}
+
+/* ============================================================
+   THÈME SOMBRE — activé par <html data-theme="dark"> (voir src/theme-init.js).
+============================================================ */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #0a0f1a;
+  --surface: #111826;
+  --surface-2: #151d2d;
+  --surface-3: #1b2436;
+  --surface-hover: #19223380;
+  --surface-raised: #172032;
+  --sidebar-bg: #0d131f;
+  --overlay: rgba(2, 5, 12, 0.66);
+
+  --text: #edf1f7;
+  --text-2: #b3bdce;
+  --text-3: #8490a6;
+  --text-4: #5f6b82;
+  --text-inverse: #0e1524;
+
+  --border: #222b3d;
+  --border-soft: #1a2233;
+  --border-strong: #303b52;
+
+  --primary: #2a6dff;
+  --primary-hover: #4380ff;
+  --primary-active: #1f5fe8;
+  --primary-soft: rgba(58, 125, 255, 0.14);
+  --primary-soft-2: rgba(58, 125, 255, 0.24);
+  --primary-border: rgba(90, 143, 255, 0.4);
+  --primary-text: #7fa8ff;
+  --on-primary: #ffffff;
+  --ring: 0 0 0 3px rgba(90, 143, 255, 0.35);
+
+  --success: #4fd08b;
+  --success-solid: #1faa5c;
+  --success-soft: rgba(31, 170, 92, 0.14);
+  --success-border: rgba(79, 208, 139, 0.32);
+  --warning: #f5bd52;
+  --warning-solid: #f59e0b;
+  --warning-soft: rgba(245, 158, 11, 0.14);
+  --warning-border: rgba(245, 189, 82, 0.32);
+  --danger: #ff8a80;
+  --danger-solid: #e5483d;
+  --danger-hover: #ef5b50;
+  --danger-soft: rgba(229, 72, 61, 0.15);
+  --danger-border: rgba(255, 138, 128, 0.32);
+  --info: #7fa8ff;
+  --info-soft: rgba(58, 125, 255, 0.14);
+  --info-border: rgba(90, 143, 255, 0.4);
+  --violet: #b59bff;
+  --violet-soft: rgba(141, 104, 255, 0.16);
+  --violet-border: rgba(181, 155, 255, 0.34);
+  --whatsapp: #35c46f;
+
+  --bubble-in: #172032;
+  --bubble-ai: rgba(58, 125, 255, 0.16);
+  --bubble-ai-border: rgba(90, 143, 255, 0.3);
+  --bubble-human: #2a6dff;
+  --bubble-human-text: #ffffff;
+  --thread-bg: #0c121e;
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.45);
+  --shadow-md: 0 6px 16px -4px rgba(0, 0, 0, 0.55);
+  --shadow-lg: 0 18px 40px -12px rgba(0, 0, 0, 0.7);
+  --shadow-xl: 0 32px 64px -16px rgba(0, 0, 0, 0.8);
+  --shadow-primary: 0 1px 2px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.14);
 }

@@ -216,3 +216,8 @@ export function initProducts() {
     }
   };
 }
+
+/** Ouvre le formulaire d'ajout d'un produit (depuis la recherche rapide ou un état vide). */
+export function openProductForm() {
+  $("#product-name")?.focus();
+}

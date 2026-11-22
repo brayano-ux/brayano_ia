@@ -35,6 +35,7 @@ function showAuthMode(mode) {
 export function showDashboard() {
   $("#login-screen").classList.add("hidden");
   $(".app-shell").classList.remove("hidden");
+  document.body.classList.add("is-authenticated");
 }
 
 export function logoutUser(mode = "login") {
@@ -43,6 +44,10 @@ export function logoutUser(mode = "login") {
   clearSession();
   $(".app-shell").classList.add("hidden");
   $("#login-screen").classList.remove("hidden");
+  document.body.classList.remove("is-authenticated", "in-thread");
+  document.title = "Brayano IA — Connexion";
+  // L'adresse ne garde pas la page de la session précédente.
+  if (window.location.hash) window.history.replaceState(null, "", window.location.pathname + window.location.search);
   ["#login-email", "#login-password", "#register-name", "#register-company", "#register-whatsapp-local", "#register-email", "#register-password", "#register-verification-code", "#google-company-name"]
     .forEach((selector) => {
       const field = $(selector);
