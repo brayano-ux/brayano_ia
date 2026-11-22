@@ -184,7 +184,7 @@ label.field, .label-field { display: grid; gap: 6px; font-size: var(--text-sm); 
 
 /* Indicatif pays + numéro local côte à côte. */
 .phone-field-row { display: flex; gap: var(--space-2); }
-.phone-field-row select { flex: 0 1 172px; min-width: 124px; }
+.phone-field-row select { flex: 0 1 210px; min-width: 132px; }
 .phone-field-row input { flex: 1 1 140px; min-width: 0; }
 
 /* Sélecteur de fichier : le bouton natif (souvent en anglais) est remplacé par un bouton stylé. */

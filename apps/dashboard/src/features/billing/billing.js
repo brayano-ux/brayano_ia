@@ -5,6 +5,8 @@ import { readSession } from "../../services/storage.js";
 import { isAgentRole } from "../navigation/roles.js";
 import { getState } from "../../state/store.js";
 import { populateCountrySelect, readPhoneField, setPhoneFieldFromDigits } from "../../utils/phone-field.js";
+import { icon } from "../../ui/icons.js";
+import { lockScroll, trapFocus, unlockScroll } from "../../ui/overlay.js";
 
 /**
  * « Mon forfait » : où en est l'entreprise (essai ou forfait, messages utilisés), choix d'un forfait et paiement Mobile Money,
@@ -35,28 +37,50 @@ export async function getBillingStatus({ fresh = false } = {}) {
   return statusCache.value;
 }
 
-/* ------------------------------------------------------------- bandeau */
+/* ---------------------------------------------- bandeau et jauge du menu */
+
+/** Jauge du menu latéral : forfait en cours et messages utilisés, toujours sous les yeux. */
+function renderSidebarPlan(status) {
+  const card = $("#sidebar-plan");
+  if (!card) return;
+  if (!status) {
+    card.classList.add("hidden");
+    return;
+  }
+  const percent = status.messageLimit ? Math.min(100, Math.round((status.messagesUsed / status.messageLimit) * 100)) : 0;
+  const low = status.blocked || percent >= 80;
+  $("#sidebar-plan-name").textContent = status.isTrial ? "Essai gratuit" : `Forfait ${status.planName}`;
+  $("#sidebar-plan-badge").classList.toggle("hidden", !status.blocked);
+  $("#sidebar-plan-badge").className = `badge danger${status.blocked ? "" : " hidden"}`;
+  $("#sidebar-plan-badge").textContent = "Épuisé";
+  $("#sidebar-plan-bar").style.width = `${percent}%`;
+  $("#sidebar-plan-bar").parentElement.className = `progress${status.blocked ? " danger" : percent >= 80 ? " warning" : ""}`;
+  $("#sidebar-plan-usage").textContent = `${count(status.messagesUsed)} / ${count(status.messageLimit)} messages`;
+  $("#sidebar-plan-cta").classList.toggle("hidden", !low);
+  card.classList.remove("hidden");
+}
 
 export async function refreshBillingBanner() {
   const banner = $("#billing-banner");
   if (!banner) return;
   const status = await getBillingStatus({ fresh: true });
+  renderSidebarPlan(status);
   const low = status && status.enforced && status.messageLimit > 0 && status.remainingMessages / status.messageLimit <= 0.2;
   if (!status || !status.enforced || (!status.blocked && !low)) {
     banner.classList.add("hidden");
     banner.textContent = "";
     return;
   }
-  const noun = status.isTrial ? "messages d'essai" : "messages de l'assistant";
+  const noun = status.isTrial ? "messages d'essai" : "messages de l'agent";
   const text = status.blocked
     ? (status.isTrial
-      ? "Votre essai gratuit est terminé : l'assistant ne répond plus à vos clients. Choisissez un forfait pour le réactiver."
+      ? "Votre essai gratuit est terminé : l'agent ne répond plus à vos clients. Choisissez un forfait pour le réactiver."
       : status.status === "EXPIRED" && status.remainingMessages > 0
-        ? "Votre abonnement est terminé : l'assistant ne répond plus à vos clients. Renouvelez votre forfait pour le réactiver."
-        : "Vous avez utilisé tous les messages de votre forfait : l'assistant ne répond plus à vos clients. Passez à un forfait supérieur.")
+        ? "Votre abonnement est terminé : l'agent ne répond plus à vos clients. Renouvelez votre forfait pour le réactiver."
+        : "Vous avez utilisé tous les messages de votre forfait : l'agent ne répond plus à vos clients. Passez à un forfait supérieur.")
     : `Il vous reste ${count(status.remainingMessages)} ${noun} sur ${count(status.messageLimit)}.`;
-  banner.className = `billing-banner${status.blocked ? " is-blocked" : ""}`;
-  banner.innerHTML = `<span>${escapeHtml(text)}</span><button type="button" class="ghost-button">Voir les forfaits</button>`;
+  banner.className = `app-banner ${status.blocked ? "danger is-blocked" : "warning"}`;
+  banner.innerHTML = `${icon(status.blocked ? "alert" : "info")}<span class="banner-text">${escapeHtml(text)}</span><button type="button" class="btn btn-sm btn-secondary">Voir les forfaits</button>`;
   banner.querySelector("button").onclick = () => $('.nav-item[data-view="billing"]')?.click();
 }
 
@@ -65,38 +89,41 @@ export async function refreshBillingBanner() {
 function statusMarkup(status) {
   const used = status.messagesUsed;
   const percent = status.messageLimit ? Math.min(100, Math.round((used / status.messageLimit) * 100)) : 0;
-  const tone = status.blocked ? "danger" : percent >= 80 ? "warning" : "ok";
+  const tone = status.blocked ? "danger" : percent >= 80 ? "warning" : "";
   const renewal = status.expiresAt ? `${status.status === "ACTIVE" ? "Valable jusqu'au" : "Terminé depuis le"} ${new Date(status.expiresAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}` : "";
+  const badge = status.isTrial ? '<span class="badge info">Essai gratuit</span>' : status.status === "ACTIVE" ? '<span class="badge success">Actif</span>' : '<span class="badge warning">Terminé</span>';
   const alert = status.blocked
-    ? `<p class="billing-alert danger">L'assistant ne répond plus à vos clients. Choisissez un forfait ci-dessous pour le réactiver. Vous pouvez toujours répondre vous-même dans « Conversations ».</p>`
+    ? `<div class="alert danger billing-alert">${icon("alert")}<div class="alert-body"><p class="alert-title">L'agent ne répond plus à vos clients</p><p>Choisissez un forfait ci-dessous pour le réactiver. Vous pouvez toujours répondre vous-même dans « Conversations ».</p></div></div>`
     : !status.enforced
-      ? `<p class="billing-alert info">Les forfaits ne sont pas encore appliqués : l'assistant répond normalement à vos clients. Vos messages sont déjà comptés pour que vous voyiez votre consommation.</p>`
+      ? `<div class="alert neutral billing-alert">${icon("info")}<div class="alert-body">Les forfaits ne sont pas encore appliqués : l'agent répond normalement à vos clients. Vos messages sont déjà comptés pour que vous voyiez votre consommation.</div></div>`
       : "";
   return `
-    <div class="billing-status-head">
-      <div>
-        <p class="eyebrow">VOTRE FORFAIT ACTUEL</p>
-        <h2>${escapeHtml(status.planName)}${status.isTrial ? "" : status.status === "ACTIVE" ? ' <span class="status-chip success">Actif</span>' : ' <span class="status-chip warning">Terminé</span>'}</h2>
-        ${renewal ? `<p class="muted">${escapeHtml(renewal)}</p>` : ""}
+    <div class="billing-status-main">
+      <div class="billing-status-plan">
+        <p class="eyebrow">Votre forfait actuel</p>
+        <h2>${escapeHtml(status.planName)} ${badge}</h2>
+        ${renewal ? `<p class="muted">${icon("calendar", "icon-sm")} ${escapeHtml(renewal)}</p>` : ""}
       </div>
       <div class="billing-count"><strong>${count(status.remainingMessages)}</strong><span>message${status.remainingMessages > 1 ? "s" : ""} restant${status.remainingMessages > 1 ? "s" : ""}</span></div>
     </div>
-    <div class="billing-meter ${tone}" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percent}"><i style="width:${percent}%"></i></div>
-    <p class="muted billing-meter-label">${count(used)} utilisé${used > 1 ? "s" : ""} sur ${count(status.messageLimit)} ${status.isTrial ? "(essai gratuit)" : "ce mois-ci"}</p>
+    <div class="billing-usage">
+      <div class="progress progress-lg ${tone}" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percent}" aria-label="Messages utilisés"><span style="width:${percent}%"></span></div>
+      <p class="billing-meter-label"><span>${count(used)} utilisé${used > 1 ? "s" : ""} sur ${count(status.messageLimit)} ${status.isTrial ? "(essai gratuit)" : "ce mois-ci"}</span><b>${percent}&nbsp;%</b></p>
+    </div>
     ${alert}`;
 }
 
 function planCardMarkup(plan, status) {
   const current = status && !status.isTrial && status.plan === plan.key && status.status === "ACTIVE";
-  const label = current ? "Renouveler" : status && !status.isTrial && status.status === "ACTIVE" ? "Choisir ce forfait" : "Choisir ce forfait";
+  const popular = plan.key === "pro" && !current;
   return `
-    <article class="plan-card${current ? " is-current" : ""}">
-      ${current ? '<span class="plan-badge">Votre forfait</span>' : ""}
+    <article class="card plan-card${current ? " is-current" : ""}${popular ? " is-popular" : ""}">
+      ${current ? '<span class="plan-badge badge success">Votre forfait</span>' : popular ? '<span class="plan-badge badge info">Le plus choisi</span>' : ""}
       <h3>${escapeHtml(plan.name)}</h3>
       <p class="plan-tagline">${escapeHtml(plan.tagline)}</p>
-      <p class="plan-price"><strong>${escapeHtml(money(plan.amount))}</strong><span> / mois</span></p>
-      <ul>${plan.highlights.map((line) => `<li>${escapeHtml(line)}</li>`).join("")}</ul>
-      <button type="button" class="${current ? "ghost-button" : "primary"}" data-choose="${escapeHtml(plan.key)}">${label}</button>
+      <p class="plan-price"><strong>${escapeHtml(count(plan.amount))}</strong><span>FCFA / mois</span></p>
+      <ul>${plan.highlights.map((line) => `<li>${icon("check", "icon-sm")}<span>${escapeHtml(line)}</span></li>`).join("")}</ul>
+      <button type="button" class="btn btn-lg btn-block ${current ? "btn-secondary" : popular ? "btn-primary" : "btn-soft"}" data-choose="${escapeHtml(plan.key)}">${current ? "Renouveler" : "Choisir ce forfait"}</button>
     </article>`;
 }
 
@@ -107,7 +134,8 @@ export async function loadBilling() {
   ]);
   if (plans) plansData = plans;
   const statusBox = $("#billing-status");
-  statusBox.innerHTML = status ? statusMarkup(status) : '<div class="empty-state">Impossible de charger votre forfait pour le moment.</div>';
+  renderSidebarPlan(status);
+  statusBox.innerHTML = status ? statusMarkup(status) : `<div class="empty"><span class="empty-icon">${icon("alert")}</span><p class="empty-title">Forfait indisponible</p><p class="empty-text">Impossible de charger votre forfait pour le moment. Réessayez dans un instant.</p></div>`;
   const grid = $("#billing-plans");
   grid.innerHTML = plansData ? plansData.plans.map((plan) => planCardMarkup(plan, status)).join("") : "";
   $$("[data-choose]", grid).forEach((button) => {
@@ -118,10 +146,16 @@ export async function loadBilling() {
 
 /* ----------------------------------------------------------- paiement */
 
+let releasePaymentFocus = null;
+
 function closePayment() {
   clearTimeout(pollTimer);
   paying = null;
+  if ($("#billing-pay").classList.contains("hidden")) return;
   $("#billing-pay").classList.add("hidden");
+  releasePaymentFocus?.();
+  releasePaymentFocus = null;
+  unlockScroll();
 }
 
 /** Pré-remplit le pays et le numéro avec le numéro WhatsApp déclaré de l'entreprise (une seule fois, sans écraser une saisie). */
@@ -149,6 +183,8 @@ function openPayment(planKey) {
   $("#billing-pay-wait").classList.add("hidden");
   $("#billing-pay-submit").disabled = false;
   $("#billing-pay").classList.remove("hidden");
+  lockScroll();
+  releasePaymentFocus = trapFocus($("#billing-pay"));
   $("#billing-pay-phone").focus();
 }
 

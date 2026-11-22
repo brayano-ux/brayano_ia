@@ -1,44 +1,57 @@
-<!-- VIEW: BILLING -->
+<!-- VUE : MON FORFAIT — où en est la consommation, les forfaits disponibles, le paiement en ligne. -->
 <section id="billing-view" class="view hidden">
-  <div class="page-heading">
+  <header class="page-header">
     <div>
-      <p class="eyebrow">ABONNEMENT</p>
-      <h1>Mon forfait</h1>
-      <p class="muted">Choisissez le forfait qui correspond à votre activité et payez en ligne, en toute sécurité.</p>
+      <h1 class="page-title">Mon forfait</h1>
+      <p class="page-subtitle">Suivez votre consommation et choisissez le forfait qui correspond à votre activité. Le paiement se fait en ligne, en toute sécurité.</p>
     </div>
-  </div>
+  </header>
 
-  <section id="billing-status" class="panel billing-status" aria-live="polite"><div class="empty-state">Chargement…</div></section>
+  <section id="billing-status" class="card billing-status" aria-live="polite">
+    <div class="card-pad stack-sm"><span class="skeleton skeleton-title"></span><span class="skeleton" style="height:34px;width:30%"></span><span class="skeleton skeleton-line"></span></div>
+  </section>
 
-  <h2 class="billing-title">Les forfaits</h2>
-  <div id="billing-plans" class="billing-plans"></div>
-  <p class="muted billing-note">
-    <strong>Un « message » = une réponse envoyée par l'assistant à un client</strong> (photos et relances comprises). Les messages que vous écrivez vous-même ne sont jamais comptés.
-    Le compteur repart à zéro chaque mois. Un forfait dure 30 jours.
-    <span id="billing-support"></span>
+  <section class="billing-plans-section" aria-labelledby="billing-plans-title">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title billing-title" id="billing-plans-title">Les forfaits</h2>
+        <p class="muted">Sans engagement : un forfait dure 30 jours et le compteur repart à zéro chaque mois.</p>
+      </div>
+    </div>
+    <div id="billing-plans" class="billing-plans"></div>
+  </section>
+
+  <p class="tip billing-note">
+    <svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-info"/></svg>
+    <span><strong>Un « message » = une réponse envoyée par l'agent à un client</strong> (photos et relances comprises). Les messages que vous écrivez vous-même ne sont jamais comptés. <span id="billing-support"></span></span>
   </p>
 
   <div id="billing-pay" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="billing-pay-title">
     <div class="modal-card">
-      <button type="button" class="modal-close" id="billing-pay-close" aria-label="Fermer">×</button>
-      <h2 id="billing-pay-title">Payer</h2>
-      <p class="muted" id="billing-pay-amount"></p>
-      <form id="billing-pay-form" class="billing-pay-form">
-        <div class="billing-pay-field">
+      <div class="modal-head">
+        <span class="icon-tile primary-tile" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><use href="#i-card"/></svg></span>
+        <div class="stack-sm grow">
+          <h2 id="billing-pay-title">Payer</h2>
+          <p class="modal-text" id="billing-pay-amount"></p>
+        </div>
+        <button type="button" class="btn-icon btn-sm btn-ghost modal-close" id="billing-pay-close" aria-label="Fermer"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-close"/></svg></button>
+      </div>
+      <form id="billing-pay-form" class="billing-pay-form form-grid">
+        <div class="field billing-pay-field">
           <span class="field-label">Votre numéro de téléphone</span>
           <div class="phone-field-row">
             <select id="billing-pay-country" aria-label="Indicatif pays"></select>
             <input id="billing-pay-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="6 90 00 00 00" required aria-label="Numéro local" />
           </div>
-          <small class="field-hint">Choisissez votre pays puis saisissez votre numéro. Vous allez être redirigé vers une page de paiement sécurisée (Mobile Money, carte bancaire…) adaptée à votre pays.</small>
+          <span class="hint">Vous allez être redirigé vers une page de paiement sécurisée (Mobile Money, carte bancaire…) adaptée à votre pays.</span>
         </div>
-        <div class="form-actions">
-          <button type="submit" class="primary" id="billing-pay-submit">Continuer vers le paiement</button>
-          <button type="button" class="text-button" id="billing-pay-cancel">Annuler</button>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="billing-pay-cancel">Annuler</button>
+          <button type="submit" class="btn btn-primary" id="billing-pay-submit"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-lock"/></svg>Continuer vers le paiement</button>
         </div>
       </form>
       <div id="billing-pay-wait" class="billing-pay-wait hidden" aria-live="polite">
-        <div class="billing-spinner" aria-hidden="true"></div>
+        <svg class="icon icon-xl icon-spin" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-loader"/></svg>
         <p id="billing-pay-wait-text"></p>
       </div>
     </div>
