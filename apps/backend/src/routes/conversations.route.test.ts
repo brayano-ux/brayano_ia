@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const { mocks } = vi.hoisted(() => ({
   mocks: {
     getConversationWithMessages: vi.fn(),
+    getConversationActivity: vi.fn(),
     listConversationSummaries: vi.fn(),
     markConversationRead: vi.fn(),
     setConversationStage: vi.fn(),
@@ -45,6 +46,7 @@ describe("conversation handoff routes", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.getConversationWithMessages.mockResolvedValue(handoffConversation);
+    mocks.getConversationActivity.mockResolvedValue({ orders: [], appointments: [] });
     mocks.setConversationAiEnabled.mockResolvedValue(handoffConversation);
     mocks.sendWhatsAppMessageForOrg.mockResolvedValue(undefined);
     mocks.recordOutboundMessage.mockResolvedValue({ id: "message-1", author: "HUMAN" });
@@ -116,6 +118,21 @@ describe("conversation handoff routes", () => {
     expect(photo.mediaUrl).toMatch(/^\/media\/client\/org-1\/22222222-2222-2222-2222-222222222222\.jpg\?t=\d+:[0-9a-f]{64}$/);
     expect(photo.mediaFile).toBeUndefined();
     expect(text.mediaUrl).toBeNull();
+    await app.close();
+  });
+
+  it("joins the customer's orders and appointments to the conversation", async () => {
+    mocks.getConversationActivity.mockResolvedValue({
+      orders: [{ id: "order-1", total: 25000, status: "NEW", paymentStatus: "UNPAID", createdAt: "2026-10-03T10:00:00.000Z", items: [] }],
+      appointments: [{ id: "appointment-1", startsAt: "2026-10-05T09:00:00.000Z", status: "BOOKED", service: "Essayage" }],
+    });
+    const app = await createApp();
+
+    const response = await app.inject({ method: "GET", url: "/organizations/org-1/conversations/conversation-1" });
+
+    expect(mocks.getConversationActivity).toHaveBeenCalledWith("org-1", "conversation-1");
+    expect(response.json().conversation.orders).toHaveLength(1);
+    expect(response.json().conversation.appointments[0]).toMatchObject({ id: "appointment-1", status: "BOOKED" });
     await app.close();
   });
 

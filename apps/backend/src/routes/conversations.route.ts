@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import {
+  getConversationActivity,
   getConversationWithMessages,
   listConversationSummaries,
   listProspectsForExport,
@@ -71,7 +72,8 @@ export async function conversationsRoute(app: FastifyInstance) {
   app.get("/organizations/:orgId/conversations/:id", async (request) => {
     const { orgId, id } = request.params as { orgId: string; id: string };
     const conversation = await getOwnedConversationOrThrow(orgId, id);
-    return { conversation: { ...conversation, messages: withMediaUrls(orgId, conversation.messages) } };
+    const activity = await getConversationActivity(orgId, id);
+    return { conversation: { ...conversation, messages: withMediaUrls(orgId, conversation.messages), ...activity } };
   });
 
   app.post("/organizations/:orgId/conversations/:id/read", async (request) => {

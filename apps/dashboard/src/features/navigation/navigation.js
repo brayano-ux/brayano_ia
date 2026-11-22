@@ -5,6 +5,7 @@ import { APP_CONFIG } from "../../config.js";
 import { maybeStartViewTour } from "../tour/tour.js";
 import { confirmDialog } from "../../ui/confirm.js";
 import { closeMenu } from "../../ui/menu.js";
+import { setPageTitle } from "../../ui/page-title.js";
 import { ADMIN_ONLY_VIEWS, isAgentRole } from "./roles.js";
 
 /**
@@ -74,8 +75,9 @@ function writeRoute(view, detail, { replace = false } = {}) {
   if (window.location.hash === hash) return;
   // On conserve les paramètres d'adresse éventuels (retour de paiement…), seul le fragment change.
   const url = `${window.location.pathname}${window.location.search}${hash}`;
-  if (replace) window.history.replaceState({ view, detail: detail || null }, "", url);
-  else window.history.pushState({ view, detail: detail || null }, "", url);
+  // `pushed` : cette étape a été ajoutée à l'historique (le bouton « retour » peut donc la dépiler).
+  if (replace) window.history.replaceState({ view, detail: detail || null, pushed: false }, "", url);
+  else window.history.pushState({ view, detail: detail || null, pushed: true }, "", url);
 }
 
 /** Ajoute ou retire l'élément ouvert dans l'adresse (ex. « #/conversations/<id> »). */
@@ -105,7 +107,7 @@ function showView(view, onViewShown, { fromHistory = false, replace = false } = 
   const title = VIEWS[view]?.title || "Tableau de bord";
   const label = $("#topbar-view");
   if (label) label.textContent = title;
-  if (isShellVisible()) document.title = `${title} · Brayano IA`;
+  if (isShellVisible()) setPageTitle(title);
   closeMenu();
   closeMobileMenu();
   if (!fromHistory) writeRoute(view, null, { replace });

@@ -44,7 +44,8 @@
 .btn-sm { min-height: var(--control-sm); padding: 0 10px; font-size: var(--text-xs); gap: 6px; border-radius: var(--radius-sm); }
 .btn-lg { min-height: var(--control-lg); padding: 0 20px; font-size: var(--text-base); border-radius: 10px; }
 .btn-block { width: 100%; }
-.btn-icon, .icon-button { display: inline-grid; place-items: center; width: var(--control); height: var(--control); min-height: 0; padding: 0; border-radius: var(--radius-md); color: var(--text-2); transition: var(--transition); flex: none; }
+.btn-icon, .icon-button { display: inline-grid; place-items: center; width: var(--control); height: var(--control); min-height: 0; padding: 0; border-radius: var(--radius-md); transition: var(--transition); flex: none; }
+.icon-button, .btn-icon:not(.btn):not(.btn-primary), .btn-icon.btn-ghost { color: var(--text-2); }
 .btn-icon.btn-sm { width: var(--control-sm); height: var(--control-sm); }
 .icon-button:hover:not(:disabled), .btn-icon.btn-ghost:hover:not(:disabled) { background: var(--surface-3); color: var(--text); }
 .btn-icon .icon, .icon-button .icon { width: 18px; height: 18px; }
@@ -199,7 +200,7 @@ button.list-row:hover, a.list-row:hover { background: var(--surface-hover); text
 /* ---------- Alertes ---------- */
 .alert { display: flex; align-items: flex-start; gap: var(--space-3); padding: 12px 14px; border-radius: var(--radius-lg); border: 1px solid var(--info-border); background: var(--info-soft); color: var(--text); font-size: var(--text-sm); line-height: 1.5; }
 .alert > .icon { color: var(--info); margin-top: 1px; }
-.alert .alert-body { flex: 1 1 auto; min-width: 0; }
+.alert .alert-body { flex: 1 1 0; min-width: 0; }
 .alert .alert-title { font-weight: 600; color: var(--text); }
 .alert .alert-actions { display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: center; flex: none; }
 .alert.success { border-color: var(--success-border); background: var(--success-soft); }
@@ -210,7 +211,7 @@ button.list-row:hover, a.list-row:hover { background: var(--surface-hover); text
 .alert.danger > .icon { color: var(--danger); }
 .alert.neutral { border-color: var(--border); background: var(--surface-2); }
 .alert.neutral > .icon { color: var(--text-3); }
-@media (max-width: 599px) { .alert { flex-wrap: wrap; } .alert .alert-actions { width: 100%; padding-left: 30px; } }
+@media (max-width: 599px) { .alert { flex-wrap: wrap; } .alert .alert-body { flex-basis: calc(100% - 40px); } .alert .alert-actions { width: 100%; padding-left: 30px; } }
 
 /* ---------- États vides ---------- */
 .empty, .empty-state { display: grid; justify-items: center; gap: 6px; text-align: center; padding: var(--space-10) var(--space-5); color: var(--text-3); font-size: var(--text-sm); line-height: 1.55; }

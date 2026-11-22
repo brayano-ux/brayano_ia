@@ -308,6 +308,28 @@ export async function getConversationWithMessages(conversationId: string) {
   });
 }
 
+/**
+ * Commandes et rendez-vous liés à une conversation, pour la fiche client de la boîte de réception.
+ * Le filtre sur l'entreprise est répété ici : on ne renvoie jamais l'activité d'une autre entreprise.
+ */
+export async function getConversationActivity(organizationId: string, conversationId: string) {
+  const [orders, appointments] = await Promise.all([
+    prisma.order.findMany({
+      where: { organizationId, conversationId },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      select: { id: true, total: true, status: true, paymentStatus: true, createdAt: true, items: true },
+    }),
+    prisma.appointment.findMany({
+      where: { organizationId, conversationId, status: { not: "CANCELLED" } },
+      orderBy: { startsAt: "desc" },
+      take: 3,
+      select: { id: true, startsAt: true, status: true, service: true },
+    }),
+  ]);
+  return { orders, appointments };
+}
+
 const MAX_HISTORY_MESSAGES = 10;
 
 /**

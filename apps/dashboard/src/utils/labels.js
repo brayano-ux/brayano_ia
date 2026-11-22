@@ -114,3 +114,19 @@ export function previewOf(message) {
   if (message.type === "DOCUMENT") return "📎 Document";
   return message.content || "Aucun message";
 }
+
+/** Informations que l'agent collecte auprès du client (fiche client) : identifiant technique → libellé affiché. */
+export const LEAD_FIELD_LABELS = {
+  name: "Nom",
+  city: "Ville",
+  quartier: "Quartier",
+  need: "Besoin",
+  product: "Produit",
+  budget: "Budget",
+  urgency: "Urgence",
+};
+
+export const ORDER_STATUS_LABELS = { NEW: "Nouvelle", CONFIRMED: "Confirmée", DELIVERED: "Livrée", CANCELLED: "Annulée" };
+export const ORDER_STATUS_TONES = { NEW: "info", CONFIRMED: "warning", DELIVERED: "success", CANCELLED: "neutral" };
+export const APPOINTMENT_STATUS_LABELS = { BOOKED: "Confirmé", CANCELLED: "Annulé", DONE: "Terminé", NO_SHOW: "Absent" };
+export const APPOINTMENT_STATUS_TONES = { BOOKED: "info", CANCELLED: "neutral", DONE: "success", NO_SHOW: "warning" };

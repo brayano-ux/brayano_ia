@@ -65,7 +65,7 @@ body:not(.role-agent) .agent-only { display: none !important; }
 
 /* ---------- Zone principale ---------- */
 .main { min-width: 0; display: flex; flex-direction: column; min-height: 100dvh; }
-.topbar { position: sticky; top: 0; z-index: var(--z-topbar); display: flex; align-items: center; gap: var(--space-4); height: var(--topbar-height); padding: 0 var(--space-6); background: color-mix(in srgb, var(--bg) 86%, transparent); -webkit-backdrop-filter: saturate(1.6) blur(14px); backdrop-filter: saturate(1.6) blur(14px); border-bottom: 1px solid var(--border); }
+.topbar { position: sticky; top: 0; z-index: var(--z-topbar); flex: none; display: flex; align-items: center; gap: var(--space-4); height: var(--topbar-height); padding: 0 var(--space-6); background: color-mix(in srgb, var(--bg) 86%, transparent); -webkit-backdrop-filter: saturate(1.6) blur(14px); backdrop-filter: saturate(1.6) blur(14px); border-bottom: 1px solid var(--border); }
 .topbar-start { display: flex; align-items: center; gap: var(--space-3); min-width: 0; flex: 0 1 auto; }
 .topbar-brand { display: none; }
 .breadcrumb { display: flex; align-items: center; gap: 6px; min-width: 0; color: var(--text-3); font-size: var(--text-sm); }
@@ -87,7 +87,7 @@ body:not(.role-agent) .agent-only { display: none !important; }
 .system-status.status-off { color: var(--danger); border-color: var(--danger-border); background: var(--danger-soft); }
 .system-status.status-off .dot { background: var(--danger-solid); animation: pulse 1.8s var(--ease) infinite; }
 
-.app-banner { display: flex; align-items: center; gap: var(--space-3); padding: 10px var(--space-6); font-size: var(--text-sm); font-weight: 500; line-height: 1.45; border-bottom: 1px solid var(--info-border); background: var(--info-soft); color: var(--text); flex-wrap: wrap; }
+.app-banner { flex: none; display: flex; align-items: center; gap: var(--space-3); padding: 10px var(--space-6); font-size: var(--text-sm); font-weight: 500; line-height: 1.45; border-bottom: 1px solid var(--info-border); background: var(--info-soft); color: var(--text); flex-wrap: wrap; }
 .app-banner.warning { border-color: var(--warning-border); background: var(--warning-soft); }
 .app-banner.danger { border-color: var(--danger-border); background: var(--danger-soft); }
 .app-banner .icon { flex: none; }
