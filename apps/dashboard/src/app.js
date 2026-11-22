@@ -200,6 +200,11 @@ function initPalette() {
 
 function bootstrap() {
   initTheme();
+  // « Voir la conversation » depuis une commande ou un rendez-vous.
+  document.addEventListener("brayano:open-conversation", (event) => void openConversationInInbox(event.detail.id));
+  document.addEventListener("click", (event) => {
+    if (event.target.closest?.("[data-open-help]")) $("#help-toggle")?.click();
+  });
   // Le rôle mémorisé évite d'afficher un instant le menu complet à un employé (le serveur reste seul juge des droits).
   applyRole(readSession()?.role === "AGENT" ? "AGENT" : "ADMIN");
   bindInboxRefresh(refreshAll);

@@ -213,9 +213,25 @@ function todoItems() {
 
 const TILE_TONES = { danger: "danger", warning: "warning", success: "success", violet: "violet", primary: "primary-tile", neutral: "" };
 
+/** Pastilles du menu : nouvelles commandes à confirmer, rendez-vous du jour. */
+function updateSalesBadges() {
+  const pending = getLatestStats()?.pending;
+  if (!pending) return;
+  const set = (selector, count) => {
+    const badge = $(selector);
+    if (!badge) return;
+    badge.textContent = String(count);
+    badge.classList.toggle("hidden", !count);
+  };
+  set("#nav-orders-count", pending.newOrders);
+  set("#tab-orders-count", pending.newOrders);
+  set("#nav-appointments-count", pending.appointmentsToday);
+}
+
 export function renderTodo() {
   const list = $("#todo-list");
   if (!list) return;
+  updateSalesBadges();
   const items = todoItems();
   const count = $("#todo-count");
   count.hidden = !items.length;
