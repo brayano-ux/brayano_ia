@@ -2,17 +2,18 @@ import { $ } from "./utils/dom.js";
 import { initOnboarding, refreshOnboarding } from "./features/onboarding/onboarding.js";
 import { initAuthFlow, logoutUser } from "./features/auth/auth.js";
 import { loadOrganizations } from "./features/organizations/organizations.js";
-import { initNavigation, registerLeaveGuard, setView, UNSAVED_CHANGES_MESSAGE, updateRealtimeHeader } from "./features/navigation/navigation.js";
-import { initOverview, refreshOverview } from "./features/overview/overview.js";
-import { initInbox, loadInbox, openConversation, bindInboxRefresh } from "./features/inbox/inbox.js";
-import { hasUnsavedAgentChanges, initAgent, loadSettings, openAgentSection } from "./features/agent/agent.js";
+import { currentView, initNavigation, navigate, registerLeaveGuard, routeView, setView, updateRealtimeHeader, VIEWS } from "./features/navigation/navigation.js";
+import { exportProspects, initOverview, refreshOverview } from "./features/overview/overview.js";
+import { initInbox, loadInbox, openConversation, bindInboxRefresh, setInboxFilter } from "./features/inbox/inbox.js";
+import { contactName } from "./features/inbox/conversation-item.js";
+import { discardAgentChanges, hasUnsavedAgentChanges, initAgent, loadSettings, openAgentSection } from "./features/agent/agent.js";
 import { initDelaySettings, loadDelaySettings } from "./features/settings/delay-settings.js";
 import { initRoutingSettings, loadRoutingConfig } from "./features/settings/routing-settings.js";
 import { loadPlatformSuspension } from "./features/suspension/suspension.js";
 import { initWhatsapp, loadWhatsApp } from "./features/whatsapp/whatsapp.js";
-import { initProducts, loadProducts } from "./features/products/products.js";
-import { hasUnsavedAgendaChanges, initAppointments, loadAppointments } from "./features/appointments/appointments.js";
-import { initOrders, loadOrders } from "./features/orders/orders.js";
+import { initProducts, loadProducts, openProductForm } from "./features/products/products.js";
+import { discardAgendaChanges, hasUnsavedAgendaChanges, initAppointments, loadAppointments } from "./features/appointments/appointments.js";
+import { initOrders, loadOrders, setOrdersFilter } from "./features/orders/orders.js";
 import { initBroadcasts, loadBroadcastsView } from "./features/broadcasts/broadcasts.js";
 import { initHelp } from "./features/help/help.js";
 import { handleChariowReturn, initBilling, loadBilling, refreshBillingBanner } from "./features/billing/billing.js";
@@ -20,12 +21,19 @@ import { initTeamSettings, loadTeam } from "./features/settings/team-settings.js
 import { initIgnoredContacts, loadIgnoredContacts } from "./features/settings/ignored-contacts.js";
 import { initSettingsTabs } from "./features/settings/settings-tabs.js";
 import { checkFirstLoginPersona, initPersonaPicker } from "./features/persona/persona.js";
-import { maybeStartViewTour } from "./features/tour/tour.js";
-import { loadRole } from "./features/navigation/roles.js";
+import { ADMIN_ONLY_VIEWS, applyRole, isAgentRole, loadRole } from "./features/navigation/roles.js";
 import { initConfigAssistant } from "./features/config-assistant/config-assistant.js";
-import { readSession } from "./services/storage.js";
+import { isAuthenticated, readSession } from "./services/storage.js";
 import { isNetworkError } from "./services/api.js";
+import { getState } from "./state/store.js";
 import { showToast } from "./utils/dom.js";
+import { initials } from "./utils/format.js";
+import { avatarHue } from "./ui/avatar.js";
+import { confirmDialog } from "./ui/confirm.js";
+import { initCommandPalette } from "./ui/command-palette.js";
+import { initScrollRows } from "./ui/scroll-row.js";
+import { initTheme, toggleTheme } from "./ui/theme.js";
+import "./ui/menu.js";
 
 /**
  * Point d'entrée du dashboard. Assemble les features indépendantes
@@ -33,15 +41,36 @@ import { showToast } from "./utils/dom.js";
  * qu'aucune d'elles n'ait besoin de connaître les autres directement.
  */
 
-/** Depuis la vue d'ensemble (conversations récentes, questions sans réponse) : affiche la boîte de réception, puis la conversation. */
+/** Depuis l'accueil ou la recherche rapide : affiche la boîte de réception, puis la conversation. */
 async function openConversationInInbox(id) {
-  if (!setView("inbox")) return;
+  if (!(await navigate("inbox", {}))) return;
   await loadInbox();
   await openConversation(id);
 }
 
+/** Ce que l'accueil sait ouvrir : une conversation, une liste filtrée, une page, une section de l'agent. */
+const overviewHandlers = {
+  openConversation: openConversationInInbox,
+  openInbox: async (filter) => {
+    if (!(await navigate("inbox", {}))) return;
+    setInboxFilter(filter);
+    await loadInbox();
+  },
+  openOrders: async (filter) => {
+    if (!(await navigate("orders", {}))) return;
+    setOrdersFilter(filter);
+    await loadOrders();
+  },
+  openView: async (view, options = {}) => {
+    if ((await navigate(view, viewLoaders)) && options.addProduct) openProductForm();
+  },
+  openAgentSection: async (tab, focus) => {
+    if (await navigate("agent", viewLoaders)) openAgentSection(tab, focus);
+  },
+};
+
 async function refreshAll() {
-  await Promise.all([refreshOverview(openConversationInInbox), loadPlatformSuspension(), refreshBillingBanner(), refreshOnboarding()]);
+  await Promise.all([refreshOverview(overviewHandlers), loadPlatformSuspension(), refreshBillingBanner(), refreshOnboarding()]);
 }
 
 const viewLoaders = {
@@ -62,20 +91,47 @@ const viewLoaders = {
   whatsapp: loadWhatsApp,
 };
 
-function renderUserCard() {
-  const email = readSession()?.email || "";
-  const local = email.split("@")[0] || "Mon compte";
-  const name = local.replace(/[._-]+/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
-  $("#user-name").textContent = name;
-  $("#user-email").textContent = email || "Compte principal";
-  $("#user-avatar").textContent = (name.match(/\b\w/g) || ["A"]).slice(0, 2).join("").toUpperCase();
+/** Nom affiché : celui du compte s'il est connu, sinon déduit de l'adresse email. */
+export function displayName() {
+  const session = readSession();
+  if (session?.name) return session.name;
+  const local = (session?.email || "").split("@")[0] || "";
+  return local.replace(/[._-]+/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase()) || "Mon compte";
 }
 
+function renderUserCard() {
+  const session = readSession();
+  const name = displayName();
+  $("#user-name").textContent = name;
+  $("#user-email").textContent = session?.role === "AGENT" ? `${session.email} · Employé` : session?.email || "Compte principal";
+  const avatar = $("#user-avatar");
+  avatar.textContent = initials(name);
+  avatar.style.setProperty("--h", String(avatarHue(session?.email || name)));
+  const greeting = $("#company-greeting");
+  const firstName = session?.name ? session.name.trim().split(/\s+/)[0] : "";
+  if (greeting) greeting.textContent = firstName ? `Bonjour, ${firstName}` : "Bonjour";
+}
+
+/** Entreprise avec laquelle la vue de départ a déjà été chargée au démarrage (null : elle ne l'a pas été). */
+let organizationLoadedAtBoot = null;
+/** Sessions ouvertes depuis le chargement de la page. */
+let sessionsOpened = 0;
+
 async function onAuthenticated() {
+  sessionsOpened += 1;
+  if (sessionsOpened > 1) {
+    // Nouvelle connexion dans le même onglet, après une déconnexion : on repart d'une page neuve, pour que rien du
+    // compte précédent ne reste affiché ni en mémoire. La session vient d'être enregistrée : elle est reprise.
+    $(".app-shell").classList.add("hidden");
+    window.location.reload();
+    return;
+  }
   renderUserCard();
   await loadRole();
+  renderUserCard();
   try {
     await loadOrganizations(refreshAll);
+    updateRealtimeHeader();
     void checkFirstLoginPersona();
     // Retour depuis la page de paiement Chariow (voir redirect_url côté serveur) : on ramène
     // l'utilisateur directement sur « Mon forfait » et on attend la confirmation de l'activation.
@@ -83,42 +139,106 @@ async function onAuthenticated() {
       window.history.replaceState({}, "", window.location.pathname);
       setView("billing", viewLoaders);
       void handleChariowReturn();
-    } else {
-      // setView("overview", ...) n'a tourné qu'avant la connexion (écran masqué) : le guide de
-      // cet onglet n'a donc encore jamais eu l'occasion de se déclencher.
-      maybeStartViewTour("overview");
+      return;
     }
+    // L'adresse désigne peut-être une autre vue que celle préparée avant la connexion (lien direct vers une page).
+    // Dans tous les cas on repasse par setView : l'écran est maintenant visible, le titre, l'adresse et le guide se mettent à jour.
+    const wanted = routeView();
+    // La vue affichée a déjà ses données si c'est l'accueil (loadOrganizations vient de le charger) ou si elle a
+    // été chargée au démarrage avec la bonne entreprise. Sinon (première connexion, entreprise inconnue ou
+    // périmée dans le navigateur), on la charge maintenant.
+    const upToDate = wanted === currentView() && (wanted === "overview" || organizationLoadedAtBoot === getState().organizationId);
+    organizationLoadedAtBoot = null;
+    // keepDetail : une conversation désignée par l'adresse (« #/conversations/<id> ») reste ouverte et reste dans
+    // l'adresse ; sinon ce second passage la refermait et le lien direct ne menait qu'à la liste.
+    setView(wanted, upToDate ? undefined : viewLoaders, { replace: true, keepDetail: true });
   } catch (error) {
     showToast(isNetworkError(error) ? "API inaccessible. Réessayez plus tard." : error.message, "error");
   }
 }
 
-function initLogout() {
-  const logoutButton = document.createElement("button");
-  logoutButton.className = "nav-item";
-  logoutButton.innerHTML = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-logout"/></svg><span>Se déconnecter</span>';
-  logoutButton.onclick = () => {
-    if (window.confirm("Voulez-vous vraiment vous déconnecter ?")) {
-      logoutUser();
-    }
+function initAccountMenu() {
+  $("#logout-button").onclick = async () => {
+    const confirmed = await confirmDialog({
+      title: "Se déconnecter ?",
+      message: "Vous devrez saisir à nouveau votre email et votre mot de passe pour revenir. Votre agent continue de répondre à vos clients.",
+      confirmLabel: "Se déconnecter",
+      iconName: "logout",
+    });
+    if (confirmed) logoutUser();
   };
-  $(".sidebar-bottom").appendChild(logoutButton);
-
   const newOrgButton = $("#new-org");
-  if (newOrgButton) {
-    newOrgButton.onclick = () => logoutUser("register");
-  }
+  if (newOrgButton) newOrgButton.onclick = () => logoutUser("register");
+}
+
+/** Pages et actions proposées par la recherche rapide (Ctrl/⌘ + K). */
+function initPalette() {
+  const allowed = (view) => !(isAgentRole() && ADMIN_ONLY_VIEWS.includes(view));
+  const icons = { overview: "home", inbox: "chats", orders: "bag", appointments: "calendar", products: "package", agent: "sparkles", broadcasts: "megaphone", whatsapp: "whatsapp", billing: "card", settings: "settings" };
+  const keywords = {
+    overview: "tableau de bord statistiques chiffres vue d'ensemble",
+    inbox: "messages clients discussions boîte de réception prospects",
+    orders: "ventes paiements livraisons",
+    appointments: "agenda réservations créneaux",
+    products: "catalogue articles photos prix",
+    agent: "assistant intelligence artificielle réglages instructions horaires relances négociation",
+    broadcasts: "annonce promotion diffusion campagne",
+    whatsapp: "connexion numéro qr code",
+    billing: "abonnement paiement plan tarifs",
+    settings: "équipe employés délai numéros ignorés zones commerciaux",
+  };
+  const go = (view) => () => setView(view, viewLoaders);
+  const agentSection = (tab, focus) => async () => {
+    if (await navigate("agent", viewLoaders)) openAgentSection(tab, focus);
+  };
+
+  initCommandPalette({
+    isAvailable: () => !$(".app-shell")?.classList.contains("hidden"),
+    pages: () => Object.entries(VIEWS).filter(([view]) => allowed(view)).map(([view, { title }]) => ({ label: title, icon: icons[view], keywords: keywords[view], run: go(view) })),
+    actions: () => [
+      { label: "Ajouter un produit", icon: "plus", keywords: "catalogue article nouveau", admin: true, run: async () => { if (await navigate("products", viewLoaders)) openProductForm(); } },
+      { label: "Tester mon agent", icon: "circle-play", keywords: "simulation essai", admin: true, run: agentSection("knowledge", "#agent-test-input") },
+      { label: "Modifier les informations de mon entreprise", icon: "book", keywords: "connaissances horaires adresse tarifs", admin: true, run: agentSection("knowledge", "#business-info") },
+      { label: "Préparer un message groupé", icon: "megaphone", keywords: "annonce promotion envoyer à tous", admin: true, run: go("broadcasts") },
+      { label: "Connecter WhatsApp", icon: "whatsapp", keywords: "qr code numéro relier", admin: true, run: go("whatsapp") },
+      { label: "Ajouter un employé", icon: "user-plus", keywords: "équipe collaborateur accès", admin: true, run: go("settings") },
+      { label: "Exporter les prospects", hint: "Fichier CSV de tous vos clients", icon: "download", keywords: "télécharger excel csv contacts", run: () => void exportProspects() },
+      { label: document.documentElement.dataset.theme === "dark" ? "Passer en thème clair" : "Passer en thème sombre", icon: document.documentElement.dataset.theme === "dark" ? "sun" : "moon", keywords: "apparence couleur nuit jour", run: toggleTheme },
+      { label: "Ouvrir l'aide", icon: "lifebuoy", keywords: "assistance support question", run: () => $("#help-toggle")?.click() },
+      { label: "Se déconnecter", icon: "logout", keywords: "quitter sortir", run: () => $("#logout-button")?.click() },
+    ].filter((action) => !(action.admin && isAgentRole())),
+    conversations: () => (getState().conversations || []).map((conversation) => {
+      // Seul un identifiant « @s.whatsapp.net » est un numéro de téléphone (WhatsApp masque parfois le numéro).
+      const jid = String(conversation.contact?.whatsappJid || "");
+      const phone = jid.endsWith("@s.whatsapp.net") ? jid.split("@")[0] : "";
+      return {
+        label: contactName(conversation.contact),
+        hint: conversation.contact?.displayName && phone ? `+${phone}` : "Conversation WhatsApp",
+        phone,
+        avatar: true,
+        run: () => void openConversationInInbox(conversation.id),
+      };
+    }),
+  });
 }
 
 function bootstrap() {
+  initTheme();
+  // « Voir la conversation » depuis une commande ou un rendez-vous.
+  document.addEventListener("brayano:open-conversation", (event) => void openConversationInInbox(event.detail.id));
+  document.addEventListener("click", (event) => {
+    if (event.target.closest?.("[data-open-help]")) $("#help-toggle")?.click();
+  });
+  // Le rôle mémorisé évite d'afficher un instant le menu complet à un employé (le serveur reste seul juge des droits).
+  applyRole(readSession()?.role === "AGENT" ? "AGENT" : "ADMIN");
   bindInboxRefresh(refreshAll);
-  registerLeaveGuard("agent", () => !hasUnsavedAgentChanges() || window.confirm(UNSAVED_CHANGES_MESSAGE));
-  registerLeaveGuard("appointments", () => !hasUnsavedAgendaChanges() || window.confirm(UNSAVED_CHANGES_MESSAGE));
+  registerLeaveGuard("agent", hasUnsavedAgentChanges, discardAgentChanges);
+  registerLeaveGuard("appointments", hasUnsavedAgendaChanges, discardAgendaChanges);
   initNavigation(viewLoaders);
   initOverview();
-  initOnboarding(action => {
+  initOnboarding(async (action) => {
     if (action === "whatsapp" || action === "inbox") { setView(action, viewLoaders); return; }
-    if (!setView("agent", viewLoaders)) return;
+    if (!(await navigate("agent", viewLoaders))) return;
     openAgentSection("knowledge", action === "test" ? "#agent-test-input" : "#business-info");
   });
   initInbox();
@@ -137,10 +257,15 @@ function bootstrap() {
   initDelaySettings();
   initRoutingSettings();
   initWhatsapp();
-  initLogout();
-  updateRealtimeHeader();
-  setView("overview", viewLoaders);
+  initAccountMenu();
+  initPalette();
+  initScrollRows();
+  // Une session déjà ouverte : on prépare directement la vue demandée par l'adresse (pas de passage par l'accueil).
+  // Ses données ne sont demandées tout de suite que si l'entreprise est connue ; sinon onAuthenticated s'en charge.
+  organizationLoadedAtBoot = isAuthenticated() ? getState().organizationId : null;
+  setView(isAuthenticated() ? routeView() : "overview", organizationLoadedAtBoot ? viewLoaders : undefined);
   initAuthFlow(onAuthenticated);
+  document.getElementById("boot-splash")?.remove();
 }
 
 if (document.readyState === "loading") {

@@ -27,3 +27,10 @@ export class PlanLimitError extends AppError {
     super(message, 402, "PLAN_LIMIT");
   }
 }
+
+/** Envoi impossible : le numéro WhatsApp de l'entreprise n'est pas relié (409, avec un message que l'utilisateur peut suivre). */
+export class WhatsAppNotConnectedError extends AppError {
+  constructor(message = "WhatsApp n'est pas connecté : reliez votre numéro dans la page « WhatsApp », puis réessayez.") {
+    super(message, 409, "WHATSAPP_NOT_CONNECTED");
+  }
+}

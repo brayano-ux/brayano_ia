@@ -12,33 +12,33 @@ const STEP_TRANSITION_MS = 550;
 /** Onglets couverts, dans l'ordre naturel de découverte. Un onglet absent de cette liste n'a pas de guide. */
 const VIEW_TOURS = {
   overview: {
-    label: "la vue d'ensemble",
+    label: "votre page d'accueil",
     steps: [
-      { selector: ".metrics", title: "Vos chiffres du jour", text: "Conversations actives, clients à traiter et statut de votre WhatsApp, en temps réel." },
-      { selector: "#recent-conversations", title: "Conversations récentes", text: "Les derniers échanges avec vos clients apparaissent ici dès qu'ils arrivent." },
-      { selector: ".quick-panel", title: "Actions rapides", text: "Connectez WhatsApp, personnalisez votre agent ou ouvrez la boîte de réception en un clic." },
+      { selector: ".todo-card", title: "Ce qu'il y a à faire", text: "Clients qui attendent une réponse, paiements à vérifier, nouvelles commandes : tout ce qui demande une action est ici." },
+      { selector: ".recent-card", title: "Dernières conversations", text: "Les échanges les plus récents avec vos clients. Cliquez sur l'un d'eux pour l'ouvrir." },
+      { selector: ".kpi-grid", title: "Vos résultats", text: "Conversations, réponses de l'agent, commandes et ventes, comparés à la période précédente." },
     ],
   },
   whatsapp: {
     label: "la connexion WhatsApp",
     steps: [
       { selector: ".wa-number", title: "Le numéro de votre entreprise", text: "Celui que vos clients contactent déjà. Choisissez le pays, saisissez le numéro, puis enregistrez." },
-      { selector: "#connect-wa", title: "Connexion par QR code", text: "Le moyen le plus simple : scannez ce code avec WhatsApp sur votre téléphone." },
+      { selector: "#connect-wa", title: "Relier votre téléphone", text: "Le moyen le plus simple : affichez le QR code et scannez-le avec WhatsApp sur votre téléphone." },
       { selector: "#qr-container", title: "Votre code de connexion", text: "Le QR code (ou le code d'association) apparaît ici et se renouvelle automatiquement." },
     ],
   },
   agent: {
     label: "votre agent IA",
     steps: [
-      { selector: ".agent-hero", title: "État de votre agent", text: "Activez ou mettez en pause ses réponses automatiques, et suivez sa configuration en un coup d'œil." },
+      { selector: ".agent-hero", title: "État de votre agent", text: "Activez ou mettez en pause ses réponses automatiques, et voyez ce qu'il reste à configurer." },
       { selector: ".agent-tabs", title: "Les réglages de l'agent", text: "Identité, connaissances, comportement, horaires… chaque onglet règle un aspect de son comportement." },
-      { selector: "#config-assistant", title: "L'assistant de configuration", text: "Collez un texte, un site web ou un PDF : l'IA en extrait les informations de votre activité à votre place." },
+      { selector: "#agent-tester .agent-playground, #agent-test-open", title: "Testez-le avant vos clients", text: "Écrivez comme un client : vous voyez exactement ce que l'agent répondrait, sans rien envoyer." },
     ],
   },
   inbox: {
-    label: "la boîte de réception",
+    label: "vos conversations",
     steps: [
-      { selector: "#inbox-stage-filters", title: "Filtrer par étiquette", text: "Retrouvez vite les nouveaux clients, ceux qui ont commandé, ou ceux à rappeler." },
+      { selector: "#inbox-stage-filters", title: "Filtrer les conversations", text: "Retrouvez vite les clients à traiter, ceux qui ont commandé ou ceux à rappeler." },
       { selector: "#all-conversations", title: "Vos conversations", text: "Toutes les discussions WhatsApp de votre entreprise, mises à jour automatiquement." },
       { selector: "#conversation-detail", title: "Le détail d'une conversation", text: "Cliquez sur un client pour lire l'échange complet et reprendre la main si besoin." },
     ],
@@ -46,18 +46,45 @@ const VIEW_TOURS = {
   products: {
     label: "le catalogue produits",
     steps: [
-      { selector: "#product-form", title: "Ajouter un produit", text: "Photo, nom, description et prix : votre agent s'en sert pour répondre et recommander le bon article." },
-      { selector: "#products-list", title: "Votre catalogue", text: "Tous vos produits ajoutés apparaissent ici, modifiables à tout moment." },
+      { selector: "#add-product", title: "Ajouter un produit", text: "Photo, nom, description et prix : votre agent s'en sert pour répondre et recommander le bon article." },
+      { selector: "#products-list", title: "Votre catalogue", text: "Tous vos produits apparaissent ici, modifiables à tout moment." },
     ],
   },
   broadcasts: {
     label: "les messages groupés",
     steps: [
-      { selector: ".broadcast-safety", title: "Protection de votre numéro", text: "Des règles automatiques limitent les envois pour éviter tout blocage de votre WhatsApp." },
       { selector: "#broadcast-form", title: "Préparer un envoi", text: "Choisissez les clients concernés et rédigez votre annonce (promotion, nouveauté, horaires)." },
+      { selector: ".broadcast-safety", title: "Protection de votre numéro", text: "Des règles automatiques limitent les envois pour éviter tout blocage de votre WhatsApp." },
     ],
   },
 };
+
+/**
+ * Guide « ce qui a changé », pour les habitués de l'ancien tableau de bord : ils ont déjà vu le guide de l'accueil
+ * (dans l'ancienne interface), on leur montre une fois les nouveaux repères. `when` réserve une étape à une mise
+ * en page : le menu est à gauche sur ordinateur, en bas de l'écran sur téléphone.
+ */
+const REDESIGN_KEY = "nouveautes";
+const REDESIGN_GUIDE = {
+  label: "votre nouveau tableau de bord",
+  steps: [
+    { when: "desktop", selector: "#sidebar .nav", title: "Votre tableau de bord a changé", text: "Le menu est maintenant regroupé : vos ventes, votre agent, votre compte. « Vue d'ensemble » s'appelle désormais « Accueil »." },
+    { when: "mobile", selector: ".tabbar", title: "Votre tableau de bord a changé", text: "Vos pages principales sont maintenant ici, en bas de l'écran. « Plus » ouvre toutes les autres." },
+    { selector: ".todo-card", title: "Ce qu'il y a à faire", text: "Tout ce qui attend une action de votre part est réuni ici : clients à qui répondre, paiements à vérifier, commandes à confirmer." },
+    { selector: "#command-trigger, .topbar-search", title: "Recherche rapide", text: "Retrouvez un client, une page ou une action en tapant quelques lettres." },
+  ],
+};
+
+/** Premier élément réellement affiché parmi ceux que désigne le sélecteur (un élément masqué ne peut pas être montré). */
+function visibleTarget(selector) {
+  return Array.from(document.querySelectorAll(selector)).find((element) => {
+    // getClientRects plutôt que offsetParent : ce dernier est nul pour un élément en position fixe (barre d'onglets
+    // du téléphone, barre du haut), qui est pourtant bien à l'écran.
+    if (!element.getClientRects().length || getComputedStyle(element).visibility === "hidden") return false;
+    const box = element.getBoundingClientRect();
+    return box.height > 0 && box.right > 0 && box.left < window.innerWidth;
+  }) || null;
+}
 
 let active = null; // { steps, index, elements, onDone }
 const pending = new Set(); // vues dont le guide est programmé (setTimeout) mais pas encore lancé
@@ -67,7 +94,11 @@ function seenKey(view) {
 }
 
 function markSeen(view) {
-  try { localStorage.setItem(seenKey(view), "1"); } catch { /* stockage indisponible : le guide pourra se rejouer, ce n'est pas grave */ }
+  try {
+    localStorage.setItem(seenKey(view), "1");
+    // Qui découvre l'accueil avec son guide connaît déjà la nouvelle interface : pas de « ce qui a changé » pour lui.
+    if (view === "overview") localStorage.setItem(seenKey(REDESIGN_KEY), "1");
+  } catch { /* stockage indisponible : le guide pourra se rejouer, ce n'est pas grave */ }
 }
 
 function hasSeen(view) {
@@ -86,16 +117,16 @@ function buildOverlay() {
       <h3 class="tour-title"></h3>
       <p class="tour-text"></p>
       <div class="tour-actions">
-        <button type="button" class="text-button tour-skip">Passer le guide</button>
-        <button type="button" class="primary tour-next">Suivant</button>
+        <button type="button" class="btn btn-sm btn-ghost tour-skip">Passer le guide</button>
+        <button type="button" class="btn btn-sm btn-primary tour-next">Suivant</button>
       </div>
     </div>
     <div class="tour-bravo hidden">
       <div class="tour-bravo-card">
-        <span class="tour-bravo-emoji" aria-hidden="true">🎉</span>
+        <span class="icon-tile icon-tile-lg success" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><use href="#i-check-circle"></use></svg></span>
         <h3>Bravo !</h3>
         <p></p>
-        <button type="button" class="primary tour-bravo-close">Continuer</button>
+        <button type="button" class="btn btn-primary tour-bravo-close">Continuer</button>
       </div>
     </div>`;
   document.body.append(root);
@@ -134,7 +165,10 @@ function positionTooltip(els, rect) {
   const { width: tw, height: th } = tooltip.getBoundingClientRect();
   const margin = 16;
   const spaceBelow = window.innerHeight - rect.bottom;
-  const top = spaceBelow > th + margin * 2 ? rect.bottom + margin : Math.max(margin, rect.top - th - margin);
+  // Sous la zone s'il y a la place, sinon au-dessus ; dans tous les cas l'explication reste entièrement à l'écran
+  // (quitte à recouvrir le bas d'une zone plus haute que la fenêtre).
+  const preferred = spaceBelow > th + margin * 2 ? rect.bottom + margin : rect.top - th - margin;
+  const top = Math.min(Math.max(margin, preferred), window.innerHeight - th - margin);
   let left = rect.left + rect.width / 2 - tw / 2;
   left = Math.min(Math.max(left, margin), window.innerWidth - tw - margin);
   tooltip.style.left = `${left}px`;
@@ -163,7 +197,7 @@ function waitForScrollToSettle(callback) {
 function showStep(index) {
   const { steps, els } = active;
   const step = steps[index];
-  const target = document.querySelector(step.selector);
+  const target = visibleTarget(step.selector);
   if (!target) {
     // Élément absent (pas encore chargé, ou invisible pour ce compte) : on passe l'étape sans bloquer le guide.
     if (index + 1 < steps.length) showStep(index + 1);
@@ -181,11 +215,13 @@ function showStep(index) {
     positionCursorAndSpotlight(els, rect);
     els.cursor.classList.remove("clicking");
     window.setTimeout(() => els.cursor.classList.add("clicking"), STEP_TRANSITION_MS);
-    positionTooltip(els, rect);
+    // Le texte d'abord : la bulle est placée d'après sa hauteur réelle (sinon, au-dessus d'un élément du bas de
+    // l'écran, elle le recouvrait en s'agrandissant).
     els.stepCount.textContent = `Étape ${index + 1} sur ${steps.length}`;
     els.title.textContent = step.title;
     els.text.textContent = step.text;
     els.next.textContent = index + 1 === steps.length ? "Terminer" : "Suivant";
+    positionTooltip(els, rect);
     els.tooltip.classList.add("visible");
   });
 }
@@ -228,6 +264,17 @@ function next() {
   else finish();
 }
 
+/**
+ * Une fenêtre prioritaire s'ouvre (première connexion) : le guide en cours lui laisse la place et se rejouera à
+ * la prochaine visite de la page, comme s'il n'avait pas commencé.
+ */
+export function interruptTour() {
+  if (!active) return;
+  const { key } = active;
+  cleanup();
+  try { localStorage.removeItem(seenKey(key)); } catch { /* stockage indisponible */ }
+}
+
 /** Lance le guide d'un onglet manuellement (utilisable depuis l'aide, même si déjà vu). */
 function blockingModalOpen() {
   // Le guide ne doit jamais s'afficher par-dessus une fenêtre qui attend une décision de l'utilisateur
@@ -236,11 +283,17 @@ function blockingModalOpen() {
 }
 
 export function runTour(view) {
-  const config = VIEW_TOURS[view];
+  start(view, view, VIEW_TOURS[view]);
+}
+
+/** `key` : ce qui est mémorisé comme « déjà vu » ; `view` : la page sur laquelle le guide a un sens. */
+function start(key, view, config) {
   if (!config || active || blockingModalOpen()) return;
-  markSeen(view);
+  markSeen(key);
+  const layout = window.matchMedia("(max-width: 1023px)").matches ? "mobile" : "desktop";
+  const steps = config.steps.filter((step) => !step.when || step.when === layout);
   const els = buildOverlay();
-  active = { view, steps: config.steps, label: config.label, els, index: 0 };
+  active = { key, view, steps, label: config.label, els, index: 0 };
   els.next.onclick = next;
   els.skip.onclick = skip;
   document.addEventListener("keydown", onKeydown);
@@ -252,6 +305,16 @@ export function maybeStartViewTour(view) {
   // Un guide encore ouvert sur un autre onglet n'a plus de sens ici : ses repères pointeraient sur des éléments
   // qui ne sont plus affichés. On le ferme plutôt que de laisser un cadre orphelin sur la nouvelle page.
   if (active && active.view !== view) skip();
+  // Habitué de l'ancien tableau de bord (il a déjà vu le guide de l'accueil) : une fois, ce qui a changé.
+  if (view === "overview" && hasSeen("overview") && !hasSeen(REDESIGN_KEY) && !active && !pending.has(REDESIGN_KEY)) {
+    pending.add(REDESIGN_KEY);
+    window.setTimeout(() => {
+      pending.delete(REDESIGN_KEY);
+      // L'utilisateur est peut-être déjà parti sur une autre page : le guide attendra son retour sur l'accueil.
+      if (document.body.dataset.currentView === "overview") start(REDESIGN_KEY, "overview", REDESIGN_GUIDE);
+    }, 900);
+    return;
+  }
   if (!VIEW_TOURS[view] || hasSeen(view) || active || pending.has(view)) return;
   pending.add(view);
   window.setTimeout(() => {

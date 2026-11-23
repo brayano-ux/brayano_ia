@@ -3,6 +3,9 @@ import { $, showToast } from "../../utils/dom.js";
 import { getState } from "../../state/store.js";
 import { setSystemStatus } from "../navigation/system-status.js";
 import { populateCountrySelect, readPhoneField, setPhoneFieldFromDigits } from "../../utils/phone-field.js";
+import { formatPhone } from "../../utils/format.js";
+import { confirmDialog } from "../../ui/confirm.js";
+import { icon } from "../../ui/icons.js";
 
 /**
  * Feature "Connexion WhatsApp" : statut du numéro, QR code de liaison,
@@ -16,8 +19,8 @@ let waitingUntil = 0;
 let renderedQr = null;
 
 const DEFAULT_DESCRIPTION = "Connectez WhatsApp en scannant le QR code ou en recevant un code d'association.";
-const QR_PLACEHOLDER = '<span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3"/><path d="M21 14v.01"/><path d="M14 21h.01"/><path d="M18 18h3v3h-3z"/></svg></span><p>Le QR code apparaîtra ici</p>';
-const CONNECTED_PLACEHOLDER = '<span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.8 2.8L16 9.5"/></svg></span><p>Votre numéro est connecté : l\'assistant répond à vos clients.</p>';
+const QR_PLACEHOLDER = `<span class="qr-illustration" aria-hidden="true">${icon("qr", "icon-xl")}</span><p>Le QR code apparaîtra ici</p><small>Cliquez sur « Afficher le QR code » pour commencer.</small>`;
+const CONNECTED_PLACEHOLDER = `<span class="qr-illustration is-connected" aria-hidden="true">${icon("check-circle", "icon-xl")}</span><p>Votre numéro est connecté</p><small>L'agent répond à vos clients sur ce numéro.</small>`;
 
 function whatsappViewVisible() {
   const view = $("#whatsapp-view");
@@ -49,6 +52,8 @@ export async function loadWhatsApp({ silent = false } = {}) {
     const { status } = info;
     const connected = status === "CONNECTED";
     setSystemStatus(status);
+    // L'état pilote la mise en page (voir whatsapp.css) : une fois connecté, les étapes de liaison disparaissent.
+    $("#whatsapp-view").dataset.state = status;
     renderNumberInfo(info);
     let pairingCode = null;
 
@@ -62,7 +67,7 @@ export async function loadWhatsApp({ silent = false } = {}) {
 
     $("#wa-title").textContent = connected ? "WhatsApp connecté" : pairingCode ? "Saisissez le code dans WhatsApp" : status === "QR_PENDING" ? "Scannez le QR code" : "WhatsApp déconnecté";
     $("#wa-description").textContent = connected
-      ? `Votre numéro WhatsApp est relié${info.connectedNumber ? ` (+${info.connectedNumber})` : ""} : l'assistant répond aux messages de vos clients.`
+      ? `Votre numéro WhatsApp est relié${info.connectedNumber ? ` (${formatPhone(info.connectedNumber)})` : ""} : l'agent répond aux messages de vos clients.`
       : DEFAULT_DESCRIPTION;
     $("#qr-status").textContent = connected ? "Connecté" : pairingCode ? "Code prêt" : status === "QR_PENDING" ? "QR disponible" : "En attente";
     $("#qr-status").className = `pill ${connected ? "" : "warning"}`;
@@ -85,7 +90,7 @@ export async function loadWhatsApp({ silent = false } = {}) {
         const current = $("#pairing-code-value");
         if (!current || current.textContent !== pairingCode) {
           $("#qr-container").className = "qr-placeholder pairing-code-placeholder";
-          $("#qr-container").innerHTML = '<div><p>Sur votre téléphone, choisissez « Lier avec un numéro de téléphone » puis saisissez :</p><strong id="pairing-code-value"></strong></div>';
+          $("#qr-container").innerHTML = '<div class="pairing-code"><p>Sur votre téléphone, dans « Connecter un appareil », touchez « Lier avec le numéro de téléphone » sous le scanner, puis saisissez ce code :</p><strong id="pairing-code-value"></strong></div>';
           $("#pairing-code-value").textContent = pairingCode;
         }
       } else {
@@ -133,7 +138,7 @@ function renderNumberInfo(info) {
   const mismatch = info.numberMatches === false;
   warning.classList.toggle("hidden", !mismatch);
   warning.textContent = mismatch
-    ? `Le téléphone relié (+${info.connectedNumber}) n'est pas le numéro de votre entreprise (${info.declaredDisplay}). Vérifiez que vous avez lié le bon téléphone, ou corrigez le numéro ci-dessus.`
+    ? `Le téléphone relié (${formatPhone(info.connectedNumber)}) n'est pas le numéro de votre entreprise (${info.declaredDisplay}). Vérifiez que vous avez lié le bon téléphone, ou corrigez le numéro ci-dessus.`
     : "";
 }
 
@@ -201,7 +206,13 @@ async function connectWhatsAppWithCode(event) {
 }
 
 async function disconnectWhatsApp() {
-  const confirmed = window.confirm("Voulez-vous vraiment déconnecter ce numéro WhatsApp ?");
+  const confirmed = await confirmDialog({
+    title: "Déconnecter ce numéro ?",
+    message: "Votre agent ne répondra plus à vos clients tant que vous n'aurez pas relié un numéro. Vos conversations restent enregistrées.",
+    confirmLabel: "Déconnecter",
+    tone: "danger",
+    iconName: "unplug",
+  });
   if (!confirmed) return;
 
   try {
@@ -215,6 +226,7 @@ async function disconnectWhatsApp() {
 }
 
 export function initWhatsapp() {
+  $("#qr-container").innerHTML = QR_PLACEHOLDER;
   populateCountrySelect($("#wa-number-country"));
   populateCountrySelect($("#pairing-phone-country"));
 

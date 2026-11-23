@@ -18,6 +18,9 @@ async function saveDelaySettings(event) {
   event.preventDefault();
   const selected = document.querySelector('input[name="response-delay"]:checked');
   const responseDelaySeconds = Number(selected?.value || 5);
+  const button = $("#save-settings");
+  button.disabled = true;
+  button.classList.add("is-loading");
 
   try {
     await api(`/organizations/${getState().organizationId}/ai-settings`, {
@@ -27,6 +30,9 @@ async function saveDelaySettings(event) {
     showToast(`Délai enregistré : ${responseDelaySeconds >= 60 ? `${responseDelaySeconds / 60} minute(s)` : `${responseDelaySeconds} secondes`}`, "success");
   } catch (error) {
     showToast(error.message, "error");
+  } finally {
+    button.disabled = false;
+    button.classList.remove("is-loading");
   }
 }
 

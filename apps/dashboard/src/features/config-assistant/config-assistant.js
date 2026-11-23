@@ -17,7 +17,7 @@ function renderResult(analysis) {
 
   const missing = $("#ca-missing");
   if (analysis.missing?.length) {
-    missing.innerHTML = `<strong>Non trouvé dans votre source — à compléter vous-même :</strong> ${analysis.missing.map((label) => `<span class="ca-chip">${escapeHtml(label)}</span>`).join("")}`;
+    missing.innerHTML = `<strong>Non trouvé dans votre source, à compléter vous-même :</strong><span class="ca-chips">${analysis.missing.map((label) => `<span class="badge warning ca-chip">${escapeHtml(label)}</span>`).join("")}</span>`;
     missing.classList.remove("hidden");
   } else {
     missing.classList.add("hidden");
@@ -60,6 +60,7 @@ async function analyze() {
   }
 
   button.disabled = true;
+  button.classList.add("is-loading");
   status.textContent = "Analyse en cours… (jusqu’à 30 secondes)";
   try {
     const { analysis } = await request;
@@ -71,6 +72,7 @@ async function analyze() {
     showToast(error.message || "L’analyse a échoué.", "error");
   } finally {
     button.disabled = false;
+    button.classList.remove("is-loading");
   }
 }
 
@@ -85,7 +87,7 @@ function applyDraft(mode) {
   target.value = combined;
   target.dispatchEvent(new Event("input", { bubbles: true }));
   target.scrollIntoView({ behavior: "smooth", block: "center" });
-  showToast("Texte placé dans « Informations sur votre activité ». Relisez puis cliquez sur « Enregistrer les modifications ».", "success");
+  showToast("Texte placé dans « Informations sur votre activité ». Relisez puis cliquez sur « Enregistrer ».", "success");
 }
 
 export function initConfigAssistant() {

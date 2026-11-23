@@ -1,74 +1,107 @@
-<!-- VIEW: APPOINTMENTS -->
+<!-- VUE : RENDEZ-VOUS — l'agenda des rendez-vous pris par l'agent ou ajoutés à la main, et ses réglages. -->
 <section id="appointments-view" class="view hidden">
-  <div class="page-heading">
+  <header class="page-header">
     <div>
-      <p class="eyebrow">AGENDA</p>
-      <h1>Rendez-vous</h1>
-      <p class="muted">Définissez vos horaires : l’agent propose uniquement les créneaux libres et enregistre les rendez-vous confirmés par vos clients.</p>
+      <h1 class="page-title">Rendez-vous</h1>
+      <p class="page-subtitle">L’agent ne propose que vos créneaux libres et enregistre ici les rendez-vous confirmés par vos clients.</p>
+    </div>
+    <div class="page-actions">
+      <button type="button" class="btn btn-primary" id="add-appointment"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-calendar-plus"/></svg>Ajouter un rendez-vous</button>
+    </div>
+  </header>
+
+  <div class="tabs page-tabs" role="tablist" aria-label="Sections des rendez-vous">
+    <button type="button" class="tab active" role="tab" aria-selected="true" data-appointments-tab="agenda"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-calendar"/></svg>Agenda<span id="appointments-count" class="count"></span></button>
+    <button type="button" class="tab admin-only" role="tab" aria-selected="false" data-appointments-tab="settings"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sliders"/></svg>Réglages de l’agenda</button>
+  </div>
+
+  <div data-appointments-pane="agenda">
+    <div id="appointments-list" class="appointments-list" aria-live="polite">
+      <div class="card skeleton-row"><span class="skeleton" style="width:54px;height:34px"></span><span class="grow stack-sm"><span class="skeleton skeleton-line" style="width:30%"></span><span class="skeleton skeleton-line" style="width:50%"></span></span></div>
+      <div class="card skeleton-row"><span class="skeleton" style="width:54px;height:34px"></span><span class="grow stack-sm"><span class="skeleton skeleton-line" style="width:35%"></span><span class="skeleton skeleton-line" style="width:45%"></span></span></div>
     </div>
   </div>
 
-  <div class="appointments-layout">
-    <form id="agenda-form" class="panel settings-form agenda-form admin-only">
-      <div class="agenda-form-head">
-        <h2>Réglages de l’agenda</h2>
-        <label class="agenda-switch">
-          <input id="agenda-enabled" type="checkbox" />
-          <span>Prise de rendez-vous par l’agent</span>
+  <div data-appointments-pane="settings" class="hidden admin-only">
+    <form id="agenda-form" class="agenda-form stack-lg">
+      <section class="card card-pad">
+        <div class="setting-row">
+          <span class="icon-tile primary-tile" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><use href="#i-calendar-check"/></svg></span>
+          <div class="setting-text">
+            <p class="setting-title">Prise de rendez-vous par l’agent</p>
+            <p class="setting-desc">Activée, l’agent propose vos créneaux libres et réserve. Désactivée, il ne propose aucun rendez-vous.</p>
+          </div>
+          <label class="switch"><input id="agenda-enabled" type="checkbox" aria-label="Prise de rendez-vous par l’agent" /><span class="switch-track" aria-hidden="true"></span></label>
+        </div>
+      </section>
+
+      <section class="card card-pad form-grid">
+        <div class="pane-head"><h2>Créneaux</h2><p>La durée d’un rendez-vous et les règles que l’agent respecte pour proposer une heure.</p></div>
+        <label class="field">
+          <span class="field-label">Type de rendez-vous</span>
+          <input id="agenda-service" type="text" maxlength="160" placeholder="Ex. Coupe + brushing, Consultation, Essayage…" />
         </label>
-      </div>
-      <p class="field-hint">Désactivé, l’agent ne propose aucun rendez-vous et se comporte comme avant.</p>
-
-      <label>
-        <span class="field-label">Type de rendez-vous</span>
-        <input id="agenda-service" type="text" maxlength="160" placeholder="Ex. Coupe + brushing, Consultation…" />
-      </label>
-
-      <div class="agenda-grid">
-        <label><span class="field-label">Durée d’un créneau (min)</span><input id="agenda-slot" type="number" min="10" max="240" step="5" /></label>
-        <label><span class="field-label">Pause entre deux RDV (min)</span><input id="agenda-buffer" type="number" min="0" max="120" step="5" /></label>
-        <label><span class="field-label">RDV simultanés</span><input id="agenda-capacity" type="number" min="1" max="50" /></label>
-        <label><span class="field-label">Préavis minimum (min)</span><input id="agenda-notice" type="number" min="0" max="10080" step="15" /></label>
-        <label><span class="field-label">Réservable jusqu’à (jours)</span><input id="agenda-horizon" type="number" min="1" max="180" /></label>
-        <label><span class="field-label">Fuseau horaire</span><input id="agenda-timezone" type="text" placeholder="Africa/Douala" /></label>
-      </div>
-
-      <fieldset class="agenda-hours">
-        <legend class="field-label">Horaires d’ouverture</legend>
-        <p class="field-hint">Deux plages possibles par jour (ex. matin et après-midi). Laissez vide un jour fermé.</p>
-        <div id="agenda-hours-rows"></div>
-      </fieldset>
-
-      <fieldset class="agenda-closed">
-        <legend class="field-label">Jours fermés (fériés, congés)</legend>
-        <div class="agenda-closed-add">
-          <input id="agenda-closed-date" type="date" />
-          <button id="agenda-closed-add" type="button" class="ghost-button">Ajouter</button>
+        <div class="field-row-3">
+          <label class="field"><span class="field-label">Durée d’un créneau</span><div class="input-suffix"><input id="agenda-slot" type="number" inputmode="numeric" min="10" max="240" step="5" /><span>min</span></div></label>
+          <label class="field"><span class="field-label">Pause entre deux rendez-vous</span><div class="input-suffix"><input id="agenda-buffer" type="number" inputmode="numeric" min="0" max="120" step="5" /><span>min</span></div></label>
+          <label class="field"><span class="field-label">Rendez-vous en même temps</span><input id="agenda-capacity" type="number" inputmode="numeric" min="1" max="50" /></label>
+          <label class="field"><span class="field-label">Préavis minimum</span><div class="input-suffix"><input id="agenda-notice" type="number" inputmode="numeric" min="0" max="10080" step="15" /><span>min</span></div></label>
+          <label class="field"><span class="field-label">Réservable jusqu’à</span><div class="input-suffix"><input id="agenda-horizon" type="number" inputmode="numeric" min="1" max="180" /><span>jours</span></div></label>
+          <label class="field"><span class="field-label">Fuseau horaire</span><input id="agenda-timezone" type="text" placeholder="Africa/Douala" /></label>
         </div>
-        <div id="agenda-closed-list" class="agenda-chips"></div>
-      </fieldset>
+      </section>
 
-      <button id="agenda-save" type="submit" class="primary">Enregistrer l’agenda</button>
+      <section class="card card-pad form-grid">
+        <fieldset class="agenda-hours form-grid">
+          <legend class="pane-head"><h2>Horaires de rendez-vous</h2><p>Deux plages possibles par jour (matin et après-midi). Laissez vide un jour où vous ne recevez pas.</p></legend>
+          <div id="agenda-hours-rows" class="bh-rows"></div>
+        </fieldset>
+      </section>
+
+      <section class="card card-pad form-grid">
+        <fieldset class="agenda-closed form-grid">
+          <legend class="pane-head"><h2>Jours fermés</h2><p>Jours fériés, congés : l’agent ne proposera aucun créneau ces jours-là.</p></legend>
+          <div class="agenda-closed-add">
+            <input id="agenda-closed-date" type="date" aria-label="Jour fermé à ajouter" />
+            <button id="agenda-closed-add" type="button" class="btn btn-secondary"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-plus"/></svg>Ajouter ce jour</button>
+          </div>
+          <div id="agenda-closed-list" class="agenda-chips"></div>
+        </fieldset>
+      </section>
+
+      <div id="agenda-dirty" class="save-bar hidden" role="status">
+        <span class="save-bar-text"><span class="dot warning"></span>Modifications non enregistrées</span>
+        <div class="save-bar-actions">
+          <button type="button" class="btn btn-ghost" id="agenda-discard">Annuler</button>
+          <button id="agenda-save" type="submit" class="btn btn-primary"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"/></svg>Enregistrer</button>
+        </div>
+      </div>
     </form>
-
-    <section class="appointments-list-section">
-      <div class="products-list-heading">
-        <h2>Rendez-vous à venir</h2>
-        <span id="appointments-count" class="muted"></span>
-      </div>
-
-      <form id="appointment-add-form" class="panel appointment-add">
-        <strong>Ajouter manuellement</strong>
-        <div class="agenda-grid">
-          <label><span class="field-label">Date</span><input id="appt-date" type="date" required /></label>
-          <label><span class="field-label">Heure</span><input id="appt-time" type="time" required /></label>
-          <label><span class="field-label">Nom</span><input id="appt-name" type="text" maxlength="160" /></label>
-          <label><span class="field-label">Téléphone</span><input id="appt-phone" type="tel" maxlength="40" /></label>
-        </div>
-        <button type="submit" class="ghost-button">Réserver ce créneau</button>
-      </form>
-
-      <div id="appointments-list" class="appointments-list" aria-live="polite"></div>
-    </section>
   </div>
+
+  <!-- Ajout manuel d'un rendez-vous -->
+  <aside class="drawer" id="appointment-drawer" aria-labelledby="appointment-drawer-title" aria-hidden="true">
+    <header class="drawer-header">
+      <div>
+        <h2 id="appointment-drawer-title" class="drawer-title">Ajouter un rendez-vous</h2>
+        <p class="muted">Pour un client qui a réservé par téléphone ou sur place.</p>
+      </div>
+      <button type="button" class="btn-icon btn-ghost" data-drawer-close aria-label="Fermer"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-close"/></svg></button>
+    </header>
+    <form id="appointment-add-form" class="appointment-add drawer-form">
+      <div class="drawer-body form-grid">
+        <div class="field-row">
+          <label class="field"><span class="field-label">Date</span><input id="appt-date" type="date" required /></label>
+          <label class="field"><span class="field-label">Heure</span><input id="appt-time" type="time" required /></label>
+        </div>
+        <label class="field"><span class="field-label">Nom du client <span class="optional">facultatif</span></span><input id="appt-name" type="text" maxlength="160" placeholder="Ex. Nadège Mballa" /></label>
+        <label class="field"><span class="field-label">Téléphone <span class="optional">facultatif</span></span><input id="appt-phone" type="tel" maxlength="40" placeholder="Ex. 677 88 90 23" /></label>
+        <p class="tip"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-info"/></svg><span>Le créneau doit être libre et dans vos horaires. L’agent ne le proposera plus à un autre client.</span></p>
+      </div>
+      <footer class="drawer-footer">
+        <button type="button" class="btn btn-secondary" data-drawer-close>Annuler</button>
+        <button type="submit" class="btn btn-primary" id="appt-save">Réserver ce créneau</button>
+      </footer>
+    </form>
+  </aside>
 </section>

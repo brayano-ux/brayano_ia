@@ -44,9 +44,53 @@ describe.skipIf(!integrationEnabled)("statistiques du tableau de bord (base rée
     expect(stats.stages).toEqual({ NEW: 0, INTERESTED: 1, ORDERED: 0, CALLBACK: 0 });
     expect(stats.estimatedMinutesSaved).toBe(3);
     expect(stats.series).toHaveLength(7);
-    expect(stats.series.find((entry) => entry.day === "2026-10-13")).toEqual({ day: "2026-10-13", clientMessages: 2, assistantMessages: 2, orders: 1 });
-    expect(stats.series.find((entry) => entry.day === "2026-10-14")).toEqual({ day: "2026-10-14", clientMessages: 1, assistantMessages: 1, orders: 1 });
-    expect(stats.series.find((entry) => entry.day === "2026-10-09")).toEqual({ day: "2026-10-09", clientMessages: 0, assistantMessages: 0, orders: 0 });
+    expect(stats.series.find((entry) => entry.day === "2026-10-13")).toEqual({ day: "2026-10-13", clientMessages: 2, assistantMessages: 2, orders: 1, conversations: 1, revenue: 3000 });
+    expect(stats.series.find((entry) => entry.day === "2026-10-14")).toEqual({ day: "2026-10-14", clientMessages: 1, assistantMessages: 1, orders: 1, conversations: 0, revenue: 7000 });
+    expect(stats.series.find((entry) => entry.day === "2026-10-09")).toEqual({ day: "2026-10-09", clientMessages: 0, assistantMessages: 0, orders: 0, conversations: 0, revenue: 0 });
+  });
+
+  it("compare avec la période précédente de même durée, arrêtée à la même heure", async () => {
+    const { organization } = await createTestOrganization();
+    await seed(organization.id);
+    const contact = await prisma.contact.create({ data: { organizationId: organization.id, whatsappJid: "237655000002@s.whatsapp.net" } });
+    // Semaine précédente : du 1er octobre 00:00 (heure locale) au 7 octobre 13:00 (heure locale).
+    const earlier = await prisma.conversation.create({ data: { organizationId: organization.id, contactId: contact.id, createdAt: new Date("2026-10-05T09:00:00Z") } });
+    const message = (direction: "INBOUND" | "OUTBOUND", author: "CONTACT" | "AI", at: string) =>
+      prisma.message.create({ data: { conversationId: earlier.id, direction, author, type: "TEXT", content: "x", createdAt: new Date(at) } });
+    await message("INBOUND", "CONTACT", "2026-10-05T09:00:00Z");
+    await message("OUTBOUND", "AI", "2026-10-05T09:00:05Z");
+    await message("INBOUND", "CONTACT", "2026-10-07T11:00:00Z"); // 7 octobre 12:00 local : avant l'heure de coupure
+    await message("INBOUND", "CONTACT", "2026-10-07T15:00:00Z"); // 7 octobre 16:00 local : après l'heure de coupure, non compté
+    await prisma.order.create({ data: { organizationId: organization.id, conversationId: earlier.id, customerName: "D", deliveryAddress: "x", items: [], total: 4000, createdAt: new Date("2026-10-06T10:00:00Z") } });
+    await prisma.order.create({ data: { organizationId: organization.id, conversationId: earlier.id, customerName: "E", deliveryAddress: "x", items: [], total: 9000, status: "CANCELLED", createdAt: new Date("2026-10-06T10:00:00Z") } });
+    await prisma.appointment.create({ data: { organizationId: organization.id, startsAt: new Date("2026-10-09T09:00:00Z"), endsAt: new Date("2026-10-09T09:30:00Z"), createdAt: new Date("2026-10-06T12:00:00Z") } });
+
+    const stats = await getDashboardStats(organization.id, 7, NOW);
+
+    expect(stats.previous).toEqual({ conversations: 1, clientMessages: 2, assistantMessages: 1, orders: 1, revenue: 4000, appointments: 1 });
+    // La période en cours n'est pas modifiée par ces données plus anciennes.
+    expect(stats.messages.fromClients).toBe(3);
+    expect(stats.conversations.started).toBe(1);
+  });
+
+  it("signale ce qui attend une action aujourd'hui", async () => {
+    const { organization } = await createTestOrganization();
+    const other = await createTestOrganization("Autre");
+    await seed(organization.id);
+    const appointment = (organizationId: string, startsAt: string, status: "BOOKED" | "CANCELLED" | "DONE" = "BOOKED") =>
+      prisma.appointment.create({ data: { organizationId, startsAt: new Date(startsAt), endsAt: new Date(new Date(startsAt).getTime() + 30 * 60_000), status } });
+    await appointment(organization.id, "2026-10-14T07:00:00Z"); // aujourd'hui 08:00 local
+    await appointment(organization.id, "2026-10-14T22:30:00Z"); // aujourd'hui 23:30 local
+    await appointment(organization.id, "2026-10-14T23:30:00Z"); // demain 00:30 local
+    await appointment(organization.id, "2026-10-14T15:00:00Z", "CANCELLED");
+    await appointment(other.organization.id, "2026-10-14T15:00:00Z");
+    await prisma.order.create({ data: { organizationId: organization.id, customerName: "F", deliveryAddress: "x", items: [], total: 1000, status: "DELIVERED", createdAt: new Date("2026-08-01T10:00:00Z") } });
+    await prisma.order.create({ data: { organizationId: other.organization.id, customerName: "G", deliveryAddress: "x", items: [], total: 1000 } });
+
+    const stats = await getDashboardStats(organization.id, 1, NOW);
+
+    // Commandes de `seed` : A (payée, nouvelle), B (non payée, nouvelle), C (annulée) + F (livrée, non payée, ancienne).
+    expect(stats.pending).toEqual({ newOrders: 2, unpaidOrders: 2, appointmentsToday: 2 });
   });
 
   it("limite « aujourd'hui » au jour local en cours", async () => {

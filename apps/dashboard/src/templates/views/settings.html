@@ -1,175 +1,109 @@
-<!-- VIEW: SETTINGS -->
+<!-- VUE : PARAMÈTRES — délai de réponse, équipe, numéros ignorés, zones et commerciaux. -->
 <section id="settings-view" class="view hidden">
-  <div class="page-heading">
+  <header class="page-header">
     <div>
-      <p class="eyebrow">CONFIGURATION</p>
-      <h1>Paramètres</h1>
-      <p class="muted">Réglez le délai de réponse de l’agent, votre équipe, les numéros à ignorer et le routage de vos prospects.</p>
+      <h1 class="page-title">Paramètres</h1>
+      <p class="page-subtitle">Le rythme de réponse de l’agent, votre équipe, les numéros à ignorer et la répartition de vos prospects.</p>
     </div>
-  </div>
+  </header>
 
-  <div class="agent-tabs settings-tabs" role="tablist" aria-label="Sections des paramètres">
-    <button type="button" class="agent-tab active" role="tab" data-settings-tab="responses">Réponses</button>
-    <button type="button" class="agent-tab" role="tab" data-settings-tab="team">Équipe</button>
-    <button type="button" class="agent-tab" role="tab" data-settings-tab="ignored">Numéros à ignorer</button>
-    <button type="button" class="agent-tab" role="tab" data-settings-tab="routing">Zones et commerciaux</button>
-  </div>
+  <div class="settings-layout">
+    <nav class="settings-nav settings-tabs" role="tablist" aria-label="Sections des paramètres">
+      <button type="button" class="settings-nav-item active" role="tab" data-settings-tab="responses"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-timer"/></svg><span>Réponses</span></button>
+      <button type="button" class="settings-nav-item" role="tab" data-settings-tab="team"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-users"/></svg><span>Équipe</span></button>
+      <button type="button" class="settings-nav-item" role="tab" data-settings-tab="ignored"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-ban"/></svg><span>Numéros à ignorer</span></button>
+      <button type="button" class="settings-nav-item" role="tab" data-settings-tab="routing"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-route"/></svg><span>Zones et commerciaux</span></button>
+    </nav>
 
-  <div class="settings-stack">
-
-    <!-- ============ Délai de réponse ============ -->
-    <div class="settings-pane" data-settings-pane="responses">
-    <form id="delay-form" class="panel settings-card">
-      <div class="settings-card-head">
-        <h2>Délai de réponse de l'IA</h2>
-        <p class="muted">Un délai plus long rend les réponses moins robotiques et réduit le risque de restriction WhatsApp. Valeur par défaut : 5 secondes. L'agent attend toujours au moins le temps qu'il faudrait pour taper sa réponse, et les longues réponses partent en deux ou trois messages.</p>
+    <div class="settings-stack">
+      <!-- ============ Délai de réponse ============ -->
+      <div class="settings-pane" data-settings-pane="responses">
+        <form id="delay-form" class="card card-pad form-grid settings-card">
+          <div class="pane-head">
+            <h2>Délai de réponse de l’agent</h2>
+            <p>Un délai plus long rend les réponses moins robotiques et réduit le risque de restriction WhatsApp. L’agent attend toujours au moins le temps qu’il faudrait pour taper sa réponse, et les longues réponses partent en deux ou trois messages.</p>
+          </div>
+          <div class="delay-options" role="radiogroup" aria-label="Délai de réponse de l’agent">
+            <label class="delay-option"><input type="radio" name="response-delay" value="3" /><span><b>3 s</b><small>Rapide</small></span></label>
+            <label class="delay-option"><input type="radio" name="response-delay" value="5" checked /><span><b>5 s</b><small>Recommandé</small></span></label>
+            <label class="delay-option"><input type="radio" name="response-delay" value="7" /><span><b>7 s</b><small>Plus prudent</small></span></label>
+            <label class="delay-option"><input type="radio" name="response-delay" value="60" /><span><b>1 min</b><small>Réponse espacée</small></span></label>
+            <label class="delay-option"><input type="radio" name="response-delay" value="120" /><span><b>2 min</b><small>Très espacée</small></span></label>
+          </div>
+          <div class="form-actions"><button class="btn btn-primary" id="save-settings" type="button">Enregistrer le délai</button></div>
+        </form>
       </div>
 
-      <div class="delay-options" role="radiogroup" aria-label="Délai de réponse de l'IA">
-        <label class="delay-option">
-          <input type="radio" name="response-delay" value="3" />
-          <span>3 s<small>Rapide</small></span>
-        </label>
-        <label class="delay-option">
-          <input type="radio" name="response-delay" value="5" checked />
-          <span>5 s<small>Par défaut</small></span>
-        </label>
-        <label class="delay-option">
-          <input type="radio" name="response-delay" value="7" />
-          <span>7 s<small>Plus prudent</small></span>
-        </label>
-        <label class="delay-option">
-          <input type="radio" name="response-delay" value="60" />
-          <span>1 min<small>Réponse espacée</small></span>
-        </label>
-        <label class="delay-option">
-          <input type="radio" name="response-delay" value="120" />
-          <span>2 min<small>Réponse très espacée</small></span>
-        </label>
-      </div>
-      <div class="form-actions"><button class="primary" id="save-settings" type="button">Enregistrer le délai</button></div>
-    </form>
-    </div>
-
-    <!-- ============ Équipe ============ -->
-    <div class="settings-pane hidden" data-settings-pane="team">
-    <section class="panel settings-card team-settings" aria-labelledby="team-title">
-      <div class="settings-card-head">
-        <h2 id="team-title">Votre équipe</h2>
-        <p class="muted">Ajoutez des employés qui partagent la boîte de réception : ils répondent aux clients, suivent les commandes et les rendez-vous. Ils ne peuvent ni modifier l’agent, ni le catalogue, ni le numéro WhatsApp.</p>
-      </div>
-      <div id="team-list" class="team-list" aria-live="polite"><div class="empty-state">Chargement…</div></div>
-      <form id="team-form" class="team-form">
-        <h3>Ajouter un employé</h3>
-        <div class="team-form-grid">
-          <label><span class="field-label">Nom</span><input id="team-name" type="text" maxlength="80" required placeholder="Ex. Awa" /></label>
-          <label><span class="field-label">Email de connexion</span><input id="team-email" type="email" required placeholder="awa@exemple.com" autocomplete="off" /></label>
-          <label><span class="field-label">Mot de passe (8 caractères minimum)</span><input id="team-password" type="text" minlength="8" maxlength="100" required autocomplete="off" /></label>
-        </div>
-        <p class="field-hint">Communiquez-lui son email et son mot de passe : il se connecte sur la même page que vous.</p>
-        <div class="form-actions"><button type="submit" class="primary">Ajouter l’employé</button></div>
-      </form>
-    </section>
-    </div>
-
-    <!-- ============ Contacts à ignorer ============ -->
-    <div class="settings-pane hidden" data-settings-pane="ignored">
-    <section class="panel settings-card ignored-contacts" aria-labelledby="ignored-title">
-      <div class="settings-card-head">
-        <h2 id="ignored-title">Numéros à ignorer</h2>
-        <p class="muted">Ajoutez les numéros (famille, fournisseurs…) auxquels votre agent IA ne doit jamais répondre automatiquement. Vous gardez la main pour leur répondre vous-même ; les autres clients ne sont pas concernés.</p>
-      </div>
-      <div id="ignored-contacts-list" class="ignored-contacts-list" aria-live="polite"><div class="empty-state">Chargement…</div></div>
-      <form id="ignored-contact-form" class="ignored-contact-form">
-        <div class="ignored-contact-form-grid">
-          <label><span class="field-label">Numéro WhatsApp</span><input id="ignored-contact-number" type="text" inputmode="tel" required placeholder="+237 6 90 00 00 00" /></label>
-          <label><span class="field-label">Note (facultatif)</span><input id="ignored-contact-label" type="text" maxlength="60" placeholder="Ex. Maman, Fournisseur tissus" /></label>
-        </div>
-        <div class="form-actions"><button type="submit" class="primary">Ajouter à la liste</button></div>
-      </form>
-    </section>
-    </div>
-
-    <!-- ============ Zones et responsables ============ -->
-    <div class="settings-pane hidden" data-settings-pane="routing">
-    <section class="routing-settings" aria-labelledby="routing-title">
-      <div class="settings-card-head routing-head">
-        <h2 id="routing-title">Zones et responsables</h2>
-        <p class="muted">Définissez vos zones et les responsables qui reçoivent les prospects de chacune.</p>
+      <!-- ============ Équipe ============ -->
+      <div class="settings-pane hidden" data-settings-pane="team">
+        <section class="card team-settings settings-card" aria-labelledby="team-title">
+          <div class="card-header"><div><h2 class="card-title" id="team-title">Votre équipe</h2><p class="card-subtitle">Vos employés partagent les conversations : ils répondent aux clients, suivent les commandes et les rendez-vous. Ils ne peuvent modifier ni l’agent, ni le catalogue, ni le numéro WhatsApp.</p></div></div>
+          <div id="team-list" class="team-list list" aria-live="polite"><div class="skeleton-row"><span class="skeleton skeleton-circle"></span><span class="grow stack-sm"><span class="skeleton skeleton-line" style="width:30%"></span><span class="skeleton skeleton-line" style="width:45%"></span></span></div></div>
+        </section>
+        <form id="team-form" class="card card-pad form-grid team-form">
+          <div class="pane-head"><h2>Ajouter un employé</h2><p>Communiquez-lui son email et son mot de passe : il se connecte sur la même page que vous.</p></div>
+          <div class="field-row-3 team-form-grid">
+            <label class="field"><span class="field-label">Nom</span><input id="team-name" type="text" maxlength="80" required placeholder="Ex. Carine" /></label>
+            <label class="field"><span class="field-label">Email de connexion</span><input id="team-email" type="email" required placeholder="carine@exemple.com" autocomplete="off" /></label>
+            <label class="field"><span class="field-label">Mot de passe</span><input id="team-password" type="text" minlength="8" maxlength="100" required autocomplete="off" placeholder="8 caractères minimum" /></label>
+          </div>
+          <div class="form-actions"><button type="submit" class="btn btn-primary"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-user-plus"/></svg>Ajouter l’employé</button></div>
+        </form>
       </div>
 
-      <div class="routing-layout">
-        <!-- Liste (à gauche sur grand écran) -->
-        <div class="panel routing-list-panel">
-          <h3>Zones configurées</h3>
-          <div id="routing-locations-list"></div>
-        </div>
+      <!-- ============ Numéros à ignorer ============ -->
+      <div class="settings-pane hidden" data-settings-pane="ignored">
+        <section class="card ignored-contacts settings-card" aria-labelledby="ignored-title">
+          <div class="card-header"><div><h2 class="card-title" id="ignored-title">Numéros à ignorer</h2><p class="card-subtitle">Famille, fournisseurs… L’agent ne leur répond jamais automatiquement. Vous gardez la main pour leur répondre vous-même.</p></div></div>
+          <div id="ignored-contacts-list" class="ignored-contacts-list list" aria-live="polite"><div class="skeleton-row"><span class="skeleton skeleton-circle"></span><span class="grow stack-sm"><span class="skeleton skeleton-line" style="width:35%"></span></span></div></div>
+        </section>
+        <form id="ignored-contact-form" class="card card-pad form-grid ignored-contact-form">
+          <div class="pane-head"><h2>Ajouter un numéro</h2></div>
+          <div class="field-row ignored-contact-form-grid">
+            <label class="field"><span class="field-label">Numéro WhatsApp</span><input id="ignored-contact-number" type="text" inputmode="tel" required placeholder="+237 6 90 00 00 00" /></label>
+            <label class="field"><span class="field-label">Note <span class="optional">facultatif</span></span><input id="ignored-contact-label" type="text" maxlength="60" placeholder="Ex. Maman, Fournisseur tissus" /></label>
+          </div>
+          <div class="form-actions"><button type="submit" class="btn btn-primary"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-plus"/></svg>Ajouter à la liste</button></div>
+        </form>
+      </div>
 
-        <!-- Formulaires (à droite sur grand écran) -->
+      <!-- ============ Zones et commerciaux ============ -->
+      <div class="settings-pane hidden" data-settings-pane="routing">
+        <section class="card routing-settings routing-list-panel" aria-labelledby="routing-title">
+          <div class="card-header"><div><h2 class="card-title" id="routing-title">Zones et commerciaux</h2><p class="card-subtitle">Quand un prospect est prêt, l’agent le transmet par WhatsApp au commercial de sa zone.</p></div></div>
+          <div id="routing-locations-list" class="routing-list"></div>
+        </section>
+
         <div class="routing-side">
-          <form id="location-form" class="panel routing-form">
-            <h3>Ajouter une zone</h3>
-            <label>
-              Nom de la zone
-              <input id="location-name" type="text" placeholder="Douala" required />
-            </label>
-            <label>
-              Ville
-              <input id="location-city" type="text" placeholder="Douala" required />
-            </label>
-            <label>
-              WhatsApp de la zone
-              <input id="location-recipient-whatsapp" type="text" inputmode="tel" placeholder="+237..." />
-              <span class="field-hint">Au format international, avec l'indicatif du pays.</span>
-            </label>
-            <div class="form-actions">
-              <button type="submit" class="primary">Enregistrer la zone</button>
-            </div>
+          <form id="location-form" class="card card-pad form-grid routing-form">
+            <div class="pane-head"><h2>Ajouter une zone</h2></div>
+            <label class="field"><span class="field-label">Nom de la zone</span><input id="location-name" type="text" placeholder="Douala" required /></label>
+            <label class="field"><span class="field-label">Ville</span><input id="location-city" type="text" placeholder="Douala" required /></label>
+            <label class="field"><span class="field-label">WhatsApp de la zone <span class="optional">facultatif</span></span><input id="location-recipient-whatsapp" type="text" inputmode="tel" placeholder="+237..." /><span class="hint">Au format international, avec l'indicatif du pays.</span></label>
+            <div class="form-actions"><button type="submit" class="btn btn-primary">Enregistrer la zone</button></div>
           </form>
 
-          <form id="responsible-form" class="panel routing-form">
-            <h3>Ajouter un responsable</h3>
-            <label>
-              Zone
-              <select id="responsible-location" required></select>
-            </label>
-            <label>
-              Nom du responsable
-              <input id="responsible-name" type="text" placeholder="Jean Dupont" required />
-            </label>
-            <label>
-              WhatsApp du responsable
-              <input id="responsible-whatsapp" type="text" inputmode="tel" placeholder="+237..." required />
-            </label>
-            <label class="checkbox-row">
-              <input id="responsible-active" type="checkbox" checked />
-              <span>Commercial actif</span>
-            </label>
+          <form id="responsible-form" class="card card-pad form-grid routing-form">
+            <div class="pane-head"><h2>Ajouter un commercial</h2></div>
+            <label class="field"><span class="field-label">Zone</span><select id="responsible-location" required></select></label>
+            <label class="field"><span class="field-label">Nom du commercial</span><input id="responsible-name" type="text" placeholder="Jean Dupont" required /></label>
+            <label class="field"><span class="field-label">WhatsApp du commercial</span><input id="responsible-whatsapp" type="text" inputmode="tel" placeholder="+237..." required /></label>
+            <label class="checkbox-row"><input id="responsible-active" type="checkbox" checked /><span>Commercial actif</span></label>
             <input id="responsible-id" type="hidden" />
             <div class="form-actions">
-              <button type="submit" class="primary">Enregistrer le responsable</button>
-              <button type="button" id="cancel-responsible-edit" class="text-button hidden">Annuler la modification</button>
+              <button type="button" id="cancel-responsible-edit" class="btn btn-ghost hidden">Annuler la modification</button>
+              <button type="submit" class="btn btn-primary">Enregistrer le responsable</button>
             </div>
           </form>
 
-          <form id="fallback-form" class="panel routing-fallback">
-            <h3>Fallback global</h3>
-            <p class="muted">Utilisé quand aucune zone ou aucun responsable ne correspond.</p>
-            <label>
-              Responsable de fallback
-              <select id="fallback-responsible"></select>
-            </label>
-            <label>
-              WhatsApp de fallback
-              <input id="fallback-whatsapp" type="text" inputmode="tel" placeholder="+237..." />
-            </label>
-            <div class="form-actions">
-              <button type="submit" class="primary">Enregistrer le fallback</button>
-            </div>
+          <form id="fallback-form" class="card card-pad form-grid routing-fallback">
+            <div class="pane-head"><h2>Destinataire par défaut</h2><p>Utilisé quand aucune zone ou aucun commercial ne correspond au prospect.</p></div>
+            <label class="field"><span class="field-label">Commercial par défaut</span><select id="fallback-responsible"></select></label>
+            <label class="field"><span class="field-label">WhatsApp par défaut <span class="optional">facultatif</span></span><input id="fallback-whatsapp" type="text" inputmode="tel" placeholder="+237..." /></label>
+            <div class="form-actions"><button type="submit" class="btn btn-primary">Enregistrer</button></div>
           </form>
         </div>
       </div>
-    </section>
     </div>
   </div>
 </section>

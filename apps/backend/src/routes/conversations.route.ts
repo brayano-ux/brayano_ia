@@ -1,11 +1,13 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import {
+  getConversationActivity,
   getConversationWithMessages,
   listConversationSummaries,
   listProspectsForExport,
   markConversationRead,
   recordOutboundMessage,
+  restoreConversationHandling,
   setConversationAiEnabled,
   setConversationStage,
   setPaymentCheckPending,
@@ -16,7 +18,7 @@ import { prisma } from "../database/client.js";
 import { setContactOptOut } from "../contacts/contacts.service.js";
 import { requireAuth } from "./auth.route.js";
 import { withConversationSendLock } from "../conversations/conversation-send-lock.js";
-import { NotFoundError, ValidationError } from "../shared/errors.js";
+import { NotFoundError, ValidationError, WhatsAppNotConnectedError } from "../shared/errors.js";
 import { sendWhatsAppMessageForOrg } from "../whatsapp/whatsapp.registry.js";
 
 const stageBodySchema = z.object({
@@ -71,7 +73,8 @@ export async function conversationsRoute(app: FastifyInstance) {
   app.get("/organizations/:orgId/conversations/:id", async (request) => {
     const { orgId, id } = request.params as { orgId: string; id: string };
     const conversation = await getOwnedConversationOrThrow(orgId, id);
-    return { conversation: { ...conversation, messages: withMediaUrls(orgId, conversation.messages) } };
+    const activity = await getConversationActivity(orgId, id);
+    return { conversation: { ...conversation, messages: withMediaUrls(orgId, conversation.messages), ...activity } };
   });
 
   app.post("/organizations/:orgId/conversations/:id/read", async (request) => {
@@ -141,7 +144,16 @@ export async function conversationsRoute(app: FastifyInstance) {
 
     const message = await withConversationSendLock(id, async () => {
       await setConversationAiEnabled(id, false);
-      await sendWhatsAppMessageForOrg(orgId, conversation.contact.whatsappJid, parsed.data.text);
+      try {
+        await sendWhatsAppMessageForOrg(orgId, conversation.contact.whatsappJid, parsed.data.text);
+      } catch (error) {
+        // WhatsApp n'est pas relié : rien n'est parti. La conversation retrouve son état, l'agent n'est pas mis
+        // en pause pour un message jamais envoyé. (Pour toute autre erreur, on ne sait pas : il reste en pause.)
+        if (error instanceof WhatsAppNotConnectedError) {
+          await restoreConversationHandling(id, { aiEnabled: conversation.aiEnabled, status: conversation.status }).catch(() => undefined);
+        }
+        throw error;
+      }
       return recordOutboundMessage({
         conversationId: conversation.id,
         text: parsed.data.text,

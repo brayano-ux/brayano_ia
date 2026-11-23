@@ -1,32 +1,40 @@
-<!-- VIEW: ORDERS -->
+<!-- VUE : COMMANDES — ce que l'agent a enregistré sur WhatsApp, à confirmer, livrer et encaisser. -->
 <section id="orders-view" class="view hidden">
-  <div class="page-heading">
+  <header class="page-header">
     <div>
-      <p class="eyebrow">VENTES</p>
-      <h1>Commandes</h1>
-      <p class="muted">Quand un client confirme sa commande sur WhatsApp, l’agent l’enregistre ici avec le produit, la quantité et l’adresse. Vous recevez aussi un email.</p>
+      <h1 class="page-title">Commandes</h1>
+      <p class="page-subtitle">Quand un client confirme sa commande sur WhatsApp, l’agent l’enregistre ici avec le produit, la quantité et l’adresse. Vous recevez aussi un email.</p>
     </div>
-  </div>
-
-  <div class="panel orders-settings admin-only">
-    <label class="agenda-switch">
-      <input id="orders-enabled" type="checkbox" />
-      <span>Prise de commande par l’agent</span>
-    </label>
-    <p class="field-hint">L’agent ne propose que les produits actifs de votre catalogue (page « Produits »). Désactivé, il se comporte comme avant.</p>
-  </div>
-
-  <div class="orders-toolbar">
-    <div id="orders-filters" class="orders-filters" role="tablist" aria-label="Filtrer par statut">
-      <button type="button" class="orders-filter active" data-filter="">Toutes</button>
-      <button type="button" class="orders-filter" data-filter="UNPAID">À encaisser</button>
-      <button type="button" class="orders-filter" data-filter="NEW">Nouvelles</button>
-      <button type="button" class="orders-filter" data-filter="CONFIRMED">Confirmées</button>
-      <button type="button" class="orders-filter" data-filter="DELIVERED">Livrées</button>
-      <button type="button" class="orders-filter" data-filter="CANCELLED">Annulées</button>
+    <div class="page-actions admin-only">
+      <label class="switch switch-success feature-switch" title="L’agent ne propose que les produits actifs de votre catalogue. Désactivé, il ne prend plus de commande.">
+        <input id="orders-enabled" type="checkbox" />
+        <span class="switch-track" aria-hidden="true"></span>
+        <span>Prise de commande par l’agent</span>
+      </label>
     </div>
-    <span id="orders-count" class="muted"></span>
+  </header>
+
+  <div id="orders-summary" class="summary-strip"></div>
+
+  <div class="toolbar orders-toolbar">
+    <div id="orders-filters" class="chips scroll-x orders-filters" role="group" aria-label="Filtrer par statut">
+      <button type="button" class="chip orders-filter active" data-filter="">Toutes<span class="chip-count"></span></button>
+      <button type="button" class="chip orders-filter" data-filter="NEW">Nouvelles<span class="chip-count"></span></button>
+      <button type="button" class="chip orders-filter" data-filter="UNPAID">À encaisser<span class="chip-count"></span></button>
+      <button type="button" class="chip orders-filter" data-filter="CONFIRMED">Confirmées<span class="chip-count"></span></button>
+      <button type="button" class="chip orders-filter" data-filter="DELIVERED">Livrées<span class="chip-count"></span></button>
+      <button type="button" class="chip orders-filter" data-filter="CANCELLED">Annulées<span class="chip-count"></span></button>
+    </div>
+    <div class="input-group toolbar-search">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-search"/></svg>
+      <input id="orders-search" type="search" placeholder="Rechercher un client ou un article" aria-label="Rechercher une commande" autocomplete="off" />
+    </div>
+    <span id="orders-count" class="toolbar-count" aria-live="polite"></span>
   </div>
 
-  <div id="orders-list" class="orders-list" aria-live="polite"></div>
+  <div id="orders-list" class="orders-list" aria-live="polite">
+    <div class="card skeleton-row"><span class="skeleton skeleton-circle"></span><span class="grow stack-sm"><span class="skeleton skeleton-line" style="width:30%"></span><span class="skeleton skeleton-line" style="width:55%"></span></span></div>
+    <div class="card skeleton-row"><span class="skeleton skeleton-circle"></span><span class="grow stack-sm"><span class="skeleton skeleton-line" style="width:35%"></span><span class="skeleton skeleton-line" style="width:50%"></span></span></div>
+    <div class="card skeleton-row"><span class="skeleton skeleton-circle"></span><span class="grow stack-sm"><span class="skeleton skeleton-line" style="width:25%"></span><span class="skeleton skeleton-line" style="width:60%"></span></span></div>
+  </div>
 </section>

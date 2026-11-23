@@ -2,23 +2,30 @@ import { api } from "../../services/api.js";
 import { $, escapeHtml } from "../../utils/dom.js";
 import { getState } from "../../state/store.js";
 import { onboardingSteps } from "./progress.js";
+import { icon } from "../../ui/icons.js";
 
 let navigate = () => {};
 let currentOrganization = null;
-let expanded = true;
+/** Sur téléphone le guide démarre replié : seule la prochaine étape est affichée, pour ne pas repousser tout le reste. */
+const startsExpanded = () => !window.matchMedia("(max-width: 767px)").matches;
+let expanded = startsExpanded();
 let lastCompletion = false;
+/** Le guide a été affiché avec une étape restante depuis l'ouverture : s'il se termine, on le montre terminé. */
+let sawIncomplete = false;
 let latestStatus = null;
 let requestVersion = 0;
 
+const isComplete = (status) => onboardingSteps(status).every((step) => step.done);
+
+/**
+ * Un démarrage déjà terminé à l'ouverture n'a plus rien à dire : le guide laisse la place à « À traiter ».
+ * Il revient de lui-même si une étape se défait (WhatsApp déconnecté, par exemple).
+ */
+const guideHidden = (status) => isComplete(status) && !sawIncomplete;
+
+/** Seul rappel permanent : l'agent est en pause (une suspension a son propre bandeau, sur toutes les pages). */
 function updateBanner(status) {
-  const title = $("#overview-agent-status-title"), description = $("#overview-agent-status-description");
-  if (!title || !description) return;
-  const text = status.suspended ? ["Votre agent est suspendu.", "Consultez le motif dans les réglages ou contactez le support."]
-    : !status.aiEnabled ? ["Votre agent est en pause.", "Activez les réponses automatiques dans les réglages de l’agent."]
-    : !status.whatsappConnected ? ["Connectez WhatsApp pour démarrer.", "Votre agent pourra répondre dès que votre numéro sera relié."]
-    : !status.profileComplete ? ["Complétez les informations de votre entreprise.", "Donnez à votre agent les informations nécessaires avant vos premiers échanges."]
-    : ["Votre agent est prêt à échanger.", "Envoyez une première question depuis un autre numéro pour vérifier sa réponse."];
-  title.textContent = text[0]; description.textContent = status.firstReplySent && status.aiEnabled && status.whatsappConnected && !status.suspended ? "Votre assistant a déjà répondu automatiquement sur WhatsApp." : text[1];
+  $(".status-banner")?.classList.toggle("hidden", status.aiEnabled || status.suspended);
 }
 
 function render(status) {
@@ -26,6 +33,7 @@ function render(status) {
   const steps = onboardingSteps(status);
   const done = steps.filter(step => step.done).length;
   const complete = done === steps.length;
+  if (!complete) sawIncomplete = true;
   if (complete && !lastCompletion) expanded = false;
   if (complete) $("#onboarding-first-help").classList.add("hidden");
   lastCompletion = complete;
@@ -37,31 +45,36 @@ function render(status) {
   $("#onboarding-progress").setAttribute("aria-valuetext", `${done} étapes sur ${steps.length}`);
   $("#onboarding-progress-fill").style.width = `${done * 25}%`;
   const toggle = $("#onboarding-toggle");
-  toggle.textContent = expanded ? "Réduire" : "Voir les étapes";
+  toggle.textContent = expanded ? "Réduire" : complete ? "Voir les étapes" : "Voir les 4 étapes";
   toggle.setAttribute("aria-expanded", String(expanded));
-  $("#onboarding-body").classList.toggle("hidden", !expanded);
-  $("#onboarding-steps").innerHTML = steps.map((step, index) => `<li class="onboarding-step${step.done ? " done" : ""}${next?.id === step.id ? " next" : ""}">
-    <span class="onboarding-number" aria-hidden="true">${step.done ? "✓" : index + 1}</span>
-    <div><h3>${escapeHtml(step.title)}</h3><p>${escapeHtml(step.description)}</p><span class="onboarding-state">${step.done ? "Validée" : next?.id === step.id ? "Prochaine étape" : "À faire"}</span></div>
-    <button type="button" class="ghost-button" data-onboarding-action="${step.id}">${step.done ? "Consulter" : escapeHtml(step.action)}</button>
-  </li>`).join("");
+  // Replié et pas terminé : on garde la prochaine étape visible, c'est la seule chose à faire maintenant.
+  $("#onboarding-body").classList.toggle("hidden", !expanded && complete);
+  $("#onboarding-body").classList.toggle("only-next", !expanded && !complete);
+  $("#onboarding-steps").innerHTML = steps.map((step, index) => {
+    const isNext = next?.id === step.id;
+    const state = step.done ? '<span class="badge success onboarding-state">Validée</span>' : isNext ? '<span class="badge info onboarding-state">Prochaine étape</span>' : '<span class="badge neutral onboarding-state">À faire</span>';
+    return `<li class="onboarding-step${step.done ? " done" : ""}${isNext ? " next" : ""}">
+    <span class="onboarding-number" aria-hidden="true">${step.done ? icon("check") : index + 1}</span>
+    <div class="onboarding-step-text"><h3>${escapeHtml(step.title)}</h3><p>${escapeHtml(step.description)}</p></div>
+    ${state}
+    <button type="button" class="btn btn-sm ${isNext ? "btn-primary" : "btn-secondary"}" data-onboarding-action="${step.id}">${step.done ? "Consulter" : escapeHtml(step.action)}</button>
+  </li>`;
+  }).join("");
   $("#onboarding-note").textContent = status.suspended ? "L’agent est suspendu. Consultez le support avant votre essai WhatsApp."
     : !status.aiEnabled ? "Votre agent est en pause. Activez ses réponses automatiques pour recevoir une première réponse."
     : "Les étapes se valident automatiquement à partir de votre configuration et de vos échanges réels.";
   $("#onboarding-error").classList.add("hidden");
-  panel.classList.remove("hidden");
+  panel.classList.toggle("hidden", guideHidden(status));
   updateBanner(status);
-  // Tant que le guide est affiché et incomplet, la bannière répéterait l'étape en cours (« Connectez WhatsApp… ») :
-  // on ne la montre que si elle dit quelque chose de plus (agent en pause ou suspendu), ou une fois le démarrage terminé.
-  $(".status-banner")?.classList.toggle("hidden", !(complete || status.suspended || !status.aiEnabled));
 }
 
 export async function refreshOnboarding() {
   const panel = $("#onboarding-guide");
   const organizationId = getState().organizationId;
-  if (!panel || !organizationId || document.body.classList.contains("role-agent")) { panel?.classList.add("hidden"); return; }
+  // Un employé ne règle pas l'agent : ni guide, ni rappel de pause (y compris après un changement de compte).
+  if (!panel || !organizationId || document.body.classList.contains("role-agent")) { panel?.classList.add("hidden"); $(".status-banner")?.classList.add("hidden"); return; }
   if (currentOrganization !== organizationId) {
-    currentOrganization = organizationId; latestStatus = null; expanded = true; lastCompletion = false;
+    currentOrganization = organizationId; latestStatus = null; expanded = startsExpanded(); lastCompletion = false; sawIncomplete = false;
     panel.classList.add("hidden");
     $("#onboarding-first-help").classList.add("hidden");
   }
@@ -73,10 +86,12 @@ export async function refreshOnboarding() {
     const unchanged = latestStatus && Object.keys(onboarding).every(key => latestStatus[key] === onboarding[key]);
     latestStatus = onboarding;
     if (!unchanged) render(onboarding);
-    else { $("#onboarding-error").classList.add("hidden"); panel.classList.remove("hidden"); }
+    else { $("#onboarding-error").classList.add("hidden"); panel.classList.toggle("hidden", guideHidden(onboarding)); }
   } catch (error) {
     if (version !== requestVersion || organizationId !== getState().organizationId) return;
     if (error.status === 401 || error.status === 403) { panel.classList.add("hidden"); return; }
+    // Guide déjà masqué (démarrage terminé) : une actualisation ratée ne le fait pas réapparaître avec une erreur.
+    if (latestStatus && guideHidden(latestStatus)) return;
     panel.classList.remove("hidden");
     const errorBox = $("#onboarding-error");
     errorBox.textContent = "Impossible d’actualiser la progression. Vos informations restent enregistrées. Réessayez dans un instant.";

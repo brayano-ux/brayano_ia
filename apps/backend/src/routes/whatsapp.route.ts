@@ -66,7 +66,7 @@ export async function whatsappRoute(app: FastifyInstance) {
     return `
       <html>
         <body style="display:flex;flex-direction:column;align-items:center;font-family:sans-serif;">
-          <h2>Scanne avec WhatsApp &gt; Appareils liés &gt; Lier un appareil</h2>
+          <h2>Scanne avec WhatsApp &gt; Appareils connectés &gt; Connecter un appareil</h2>
           <img src="${qr}" style="width:300px;height:300px;" />
           <p>Cette page se rafraîchit automatiquement toutes les 20 secondes.</p>
         </body>

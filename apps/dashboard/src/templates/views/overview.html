@@ -1,175 +1,157 @@
-<!-- VIEW: OVERVIEW -->
+<!-- VUE : ACCUEIL — ce qu'il y a à faire maintenant, puis les résultats de la période choisie. -->
 <section id="overview-view" class="view">
-  <div class="page-heading">
+  <header class="page-header">
     <div>
       <p id="overview-date" class="eyebrow">Aujourd'hui</p>
-      <h1>Bonjour, <span id="company-greeting">Bienvenue</span></h1>
-      <p class="muted">Voici ce qui se passe dans votre espace aujourd'hui.</p>
+      <h1 class="page-title" id="company-greeting">Bonjour</h1>
+      <p class="page-subtitle" id="overview-subtitle">Voici ce qui demande votre attention et ce que votre agent a accompli.</p>
     </div>
-    <div class="page-actions admin-only">
-      <button type="button" class="export-button" id="export-prospects">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
-        Exporter les prospects
+    <!-- Sur téléphone, cette action secondaire est proposée dans les raccourcis, en bas de page. -->
+    <div class="page-actions only-desktop">
+      <button type="button" class="btn btn-secondary" id="export-prospects">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"/></svg>
+        <span>Exporter les prospects</span>
       </button>
     </div>
+  </header>
+
+  <!-- Agent en pause : rappelé ici tant que les réponses automatiques sont coupées (la suspension a son propre bandeau). -->
+  <div class="status-banner alert warning hidden" role="status">
+    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-pause"/></svg>
+    <div class="alert-body status-text">
+      <p class="alert-title">Votre agent est en pause.</p>
+      <p>Il ne répond à aucun client pour le moment. Réactivez « Réponses automatiques » dans la page Agent IA.</p>
+    </div>
+    <div class="alert-actions admin-only"><button type="button" class="btn btn-sm btn-secondary" data-view-target="agent">Ouvrir l'agent</button></div>
   </div>
 
-  <section id="onboarding-guide" class="panel onboarding-guide admin-only hidden" aria-labelledby="onboarding-summary">
-    <div class="onboarding-heading"><div><p class="eyebrow">BIEN DÉMARRER</p><h2 id="onboarding-summary">Votre assistant, prêt en 4 étapes</h2><p id="onboarding-count" class="muted" aria-live="polite">Chargement de votre progression…</p></div><div class="onboarding-help-actions"><button id="onboarding-retry" type="button" class="text-button">Actualiser</button><button id="onboarding-toggle" type="button" class="text-button" aria-controls="onboarding-body" aria-expanded="true">Réduire</button></div></div>
-    <div id="onboarding-progress" class="onboarding-progress" role="progressbar" aria-label="Progression du démarrage" aria-valuemin="0" aria-valuemax="4" aria-valuenow="0"><span id="onboarding-progress-fill"></span></div>
+  <!-- Guide de démarrage : 4 étapes validées automatiquement par le serveur. -->
+  <section id="onboarding-guide" class="card onboarding-guide admin-only hidden" aria-labelledby="onboarding-summary">
+    <div class="onboarding-heading">
+      <span class="icon-tile icon-tile-lg primary-tile" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><use href="#i-rocket"/></svg></span>
+      <div class="onboarding-heading-text">
+        <h2 id="onboarding-summary" class="card-title">Votre assistant, prêt en 4 étapes</h2>
+        <p id="onboarding-count" class="muted" aria-live="polite">Chargement de votre progression…</p>
+      </div>
+      <div class="onboarding-help-actions">
+        <button id="onboarding-retry" type="button" class="btn btn-sm btn-ghost"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-refresh"/></svg>Actualiser</button>
+        <button id="onboarding-toggle" type="button" class="btn btn-sm btn-ghost" aria-controls="onboarding-body" aria-expanded="true">Réduire</button>
+      </div>
+    </div>
+    <div id="onboarding-progress" class="onboarding-progress progress" role="progressbar" aria-label="Progression du démarrage" aria-valuemin="0" aria-valuemax="4" aria-valuenow="0"><span id="onboarding-progress-fill"></span></div>
     <p id="onboarding-error" class="onboarding-error hidden" role="status"></p>
-    <div id="onboarding-body"><ol id="onboarding-steps" class="onboarding-steps"></ol><p id="onboarding-note" class="muted"></p></div>
-    <div id="onboarding-first-help" class="onboarding-first-help hidden" tabindex="-1"><h3>Essayez depuis un autre numéro</h3><p>Depuis le téléphone d’un proche ou un autre numéro WhatsApp, envoyez une question au numéro que vous avez relié. Laissez l’agent répondre, puis revenez ici. Un message écrit manuellement ou une réponse du testeur ne valide pas cette étape.</p><div class="onboarding-help-actions"><button id="onboarding-open-inbox" type="button" class="ghost-button">Ouvrir les conversations</button><button id="onboarding-refresh" type="button" class="primary">Vérifier ma progression</button></div></div>
+    <div id="onboarding-body"><ol id="onboarding-steps" class="onboarding-steps"></ol><p id="onboarding-note" class="muted onboarding-note"></p></div>
+    <div id="onboarding-first-help" class="onboarding-first-help hidden" tabindex="-1">
+      <h3>Essayez depuis un autre numéro</h3>
+      <p>Depuis le téléphone d’un proche ou un autre numéro WhatsApp, envoyez une question au numéro que vous avez relié. Laissez l’agent répondre, puis revenez ici. Un message écrit manuellement ou une réponse du testeur ne valide pas cette étape.</p>
+      <div class="onboarding-help-actions"><button id="onboarding-open-inbox" type="button" class="btn btn-secondary">Ouvrir les conversations</button><button id="onboarding-refresh" type="button" class="btn btn-primary">Vérifier ma progression</button></div>
+    </div>
   </section>
 
-  <div class="status-banner">
-    <span class="status-icon" aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 3v4"/><path d="M21 5h-4"/></svg>
-    </span>
-    <div class="status-text">
-      <strong id="overview-agent-status-title">Votre espace est prêt.</strong>
-      <p id="overview-agent-status-description">Vérifiez la configuration de votre agent et la connexion WhatsApp.</p>
-    </div>
-    <button class="text-button admin-only" data-view-target="agent">
-      Configurer l'agent
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-    </button>
+  <!-- Maintenant : ce qui attend une action, et les derniers échanges. -->
+  <div class="overview-now">
+    <section class="card todo-card" aria-labelledby="todo-title">
+      <header class="card-header">
+        <div>
+          <h2 class="card-title" id="todo-title">À traiter</h2>
+          <p class="card-subtitle" id="todo-subtitle">Ce qui attend une action de votre part.</p>
+        </div>
+        <span class="count" id="todo-count" hidden>0</span>
+      </header>
+      <div id="todo-list" class="todo-list" aria-live="polite">
+        <div class="skeleton-row"><span class="skeleton skeleton-circle"></span><span class="grow stack-sm"><span class="skeleton skeleton-line" style="width:55%"></span><span class="skeleton skeleton-line" style="width:35%"></span></span></div>
+        <div class="skeleton-row"><span class="skeleton skeleton-circle"></span><span class="grow stack-sm"><span class="skeleton skeleton-line" style="width:45%"></span><span class="skeleton skeleton-line" style="width:30%"></span></span></div>
+        <div class="skeleton-row"><span class="skeleton skeleton-circle"></span><span class="grow stack-sm"><span class="skeleton skeleton-line" style="width:60%"></span><span class="skeleton skeleton-line" style="width:25%"></span></span></div>
+      </div>
+    </section>
+
+    <section class="card recent-card" aria-labelledby="recent-title">
+      <header class="card-header">
+        <div>
+          <h2 class="card-title" id="recent-title">Dernières conversations</h2>
+          <p class="card-subtitle">Les échanges les plus récents avec vos clients.</p>
+        </div>
+        <a class="card-link" href="#/conversations" data-view-target="inbox">Tout voir<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+      </header>
+      <div id="recent-conversations" class="conversation-list">
+        <div class="skeleton-row"><span class="skeleton skeleton-circle"></span><span class="grow stack-sm"><span class="skeleton skeleton-line" style="width:40%"></span><span class="skeleton skeleton-line" style="width:70%"></span></span></div>
+        <div class="skeleton-row"><span class="skeleton skeleton-circle"></span><span class="grow stack-sm"><span class="skeleton skeleton-line" style="width:50%"></span><span class="skeleton skeleton-line" style="width:60%"></span></span></div>
+        <div class="skeleton-row"><span class="skeleton skeleton-circle"></span><span class="grow stack-sm"><span class="skeleton skeleton-line" style="width:35%"></span><span class="skeleton skeleton-line" style="width:75%"></span></span></div>
+        <div class="skeleton-row"><span class="skeleton skeleton-circle"></span><span class="grow stack-sm"><span class="skeleton skeleton-line" style="width:45%"></span><span class="skeleton skeleton-line" style="width:55%"></span></span></div>
+      </div>
+    </section>
   </div>
 
-  <div class="metrics">
-    <article class="metric-card">
-      <span class="metric-icon violet" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      </span>
+  <!-- Résultats : tout ce qui suit dépend de la période choisie ici. -->
+  <section class="stats-panel" aria-labelledby="stats-title">
+    <header class="section-header">
       <div>
-        <small>Conversations actives</small>
-        <strong id="metric-active">—</strong>
-        <span class="trend live">En temps réel</span>
-      </div>
-    </article>
-
-    <article class="metric-card">
-      <span class="metric-icon green" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 7 17l-5-5"/><path d="m22 10-7.5 7.5L13 16"/></svg>
-      </span>
-      <div>
-        <small>Clients à traiter</small>
-        <strong id="metric-todo">—</strong>
-        <span id="metric-todo-hint" class="trend">Nouveaux messages, prises de main, paiements</span>
-      </div>
-    </article>
-
-    <article class="metric-card">
-      <span class="metric-icon orange" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>
-      </span>
-      <div>
-        <small>Statut WhatsApp</small>
-        <strong id="metric-whatsapp">—</strong>
-        <span id="metric-phone" class="trend">Connexion requise</span>
-      </div>
-    </article>
-  </div>
-
-
-  <section class="panel stats-panel" aria-labelledby="stats-title">
-    <div class="panel-heading">
-      <div>
-        <h2 id="stats-title">Ce que votre agent a fait</h2>
+        <h2 class="section-title" id="stats-title">Vos résultats</h2>
         <p class="muted" id="stats-subtitle">Chiffres calculés sur vos vraies conversations.</p>
       </div>
-      <div class="panel-tools">
-        <label class="metric-filter">
-          <span>Période</span>
-          <select id="stats-period">
-            <option value="1">Aujourd'hui</option>
-            <option value="7" selected>7 derniers jours</option>
-            <option value="30">30 derniers jours</option>
-          </select>
-        </label>
+      <div class="segmented" id="stats-period" role="group" aria-label="Période">
+        <button type="button" data-period="1">Aujourd'hui</button>
+        <button type="button" data-period="7" class="active" aria-pressed="true">7 jours</button>
+        <button type="button" data-period="30">30 jours</button>
+      </div>
+    </header>
+    <div id="stats-body" class="stats-body">
+      <div class="kpi-grid">
+        <div class="card kpi-card"><span class="skeleton skeleton-line" style="width:50%"></span><span class="skeleton" style="height:30px;width:40%;margin-top:14px"></span><span class="skeleton skeleton-line" style="width:65%;margin-top:14px"></span></div>
+        <div class="card kpi-card"><span class="skeleton skeleton-line" style="width:50%"></span><span class="skeleton" style="height:30px;width:40%;margin-top:14px"></span><span class="skeleton skeleton-line" style="width:65%;margin-top:14px"></span></div>
+        <div class="card kpi-card"><span class="skeleton skeleton-line" style="width:50%"></span><span class="skeleton" style="height:30px;width:40%;margin-top:14px"></span><span class="skeleton skeleton-line" style="width:65%;margin-top:14px"></span></div>
+        <div class="card kpi-card"><span class="skeleton skeleton-line" style="width:50%"></span><span class="skeleton" style="height:30px;width:40%;margin-top:14px"></span><span class="skeleton skeleton-line" style="width:65%;margin-top:14px"></span></div>
       </div>
     </div>
-    <div id="stats-body" class="stats-body"><div class="empty-state">Chargement…</div></div>
   </section>
 
-  <div class="panel commercial-panel hidden">
-    <div class="panel-heading">
+  <section class="card commercial-panel hidden" aria-labelledby="commercial-title">
+    <header class="card-header">
       <div>
-        <h2>Messages reçus par commercial</h2>
-        <p class="muted">Suivez le volume reçu par chaque commercial selon la période.</p>
+        <h2 class="card-title" id="commercial-title">Messages reçus par commercial</h2>
+        <p class="card-subtitle">Volume reçu par chaque commercial selon la période.</p>
       </div>
-      <div class="panel-tools">
-        <label class="metric-filter">
-          <span>Période</span>
-          <select id="commercial-period">
-            <option value="today">Aujourd'hui</option>
-            <option value="7d">7 derniers jours</option>
-            <option value="30d">30 derniers jours</option>
-            <option value="all">Tout</option>
-          </select>
-        </label>
-      </div>
-    </div>
+      <label class="inline-select">
+        <span class="sr-only">Période</span>
+        <select id="commercial-period">
+          <option value="today">Aujourd'hui</option>
+          <option value="7d">7 derniers jours</option>
+          <option value="30d">30 derniers jours</option>
+          <option value="all">Depuis le début</option>
+        </select>
+      </label>
+    </header>
     <div id="commercial-metrics-list" class="commercial-list"></div>
-  </div>
+  </section>
 
-  <div class="content-grid">
-    <section class="panel">
-      <div class="panel-heading">
-        <div>
-          <h2>Conversations récentes</h2>
-          <p class="muted">Les derniers échanges avec vos contacts</p>
-        </div>
-        <button class="ghost-button" data-view-target="inbox">
-          Voir tout
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
-        </button>
-      </div>
-      <div id="recent-conversations" class="conversation-list">
-        <div class="empty-state">Chargement des conversations...</div>
-      </div>
-    </section>
-
-    <section class="panel quick-panel">
-      <div class="panel-heading">
-        <div>
-          <h2>Actions rapides</h2>
-          <p class="muted">Gérez votre espace en quelques clics</p>
-        </div>
-      </div>
-
-      <button class="quick-action admin-only" data-view-target="products">
-        <span class="quick-icon green-bg" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
-        </span>
-        <div>
-          <strong>Ajouter un produit</strong>
-          <small>Avec sa photo, pour que l'agent la partage</small>
-        </div>
-        <svg class="quick-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+  <section class="quick-panel" aria-labelledby="quick-title">
+    <h2 class="section-title" id="quick-title">Raccourcis</h2>
+    <div class="quick-grid">
+      <button type="button" class="card quick-action admin-only" data-quick="product">
+        <span class="icon-tile success" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><use href="#i-package"/></svg></span>
+        <span class="quick-text"><strong>Ajouter un produit</strong><small>Avec sa photo, pour que l'agent la partage</small></span>
+        <svg class="icon icon-sm quick-chevron" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron-right"/></svg>
       </button>
-
-      <button class="quick-action admin-only" data-view-target="agent">
-        <span class="quick-icon violet-bg" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 3v4"/><path d="M21 5h-4"/></svg>
-        </span>
-        <div>
-          <strong>Personnaliser l'agent</strong>
-          <small>Adaptez ses réponses à votre activité</small>
-        </div>
-        <svg class="quick-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+      <button type="button" class="card quick-action admin-only" data-quick="test">
+        <span class="icon-tile violet" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><use href="#i-circle-play"/></svg></span>
+        <span class="quick-text"><strong>Tester mon agent</strong><small>Posez-lui une question comme un client</small></span>
+        <svg class="icon icon-sm quick-chevron" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron-right"/></svg>
       </button>
-
-      <button class="quick-action" data-view-target="inbox">
-        <span class="quick-icon orange-bg" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
-        </span>
-        <div>
-          <strong>Ouvrir la boîte de réception</strong>
-          <small>Répondez aux demandes importantes</small>
-        </div>
-        <svg class="quick-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+      <button type="button" class="card quick-action admin-only" data-view-target="broadcasts">
+        <span class="icon-tile warning" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><use href="#i-megaphone"/></svg></span>
+        <span class="quick-text"><strong>Envoyer une annonce</strong><small>Un message à tous vos clients</small></span>
+        <svg class="icon icon-sm quick-chevron" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron-right"/></svg>
       </button>
-    </section>
-  </div>
+      <button type="button" class="card quick-action" data-view-target="inbox">
+        <span class="icon-tile primary-tile" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><use href="#i-chats"/></svg></span>
+        <span class="quick-text"><strong>Répondre à un client</strong><small>Ouvrir toutes les conversations</small></span>
+        <svg class="icon icon-sm quick-chevron" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron-right"/></svg>
+      </button>
+      <button type="button" class="card quick-action quick-export" data-quick="export">
+        <span class="icon-tile" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><use href="#i-download"/></svg></span>
+        <span class="quick-text"><strong>Exporter les prospects</strong><small>Un fichier de tous vos clients</small></span>
+        <svg class="icon icon-sm quick-chevron" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron-right"/></svg>
+      </button>
+    </div>
+  </section>
 </section>

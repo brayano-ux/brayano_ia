@@ -1,59 +1,78 @@
-<!-- VIEW: BROADCASTS -->
+<!-- VUE : MESSAGES GROUPÉS — une annonce à plusieurs clients, avec des garde-fous pour protéger le numéro. -->
 <section id="broadcasts-view" class="view hidden">
-  <div class="page-heading">
+  <header class="page-header">
     <div>
-      <p class="eyebrow">COMMUNICATION</p>
-      <h1>Messages groupés</h1>
-      <p class="muted">Envoyez une annonce (promotion, nouveau produit, horaires) à vos clients, sans risquer de faire bloquer votre numéro.</p>
+      <h1 class="page-title">Messages groupés</h1>
+      <p class="page-subtitle">Envoyez une annonce (promotion, nouveauté, horaires) à vos clients, sans risquer de faire bloquer votre numéro.</p>
     </div>
-  </div>
-
-  <div class="panel broadcast-safety">
-    <strong>🛡️ Pour protéger votre numéro WhatsApp</strong>
-    <ul>
-      <li>Seuls les clients qui vous ont <b>déjà écrit</b> récemment sont contactés.</li>
-      <li>Un client qui écrit « STOP » n’est plus jamais contacté. La mention est ajoutée automatiquement à chaque message.</li>
-      <li>Les messages partent <b>par lots de <span id="bc-max-per">50</span> personnes</b> au maximum, avec <b id="bc-max-day">100</b> messages par 24 h, envoyés lentement, un à un. Si votre groupe est plus grand, renvoyez le même message : il part au lot suivant, sans doublon.</li>
-    </ul>
-  </div>
+  </header>
 
   <div class="broadcast-layout">
-    <form id="broadcast-form" class="panel broadcast-form">
-      <h2>Nouvel envoi</h2>
-      <fieldset class="broadcast-audience">
-        <legend class="field-label">À qui l’envoyer ?</legend>
-        <div id="bc-stages" class="broadcast-stages">
-          <label><input type="checkbox" value="NEW" /> Nouveaux</label>
-          <label><input type="checkbox" value="INTERESTED" /> Intéressés</label>
-          <label><input type="checkbox" value="ORDERED" /> Ont commandé</label>
-          <label><input type="checkbox" value="CALLBACK" /> À rappeler</label>
-        </div>
-        <p class="field-hint">Ne cochez rien pour viser tous vos clients éligibles.</p>
-        <label class="bc-window">
-          <span class="field-label">Clients qui ont écrit depuis</span>
-          <select id="bc-window">
-            <option value="7">7 jours</option>
-            <option value="14">14 jours</option>
-            <option value="30" selected>30 jours</option>
-            <option value="60">60 jours</option>
-          </select>
+    <form id="broadcast-form" class="card broadcast-form">
+      <section class="broadcast-step">
+        <div class="step-head"><span class="step-number">1</span><div><h2>À qui l’envoyer ?</h2><p>Ne cochez rien pour viser tous vos clients qui vous ont écrit récemment.</p></div></div>
+        <fieldset class="broadcast-audience form-grid">
+          <legend class="sr-only">Clients concernés</legend>
+          <div id="bc-stages" class="check-grid broadcast-stages">
+            <label class="check-card"><input type="checkbox" value="NEW" /><span>Nouveaux</span></label>
+            <label class="check-card"><input type="checkbox" value="INTERESTED" /><span>Intéressés</span></label>
+            <label class="check-card"><input type="checkbox" value="ORDERED" /><span>Ont commandé</span></label>
+            <label class="check-card"><input type="checkbox" value="CALLBACK" /><span>À rappeler</span></label>
+          </div>
+          <label class="field bc-window">
+            <span class="field-label">Clients qui vous ont écrit depuis</span>
+            <select id="bc-window">
+              <option value="7">7 jours</option>
+              <option value="14">14 jours</option>
+              <option value="30" selected>30 jours</option>
+              <option value="60">60 jours</option>
+            </select>
+          </label>
+        </fieldset>
+      </section>
+
+      <section class="broadcast-step">
+        <div class="step-head"><span class="step-number">2</span><div><h2>Votre message</h2><p>Court, clair, avec une invitation à répondre.</p></div></div>
+        <label class="field">
+          <span class="field-label sr-only">Votre message</span>
+          <textarea id="bc-text" rows="6" maxlength="1000" placeholder="Ex. Bonjour 👋 Cette semaine, -10 % sur tous nos sacs. Répondez à ce message pour commander."></textarea>
+          <span class="agent-counter" id="bc-counter">0 / 1000 caractères</span>
         </label>
-      </fieldset>
-      <div id="bc-preview" class="broadcast-preview" aria-live="polite">Calcul du nombre de destinataires…</div>
-      <label>
-        <span class="field-label">Votre message</span>
-        <textarea id="bc-text" rows="6" maxlength="1000" placeholder="Ex. Bonjour 👋 Cette semaine, -10 % sur tous nos sacs. Répondez à ce message pour commander."></textarea>
-        <span class="agent-counter" id="bc-counter">0 / 1000 caractères</span>
-      </label>
-      <p class="field-hint">Ajouté automatiquement à la fin : une phrase invitant à répondre STOP pour ne plus recevoir vos messages (sa formulation varie d’un client à l’autre, pour ne pas envoyer un texte strictement identique à tous).</p>
-      <div class="form-actions">
-        <button type="submit" class="primary" id="bc-send">Envoyer</button>
-      </div>
+        <p class="tip"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-info"/></svg><span>Une phrase invitant à répondre STOP est ajoutée automatiquement à la fin. Sa formulation varie d’un client à l’autre, pour ne pas envoyer un texte strictement identique à tous.</span></p>
+      </section>
+
+      <section class="broadcast-step">
+        <div class="step-head"><span class="step-number">3</span><div><h2>Vérifier et envoyer</h2><p>L’envoi part lentement, un message à la fois. Il ne peut pas être rappelé.</p></div></div>
+        <div id="bc-preview" class="broadcast-preview" aria-live="polite">Calcul du nombre de destinataires…</div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary btn-lg" id="bc-send">Envoyer</button>
+        </div>
+      </section>
     </form>
 
-    <section class="panel broadcast-history">
-      <h2>Derniers envois</h2>
-      <div id="bc-list" class="bc-list" aria-live="polite"><div class="empty-state">Chargement…</div></div>
-    </section>
+    <aside class="broadcast-side">
+      <section class="card phone-preview" aria-label="Aperçu du message sur WhatsApp">
+        <header class="phone-preview-head"><span class="avatar avatar-sm avatar-brand" id="bc-preview-avatar">B</span><div><strong id="bc-preview-name">Votre entreprise</strong><small>Aperçu sur WhatsApp</small></div></header>
+        <div class="phone-preview-body">
+          <div class="phone-bubble"><span id="bc-preview-text" class="phone-bubble-text is-placeholder">Votre message apparaîtra ici.</span><span class="phone-bubble-stop">Pour ne plus recevoir nos messages, répondez STOP.</span><time>maintenant</time></div>
+        </div>
+      </section>
+
+      <section class="card card-pad broadcast-safety">
+        <h2 class="card-title"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-shield"/></svg>Votre numéro est protégé</h2>
+        <ul>
+          <li>Seuls les clients qui vous ont <b>déjà écrit</b> récemment sont contactés.</li>
+          <li>Un client qui écrit « STOP » n’est plus jamais contacté.</li>
+          <li>Les messages partent <b>par lots de <span id="bc-max-per">50</span> personnes</b> au maximum, <b id="bc-max-day">100</b> par 24 h, envoyés lentement. Si votre groupe est plus grand, renvoyez le même message : il part au lot suivant, sans doublon.</li>
+        </ul>
+      </section>
+    </aside>
   </div>
+
+  <section class="broadcast-history" aria-labelledby="bc-history-title">
+    <h2 class="section-title" id="bc-history-title">Derniers envois</h2>
+    <div id="bc-list" class="bc-list" aria-live="polite">
+      <div class="card skeleton-row"><span class="grow stack-sm"><span class="skeleton skeleton-line" style="width:20%"></span><span class="skeleton skeleton-line" style="width:70%"></span></span></div>
+    </div>
+  </section>
 </section>

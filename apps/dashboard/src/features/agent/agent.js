@@ -7,6 +7,9 @@ import { initLearning, loadLearning } from "./learning.js";
 import { initHoursSettings, fillHoursSettings, readHoursSettings, hoursSnapshot, validateHours, validateNegotiation } from "./hours-settings.js";
 import { initShopLocation, fillShopLocation, readShopLocation, shopLocationSnapshot } from "./shop-location.js";
 import { initTester } from "./tester.js";
+import { confirmDialog } from "../../ui/confirm.js";
+import { closeDrawer, isDrawerOpen, openDrawer } from "../../ui/drawer.js";
+import { icon } from "../../ui/icons.js";
 
 /**
  * Feature "Agent IA" : configuration de la base de connaissances
@@ -19,7 +22,7 @@ function renderCustomQualificationFields(fields = []) {
     .filter((field) => !APP_CONFIG.standardQualificationFields.includes(field))
     .map((field) => {
       const label = field.replace(/[_-]+/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
-      return `<label><input type="checkbox" class="custom-qualification-field" value="${escapeHtml(field)}" checked /> ${escapeHtml(label)}</label>`;
+      return `<label class="check-card"><input type="checkbox" class="custom-qualification-field" value="${escapeHtml(field)}" checked /><span>${escapeHtml(label)}</span></label>`;
     })
     .join("");
 }
@@ -68,6 +71,7 @@ async function saveSettings(event) {
   }
   const saveButton = $("#save-agent");
   saveButton.disabled = true;
+  saveButton.classList.add("is-loading");
   try {
     const standardFields = $$('input[name="qualification-field"]:checked').map((input) => input.value);
     const customFields = $$(".custom-qualification-field:checked").map((input) => input.value);
@@ -95,6 +99,7 @@ async function saveSettings(event) {
     showToast(error.message, "error");
   } finally {
     saveButton.disabled = false;
+    saveButton.classList.remove("is-loading");
   }
 }
 
@@ -156,6 +161,14 @@ function markClean() {
   $("#agent-dirty").classList.add("hidden");
 }
 
+/**
+ * L'utilisateur quitte la page sans enregistrer (ou sa session se termine) : il n'y a plus de modification en
+ * attente. Les réglages enregistrés sont rechargés à la prochaine ouverture de la page.
+ */
+export function discardAgentChanges() {
+  markClean();
+}
+
 function setActiveTab(tab) {
   $$(".agent-tab").forEach((button) => {
     const active = button.dataset.agentTab === tab;
@@ -163,13 +176,28 @@ function setActiveTab(tab) {
     button.setAttribute("aria-selected", String(active));
   });
   $$(".agent-pane").forEach((pane) => pane.classList.toggle("hidden", pane.dataset.agentPane !== tab));
+  // Sur téléphone la barre d'onglets défile : l'onglet choisi reste visible.
+  $(`.agent-tab[data-agent-tab="${tab}"]`)?.scrollIntoView({ block: "nearest", inline: "center" });
   // L'onglet « Apprentissage » est hors du formulaire principal : on cache alors le formulaire (sinon il reste une carte vide).
   $("#agent-form").classList.toggle("hidden", tab === "learning");
 }
 
+/** Le testeur est une colonne sur grand écran, un panneau à ouvrir sur les écrans plus petits. */
+function testerIsPanel() {
+  return window.matchMedia("(max-width: 1179px)").matches;
+}
+
+export function openTester() {
+  if (testerIsPanel()) openDrawer($("#agent-tester"), { focus: "#agent-test-input" });
+  else $("#agent-test-input")?.focus();
+}
+
 export function openAgentSection(tab, focusSelector) {
   setActiveTab(tab);
-  if (focusSelector) $(focusSelector)?.focus();
+  if (!focusSelector) return;
+  const target = $(focusSelector);
+  if (target?.closest("#agent-tester")) openTester();
+  else target?.focus();
 }
 
 function focusInvalid(tab, selector, message) {
@@ -192,7 +220,7 @@ function refreshAgentChrome() {
 
   const pill = $("#agent-hero-status");
   const suspended = toggle.disabled;
-  pill.className = `agent-status-pill ${suspended ? "off" : toggle.checked ? "on" : "paused"}`;
+  pill.className = `agent-status-pill badge ${suspended ? "danger" : toggle.checked ? "success" : "warning"}`;
   pill.textContent = suspended ? "Suspendu" : toggle.checked ? "Actif" : "En pause";
 
   $$("[data-counter-for]").forEach((counter) => {
@@ -224,9 +252,12 @@ function renderCompleteness() {
   $("#agent-meter").setAttribute("aria-valuenow", String(percent));
   $("#agent-meter-fill").style.width = `${percent}%`;
   const list = $("#agent-checklist");
-  list.innerHTML = checks
-    .map((check, index) => `<li class="${check.done ? "done" : ""}"><button type="button" data-check-tab="${check.tab}" data-check-index="${index}">${check.done ? "✓" : "○"} ${escapeHtml(check.label)}</button></li>`)
-    .join("");
+  // Seul ce qui reste à faire est listé : une configuration terminée se résume en une ligne.
+  const remaining = checks.filter((check) => !check.done);
+  list.innerHTML = remaining.length
+    ? remaining.map((check) => `<li><button type="button" data-check-tab="${check.tab}">${icon("circle-dot", "icon-sm")}<span>${escapeHtml(check.label)}</span>${icon("chevron-right", "icon-xs")}</button></li>`).join("")
+    : `<li class="done">${icon("check-circle", "icon-sm")}<span>Tout est renseigné : votre agent a ce qu'il lui faut pour répondre.</span></li>`;
+  $("#agent-meter").classList.toggle("success", !remaining.length);
   $$("[data-check-tab]", list).forEach((button) => {
     button.onclick = () => setActiveTab(button.dataset.checkTab);
   });
@@ -238,7 +269,7 @@ async function loadFeatureStates() {
     const element = $(id);
     if (!element) return;
     element.textContent = text;
-    element.className = `agent-feature-state ${on === null ? "" : on ? "on" : "off"}`.trim();
+    element.className = `agent-feature-state badge ${on ? "success" : "neutral"}`;
   };
   const [products, appointments, orders] = await Promise.allSettled([
     api(`${base}/products`),
@@ -255,19 +286,20 @@ async function loadFeatureStates() {
   else setState_("#feature-orders-state", "—", null);
 }
 
-function applyTemplate() {
+async function applyTemplate() {
   const select = $("#agent-template");
   const key = select.value;
   select.value = "";
   if (!key || !TEMPLATES[key]) return;
   const field = $("#system-prompt");
-  if (field.value.trim() && !window.confirm("Remplacer les instructions actuelles par ce modèle ?")) return;
+  if (field.value.trim() && !(await confirmDialog({ title: "Remplacer vos instructions ?", message: "Le modèle remplace le texte actuel des instructions. Rien n'est enregistré tant que vous ne cliquez pas sur « Enregistrer ».", confirmLabel: "Utiliser le modèle" }))) return;
   field.value = TEMPLATES[key];
   field.dispatchEvent(new Event("input", { bubbles: true }));
   showToast("Modèle appliqué. Adaptez-le puis enregistrez.", "success");
 }
 
 function initAgentChrome() {
+  document.addEventListener("brayano:session-ended", discardAgentChanges);
   $("#agent-form").noValidate = true;
   $$(".agent-tab").forEach((button) => {
     button.onclick = () => setActiveTab(button.dataset.agentTab);
@@ -278,7 +310,16 @@ function initAgentChrome() {
   ["input", "change"].forEach((type) => $("#agent-view").addEventListener(type, (event) => {
     if (event.target.closest("#agent-form") || event.target.id === "global-ai-enabled") refreshAgentChrome();
   }));
-  $("#agent-template").onchange = applyTemplate;
+  $("#agent-template").onchange = () => void applyTemplate();
+  $("#agent-test-open").onclick = openTester;
+  $("#agent-discard").onclick = async () => {
+    await loadSettings();
+    showToast("Modifications annulées.", "info");
+  };
+  // Le testeur ouvert en panneau se referme si l'écran s'élargit (il redevient une colonne).
+  window.addEventListener("resize", () => {
+    if (!testerIsPanel() && isDrawerOpen($("#agent-tester"))) void closeDrawer($("#agent-tester"), { force: true });
+  });
 
   // Entrée dans le champ « site web » de l'assistant ne doit jamais enregistrer le formulaire.
   $("#ca-url").addEventListener("keydown", (event) => {

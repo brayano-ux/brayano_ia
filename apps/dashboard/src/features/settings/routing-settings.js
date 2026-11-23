@@ -1,6 +1,9 @@
 import { api } from "../../services/api.js";
 import { $, escapeHtml, showToast } from "../../utils/dom.js";
 import { getState, setState } from "../../state/store.js";
+import { avatarMarkup } from "../../ui/avatar.js";
+import { confirmDialog } from "../../ui/confirm.js";
+import { icon } from "../../ui/icons.js";
 
 /**
  * Feature "Zones et responsables" : configuration du routage commercial
@@ -32,7 +35,7 @@ function startResponsibleEdit(responsibleId, locations) {
 }
 
 async function deleteResponsibleConfig(responsibleId) {
-  const confirmed = window.confirm("Supprimer définitivement ce commercial ? Les anciens prospects seront conservés, mais ne seront plus liés à ce commercial.");
+  const confirmed = await confirmDialog({ title: "Supprimer ce commercial ?", message: "Les anciens prospects seront conservés, mais ne seront plus liés à ce commercial. Cette action est définitive.", confirmLabel: "Supprimer", tone: "danger", iconName: "trash" });
   if (!confirmed) return;
 
   try {
@@ -61,28 +64,30 @@ export async function loadRoutingConfig() {
     }
 
     if (!locations.length) {
-      list.innerHTML = '<div class="empty-state">Aucune zone configurée pour le moment.</div>';
+      list.innerHTML = `<div class="empty empty-compact"><span class="empty-icon">${icon("route")}</span><p class="empty-title">Aucune zone pour le moment</p><p class="empty-text">Facultatif : utile si plusieurs commerciaux se partagent vos prospects par ville ou par quartier.</p></div>`;
     } else {
       list.innerHTML = locations
         .map((location) => {
           const responsible = (location.responsible || [])
             .map(
               (person) => `
-            <li class="routing-responsible">
-              <span>${escapeHtml(person.name)} — ${escapeHtml(person.whatsappNumber)}${person.active ? "" : " (inactif)"}</span>
+            <li class="routing-responsible${person.active ? "" : " is-inactive"}">
+              ${avatarMarkup(person.name, { seed: person.name, size: "sm" })}
+              <span class="routing-person"><b class="truncate">${escapeHtml(person.name)}</b><small class="truncate">${escapeHtml(person.whatsappNumber)}</small></span>
+              ${person.active ? "" : '<span class="badge neutral">Inactif</span>'}
               <span class="routing-actions">
-                <button type="button" class="text-button" data-edit-responsible="${escapeHtml(person.id)}">Modifier</button>
-                <button type="button" class="text-button danger-text" data-delete-responsible="${escapeHtml(person.id)}">Supprimer</button>
+                <button type="button" class="btn-icon btn-sm btn-ghost" data-edit-responsible="${escapeHtml(person.id)}" aria-label="Modifier ${escapeHtml(person.name)}" data-tip="Modifier">${icon("edit", "icon-sm")}</button>
+                <button type="button" class="btn-icon btn-sm btn-ghost btn-danger-ghost" data-delete-responsible="${escapeHtml(person.id)}" aria-label="Supprimer ${escapeHtml(person.name)}" data-tip="Supprimer">${icon("trash", "icon-sm")}</button>
               </span>
             </li>
           `,
             )
-            .join("") || "<li>Aucun responsable</li>";
+            .join("") || '<li class="routing-empty">Aucun commercial dans cette zone.</li>';
           return `
             <div class="routing-item">
-              <div>
-                <strong>${escapeHtml(location.name)}</strong>
-                <small>${escapeHtml(location.city)}</small>
+              <div class="routing-item-head">
+                <span class="icon-tile">${icon("map-pin")}</span>
+                <div><strong>${escapeHtml(location.name)}</strong><small>${escapeHtml(location.city)}</small></div>
               </div>
               <ul>${responsible}</ul>
             </div>
@@ -173,10 +178,10 @@ async function saveFallbackConfig(event) {
 
   try {
     await api(`/organizations/${getState().organizationId}/routing/fallback`, { method: "PUT", body: JSON.stringify(payload) });
-    showToast("Fallback enregistré.", "success");
+    showToast("Destinataire par défaut enregistré.", "success");
     await loadRoutingConfig();
   } catch (error) {
-    showToast(error.message || "Impossible d'enregistrer le fallback.", "error");
+    showToast(error.message || "Impossible d'enregistrer le destinataire par défaut.", "error");
   }
 }
 

@@ -2,16 +2,45 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Brayano IA — Centre de pilotage</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
+    <title>Brayano IA — Tableau de bord</title>
     <meta name="robots" content="noindex" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://connect.facebook.net https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https: http://127.0.0.1:3000 http://localhost:3000; connect-src 'self' https://accounts.google.com/gsi/ https://www.facebook.com https://connect.facebook.net https://brayano-ia-5.onrender.com http://127.0.0.1:3000 http://localhost:3000; frame-src https://www.openstreetmap.org https://accounts.google.com/gsi/; object-src 'none'; base-uri 'none'; form-action 'self'" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://connect.facebook.net https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; font-src 'self'; img-src 'self' data: blob: https: http://127.0.0.1:3000 http://localhost:3000; connect-src 'self' https://accounts.google.com/gsi/ https://www.facebook.com https://connect.facebook.net https://brayano-ia-5.onrender.com http://127.0.0.1:3000 http://localhost:3000; frame-src https://www.openstreetmap.org https://accounts.google.com/gsi/; object-src 'none'; base-uri 'none'; form-action 'self'" />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
     <link rel="icon" type="image/png" href="../assets/logo-mark.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="../src/styles/main.css" />
+    <meta name="theme-color" content="#f5f7fa" />
+    <script src="../src/theme-init.js"></script>
+    <link rel="preload" href="../assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <style>
+      /* Écran d'attente : affiché tout de suite, avant même le chargement des feuilles de style. */
+      .boot-splash { position: fixed; inset: 0; z-index: 300; display: grid; place-content: center; justify-items: center; gap: 22px; background: #f5f7fa; }
+      :root[data-theme="dark"] .boot-splash { background: #0a0f1a; }
+      .boot-splash img { width: 56px; height: auto; animation: boot-pulse 1.6s ease-in-out infinite; }
+      .boot-bar { width: 132px; height: 3px; border-radius: 3px; background: rgba(31, 107, 255, 0.16); overflow: hidden; }
+      .boot-bar span { display: block; width: 40%; height: 100%; border-radius: inherit; background: #1f6bff; animation: boot-slide 1.1s ease-in-out infinite; }
+      @keyframes boot-slide { 0% { transform: translateX(-110%); } 100% { transform: translateX(260%); } }
+      @keyframes boot-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(0.94); } }
+      @media (prefers-reduced-motion: reduce) { .boot-splash img, .boot-bar span { animation: none; } }
+    </style>
+    <link rel="stylesheet" href="../src/styles/tokens.css" />
+    <link rel="stylesheet" href="../src/styles/base.css" />
+    <link rel="stylesheet" href="../src/styles/components.css" />
+    <link rel="stylesheet" href="../src/styles/layout.css" />
+    <link rel="stylesheet" href="../src/styles/auth.css" />
+    <link rel="stylesheet" href="../src/styles/overview.css" />
+    <link rel="stylesheet" href="../src/styles/inbox.css" />
+    <link rel="stylesheet" href="../src/styles/agent.css" />
+    <link rel="stylesheet" href="../src/styles/products.css" />
+    <link rel="stylesheet" href="../src/styles/orders.css" />
+    <link rel="stylesheet" href="../src/styles/appointments.css" />
+    <link rel="stylesheet" href="../src/styles/broadcasts.css" />
+    <link rel="stylesheet" href="../src/styles/whatsapp.css" />
+    <link rel="stylesheet" href="../src/styles/billing.css" />
+    <link rel="stylesheet" href="../src/styles/settings.css" />
+    <link rel="stylesheet" href="../src/styles/help.css" />
+    <link rel="stylesheet" href="../src/styles/persona.css" />
+    <link rel="stylesheet" href="../src/styles/onboarding.css" />
+    <link rel="stylesheet" href="../src/styles/tour.css" />
     <!-- Meta Pixel Code -->
   <script src="../assets/meta-pixel.js"></script>
   <noscript><img height="1" width="1" style="display:none"
@@ -20,6 +49,10 @@
   <!-- End Meta Pixel Code -->
 </head>
   <body>
+    <div id="boot-splash" class="boot-splash" role="status" aria-label="Chargement du tableau de bord">
+      <img src="../assets/logo-mark.png" alt="" width="56" height="54" />
+      <div class="boot-bar"><span></span></div>
+    </div>
     <div id="app-root"></div>
     <script type="module" src="../src/bootstrap.js"></script>
   </body>

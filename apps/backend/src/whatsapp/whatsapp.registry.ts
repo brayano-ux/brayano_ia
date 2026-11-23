@@ -1,3 +1,4 @@
+import { WhatsAppNotConnectedError } from "../shared/errors.js";
 import fs from "node:fs";
 import path from "node:path";
 import { env } from "../config/env.js";
@@ -221,8 +222,10 @@ export async function sendWhatsAppMessageForOrg(
   text: string,
 ): Promise<void> {
   const provider = providers.get(organizationId);
-  if (!provider) {
-    throw new Error("Ce compte WhatsApp n'est pas connecté pour cette entreprise.");
+  // Numéro jamais relié, ou session en cours de reconnexion : on le dit clairement plutôt que de laisser
+  // la bibliothèque WhatsApp échouer avec une erreur technique incompréhensible pour l'utilisateur.
+  if (!provider || provider.getStatus() !== "CONNECTED") {
+    throw new WhatsAppNotConnectedError();
   }
 
   const recipientJid = jid.includes("@")

@@ -1,3 +1,4 @@
+import { applyRole } from "../navigation/roles.js";
 import { api, isNetworkError, isAuthenticationError, setUnauthorizedHandler } from "../../services/api.js";
 import { clearSession, isAuthenticated, readSession, writeOrganizationId, writeSession } from "../../services/storage.js";
 import { askFields } from "../../utils/ask.js";
@@ -27,22 +28,50 @@ function showAuthMode(mode) {
   $("#google-company-form")?.classList.add("hidden");
   if (googleAvailable) $("#google-auth")?.classList.remove("hidden");
   toggleButton.classList.remove("hidden");
-  authTitle.textContent = isLogin ? "Connexion à l'espace de pilotage" : "Créer mon espace client";
-  authHint.textContent = isLogin ? "Connectez-vous avec votre compte." : "Créez votre entreprise et votre compte administrateur.";
+  authTitle.textContent = isLogin ? "Connexion" : "Créer votre espace";
+  authHint.textContent = isLogin ? "Connectez-vous avec votre compte." : "Quelques informations suffisent : votre agent sera prêt en quelques minutes.";
   toggleButton.textContent = isLogin ? "Créer un compte" : "Se connecter";
+  const switchLabel = $("#auth-switch-label");
+  if (switchLabel) switchLabel.textContent = isLogin ? "Pas encore de compte ?" : "Vous avez déjà un compte ?";
+  $("#login-screen").dataset.mode = mode;
+}
+
+/** Bouton « œil » d'un champ mot de passe : affiche ou masque la saisie. */
+function initPasswordToggles() {
+  document.addEventListener("click", (event) => {
+    const button = event.target.closest?.(".password-toggle");
+    if (!button) return;
+    const input = document.getElementById(button.dataset.target);
+    if (!input) return;
+    const visible = input.type === "password";
+    input.type = visible ? "text" : "password";
+    button.classList.toggle("is-visible", visible);
+    button.setAttribute("aria-pressed", String(visible));
+    button.setAttribute("aria-label", visible ? "Masquer le mot de passe" : "Afficher le mot de passe");
+    input.focus();
+  });
 }
 
 export function showDashboard() {
   $("#login-screen").classList.add("hidden");
   $(".app-shell").classList.remove("hidden");
+  document.body.classList.add("is-authenticated");
 }
 
 export function logoutUser(mode = "login") {
   // On prévient le serveur pour qu'il supprime la session : le jeton ne doit plus servir après la déconnexion.
   if (isAuthenticated()) void api("/logout", { method: "POST" }).catch(() => undefined);
   clearSession();
+  // Panneaux, fenêtres et recherche rapide appartiennent à la session qui se termine : aucun voile ne doit
+  // recouvrir l'écran de connexion. Les modifications non enregistrées sont abandonnées avec elle.
+  document.dispatchEvent(new CustomEvent("brayano:close-overlays"));
+  document.dispatchEvent(new CustomEvent("brayano:session-ended"));
   $(".app-shell").classList.add("hidden");
   $("#login-screen").classList.remove("hidden");
+  document.body.classList.remove("is-authenticated", "in-thread");
+  document.title = "Brayano IA — Connexion";
+  // L'adresse ne garde pas la page de la session précédente.
+  if (window.location.hash) window.history.replaceState(null, "", window.location.pathname + window.location.search);
   ["#login-email", "#login-password", "#register-name", "#register-company", "#register-whatsapp-local", "#register-email", "#register-password", "#register-verification-code", "#google-company-name"]
     .forEach((selector) => {
       const field = $(selector);
@@ -58,11 +87,15 @@ async function authenticateUser(email, password) {
     body: JSON.stringify({ email: normalizedEmail, password }),
   });
 
+  // Le rôle arrive avec la connexion : un employé ne voit pas le menu du propriétaire, même un instant.
+  const role = response.user.role === "AGENT" ? "AGENT" : response.user.role === "ADMIN" ? "ADMIN" : null;
   writeSession({
     email: response.user.email,
     token: response.token,
     organizationId: response.organizationId || null,
+    ...(role ? { role } : {}),
   });
+  if (role) applyRole(role);
 
   if (response.organizationId) {
     writeOrganizationId(response.organizationId);
@@ -369,6 +402,7 @@ export function initAuthFlow(onAuthenticated) {
   };
 
   void initGoogleAuth(onAuthenticated);
+  initPasswordToggles();
 
   // Lien « Créer mon compte » de la page d'accueil : ouvre directement l'inscription.
   if (new URLSearchParams(window.location.search).has("inscription")) showAuthMode("register");

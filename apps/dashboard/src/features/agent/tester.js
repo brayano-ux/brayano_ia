@@ -1,6 +1,8 @@
 import { api } from "../../services/api.js";
 import { $, $$, escapeHtml, showToast } from "../../utils/dom.js";
 import { getState } from "../../state/store.js";
+import { formatMoney } from "../../utils/format.js";
+import { icon } from "../../ui/icons.js";
 
 /**
  * Testeur de l'agent : simule une vraie conversation WhatsApp sans rien enregistrer ni envoyer.
@@ -16,11 +18,14 @@ let simulation = { booking: null, order: null, negotiation: null };
 let busy = false;
 
 const MEDIA_LABELS = {
-  payment_proof: "📷 Capture de paiement",
-  product_photo: "📷 Photo d'un produit",
-  document: "📎 Document",
-  file: "🖼️ Fichier",
+  payment_proof: { iconName: "receipt", text: "Preuve de paiement" },
+  product_photo: { iconName: "camera", text: "Photo d'un produit" },
+  document: { iconName: "file", text: "Document" },
+  file: { iconName: "paperclip", text: "Fichier" },
 };
+
+/** Ce que l'agent aurait fait pour de vrai (rendez-vous, commande, photo, passage de main…) : une icône par type. */
+const EFFECT_ICONS = { welcome: "sparkles", file: "paperclip", booking: "calendar-check", order: "bag", handoff: "hand", photo: "image", negotiation: "handshake", stage: "tag", claim: "shield-alert", missing: "question" };
 
 function historyForServer() {
   return turns.map((turn) => ({ role: turn.role, content: turn.content }));
@@ -28,7 +33,8 @@ function historyForServer() {
 
 function bubbleMarkup(turn) {
   if (turn.role === "user") {
-    const media = turn.media ? `<span class="test-media-tag">${escapeHtml(MEDIA_LABELS[turn.media] || "Fichier")}</span>` : "";
+    const label = turn.media ? MEDIA_LABELS[turn.media] || MEDIA_LABELS.file : null;
+    const media = label ? `<span class="test-media-tag">${icon(label.iconName, "icon-xs")}${escapeHtml(label.text)}</span>` : "";
     return `<div class="agent-test-bubble prospect">${media}${turn.text ? `<span>${escapeHtml(turn.text)}</span>` : ""}</div>`;
   }
   const replies = (turn.replies || [{ type: "text", text: turn.content }])
@@ -37,30 +43,43 @@ function bubbleMarkup(turn) {
       : `<div class="agent-test-bubble agent">${escapeHtml(reply.text)}</div>`))
     .join("");
   const effects = (turn.effects || []).length
-    ? `<ul class="test-effects">${turn.effects.map((effect) => `<li class="effect-${escapeHtml(effect.type)}">${escapeHtml(effect.label)}</li>`).join("")}</ul>`
+    ? `<ul class="test-effects">${turn.effects.map((effect) => `<li class="effect-${escapeHtml(effect.type)}">${icon(EFFECT_ICONS[effect.type] || "zap", "icon-xs")}${escapeHtml(effect.label)}</li>`).join("")}</ul>`
     : "";
   return `<div class="agent-test-turn">${replies}${effects}</div>`;
 }
 
+const SUGGESTIONS = ["Bonjour, vous vendez quoi ?", "Quels sont vos prix ?", "Vous livrez dans mon quartier ?"];
+
+function emptyMarkup() {
+  return `<div class="tester-empty">
+    <span class="empty-icon">${icon("chats")}</span>
+    <p class="empty-title">Parlez à votre agent comme un client</p>
+    <p class="empty-text">Vous voyez exactement ce qu'il répondrait, et ce qu'il ferait : rendez-vous, commande, photos, passage de main.</p>
+    <div class="tester-suggestions">${SUGGESTIONS.map((text) => `<button type="button" class="chip" data-test-suggestion>${escapeHtml(text)}</button>`).join("")}</div>
+  </div>`;
+}
+
 function render() {
   const container = $("#agent-test-messages");
-  container.innerHTML = turns.length ? turns.map(bubbleMarkup).join("") : '<div class="empty-state">Écrivez un premier message pour simuler un prospect.</div>';
+  container.innerHTML = turns.length
+    ? turns.map(bubbleMarkup).join("") + (busy ? '<div class="agent-test-bubble agent typing" aria-label="L\'agent écrit"><i></i><i></i><i></i></div>' : "")
+    : emptyMarkup();
   container.scrollTop = container.scrollHeight;
 
   const state = $("#agent-test-state");
   const parts = [];
   if (simulation.booking) {
     const start = new Date(simulation.booking.startsAt);
-    parts.push(`📅 Rendez-vous simulé : ${new Intl.DateTimeFormat("fr-FR", { dateStyle: "full", timeStyle: "short" }).format(start)}`);
+    parts.push({ iconName: "calendar-check", text: `Rendez-vous simulé : ${new Intl.DateTimeFormat("fr-FR", { dateStyle: "full", timeStyle: "short" }).format(start)}` });
   }
   if (simulation.order) {
-    parts.push(`🛍️ Commande simulée : ${simulation.order.items.map((line) => `${line.quantity} × ${line.name}`).join(", ")}`);
+    parts.push({ iconName: "bag", text: `Commande simulée : ${simulation.order.items.map((line) => `${line.quantity} × ${line.name}`).join(", ")}` });
   }
   if (simulation.negotiation) {
-    parts.push(`🤝 Négociation simulée : ${new Intl.NumberFormat("fr-FR").format(simulation.negotiation.currentPrice).replace(/[  ]/g, " ")} FCFA (tour ${simulation.negotiation.round}/3)`);
+    parts.push({ iconName: "handshake", text: `Négociation simulée : ${formatMoney(simulation.negotiation.currentPrice)} (tour ${simulation.negotiation.round}/3)` });
   }
   state.classList.toggle("hidden", !parts.length);
-  state.innerHTML = parts.map((part) => `<span>${escapeHtml(part)}</span>`).join("");
+  state.innerHTML = parts.map((part) => `<span>${icon(part.iconName, "icon-xs")}${escapeHtml(part.text)}</span>`).join("");
 }
 
 function readFileAsBase64(file) {
@@ -148,6 +167,14 @@ export function initTester() {
     void send(null, null);
   };
   $("#clear-agent-test").onclick = resetTester;
+  // Suggestions de l'état vide : un clic envoie la question, pour montrer tout de suite l'agent à l'œuvre.
+  $("#agent-test-messages").addEventListener("click", (event) => {
+    const suggestion = event.target.closest("[data-test-suggestion]");
+    if (!suggestion) return;
+    $("#agent-test-input").value = suggestion.textContent;
+    void send(null, null);
+  });
+  render();
   $$("[data-test-media]").forEach((button) => {
     button.onclick = () => {
       const kind = button.dataset.testMedia;

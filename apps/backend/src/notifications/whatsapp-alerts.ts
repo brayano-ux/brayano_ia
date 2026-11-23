@@ -35,7 +35,7 @@ function formatDate(date: Date | null): string {
 }
 
 const REASON_TEXT: Record<ConnectionOutage["reason"], string> = {
-  logged_out: "Le numéro a été déconnecté depuis le téléphone (Paramètres WhatsApp, Appareils liés) ou WhatsApp a invalidé la session. Le client doit rescanner un QR code : cela ne se rétablit pas tout seul.",
+  logged_out: "Le numéro a été déconnecté depuis le téléphone (WhatsApp, Appareils connectés) ou WhatsApp a invalidé la session. Le client doit rescanner un QR code : cela ne se rétablit pas tout seul.",
   connection_lost: "La connexion est coupée et ne se rétablit pas toute seule (problème réseau, serveur, session corrompue ou disque plein).",
   manual: "Déconnexion volontaire.",
 };
@@ -71,7 +71,7 @@ export function buildDisconnectAlert(details: OrganizationDetails, outage: Conne
       "",
       describeOrganization(details),
       "",
-      "À faire : prévenir le client afin qu'il ouvre son tableau de bord, onglet WhatsApp, clique sur « Connexion par QR code » puis scanne le QR code avec le téléphone du numéro.",
+      "À faire : prévenir le client afin qu'il ouvre son tableau de bord, page « WhatsApp », clique sur « Afficher le QR code » puis scanne le QR code avec le téléphone du numéro.",
     ].join("\n"),
   };
 }
@@ -86,7 +86,7 @@ export function buildRecoveredNotice(details: OrganizationDetails, downMs: numbe
 /** Message destiné au client : simple, sans information interne, avec la marche à suivre. */
 export function buildClientDisconnectEmail(details: OrganizationDetails, outage: ConnectionOutage, nowMs: number) {
   const cause = outage.reason === "logged_out"
-    ? "Le numéro a été déconnecté depuis votre téléphone (WhatsApp, Appareils liés) ou WhatsApp a fermé la session."
+    ? "Le numéro a été déconnecté depuis votre téléphone (WhatsApp, Appareils connectés) ou WhatsApp a fermé la session."
     : "La connexion avec WhatsApp est coupée et ne se rétablit pas toute seule.";
   const dashboard = env.CLIENT_DASHBOARD_URL ? `\nVotre tableau de bord : ${env.CLIENT_DASHBOARD_URL}` : "";
   const support = env.SUPPORT_EMAIL ? `\n\nBesoin d'aide ? Écrivez-nous à ${env.SUPPORT_EMAIL}.` : "";
@@ -100,9 +100,9 @@ export function buildClientDisconnectEmail(details: OrganizationDetails, outage:
       cause,
       "",
       "Pour le reconnecter :",
-      "  1. Ouvrez votre tableau de bord, onglet WhatsApp.",
-      "  2. Cliquez sur « Connexion par QR code » (ou sur « Utiliser un code d'association » si vous préférez saisir un code).",
-      "  3. Sur le téléphone du numéro : WhatsApp, Appareils liés, Lier un appareil, puis scannez le QR code affiché.",
+      "  1. Ouvrez votre tableau de bord, page « WhatsApp ».",
+      "  2. Cliquez sur « Afficher le QR code » (ou sur « Utiliser un code d'association » si vous préférez saisir un code).",
+      "  3. Sur le téléphone du numéro : WhatsApp, menu, « Appareils connectés », « Connecter un appareil », puis scannez le QR code affiché.",
       dashboard,
       support,
     ].join("\n").replace(/\n{3,}/g, "\n\n"),

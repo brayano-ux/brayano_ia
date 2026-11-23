@@ -72,7 +72,7 @@ Puis ouvre dans le navigateur :
 ```
 http://localhost:3000/organizations/<orgId>/whatsapp/qr-view
 ```
-Scanne avec WhatsApp (**Réglages > Appareils liés > Lier un appareil**) sur le téléphone du numéro de **cette entreprise précise**.
+Scanne avec WhatsApp (**menu > Appareils connectés > Connecter un appareil**) sur le téléphone du numéro de **cette entreprise précise**.
 
 ### 4. Répéter pour une deuxième entreprise
 Refais les étapes 1 à 3 avec un autre nom et un autre numéro WhatsApp — chaque entreprise a sa session, ses conversations et son agent totalement isolés.

@@ -1,121 +1,152 @@
-<!-- APP SHELL -->
-<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-  <defs>
-    <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></symbol>
-    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
-    <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 3v4"/><path d="M21 5h-4"/></symbol>
-    <symbol id="i-package" viewBox="0 0 24 24"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></symbol>
-    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></symbol>
-    <symbol id="i-bag" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></symbol>
-    <symbol id="i-phone" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></symbol>
-    <symbol id="i-settings" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></symbol>
-    <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></symbol>
-    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></symbol>
-    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></symbol>
-    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
-    <symbol id="i-selector" viewBox="0 0 24 24"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></symbol>
-    <symbol id="i-megaphone" viewBox="0 0 24 24"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></symbol>
-    <symbol id="i-card" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></symbol>
-    <symbol id="i-close" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
-  </defs>
-</svg>
-
+<!-- STRUCTURE DE L'APPLICATION : menu latéral, barre du haut, vues, navigation mobile, aide, guide de démarrage. -->
 <div class="app-shell hidden">
+  <a class="skip-link" href="#views-root">Aller au contenu</a>
   <div id="sidebar-overlay" class="sidebar-overlay"></div>
 
   <aside id="sidebar" class="sidebar" aria-label="Navigation principale">
-    <a class="brand" href="#" aria-label="Brayano IA">
-      <img class="brand-logo" src="../assets/logo-mark.png" alt="" width="32" height="30" />
-      <span class="brand-name">Brayano <span class="brand-accent">IA</span></span>
-    </a>
+    <div class="sidebar-grip" aria-hidden="true"></div>
+    <div class="sidebar-head">
+      <a class="brand" href="#/accueil" data-view="overview" aria-label="Brayano IA — accueil">
+        <img class="brand-logo" src="../assets/logo-mark.png" alt="" width="30" height="29" />
+        <span class="brand-name">Brayano <span class="brand-accent">IA</span></span>
+      </a>
+      <span class="sidebar-sheet-title">Menu</span>
+      <button type="button" class="btn-icon btn-ghost sidebar-close" id="sidebar-close" aria-label="Fermer le menu"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-close"/></svg></button>
+    </div>
 
-    <label class="org-picker">
-      <span id="org-initial" class="org-initial">B</span>
+    <label class="org-picker hidden">
+      <span id="org-initial" class="avatar avatar-sm avatar-square avatar-brand">B</span>
       <span class="org-picker-text">
         <small>Espace de travail</small>
         <select id="org-select" aria-label="Choisir une entreprise"></select>
       </span>
-      <svg class="icon chevron" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-selector"/></svg>
+      <svg class="icon icon-sm chevron" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-selector"/></svg>
     </label>
 
     <nav class="nav" aria-label="Sections">
-      <button class="nav-item active" data-view="overview"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-home"/></svg><span>Vue d'ensemble</span></button>
-      <button class="nav-item" data-view="inbox"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chat"/></svg><span>Conversations</span><b id="nav-count" class="nav-badge">0</b></button>
-      <button class="nav-item admin-only" data-view="agent"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sparkles"/></svg><span>Agent IA</span></button>
-      <p class="nav-group">Activité</p>
-      <button class="nav-item admin-only" data-view="products"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-package"/></svg><span>Produits</span></button>
-      <button class="nav-item" data-view="appointments"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-calendar"/></svg><span>Rendez-vous</span></button>
-      <button class="nav-item" data-view="orders"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bag"/></svg><span>Commandes</span></button>
-      <p class="nav-group admin-only">Canal</p>
-      <button class="nav-item admin-only" data-view="broadcasts"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-megaphone"/></svg><span>Messages groupés</span></button>
-      <button class="nav-item admin-only" data-view="whatsapp"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-phone"/></svg><span>WhatsApp</span></button>
+      <button type="button" class="nav-item active" data-view="overview"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-home"/></svg><span>Accueil</span></button>
+      <button type="button" class="nav-item" data-view="inbox"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chats"/></svg><span>Conversations</span><b id="nav-count" class="nav-badge hidden" aria-label="conversations à traiter">0</b></button>
+
+      <p class="nav-group">Ventes</p>
+      <button type="button" class="nav-item" data-view="orders"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bag"/></svg><span>Commandes</span><b id="nav-orders-count" class="nav-badge nav-badge-soft hidden" aria-label="nouvelles commandes">0</b></button>
+      <button type="button" class="nav-item" data-view="appointments"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-calendar"/></svg><span>Rendez-vous</span><b id="nav-appointments-count" class="nav-badge nav-badge-soft hidden" aria-label="rendez-vous aujourd'hui">0</b></button>
+      <button type="button" class="nav-item admin-only" data-view="products"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-package"/></svg><span>Produits</span></button>
+
+      <p class="nav-group admin-only">Automatisation</p>
+      <button type="button" class="nav-item admin-only" data-view="agent"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sparkles"/></svg><span>Agent IA</span></button>
+      <button type="button" class="nav-item admin-only" data-view="broadcasts"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-megaphone"/></svg><span>Messages groupés</span></button>
+
+      <p class="nav-group admin-only">Compte</p>
+      <button type="button" class="nav-item admin-only" data-view="whatsapp"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-whatsapp"/></svg><span>WhatsApp</span><i id="nav-wa-dot" class="dot" aria-hidden="true"></i></button>
+      <button type="button" class="nav-item admin-only" data-view="billing"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-card"/></svg><span>Mon forfait</span></button>
+      <button type="button" class="nav-item admin-only" data-view="settings"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-settings"/></svg><span>Paramètres</span></button>
+      <button type="button" class="nav-item nav-help" data-open-help><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-lifebuoy"/></svg><span>Aide et assistance</span></button>
     </nav>
 
     <div class="sidebar-bottom">
-      <button class="nav-item admin-only" data-view="billing"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-card"/></svg><span>Mon forfait</span></button>
-      <button class="nav-item admin-only" data-view="settings"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-settings"/></svg><span>Paramètres</span></button>
-      <div class="user-card">
-        <span class="avatar" id="user-avatar">AD</span>
-        <div>
-          <strong id="user-name">Mon compte</strong>
-          <small id="user-email">Compte principal</small>
+      <button type="button" class="sidebar-plan admin-only hidden" id="sidebar-plan" data-view="billing" aria-label="Voir mon forfait">
+        <span class="sidebar-plan-top"><strong id="sidebar-plan-name">Forfait</strong><span id="sidebar-plan-badge" class="badge info hidden">Essai</span></span>
+        <span class="progress"><span id="sidebar-plan-bar" style="width:0%"></span></span>
+        <span class="sidebar-plan-meta"><span id="sidebar-plan-usage">—</span><span id="sidebar-plan-cta" class="sidebar-plan-cta hidden">Augmenter</span></span>
+      </button>
+
+      <div class="menu-anchor user-menu-anchor">
+        <button type="button" class="user-card" id="user-menu-trigger" data-menu="user-menu" aria-haspopup="menu" aria-expanded="false">
+          <span class="avatar" id="user-avatar">A</span>
+          <span class="user-card-text">
+            <strong id="user-name">Mon compte</strong>
+            <small id="user-email">Compte principal</small>
+          </span>
+          <svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-selector"/></svg>
+        </button>
+        <div class="menu menu-up menu-left user-menu" id="user-menu" role="menu">
+          <p class="menu-label">Apparence</p>
+          <div class="segmented theme-switch" role="group" aria-label="Apparence">
+            <button type="button" data-theme-choice="light"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sun"/></svg>Clair</button>
+            <button type="button" data-theme-choice="dark"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-moon"/></svg>Sombre</button>
+            <button type="button" data-theme-choice="auto"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-monitor"/></svg>Auto</button>
+          </div>
+          <div class="menu-sep"></div>
+          <button type="button" class="menu-item" role="menuitem" data-open-help><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-lifebuoy"/></svg>Aide et assistance</button>
+          <button type="button" class="menu-item" role="menuitem" data-open-palette><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-search"/></svg>Recherche rapide<kbd data-shortcut-label>Ctrl K</kbd></button>
+          <div class="menu-sep"></div>
+          <button type="button" class="menu-item danger" role="menuitem" id="logout-button"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-logout"/></svg>Se déconnecter</button>
         </div>
       </div>
     </div>
   </aside>
 
-  <main class="main">
+  <div class="main">
     <header class="topbar">
       <div class="topbar-start">
-        <button id="mobile-menu-trigger" class="mobile-menu-trigger icon-button" aria-label="Ouvrir le menu" type="button"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-menu"/></svg></button>
-        <div class="breadcrumb">Centre de pilotage <span>/</span> <strong id="current-org">Brayano IA</strong></div>
+        <a class="topbar-brand" href="#/accueil" data-view="overview" aria-label="Accueil"><img src="../assets/logo-mark.png" alt="" width="28" height="27" /></a>
+        <div class="breadcrumb"><span id="current-org" class="truncate">Brayano IA</span><svg class="icon icon-xs" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron-right"/></svg><strong id="topbar-view">Accueil</strong></div>
       </div>
+      <button type="button" class="command-trigger" id="command-trigger" data-open-palette aria-label="Recherche rapide">
+        <svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-search"/></svg>
+        <span>Rechercher un client, une page, une action…</span>
+        <kbd data-shortcut-label>Ctrl K</kbd>
+      </button>
       <div class="top-actions">
-        <button type="button" id="system-status" class="system-status" data-view-target="whatsapp" title="État de la connexion WhatsApp"><span class="live-dot"></span><span class="system-status-text">WhatsApp : vérification…</span></button>
+        <button type="button" id="system-status" class="system-status" data-view-target="whatsapp" title="État de la connexion WhatsApp"><span class="dot"></span><span class="system-status-text">WhatsApp : vérification…</span></button>
+        <button type="button" class="btn-icon btn-ghost topbar-search" data-open-palette aria-label="Rechercher"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-search"/></svg></button>
+        <button type="button" id="help-toggle" class="btn btn-ghost help-toggle" aria-expanded="false" aria-controls="help-panel" aria-label="Besoin d'aide ?"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-help"/></svg><span class="help-fab-label">Aide</span></button>
       </div>
     </header>
-    <div id="platform-suspension-banner" class="platform-banner hidden" role="alert"></div>
-    <div id="billing-banner" class="billing-banner hidden" role="status"></div>
-    <div id="views-root" class="views-root"></div>
-  </main>
+    <div id="platform-suspension-banner" class="app-banner danger hidden" role="alert"></div>
+    <div id="billing-banner" class="app-banner hidden" role="status"></div>
+    <div id="views-root" class="views-root" tabindex="-1"></div>
+  </div>
 
   <nav class="tabbar" aria-label="Navigation rapide">
-    <button class="tab-item active" data-view="overview"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-home"/></svg><span>Accueil</span></button>
-    <button class="tab-item" data-view="inbox"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chat"/></svg><span>Messages</span></button>
-    <button class="tab-item admin-only" data-view="agent"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sparkles"/></svg><span>Agent</span></button>
-    <button class="tab-item" data-view="orders"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bag"/></svg><span>Commandes</span></button>
-    <button class="tab-item" id="tab-more" type="button"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-grid"/></svg><span>Plus</span></button>
+    <button type="button" class="tab-item active" data-view="overview"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-home"/></svg><span>Accueil</span></button>
+    <button type="button" class="tab-item" data-view="inbox"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chats"/></svg><span>Messages</span><b id="tab-count" class="tab-badge hidden">0</b></button>
+    <button type="button" class="tab-item" data-view="orders"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bag"/></svg><span>Commandes</span><b id="tab-orders-count" class="tab-badge hidden">0</b></button>
+    <button type="button" class="tab-item admin-only" data-view="agent"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sparkles"/></svg><span>Agent IA</span></button>
+    <button type="button" class="tab-item agent-only" data-view="appointments"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-calendar"/></svg><span>Rendez-vous</span></button>
+    <button type="button" class="tab-item" id="tab-more" aria-controls="sidebar"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-grid"/></svg><span>Plus</span></button>
   </nav>
 
-  <!-- Aide : un seul bouton. Propriétaire → assistant intelligent ; employé → discussion WhatsApp avec le support. -->
+  <!-- Aide : assistant intelligent pour le propriétaire, discussion WhatsApp avec le support pour un employé. -->
   <div class="help-dock">
     <section id="help-panel" class="help-panel hidden" role="dialog" aria-label="Assistant d'aide Brayano IA">
       <header class="help-head">
-        <img src="../assets/logo-mark.png" alt="" width="28" height="27" />
+        <span class="help-head-logo"><img src="../assets/logo-mark.png" alt="" width="24" height="23" /></span>
         <div class="help-head-text"><strong>Assistant d'aide</strong><small>Il connaît toute la configuration de Brayano IA</small></div>
-        <button type="button" class="help-icon-button" id="help-reset" title="Nouvelle discussion" aria-label="Nouvelle discussion"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></button>
-        <button type="button" class="help-icon-button" id="help-close" aria-label="Fermer"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-close"/></svg></button>
+        <button type="button" class="btn-icon btn-sm btn-ghost" id="help-reset" data-tip="Nouvelle discussion" data-tip-pos="bottom" aria-label="Nouvelle discussion"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-reset"/></svg></button>
+        <button type="button" class="btn-icon btn-sm btn-ghost" id="help-close" aria-label="Fermer"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-close"/></svg></button>
       </header>
       <div id="help-messages" class="help-messages" aria-live="polite"></div>
       <div id="help-chips" class="help-chips"></div>
       <form id="help-form" class="help-form">
         <textarea id="help-input" rows="1" maxlength="1000" placeholder="Posez votre question…" aria-label="Votre question"></textarea>
-        <button type="submit" class="help-send" id="help-send" aria-label="Envoyer"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></svg></button>
+        <button type="submit" class="btn btn-primary btn-icon help-send" id="help-send" aria-label="Envoyer"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-send"/></svg></button>
       </form>
       <p class="help-foot">Une réponse ne vous convient pas ? <a id="help-panel-wa" href="https://wa.me/237683260520" target="_blank" rel="noopener">Écrivez-nous sur WhatsApp</a></p>
     </section>
-    <button type="button" id="help-toggle" class="help-fab" aria-expanded="false" aria-controls="help-panel" aria-label="Besoin d'aide ?">
-      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4"/><path d="M12 17.5h.01"/></svg>
-      <span class="help-fab-label">Aide</span>
-    </button>
+  </div>
+
+  <!-- Recherche rapide (Ctrl/⌘ + K) -->
+  <div id="command-palette" class="palette hidden" role="dialog" aria-modal="true" aria-label="Recherche rapide">
+    <div class="palette-card">
+      <div class="palette-input">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-search"/></svg>
+        <input type="text" id="palette-input" placeholder="Rechercher un client, une page, une action…" autocomplete="off" spellcheck="false" aria-label="Rechercher" aria-controls="palette-results" />
+        <button type="button" class="btn btn-sm btn-ghost palette-close" id="palette-close">Fermer</button>
+      </div>
+      <div id="palette-results" class="palette-results" role="listbox"></div>
+      <footer class="palette-foot"><span><kbd>↑</kbd><kbd>↓</kbd> naviguer</span><span><kbd>↵</kbd> ouvrir</span><span><kbd>Échap</kbd> fermer</span></footer>
+    </div>
   </div>
 
   <!-- Guide de démarrage : proposé une seule fois, à la première connexion -->
   <div id="persona-modal" class="persona-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="persona-title">
     <div class="persona-card">
-      <p class="persona-step-indicator" id="persona-step-indicator">Étape 1 sur 3</p>
+      <div class="persona-top">
+        <span class="persona-brand"><img src="../assets/logo-mark.png" alt="" width="26" height="25" />Brayano <span class="brand-accent">IA</span></span>
+        <p class="persona-step-indicator" id="persona-step-indicator">Étape 1 sur 3</p>
+      </div>
       <div class="persona-head">
-        <span class="persona-badge"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sparkles"/></svg></span>
         <h1 id="persona-title">Donnez une personnalité à votre agent</h1>
         <p class="muted" id="persona-subtitle">Choisissez son domaine, son rôle et son ton : il s'exprimera ainsi dès maintenant avec vos clients. Vous pourrez toujours l'ajuster plus tard dans « Agent IA ».</p>
       </div>
@@ -143,7 +174,7 @@
           <p class="muted">Collez une description, votre liste de prix ou le texte de votre site : l'IA la transforme en informations utilisables par votre agent. Vous pourrez toujours la modifier plus tard dans « Agent IA ». Cette étape est facultative.</p>
           <textarea id="persona-business-text" rows="7" placeholder="Ex. : Boutique de vêtements à Douala, ouverte du lundi au samedi de 9h à 19h. Robe en coton 12 000 FCFA, livraison 1 500 FCFA en ville..."></textarea>
           <div class="ca-actions">
-            <button type="button" class="ghost-button" id="persona-business-analyze">✨ Structurer avec l'IA</button>
+            <button type="button" class="btn btn-secondary" id="persona-business-analyze"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-wand"/></svg>Structurer avec l'IA</button>
             <span id="persona-business-status" class="muted"></span>
           </div>
           <div id="persona-business-missing" class="ca-missing hidden"></div>
@@ -152,18 +183,16 @@
 
       <div id="persona-step-whatsapp" class="persona-step hidden">
         <section class="persona-section persona-final">
-          <span class="persona-emoji-big" aria-hidden="true">🎉</span>
+          <span class="icon-tile icon-tile-lg success" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><use href="#i-check-circle"/></svg></span>
           <h2>Votre agent est configuré</h2>
           <p class="muted">Il ne reste plus qu'à connecter le numéro WhatsApp de votre entreprise pour qu'il commence à répondre à vos clients.</p>
         </section>
       </div>
 
       <div class="persona-actions">
-        <button type="button" class="text-button" id="persona-skip">Configurer plus tard</button>
-        <button type="button" class="primary" id="persona-next" disabled>Suivant</button>
+        <button type="button" class="btn btn-ghost" id="persona-skip">Configurer plus tard</button>
+        <button type="button" class="btn btn-primary btn-lg" id="persona-next" disabled>Suivant</button>
       </div>
     </div>
   </div>
 </div>
-
-<div id="toast" class="toast" role="status" aria-live="polite"></div>

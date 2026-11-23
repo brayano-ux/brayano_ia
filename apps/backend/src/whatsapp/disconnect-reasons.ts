@@ -2,7 +2,7 @@ import type { ConnectionLossReason } from "./whatsapp.types.js";
 
 /** Codes de fermeture renvoyés par WhatsApp (bibliothèque Baileys), expliqués en français. */
 const CLOSE_CODES: Record<number, string> = {
-  401: "Déconnecté depuis le téléphone (Appareils liés) ou session fermée par WhatsApp",
+  401: "Déconnecté depuis le téléphone (Appareils connectés) ou session fermée par WhatsApp",
   403: "Accès refusé par WhatsApp : le numéro est peut-être restreint ou banni",
   408: "Délai de connexion dépassé",
   411: "Version WhatsApp multi-appareils incompatible",

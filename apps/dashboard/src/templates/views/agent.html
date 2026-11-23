@@ -1,397 +1,422 @@
-<!-- VIEW: AGENT -->
+<!-- VUE : AGENT IA — ce que l'agent sait, comment il se comporte, ce qu'il peut faire, et un testeur en direct. -->
 <section id="agent-view" class="view hidden">
-  <div class="page-heading">
+  <header class="page-header">
     <div>
-      <p class="eyebrow">INTELLIGENCE ARTIFICIELLE</p>
-      <h1>Votre agent IA</h1>
-      <p class="muted">Configurez ce que votre agent sait, comment il parle et ce qu’il peut faire, puis testez-le tout de suite.</p>
+      <h1 class="page-title">Agent IA</h1>
+      <p class="page-subtitle">Réglez ce que votre agent sait, comment il parle et ce qu’il peut faire, puis testez-le tout de suite.</p>
     </div>
-    <div class="agent-save-area">
-      <span id="agent-dirty" class="agent-dirty hidden" role="status">● Modifications non enregistrées</span>
-      <button class="primary" id="save-agent" type="button">Enregistrer</button>
+    <div class="page-actions">
+      <button type="button" class="btn btn-secondary agent-test-open" id="agent-test-open"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-circle-play"/></svg>Tester l’agent</button>
     </div>
-  </div>
+  </header>
 
-  <section class="panel agent-hero" aria-label="État de l’agent">
+  <section class="card agent-hero" aria-label="État de l’agent">
     <div class="agent-hero-identity">
-      <div class="agent-avatar" id="agent-avatar" aria-hidden="true">IA</div>
+      <div class="avatar avatar-lg avatar-brand agent-avatar" id="agent-avatar" aria-hidden="true">IA</div>
       <div class="agent-hero-text">
         <strong id="agent-hero-name">Assistant</strong>
         <span id="agent-hero-status" class="agent-status-pill on">Actif</span>
       </div>
-      <label class="agent-switch" title="Active ou désactive les réponses automatiques pour tous les prospects.">
+      <label class="switch switch-lg switch-success agent-switch" title="Active ou désactive les réponses automatiques pour tous vos clients.">
         <input id="global-ai-enabled" form="agent-form" type="checkbox" checked />
-        <span class="agent-switch-track" aria-hidden="true"></span>
+        <span class="switch-track" aria-hidden="true"></span>
         <span class="agent-switch-label">Réponses automatiques</span>
       </label>
     </div>
     <div class="agent-completeness">
       <div class="agent-completeness-head">
         <strong>Configuration</strong>
-        <span id="agent-score-label">0 / 5</span>
+        <span id="agent-score-label" class="num">0 / 5</span>
       </div>
-      <div class="agent-meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="agent-meter"><span id="agent-meter-fill"></span></div>
+      <div class="progress agent-meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="agent-meter"><span id="agent-meter-fill"></span></div>
       <ul id="agent-checklist" class="agent-checklist"></ul>
     </div>
   </section>
 
   <div class="agent-layout">
-    <div class="agent-main">
-      <div class="agent-tabs" role="tablist" aria-label="Sections de configuration">
-        <button type="button" class="agent-tab active" role="tab" data-agent-tab="identity">Identité</button>
-        <button type="button" class="agent-tab" role="tab" data-agent-tab="knowledge">Connaissances</button>
-        <button type="button" class="agent-tab" role="tab" data-agent-tab="behavior">Comportement</button>
-        <button type="button" class="agent-tab" role="tab" data-agent-tab="hours">Horaires</button>
-        <button type="button" class="agent-tab" role="tab" data-agent-tab="rules">Règles avancées</button>
-        <button type="button" class="agent-tab" role="tab" data-agent-tab="learning">Apprentissage</button>
-        <button type="button" class="agent-tab" role="tab" data-agent-tab="features">Fonctions</button>
-      </div>
+    <div class="tabs agent-tabs" role="tablist" aria-label="Sections de configuration">
+      <button type="button" class="tab agent-tab active" role="tab" data-agent-tab="identity">Identité</button>
+      <button type="button" class="tab agent-tab" role="tab" data-agent-tab="knowledge">Connaissances</button>
+      <button type="button" class="tab agent-tab" role="tab" data-agent-tab="behavior">Comportement</button>
+      <button type="button" class="tab agent-tab" role="tab" data-agent-tab="hours">Horaires</button>
+      <button type="button" class="tab agent-tab" role="tab" data-agent-tab="rules">Règles avancées</button>
+      <button type="button" class="tab agent-tab" role="tab" data-agent-tab="learning">Apprentissage</button>
+      <button type="button" class="tab agent-tab" role="tab" data-agent-tab="features">Fonctions</button>
+    </div>
 
-      <form id="agent-form" class="panel settings-form agent-form">
+    <div class="agent-main">
+      <form id="agent-form" class="agent-form">
+        <!-- Identité -->
         <div class="agent-pane" data-agent-pane="identity">
-          <div class="agent-pane-head">
-            <h2>Identité de l’agent</h2>
-            <p class="muted">Le nom que vos clients voient dans la conversation.</p>
-          </div>
-          <label>
-            Nom de l'agent
-            <input id="agent-name" required maxlength="80" placeholder="Ex. Awa, Assistante du Salon Belle Époque" />
-          </label>
-          <div class="form-actions agent-pane-save">
-            <button type="submit" class="primary">Enregistrer</button>
-          </div>
+          <section class="card card-pad form-grid">
+            <div class="pane-head">
+              <h2>Identité de l’agent</h2>
+              <p>Le prénom ou le nom que vos clients voient dans la conversation.</p>
+            </div>
+            <label class="field">
+              <span class="field-label">Nom de l’agent</span>
+              <input id="agent-name" required maxlength="80" placeholder="Ex. Awa, Assistante du Salon Belle Époque" />
+              <span class="hint">Un prénom courant met vos clients en confiance.</span>
+            </label>
+          </section>
         </div>
 
+        <!-- Connaissances -->
         <div class="agent-pane hidden" data-agent-pane="knowledge">
-          <div class="agent-pane-head">
-            <h2>Ce que l’agent sait de votre entreprise</h2>
-            <p class="muted">L’agent s’appuie sur ces informations pour répondre. Ce qui n’y figure pas, il ne l’invente pas : il propose de vous passer la main.</p>
-          </div>
-          <section id="config-assistant" class="panel config-assistant">
-            <div class="panel-heading">
-              <div>
-                <p class="eyebrow">ASSISTANT DE CONFIGURATION</p>
-                <h2>Remplir les informations de votre entreprise</h2>
-                <p class="muted">Donnez une source (texte, site web ou PDF) : l’assistant en extrait uniquement ce qui y est écrit. Il n’invente rien et vous validez avant d’enregistrer.</p>
-              </div>
+          <section id="config-assistant" class="card card-pad form-grid config-assistant">
+            <div class="pane-head">
+              <span class="badge violet"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-wand"/></svg>Assistant de configuration</span>
+              <h2>Remplir les informations à votre place</h2>
+              <p>Donnez une source (texte, site web ou PDF) : l’assistant en extrait uniquement ce qui y est écrit. Il n’invente rien et vous validez avant d’enregistrer.</p>
             </div>
-            <div class="ca-tabs" role="tablist">
-              <button type="button" class="ca-tab active" data-ca-tab="text" role="tab">Texte collé</button>
-              <button type="button" class="ca-tab" data-ca-tab="url" role="tab">Site web</button>
-              <button type="button" class="ca-tab" data-ca-tab="pdf" role="tab">Document PDF</button>
+            <div class="segmented ca-tabs" role="tablist">
+              <button type="button" class="ca-tab active" data-ca-tab="text" role="tab"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-message-text"/></svg>Texte collé</button>
+              <button type="button" class="ca-tab" data-ca-tab="url" role="tab"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-globe"/></svg>Site web</button>
+              <button type="button" class="ca-tab" data-ca-tab="pdf" role="tab"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-file-up"/></svg>Document PDF</button>
             </div>
-            <div class="ca-pane" data-ca-pane="text">
-              <textarea id="ca-text" rows="5" maxlength="60000" placeholder="Collez ici le texte de votre site, de votre page Facebook (copiez la section « À propos »), d’une brochure…"></textarea>
-              <p class="field-hint">Pour une page Facebook : ouvrez-la, copiez les informations visibles puis collez-les ici. L’assistant ne se connecte pas à Facebook.</p>
+            <div class="ca-pane field" data-ca-pane="text">
+              <textarea id="ca-text" rows="5" maxlength="60000" placeholder="Collez ici le texte de votre site, de votre page Facebook (copiez la section « À propos »), d’une brochure…" aria-label="Texte à analyser"></textarea>
+              <p class="hint">Pour une page Facebook : ouvrez-la, copiez les informations visibles puis collez-les ici. L’assistant ne se connecte pas à Facebook.</p>
             </div>
-            <div class="ca-pane hidden" data-ca-pane="url">
-              <input id="ca-url" type="url" placeholder="https://www.monentreprise.com" />
-              <p class="field-hint">Seules les pages publiques sont lues (la page indiquée et quelques pages « contact », « à propos »…).</p>
+            <div class="ca-pane field hidden" data-ca-pane="url">
+              <input id="ca-url" type="url" placeholder="https://www.monentreprise.com" aria-label="Adresse du site web" />
+              <p class="hint">Seules les pages publiques sont lues (la page indiquée et quelques pages « contact », « à propos »…).</p>
             </div>
-            <div class="ca-pane hidden" data-ca-pane="pdf">
-              <input id="ca-pdf" type="file" accept="application/pdf" />
-              <p class="field-hint">PDF avec texte sélectionnable, 5 Mo maximum.</p>
+            <div class="ca-pane field hidden" data-ca-pane="pdf">
+              <input id="ca-pdf" type="file" accept="application/pdf" aria-label="Document PDF" />
+              <p class="hint">PDF avec texte sélectionnable, 5 Mo maximum.</p>
             </div>
             <div class="ca-actions">
-              <button type="button" class="primary" id="ca-analyze">Analyser la source</button>
+              <button type="button" class="btn btn-primary" id="ca-analyze"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-wand"/></svg>Analyser la source</button>
               <span id="ca-status" class="muted" aria-live="polite"></span>
             </div>
             <div id="ca-result" class="ca-result hidden">
-              <p class="ca-notice">Relisez chaque ligne : l’assistant peut se tromper. Rien n’est enregistré tant que vous ne cliquez pas sur « Enregistrer les modifications ».</p>
+              <p class="ca-notice alert warning"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-alert"/></svg><span class="alert-body">Relisez chaque ligne : l’assistant peut se tromper. Rien n’est enregistré tant que vous ne cliquez pas sur « Enregistrer ».</span></p>
               <div id="ca-missing" class="ca-missing hidden"></div>
               <textarea id="ca-draft" rows="9" aria-label="Brouillon à relire et corriger"></textarea>
               <details id="ca-warnings" class="ca-warnings hidden"><summary></summary><ul></ul></details>
               <div class="ca-actions">
-                <button type="button" class="primary" id="ca-apply-replace">Utiliser ce texte</button>
-                <button type="button" class="ghost-button" id="ca-apply-append">Ajouter à la suite</button>
-                <button type="button" class="ghost-button" id="ca-discard">Ignorer</button>
+                <button type="button" class="btn btn-primary" id="ca-apply-replace">Utiliser ce texte</button>
+                <button type="button" class="btn btn-secondary" id="ca-apply-append">Ajouter à la suite</button>
+                <button type="button" class="btn btn-ghost" id="ca-discard">Ignorer</button>
               </div>
             </div>
           </section>
 
-          <label>
-            Informations sur votre activité
-            <textarea id="business-info" rows="12" aria-describedby="business-info-counter business-info-tip" placeholder="Présentez votre entreprise : activité, adresse, horaires, téléphone, livraison, moyens de paiement, conditions…"></textarea>
-            <span id="business-info-counter" class="agent-counter" data-counter-for="business-info"></span>
-          </label>
-          <p id="business-info-tip" class="agent-tip">Jusqu’à 50 000 caractères. Organisez votre texte par rubriques : présentation, services, tarifs, horaires, livraison et conditions. 💡 Plus c’est précis (horaires, tarifs, quartiers livrés, moyens de paiement), moins l’agent devra vous solliciter. N’écrivez que des informations exactes.</p>
-
-          <div class="agent-pane-head bh-section">
-            <h2>Localisation de la boutique</h2>
-            <p class="muted">L’agent peut envoyer automatiquement cette position GPS (comme une localisation WhatsApp, avec la carte et l’itinéraire) à un client qui demande où vous trouver.</p>
-          </div>
-          <div class="shop-location-actions">
-            <button type="button" class="primary" id="shop-location-capture">📍 Utiliser ma position actuelle</button>
-            <span id="shop-location-status" class="muted" aria-live="polite">Aucune position enregistrée.</span>
-          </div>
-          <div id="shop-location-set" class="shop-location-set hidden">
-            <iframe id="shop-location-map" class="shop-location-map" title="Aperçu de la position de la boutique" loading="lazy"></iframe>
-            <label>
-              <span class="field-label">Nom affiché au client (facultatif)</span>
-              <input id="shop-location-label" type="text" maxlength="80" placeholder="Ex. Boutique Awa — Akwa" />
+          <section class="card card-pad form-grid">
+            <div class="pane-head">
+              <h2>Ce que l’agent sait de votre entreprise</h2>
+              <p>L’agent s’appuie sur ces informations pour répondre. Ce qui n’y figure pas, il ne l’invente pas : il propose de vous passer la main.</p>
+            </div>
+            <label class="field">
+              <span class="field-label">Informations sur votre activité <span id="business-info-counter" class="agent-counter" data-counter-for="business-info"></span></span>
+              <textarea id="business-info" rows="14" aria-describedby="business-info-counter business-info-tip" placeholder="Présentez votre entreprise : activité, adresse, horaires, téléphone, livraison, moyens de paiement, conditions…"></textarea>
             </label>
-            <button type="button" class="text-button danger-text" id="shop-location-clear">Retirer la position</button>
-          </div>
-          <p class="agent-tip">📱 Pour une position exacte, ouvrez cette page depuis le téléphone qui est physiquement dans votre boutique, puis cliquez sur « Utiliser ma position actuelle ». Votre navigateur demandera la permission d’accéder à votre position.</p>
-          <div class="form-actions agent-pane-save">
-            <button type="submit" class="primary">Enregistrer</button>
-          </div>
+            <p id="business-info-tip" class="tip"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bulb"/></svg><span>Organisez votre texte par rubriques : présentation, services, tarifs, horaires, livraison, conditions. Plus c’est précis, moins l’agent devra vous solliciter. N’écrivez que des informations exactes (50 000 caractères au maximum).</span></p>
+          </section>
+
+          <section class="card card-pad form-grid">
+            <div class="pane-head">
+              <h2>Localisation de la boutique</h2>
+              <p>L’agent peut envoyer cette position GPS (comme une localisation WhatsApp, avec la carte et l’itinéraire) à un client qui demande où vous trouver.</p>
+            </div>
+            <div class="shop-location-actions">
+              <button type="button" class="btn btn-secondary" id="shop-location-capture"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-map-pin"/></svg>Utiliser ma position actuelle</button>
+              <span id="shop-location-status" class="muted" aria-live="polite">Aucune position enregistrée.</span>
+            </div>
+            <div id="shop-location-set" class="shop-location-set hidden">
+              <iframe id="shop-location-map" class="shop-location-map" title="Aperçu de la position de la boutique" loading="lazy"></iframe>
+              <label class="field">
+                <span class="field-label">Nom affiché au client <span class="optional">facultatif</span></span>
+                <input id="shop-location-label" type="text" maxlength="80" placeholder="Ex. Boutique Awa — Akwa" />
+              </label>
+              <div><button type="button" class="btn btn-sm btn-ghost btn-danger-ghost" id="shop-location-clear"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-trash"/></svg>Retirer la position</button></div>
+            </div>
+            <p class="tip"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-phone"/></svg><span>Pour une position exacte, ouvrez cette page depuis le téléphone qui se trouve dans votre boutique, puis appuyez sur « Utiliser ma position actuelle ». Votre navigateur demandera l’autorisation d’accéder à votre position.</span></p>
+          </section>
         </div>
 
+        <!-- Comportement -->
         <div class="agent-pane hidden" data-agent-pane="behavior">
-          <div class="agent-pane-head">
-            <h2>Comportement</h2>
-            <p class="muted">Le ton, les consignes et les informations à recueillir auprès de vos prospects.</p>
-          </div>
-          <label>
-            Instructions de l'agent
-            <textarea id="system-prompt" rows="8" maxlength="8000" required></textarea>
-            <span class="agent-counter" data-counter-for="system-prompt"></span>
-          </label>
-          <div class="agent-templates">
-            <label for="agent-template">Partir d’un modèle</label>
-            <select id="agent-template">
-              <option value="">Choisir un modèle d’instructions…</option>
-              <option value="boutique">Boutique / vente de produits</option>
-              <option value="salon">Salon de coiffure / beauté</option>
-              <option value="clinique">Clinique / cabinet</option>
-              <option value="restaurant">Restaurant / traiteur</option>
-              <option value="services">Prestataire de services</option>
-            </select>
-            <p class="muted">Un modèle remplace le contenu actuel après votre confirmation. Adaptez-le ensuite à votre entreprise.</p>
-          </div>
-          <fieldset class="qualification-fields">
-            <legend>Informations à collecter avant transfert</legend>
-            <p class="muted">Si aucun champ n'est sélectionné, l'IA suit uniquement vos instructions libres.</p>
-            <label><input type="checkbox" name="qualification-field" value="name" /> Nom du prospect</label>
-            <label><input type="checkbox" name="qualification-field" value="city" /> Ville</label>
-            <label><input type="checkbox" name="qualification-field" value="need" /> Besoin</label>
-            <label><input type="checkbox" name="qualification-field" value="budget" /> Budget</label>
-            <label><input type="checkbox" name="qualification-field" value="product" /> Produit ou service</label>
-            <label><input type="checkbox" name="qualification-field" value="urgency" /> Urgence</label>
-            <label><input type="checkbox" name="qualification-field" value="quartier" /> Quartier</label>
-            <div id="custom-qualification-fields" class="custom-qualification-fields"></div>
-            <div class="custom-field-creator">
-              <input id="custom-qualification-field-input" type="text" maxlength="60" placeholder="Ex. campus, filiere, telephone" />
-              <button type="button" class="ghost-button" id="create-qualification-field">Créer</button>
+          <section class="card card-pad form-grid">
+            <div class="pane-head">
+              <h2>Instructions de l’agent</h2>
+              <p>Son rôle, son ton et ses consignes, écrits comme vous les expliqueriez à un nouvel employé.</p>
             </div>
-            <p class="muted">Créez un champ personnalisé : il sera ajouté comme case cochée.</p>
-          </fieldset>
-          <label>
-            Message d'accueil
-            <textarea id="welcome-message" rows="3" maxlength="1000" placeholder="Ex. Bonjour 👋 Bienvenue chez Belle Époque, comment puis-je vous aider ?"></textarea>
-            <span class="agent-counter" data-counter-for="welcome-message"></span>
-            <small class="field-hint">Astuce : écrivez plusieurs versions séparées par une ligne contenant seulement <code>---</code>. L'agent en choisit une au hasard à chaque nouveau client, pour ne pas envoyer toujours le même texte (ce que WhatsApp surveille).</small>
-          </label>
-          <div class="form-actions agent-pane-save">
-            <button type="submit" class="primary">Enregistrer</button>
-          </div>
-        </div>
-
-        <div class="agent-pane hidden" data-agent-pane="hours">
-          <div class="agent-pane-head">
-            <h2>Horaires d’ouverture</h2>
-            <p class="muted">Quand votre entreprise est fermée, l’agent répond quand même, mais prévient le client que l’équipe sera disponible plus tard et note sa demande.</p>
-          </div>
-          <label class="agenda-switch">
-            <input id="bh-enabled" type="checkbox" />
-            <span>Mon entreprise a des horaires d’ouverture</span>
-          </label>
-          <div id="bh-details" class="bh-details">
-            <div id="bh-rows" class="bh-rows"></div>
-            <label>
-              <span class="field-label">Fuseau horaire</span>
-              <input id="bh-timezone" type="text" placeholder="Africa/Douala" />
+            <label class="field">
+              <span class="field-label">Instructions <span class="agent-counter" data-counter-for="system-prompt"></span></span>
+              <textarea id="system-prompt" rows="9" maxlength="8000" required></textarea>
             </label>
-            <label>
-              <span class="field-label">Consigne pour les heures de fermeture (facultatif)</span>
-              <textarea id="bh-closed-message" rows="3" maxlength="500" placeholder="Ex. Nous répondons dès 8 h. Pour une urgence, appelez le 6xx xx xx xx."></textarea>
-            </label>
-          </div>
-
-          <div class="form-actions agent-pane-save">
-            <button type="submit" class="primary">Enregistrer</button>
-          </div>
-        </div>
-
-        <div class="agent-pane hidden" data-agent-pane="rules">
-          <div class="agent-pane-head">
-            <h2>Règles avancées</h2>
-            <p class="muted">Des comportements facultatifs à activer un par un, selon vos besoins.</p>
-          </div>
-
-          <div class="agent-pane-head bh-section">
-            <h2>Relances automatiques</h2>
-            <p class="muted">Si un client intéressé ne répond plus, l’agent peut lui écrire un court message pour reprendre la conversation.</p>
-          </div>
-          <label class="agenda-switch">
-            <input id="fu-enabled" type="checkbox" />
-            <span>Relancer les clients intéressés qui ne répondent plus</span>
-          </label>
-          <div id="fu-details" class="bh-details">
-            <div class="agenda-grid">
-              <label>
-                <span class="field-label">Attendre avant de relancer</span>
-                <select id="fu-delay">
-                  <option value="2">2 heures</option>
-                  <option value="4">4 heures</option>
-                  <option value="8">8 heures</option>
-                  <option value="24">1 jour</option>
-                  <option value="48">2 jours</option>
-                  <option value="72">3 jours</option>
-                </select>
-              </label>
-              <label>
-                <span class="field-label">Nombre de relances maximum</span>
-                <select id="fu-max">
-                  <option value="1">1 relance</option>
-                  <option value="2">2 relances</option>
-                </select>
-              </label>
+            <div class="field agent-templates">
+              <label class="field-label" for="agent-template">Partir d’un modèle</label>
+              <select id="agent-template">
+                <option value="">Choisir un modèle d’instructions…</option>
+                <option value="boutique">Boutique / vente de produits</option>
+                <option value="salon">Salon de coiffure / beauté</option>
+                <option value="clinique">Clinique / cabinet</option>
+                <option value="restaurant">Restaurant / traiteur</option>
+                <option value="services">Prestataire de services</option>
+              </select>
+              <span class="hint">Un modèle remplace le contenu actuel après votre confirmation. Adaptez-le ensuite à votre entreprise.</span>
             </div>
-            <p class="agent-tip">🛡️ Garde-fous : seuls les clients étiquetés « Intéressé » dont le dernier message vient de l’agent sont relancés. Jamais pendant la fermeture de l’entreprise, jamais après un « STOP », et jamais si vous avez repris la conversation.</p>
-          </div>
+          </section>
 
-          <div class="agent-pane-head bh-section">
-            <h2>Sujet autorisé</h2>
-            <p class="muted">Si activé, l’agent ne répond à un nouveau client qu’une fois qu’il a écrit sur ce sujet ; avant cela, il reste silencieux (le message reste visible dans votre boîte de réception). Une fois le sujet abordé, il répond normalement à cette personne pour toute la suite.</p>
-          </div>
-          <label class="agenda-switch">
-            <input id="tg-enabled" type="checkbox" />
-            <span>Limiter l’agent à un sujet précis</span>
-          </label>
-          <div id="tg-details" class="bh-details">
-            <label>
-              <span class="field-label">Sujet autorisé</span>
-              <input id="tg-topic" type="text" maxlength="200" placeholder="Ex. nos vêtements" />
-              <span class="field-hint">Décrivez le sujet en quelques mots : l’agent l’utilisera pour juger si un message s’y rapporte.</span>
+          <section class="card card-pad form-grid">
+            <div class="pane-head">
+              <h2>Message d’accueil</h2>
+              <p>Envoyé une seule fois, au tout premier message d’un nouveau client.</p>
+            </div>
+            <label class="field">
+              <span class="field-label">Message <span class="agent-counter" data-counter-for="welcome-message"></span></span>
+              <textarea id="welcome-message" rows="4" maxlength="1000" placeholder="Ex. Bonjour 👋 Bienvenue chez Belle Époque, comment puis-je vous aider ?"></textarea>
             </label>
-            <p class="agent-tip">⚠️ Un client qui écrit sur autre chose ne reçoit aucune réponse automatique tant qu’il n’a pas abordé ce sujet. Cela peut donner l’impression que votre service ne répond pas : à utiliser seulement si c’est vraiment ce que vous voulez.</p>
-          </div>
+            <p class="tip"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bulb"/></svg><span>Écrivez plusieurs versions séparées par une ligne contenant seulement <code>---</code>. L’agent en choisit une au hasard à chaque nouveau client, pour ne pas envoyer toujours le même texte (ce que WhatsApp surveille).</span></p>
+          </section>
 
-          <div class="agent-pane-head bh-section">
-            <h2>Publicité Facebook/Instagram uniquement</h2>
-            <p class="muted">Si activé, l’agent ne répond qu’aux nouveaux clients arrivés en cliquant sur le bouton WhatsApp d’une publicité « Cliquer pour WhatsApp » (Facebook ou Instagram). Les autres messages restent visibles dans votre boîte de réception, sans réponse automatique.</p>
-          </div>
-          <label class="agenda-switch">
-            <input id="ad-only-enabled" type="checkbox" />
-            <span>Ne répondre qu’aux clients venus d’une publicité</span>
-          </label>
-          <p class="agent-tip">⚠️ Ne détecte que les clients qui ont réellement cliqué sur le bouton de la publicité (identifiant technique transmis par WhatsApp). Un client qui a vu la publicité puis écrit de lui-même, ou un ancien client, ne sera pas reconnu et ne recevra aucune réponse automatique tant que cette option est activée.</p>
-
-          <div class="agent-pane-head bh-section">
-            <h2>Négociation de prix</h2>
-            <p class="muted">Si activé, l’agent peut accorder une petite remise naturelle quand un client négocie — jamais plus que la marge que vous autorisez, et jamais en dessous du prix plancher qu’il calcule lui-même pour chaque produit.</p>
-          </div>
-          <label class="agenda-switch">
-            <input id="neg-enabled" type="checkbox" />
-            <span>Autoriser l’agent à négocier les prix</span>
-          </label>
-          <div id="neg-details" class="bh-details">
-            <fieldset class="neg-limit">
-              <legend class="field-label">Remise maximale autorisée</legend>
-              <div class="neg-modes" role="radiogroup" aria-label="Type de remise maximale">
-                <label class="neg-mode"><input type="radio" name="neg-mode" id="neg-mode-percent" value="percent" checked /><span>En pourcentage</span></label>
-                <label class="neg-mode"><input type="radio" name="neg-mode" id="neg-mode-amount" value="amount" /><span>En montant fixe</span></label>
+          <section class="card card-pad form-grid">
+            <fieldset class="qualification-fields">
+              <legend class="pane-head">
+                <h2>Informations à recueillir</h2>
+                <p>Ce que l’agent demande au client avant de vous le transmettre. Si rien n’est coché, il suit uniquement vos instructions.</p>
+              </legend>
+              <div class="check-grid">
+                <label class="check-card"><input type="checkbox" name="qualification-field" value="name" /><span>Nom</span></label>
+                <label class="check-card"><input type="checkbox" name="qualification-field" value="city" /><span>Ville</span></label>
+                <label class="check-card"><input type="checkbox" name="qualification-field" value="quartier" /><span>Quartier</span></label>
+                <label class="check-card"><input type="checkbox" name="qualification-field" value="need" /><span>Besoin</span></label>
+                <label class="check-card"><input type="checkbox" name="qualification-field" value="product" /><span>Produit ou service</span></label>
+                <label class="check-card"><input type="checkbox" name="qualification-field" value="budget" /><span>Budget</span></label>
+                <label class="check-card"><input type="checkbox" name="qualification-field" value="urgency" /><span>Urgence</span></label>
               </div>
-              <div class="neg-value" id="neg-percent-field">
-                <label for="neg-max-discount" class="sr-only">Pourcentage maximal de remise</label>
-                <div class="input-suffix"><input id="neg-max-discount" type="number" inputmode="numeric" min="1" max="50" step="1" value="10" /><span>%</span></div>
-                <p class="agent-tip">De 1 à 50 %. Exemple : avec 10 %, un article à 25 000 FCFA ne descend jamais sous 22 500 FCFA.</p>
-              </div>
-              <div class="neg-value hidden" id="neg-amount-field">
-                <label for="neg-max-amount" class="sr-only">Montant maximal de remise en FCFA</label>
-                <div class="input-suffix"><input id="neg-max-amount" type="number" inputmode="numeric" min="100" step="100" placeholder="2000" /><span>FCFA</span></div>
-                <p class="agent-tip">Le même montant maximal s’applique à chaque article. Exemple : avec 2 000 FCFA, un article à 25 000 FCFA ne descend jamais sous 23 000 FCFA. Pour protéger vos petits articles, la remise ne dépasse jamais la moitié du prix.</p>
+              <div id="custom-qualification-fields" class="check-grid custom-qualification-fields"></div>
+              <div class="field">
+                <span class="field-label">Ajouter une information à recueillir <span class="optional">facultatif</span></span>
+                <div class="custom-field-creator">
+                  <input id="custom-qualification-field-input" type="text" maxlength="60" placeholder="Ex. taille, pointure, date de l’événement" aria-label="Nom de l’information à recueillir" />
+                  <button type="button" class="btn btn-secondary" id="create-qualification-field"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-plus"/></svg>Ajouter</button>
+                </div>
               </div>
             </fieldset>
-            <p class="agent-tip">💬 L’agent ne lâche jamais tout d’un coup : il propose au maximum 2 à 3 petites baisses progressives, en restant naturel et chaleureux, comme un vrai vendeur. Fonctionne uniquement sur les produits dont le prix est écrit avec des chiffres (ex. « 25 000 FCFA ») ; les prix « sur devis » ne sont pas négociés.</p>
-          </div>
-          <div class="form-actions agent-pane-save">
-            <button type="submit" class="primary">Enregistrer</button>
-          </div>
+          </section>
         </div>
 
+        <!-- Horaires -->
+        <div class="agent-pane hidden" data-agent-pane="hours">
+          <section class="card card-pad">
+            <div class="setting-row">
+              <div class="setting-text">
+                <p class="setting-title">Mon entreprise a des horaires d’ouverture</p>
+                <p class="setting-desc">Quand vous êtes fermé, l’agent répond quand même, mais prévient le client que l’équipe sera disponible plus tard et note sa demande.</p>
+              </div>
+              <label class="switch"><input id="bh-enabled" type="checkbox" aria-label="Mon entreprise a des horaires d’ouverture" /><span class="switch-track" aria-hidden="true"></span></label>
+            </div>
+            <div id="bh-details" class="setting-details bh-details">
+              <div id="bh-rows" class="bh-rows"></div>
+              <label class="field">
+                <span class="field-label">Fuseau horaire</span>
+                <input id="bh-timezone" type="text" placeholder="Africa/Douala" />
+              </label>
+              <label class="field">
+                <span class="field-label">Consigne pour les heures de fermeture <span class="optional">facultatif</span></span>
+                <textarea id="bh-closed-message" rows="3" maxlength="500" placeholder="Ex. Nous répondons dès 8 h. Pour une urgence, appelez le 6xx xx xx xx."></textarea>
+              </label>
+            </div>
+          </section>
+        </div>
+
+        <!-- Règles avancées -->
+        <div class="agent-pane hidden" data-agent-pane="rules">
+          <section class="card card-pad">
+            <div class="setting-row">
+              <span class="icon-tile primary-tile" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><use href="#i-bell"/></svg></span>
+              <div class="setting-text">
+                <p class="setting-title">Relances automatiques</p>
+                <p class="setting-desc">Si un client intéressé ne répond plus, l’agent lui écrit un court message pour reprendre la conversation.</p>
+              </div>
+              <label class="switch"><input id="fu-enabled" type="checkbox" aria-label="Relancer les clients intéressés qui ne répondent plus" /><span class="switch-track" aria-hidden="true"></span></label>
+            </div>
+            <div id="fu-details" class="setting-details bh-details">
+              <div class="field-row">
+                <label class="field">
+                  <span class="field-label">Attendre avant de relancer</span>
+                  <select id="fu-delay">
+                    <option value="2">2 heures</option>
+                    <option value="4">4 heures</option>
+                    <option value="8">8 heures</option>
+                    <option value="24">1 jour</option>
+                    <option value="48">2 jours</option>
+                    <option value="72">3 jours</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span class="field-label">Nombre de relances maximum</span>
+                  <select id="fu-max">
+                    <option value="1">1 relance</option>
+                    <option value="2">2 relances</option>
+                  </select>
+                </label>
+              </div>
+              <p class="tip"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-shield"/></svg><span>Garde-fous : seuls les clients « Intéressé » dont le dernier message vient de l’agent sont relancés. Jamais pendant la fermeture, jamais après un « STOP », et jamais si vous avez repris la conversation.</span></p>
+            </div>
+          </section>
+
+          <section class="card card-pad">
+            <div class="setting-row">
+              <span class="icon-tile success" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><use href="#i-handshake"/></svg></span>
+              <div class="setting-text">
+                <p class="setting-title">Négociation de prix</p>
+                <p class="setting-desc">L’agent peut accorder une petite remise quand un client négocie, jamais plus que la marge que vous autorisez.</p>
+              </div>
+              <label class="switch"><input id="neg-enabled" type="checkbox" aria-label="Autoriser l’agent à négocier les prix" /><span class="switch-track" aria-hidden="true"></span></label>
+            </div>
+            <div id="neg-details" class="setting-details bh-details">
+              <fieldset class="neg-limit field">
+                <legend class="field-label">Remise maximale autorisée</legend>
+                <div class="segmented neg-modes" role="radiogroup" aria-label="Type de remise maximale">
+                  <label class="neg-mode"><input type="radio" name="neg-mode" id="neg-mode-percent" value="percent" checked /><span>En pourcentage</span></label>
+                  <label class="neg-mode"><input type="radio" name="neg-mode" id="neg-mode-amount" value="amount" /><span>En montant fixe</span></label>
+                </div>
+                <div class="neg-value field" id="neg-percent-field">
+                  <label for="neg-max-discount" class="sr-only">Pourcentage maximal de remise</label>
+                  <div class="input-suffix"><input id="neg-max-discount" type="number" inputmode="numeric" min="1" max="50" step="1" value="10" /><span>%</span></div>
+                  <p class="hint">De 1 à 50 %. Exemple : avec 10 %, un article à 25 000 FCFA ne descend jamais sous 22 500 FCFA.</p>
+                </div>
+                <div class="neg-value field hidden" id="neg-amount-field">
+                  <label for="neg-max-amount" class="sr-only">Montant maximal de remise en FCFA</label>
+                  <div class="input-suffix"><input id="neg-max-amount" type="number" inputmode="numeric" min="100" step="100" placeholder="2000" /><span>FCFA</span></div>
+                  <p class="hint">Le même montant maximal s’applique à chaque article. Exemple : avec 2 000 FCFA, un article à 25 000 FCFA ne descend jamais sous 23 000 FCFA. Pour protéger vos petits articles, la remise ne dépasse jamais la moitié du prix.</p>
+                </div>
+              </fieldset>
+              <p class="tip"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bulb"/></svg><span>L’agent ne lâche jamais tout d’un coup : il propose au maximum 2 à 3 petites baisses progressives, comme un vrai vendeur. Fonctionne sur les produits dont le prix est écrit en chiffres (ex. « 25 000 FCFA ») ; les prix « sur devis » ne sont pas négociés.</span></p>
+            </div>
+          </section>
+
+          <section class="card card-pad">
+            <div class="setting-row">
+              <span class="icon-tile violet" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><use href="#i-target"/></svg></span>
+              <div class="setting-text">
+                <p class="setting-title">Limiter l’agent à un sujet précis</p>
+                <p class="setting-desc">L’agent ne répond à un nouveau client qu’une fois qu’il a écrit sur ce sujet. Avant cela il reste silencieux ; le message reste visible dans vos conversations.</p>
+              </div>
+              <label class="switch"><input id="tg-enabled" type="checkbox" aria-label="Limiter l’agent à un sujet précis" /><span class="switch-track" aria-hidden="true"></span></label>
+            </div>
+            <div id="tg-details" class="setting-details bh-details">
+              <label class="field">
+                <span class="field-label">Sujet autorisé</span>
+                <input id="tg-topic" type="text" maxlength="200" placeholder="Ex. nos vêtements" />
+                <span class="hint">Décrivez le sujet en quelques mots : l’agent s’en sert pour juger si un message s’y rapporte.</span>
+              </label>
+              <p class="tip warning"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-alert"/></svg><span>Un client qui écrit sur autre chose ne reçoit aucune réponse automatique tant qu’il n’a pas abordé ce sujet. Cela peut donner l’impression que votre service ne répond pas : à utiliser seulement si c’est vraiment ce que vous voulez.</span></p>
+            </div>
+          </section>
+
+          <section class="card card-pad">
+            <div class="setting-row">
+              <span class="icon-tile warning" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><use href="#i-megaphone"/></svg></span>
+              <div class="setting-text">
+                <p class="setting-title">Ne répondre qu’aux clients venus d’une publicité</p>
+                <p class="setting-desc">L’agent ne répond qu’aux nouveaux clients arrivés par le bouton WhatsApp d’une publicité Facebook ou Instagram. Les autres messages restent visibles dans vos conversations, sans réponse automatique.</p>
+              </div>
+              <label class="switch"><input id="ad-only-enabled" type="checkbox" aria-label="Ne répondre qu’aux clients venus d’une publicité" /><span class="switch-track" aria-hidden="true"></span></label>
+            </div>
+            <p class="tip warning rule-note"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-alert"/></svg><span>Ne détecte que les clients qui ont réellement cliqué sur le bouton de la publicité. Un client qui a vu la publicité puis écrit de lui-même, ou un ancien client, ne sera pas reconnu et ne recevra aucune réponse automatique tant que cette option est activée.</span></p>
+          </section>
+        </div>
+
+        <!-- Fonctions -->
         <div class="agent-pane hidden" data-agent-pane="features">
-          <div class="agent-pane-head">
-            <h2>Fonctions de l’agent</h2>
-            <p class="muted">Ce que l’agent peut faire en plus de répondre aux questions. Chaque fonction se règle sur sa page.</p>
-          </div>
-          <div class="agent-feature-list">
-            <article class="agent-feature" data-feature="products">
-              <div><strong>Catalogue produits</strong><p class="muted">L’agent recommande vos produits et envoie leurs photos.</p></div>
-              <span class="agent-feature-state" id="feature-products-state">…</span>
-              <button type="button" class="ghost-button" data-goto-view="products">Configurer</button>
-            </article>
-            <article class="agent-feature" data-feature="appointments">
-              <div><strong>Prise de rendez-vous</strong><p class="muted">L’agent propose vos créneaux libres et réserve.</p></div>
-              <span class="agent-feature-state" id="feature-appointments-state">…</span>
-              <button type="button" class="ghost-button" data-goto-view="appointments">Configurer</button>
-            </article>
-            <article class="agent-feature" data-feature="orders">
-              <div><strong>Prise de commande</strong><p class="muted">L’agent enregistre produit, quantité et adresse.</p></div>
-              <span class="agent-feature-state" id="feature-orders-state">…</span>
-              <button type="button" class="ghost-button" data-goto-view="orders">Configurer</button>
-            </article>
-            <article class="agent-feature" data-feature="whatsapp">
-              <div><strong>Numéro WhatsApp</strong><p class="muted">Le numéro sur lequel l’agent répond à vos clients.</p></div>
-              <span class="agent-feature-state" id="feature-whatsapp-state">Voir la page</span>
-              <button type="button" class="ghost-button" data-goto-view="whatsapp">Ouvrir</button>
-            </article>
-          </div>
-          <div class="form-actions agent-pane-save">
-            <button type="submit" class="primary">Enregistrer</button>
-          </div>
+          <section class="card">
+            <div class="card-header"><div><h2 class="card-title">Fonctions de l’agent</h2><p class="card-subtitle">Ce que l’agent peut faire en plus de répondre aux questions. Chaque fonction se règle sur sa page.</p></div></div>
+            <div class="agent-feature-list list">
+              <article class="list-row agent-feature" data-feature="products">
+                <span class="icon-tile" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><use href="#i-package"/></svg></span>
+                <div class="list-main"><span class="list-title">Catalogue produits</span><span class="list-sub">L’agent recommande vos produits et envoie leurs photos.</span></div>
+                <span class="agent-feature-state badge neutral" id="feature-products-state">…</span>
+                <button type="button" class="btn btn-sm btn-secondary" data-goto-view="products">Configurer</button>
+              </article>
+              <article class="list-row agent-feature" data-feature="appointments">
+                <span class="icon-tile" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><use href="#i-calendar"/></svg></span>
+                <div class="list-main"><span class="list-title">Prise de rendez-vous</span><span class="list-sub">L’agent propose vos créneaux libres et réserve.</span></div>
+                <span class="agent-feature-state badge neutral" id="feature-appointments-state">…</span>
+                <button type="button" class="btn btn-sm btn-secondary" data-goto-view="appointments">Configurer</button>
+              </article>
+              <article class="list-row agent-feature" data-feature="orders">
+                <span class="icon-tile" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><use href="#i-bag"/></svg></span>
+                <div class="list-main"><span class="list-title">Prise de commande</span><span class="list-sub">L’agent enregistre produit, quantité et adresse.</span></div>
+                <span class="agent-feature-state badge neutral" id="feature-orders-state">…</span>
+                <button type="button" class="btn btn-sm btn-secondary" data-goto-view="orders">Configurer</button>
+              </article>
+              <article class="list-row agent-feature" data-feature="whatsapp">
+                <span class="icon-tile" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><use href="#i-whatsapp"/></svg></span>
+                <div class="list-main"><span class="list-title">Numéro WhatsApp</span><span class="list-sub">Le numéro sur lequel l’agent répond à vos clients.</span></div>
+                <span class="agent-feature-state badge neutral" id="feature-whatsapp-state">Voir la page</span>
+                <button type="button" class="btn btn-sm btn-secondary" data-goto-view="whatsapp">Ouvrir</button>
+              </article>
+            </div>
+          </section>
         </div>
       </form>
 
-      <section class="panel agent-pane agent-learning hidden" data-agent-pane="learning" id="agent-learning">
-        <div class="agent-pane-head">
-          <h2>Ce que l’agent a appris de vous</h2>
-          <p class="muted">Quand une réponse n’est pas bonne, ouvrez la conversation, cliquez sur « Pourquoi cette réponse ? » puis « Corriger ». L’agent s’en souvient pour les questions semblables. Vous pouvez aussi ajouter une règle ici.</p>
-        </div>
-        <div class="learning-add">
-          <label><span class="field-label">Quand le client demande… (facultatif)</span>
-            <input id="learn-question" type="text" maxlength="300" placeholder="Ex. Vous livrez à Bonamoussadi ?" />
-          </label>
-          <label><span class="field-label">L’agent doit répondre</span>
-            <textarea id="learn-answer" rows="3" maxlength="1000" placeholder="Ex. Oui, nous livrons à Bonamoussadi pour 1 000 FCFA, sous 24 h."></textarea>
-          </label>
-          <div><button type="button" class="primary" id="learn-add">Ajouter cette règle</button></div>
+      <!-- Apprentissage (hors du formulaire : chaque règle s'enregistre tout de suite) -->
+      <section class="agent-pane agent-learning hidden" data-agent-pane="learning" id="agent-learning">
+        <div class="card card-pad form-grid">
+          <div class="pane-head">
+            <h2>Ce que l’agent a appris de vous</h2>
+            <p>Quand une réponse n’est pas bonne, ouvrez la conversation, cliquez sur « Pourquoi cette réponse ? » puis « Corriger ». L’agent s’en souvient pour les questions semblables. Vous pouvez aussi ajouter une règle ici.</p>
+          </div>
+          <div class="learning-add form-grid">
+            <label class="field"><span class="field-label">Quand le client demande… <span class="optional">facultatif</span></span>
+              <input id="learn-question" type="text" maxlength="300" placeholder="Ex. Vous livrez à Bonamoussadi ?" />
+            </label>
+            <label class="field"><span class="field-label">L’agent doit répondre</span>
+              <textarea id="learn-answer" rows="3" maxlength="1000" placeholder="Ex. Oui, nous livrons à Bonamoussadi pour 1 000 FCFA, sous 24 h."></textarea>
+            </label>
+            <div><button type="button" class="btn btn-primary" id="learn-add"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-plus"/></svg>Ajouter cette règle</button></div>
+          </div>
         </div>
         <div id="learning-list" class="learning-list" aria-live="polite"></div>
-        <p class="agent-tip">💡 L’agent s’inspire aussi, tout seul, de vos conversations passées qui ont abouti à une commande ou un rendez-vous (sans jamais reprendre de nom ni de numéro).</p>
+        <p class="tip"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bulb"/></svg><span>L’agent s’inspire aussi, tout seul, de vos conversations passées qui ont abouti à une commande ou à un rendez-vous (sans jamais reprendre de nom ni de numéro).</span></p>
       </section>
     </div>
 
-    <aside class="agent-side">
-          <section class="panel agent-playground">
-            <div class="panel-heading">
-              <div>
-                <p class="eyebrow">SIMULATION SANS WHATSAPP</p>
-                <h2>Tester l'agent avec un prospect</h2>
-                <p class="muted">Aucune conversation, commande ou réservation n’est créée et aucun message WhatsApp n’est envoyé. Un test réussi valide votre étape de démarrage. Le testeur montre ce que l’agent ferait vraiment : rendez-vous, commande, photos, passage de main.</p>
-              </div>
-              <button type="button" class="ghost-button" id="clear-agent-test">Réinitialiser</button>
-            </div>
-            <div id="agent-test-messages" class="agent-test-messages">
-              <div class="empty-state">Écrivez un premier message pour simuler un prospect.</div>
-            </div>
-            <div id="agent-test-state" class="agent-test-state hidden" aria-live="polite"></div>
-            <form id="agent-test-form" class="agent-test-form">
-              <input id="agent-test-input" type="text" maxlength="4000" placeholder="Ex. Bonjour, je voudrais connaître vos services" />
-              <button type="submit" class="primary" id="agent-test-send">Envoyer</button>
-            </form>
-            <div class="agent-test-attach" role="group" aria-label="Simuler l’envoi d’un fichier par le client">
-              <span class="muted">Le client envoie :</span>
-              <button type="button" class="chip-button" data-test-media="payment_proof">📷 Capture de paiement</button>
-              <button type="button" class="chip-button" data-test-media="product_photo">📷 Photo d’un produit</button>
-              <button type="button" class="chip-button" data-test-media="document">📎 Document</button>
-              <button type="button" class="chip-button" id="agent-test-file-button">🖼️ Mon fichier…</button>
-              <input id="agent-test-file" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" class="hidden" />
-            </div>
-            <div id="agent-test-result" class="agent-test-result hidden"></div>
-          </section>
+    <!-- Testeur : colonne de droite sur grand écran, panneau à ouvrir sur les écrans plus petits -->
+    <aside class="agent-side drawer agent-tester" id="agent-tester" aria-label="Tester l’agent">
+      <section class="agent-playground">
+        <header class="tester-head">
+          <div class="tester-head-text">
+            <strong>Tester l’agent</strong>
+            <small>Simulation : rien n’est envoyé ni enregistré</small>
+          </div>
+          <button type="button" class="btn-icon btn-sm btn-ghost" id="clear-agent-test" data-tip="Recommencer" data-tip-pos="left" aria-label="Recommencer la simulation"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-reset"/></svg></button>
+          <button type="button" class="btn-icon btn-sm btn-ghost tester-close" data-drawer-close aria-label="Fermer le testeur"><svg class="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-close"/></svg></button>
+        </header>
+        <div id="agent-test-messages" class="agent-test-messages"></div>
+        <div id="agent-test-state" class="agent-test-state hidden" aria-live="polite"></div>
+        <div id="agent-test-result" class="agent-test-result hidden"></div>
+        <div class="agent-test-attach" role="group" aria-label="Simuler l’envoi d’un fichier par le client">
+          <span class="tester-attach-label">Le client envoie</span>
+          <button type="button" class="chip chip-button" data-test-media="payment_proof"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-receipt"/></svg>Preuve de paiement</button>
+          <button type="button" class="chip chip-button" data-test-media="product_photo"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-camera"/></svg>Photo d’un produit</button>
+          <button type="button" class="chip chip-button" data-test-media="document"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-file"/></svg>Document</button>
+          <button type="button" class="chip chip-button" id="agent-test-file-button"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-paperclip"/></svg>Mon fichier</button>
+          <input id="agent-test-file" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" class="hidden" />
+        </div>
+        <form id="agent-test-form" class="agent-test-form">
+          <div class="reply-box">
+            <input id="agent-test-input" type="text" maxlength="4000" placeholder="Écrivez comme un client…" aria-label="Message du client simulé" autocomplete="off" />
+            <button type="submit" class="btn btn-primary btn-icon reply-send" id="agent-test-send" aria-label="Envoyer"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-send"/></svg></button>
+          </div>
+        </form>
+      </section>
     </aside>
+  </div>
+
+  <!-- Barre d'enregistrement : n'apparaît que lorsqu'il y a des modifications à enregistrer -->
+  <div id="agent-dirty" class="save-bar hidden" role="status">
+    <span class="save-bar-text"><span class="dot warning"></span>Modifications non enregistrées</span>
+    <div class="save-bar-actions">
+      <button type="button" class="btn btn-ghost" id="agent-discard">Annuler</button>
+      <button type="button" class="btn btn-primary" id="save-agent"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"/></svg>Enregistrer</button>
+    </div>
   </div>
 </section>

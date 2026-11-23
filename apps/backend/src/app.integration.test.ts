@@ -94,6 +94,9 @@ describe.skipIf(!integrationEnabled)("API complète (HTTP, base réelle)", () =>
 
       const { token: agentToken, response } = await login("fatou@example.com");
       expect(response.statusCode).toBe(200);
+      // Le rôle accompagne la connexion : le tableau de bord masque tout de suite ce qu'un employé n'a pas à voir.
+      expect(response.json().user).toEqual({ email: "fatou@example.com", role: "AGENT" });
+      expect((await login("owner@example.com")).response.json().user).toEqual({ email: "owner@example.com", role: "ADMIN" });
       const me = await app.inject({ method: "GET", url: "/me", headers: authed(agentToken) });
       expect(me.json().user).toMatchObject({ email: "fatou@example.com", name: "Fatou", role: "AGENT" });
 
@@ -461,7 +464,7 @@ describe.skipIf(!integrationEnabled)("API complète (HTTP, base réelle)", () =>
       const response = await chat(organization.id, token, { messages: [{ role: "user", content: "Comment connecter mon WhatsApp ?" }] });
       expect(response.statusCode).toBe(200);
       expect(response.json()).toEqual({ reply: "Allez dans la page « WhatsApp ».", openView: "whatsapp" });
-      expect(prompts[0]).toContain("Appareils liés");
+      expect(prompts[0]).toContain("Appareils connectés");
       expect(prompts[0]).toContain("WhatsApp : NON connecté");
       expect(prompts[0]).toContain("Produits : 1 (dont 1 disponibles)");
       expect(prompts[0]).toContain("Entreprise : Salon Éclat");

@@ -1,78 +1,90 @@
-<!-- VIEW: PRODUCTS -->
+<!-- VUE : PRODUITS — le catalogue que l'agent utilise pour recommander, donner les prix et envoyer les photos. -->
 <section id="products-view" class="view hidden">
-  <div class="page-heading">
+  <header class="page-header">
     <div>
-      <p class="eyebrow">CATALOGUE COMMERCIAL</p>
-      <h1>Produits</h1>
-      <p class="muted">Ajoutez vos offres pour que l’agent recommande le bon produit et partage sa photo.</p>
+      <h1 class="page-title">Produits</h1>
+      <p class="page-subtitle">Votre catalogue : l’agent s’en sert pour recommander le bon article, donner son prix exact et envoyer sa photo.</p>
     </div>
+    <div class="page-actions">
+      <button type="button" class="btn btn-primary" id="add-product"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-plus"/></svg>Ajouter un produit</button>
+    </div>
+  </header>
+
+  <div class="toolbar products-toolbar">
+    <div class="input-group toolbar-search">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-search"/></svg>
+      <input id="products-search" type="search" placeholder="Rechercher un produit" aria-label="Rechercher un produit" autocomplete="off" />
+    </div>
+    <div id="products-categories" class="chips scroll-x" role="group" aria-label="Filtrer par catégorie"></div>
+    <span id="products-count" class="toolbar-count" aria-live="polite"></span>
   </div>
 
-  <div class="products-layout">
-    <form id="product-form" class="panel settings-form product-form">
-      <h2 id="product-form-title">Ajouter un produit</h2>
+  <div id="products-list" class="products-grid" aria-live="polite">
+    <div class="card product-card"><span class="skeleton product-card-image"></span><div class="product-card-content"><span class="skeleton skeleton-line" style="width:70%"></span><span class="skeleton skeleton-line" style="width:40%"></span></div></div>
+    <div class="card product-card"><span class="skeleton product-card-image"></span><div class="product-card-content"><span class="skeleton skeleton-line" style="width:60%"></span><span class="skeleton skeleton-line" style="width:35%"></span></div></div>
+    <div class="card product-card"><span class="skeleton product-card-image"></span><div class="product-card-content"><span class="skeleton skeleton-line" style="width:75%"></span><span class="skeleton skeleton-line" style="width:45%"></span></div></div>
+    <div class="card product-card"><span class="skeleton product-card-image"></span><div class="product-card-content"><span class="skeleton skeleton-line" style="width:55%"></span><span class="skeleton skeleton-line" style="width:30%"></span></div></div>
+  </div>
 
-      <!-- Photo en premier : c'est ce que le client verra sur WhatsApp -->
-      <div class="product-photo-block">
-        <div class="product-image-preview-wrap">
-          <img id="product-image-preview" class="hidden" alt="Aperçu du produit" />
-          <span id="product-image-empty">Aucune photo sélectionnée</span>
-        </div>
-        <div class="product-photo-field">
-          <span class="field-label">Photo du produit</span>
+  <!-- Fiche produit : ajout et modification -->
+  <aside class="drawer" id="product-drawer" aria-labelledby="product-form-title" aria-hidden="true">
+    <header class="drawer-header">
+      <div>
+        <h2 id="product-form-title" class="drawer-title">Ajouter un produit</h2>
+        <p class="muted">La photo et la description sont ce que votre client recevra.</p>
+      </div>
+      <button type="button" class="btn-icon btn-ghost" data-drawer-close aria-label="Fermer"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-close"/></svg></button>
+    </header>
+    <form id="product-form" class="product-form drawer-form">
+      <div class="drawer-body form-grid">
+        <!-- Photo en premier : c'est ce que le client verra sur WhatsApp -->
+        <div class="product-photo-block">
+          <label class="product-image-preview-wrap" for="product-image-file">
+            <img id="product-image-preview" class="hidden" alt="Aperçu du produit" />
+            <span id="product-image-empty" class="product-image-empty"><svg class="icon icon-xl" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-image"/></svg><b>Ajouter une photo</b><small>JPEG, PNG ou WebP · 5 Mo maximum</small></span>
+          </label>
           <div class="file-control">
-            <label class="ghost-button" for="product-image-file">
-              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg>
-              Choisir une photo
-            </label>
+            <label class="btn btn-secondary btn-sm" for="product-image-file"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-upload"/></svg>Choisir une photo</label>
             <input id="product-image-file" type="file" accept="image/jpeg,image/png,image/webp" />
             <span id="product-image-filename" class="file-control-name">Aucun fichier choisi</span>
           </div>
-          <span class="field-hint">JPEG, PNG ou WebP, 5 Mo maximum. L’agent la partage avec le client.</span>
         </div>
-      </div>
 
-      <label>
-        <span class="field-label">Nom du produit <span class="field-note">(obligatoire)</span></span>
-        <input id="product-name" type="text" maxlength="160" required />
-      </label>
-
-      <label>
-        <span class="field-label">Description et caractéristiques <span class="field-note">(obligatoire)</span></span>
-        <textarea id="product-description" rows="5" maxlength="3000" required></textarea>
-        <span class="field-hint">Matière, tailles, usages, livraison… L’agent s’en sert pour répondre aux questions.</span>
-      </label>
-
-      <div class="product-form-row">
-        <label>
-          <span class="field-label">Catégorie</span>
-          <input id="product-category" type="text" maxlength="120" />
+        <label class="field">
+          <span class="field-label">Nom du produit</span>
+          <input id="product-name" type="text" maxlength="160" required placeholder="Ex. Robe wax « Élégance »" />
         </label>
-        <label>
-          <span class="field-label">Prix</span>
-          <input id="product-price" type="text" maxlength="80" placeholder="Ex. 25 000 FCFA" />
+
+        <label class="field">
+          <span class="field-label">Description et caractéristiques</span>
+          <textarea id="product-description" rows="5" maxlength="3000" required placeholder="Matière, tailles, couleurs, usages, délai de livraison…"></textarea>
+          <span class="hint">L’agent s’en sert pour répondre aux questions de vos clients. Plus c’est précis, mieux il répond.</span>
         </label>
+
+        <div class="field-row">
+          <label class="field">
+            <span class="field-label">Prix <span class="optional">facultatif</span></span>
+            <input id="product-price" type="text" maxlength="80" placeholder="Ex. 25 000 FCFA" />
+          </label>
+          <label class="field">
+            <span class="field-label">Catégorie <span class="optional">facultatif</span></span>
+            <input id="product-category" type="text" maxlength="120" placeholder="Ex. Robes" list="product-categories-list" />
+            <datalist id="product-categories-list"></datalist>
+          </label>
+        </div>
+
+        <label id="product-active-label" class="switch product-active-label hidden">
+          <input id="product-active" type="checkbox" checked />
+          <span class="switch-track" aria-hidden="true"></span>
+          <span class="info-switch-text"><b>Produit disponible</b><small>Désactivé, l’agent ne le propose plus à vos clients.</small></span>
+        </label>
+
+        <input id="product-id" type="hidden" />
       </div>
-
-      <label id="product-active-label" class="product-active-label hidden">
-        <input id="product-active" type="checkbox" checked />
-        <span>Produit disponible</span>
-      </label>
-
-      <input id="product-id" type="hidden" />
-
-      <div class="product-form-actions">
-        <button id="save-product" type="submit" class="primary">Ajouter au catalogue</button>
-        <button id="cancel-product-edit" type="button" class="ghost-button hidden">Annuler</button>
-      </div>
+      <footer class="drawer-footer">
+        <button id="cancel-product-edit" type="button" class="btn btn-secondary">Annuler</button>
+        <button id="save-product" type="submit" class="btn btn-primary">Ajouter au catalogue</button>
+      </footer>
     </form>
-
-    <section class="products-list-section">
-      <div class="products-list-heading">
-        <h2>Catalogue</h2>
-        <span id="products-count" class="muted"></span>
-      </div>
-      <div id="products-list" class="products-list" aria-live="polite"></div>
-    </section>
-  </div>
+  </aside>
 </section>
