@@ -59,9 +59,31 @@ const VIEW_TOURS = {
   },
 };
 
+/**
+ * Guide « ce qui a changé », pour les habitués de l'ancien tableau de bord : ils ont déjà vu le guide de l'accueil
+ * (dans l'ancienne interface), on leur montre une fois les nouveaux repères. `when` réserve une étape à une mise
+ * en page : le menu est à gauche sur ordinateur, en bas de l'écran sur téléphone.
+ */
+const REDESIGN_KEY = "nouveautes";
+const REDESIGN_GUIDE = {
+  label: "votre nouveau tableau de bord",
+  steps: [
+    { when: "desktop", selector: "#sidebar .nav", title: "Votre tableau de bord a changé", text: "Le menu est maintenant regroupé : vos ventes, votre agent, votre compte. « Vue d'ensemble » s'appelle désormais « Accueil »." },
+    { when: "mobile", selector: ".tabbar", title: "Votre tableau de bord a changé", text: "Vos pages principales sont maintenant ici, en bas de l'écran. « Plus » ouvre toutes les autres." },
+    { selector: ".todo-card", title: "Ce qu'il y a à faire", text: "Tout ce qui attend une action de votre part est réuni ici : clients à qui répondre, paiements à vérifier, commandes à confirmer." },
+    { selector: "#command-trigger, .topbar-search", title: "Recherche rapide", text: "Retrouvez un client, une page ou une action en tapant quelques lettres." },
+  ],
+};
+
 /** Premier élément réellement affiché parmi ceux que désigne le sélecteur (un élément masqué ne peut pas être montré). */
 function visibleTarget(selector) {
-  return Array.from(document.querySelectorAll(selector)).find((element) => element.offsetParent !== null && element.getBoundingClientRect().height > 0) || null;
+  return Array.from(document.querySelectorAll(selector)).find((element) => {
+    // getClientRects plutôt que offsetParent : ce dernier est nul pour un élément en position fixe (barre d'onglets
+    // du téléphone, barre du haut), qui est pourtant bien à l'écran.
+    if (!element.getClientRects().length || getComputedStyle(element).visibility === "hidden") return false;
+    const box = element.getBoundingClientRect();
+    return box.height > 0 && box.right > 0 && box.left < window.innerWidth;
+  }) || null;
 }
 
 let active = null; // { steps, index, elements, onDone }
@@ -72,7 +94,11 @@ function seenKey(view) {
 }
 
 function markSeen(view) {
-  try { localStorage.setItem(seenKey(view), "1"); } catch { /* stockage indisponible : le guide pourra se rejouer, ce n'est pas grave */ }
+  try {
+    localStorage.setItem(seenKey(view), "1");
+    // Qui découvre l'accueil avec son guide connaît déjà la nouvelle interface : pas de « ce qui a changé » pour lui.
+    if (view === "overview") localStorage.setItem(seenKey(REDESIGN_KEY), "1");
+  } catch { /* stockage indisponible : le guide pourra se rejouer, ce n'est pas grave */ }
 }
 
 function hasSeen(view) {
@@ -189,11 +215,13 @@ function showStep(index) {
     positionCursorAndSpotlight(els, rect);
     els.cursor.classList.remove("clicking");
     window.setTimeout(() => els.cursor.classList.add("clicking"), STEP_TRANSITION_MS);
-    positionTooltip(els, rect);
+    // Le texte d'abord : la bulle est placée d'après sa hauteur réelle (sinon, au-dessus d'un élément du bas de
+    // l'écran, elle le recouvrait en s'agrandissant).
     els.stepCount.textContent = `Étape ${index + 1} sur ${steps.length}`;
     els.title.textContent = step.title;
     els.text.textContent = step.text;
     els.next.textContent = index + 1 === steps.length ? "Terminer" : "Suivant";
+    positionTooltip(els, rect);
     els.tooltip.classList.add("visible");
   });
 }
@@ -244,11 +272,17 @@ function blockingModalOpen() {
 }
 
 export function runTour(view) {
-  const config = VIEW_TOURS[view];
+  start(view, view, VIEW_TOURS[view]);
+}
+
+/** `key` : ce qui est mémorisé comme « déjà vu » ; `view` : la page sur laquelle le guide a un sens. */
+function start(key, view, config) {
   if (!config || active || blockingModalOpen()) return;
-  markSeen(view);
+  markSeen(key);
+  const layout = window.matchMedia("(max-width: 1023px)").matches ? "mobile" : "desktop";
+  const steps = config.steps.filter((step) => !step.when || step.when === layout);
   const els = buildOverlay();
-  active = { view, steps: config.steps, label: config.label, els, index: 0 };
+  active = { view, steps, label: config.label, els, index: 0 };
   els.next.onclick = next;
   els.skip.onclick = skip;
   document.addEventListener("keydown", onKeydown);
@@ -260,6 +294,16 @@ export function maybeStartViewTour(view) {
   // Un guide encore ouvert sur un autre onglet n'a plus de sens ici : ses repères pointeraient sur des éléments
   // qui ne sont plus affichés. On le ferme plutôt que de laisser un cadre orphelin sur la nouvelle page.
   if (active && active.view !== view) skip();
+  // Habitué de l'ancien tableau de bord (il a déjà vu le guide de l'accueil) : une fois, ce qui a changé.
+  if (view === "overview" && hasSeen("overview") && !hasSeen(REDESIGN_KEY) && !active && !pending.has(REDESIGN_KEY)) {
+    pending.add(REDESIGN_KEY);
+    window.setTimeout(() => {
+      pending.delete(REDESIGN_KEY);
+      // L'utilisateur est peut-être déjà parti sur une autre page : le guide attendra son retour sur l'accueil.
+      if (document.body.dataset.currentView === "overview") start(REDESIGN_KEY, "overview", REDESIGN_GUIDE);
+    }, 900);
+    return;
+  }
   if (!VIEW_TOURS[view] || hasSeen(view) || active || pending.has(view)) return;
   pending.add(view);
   window.setTimeout(() => {

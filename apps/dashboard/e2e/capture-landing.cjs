@@ -25,7 +25,7 @@ const OUT = path.join(__dirname, "..", "assets", "screens");
 // 1366 px : la largeur d'ordinateur portable la plus courante ; la boîte de réception y montre ses trois volets.
 const VIEWPORT = { width: 1366, height: 863 };
 const SIZES = [[1200, 758, 84], [2400, 1516, 76]];
-const VIEWS_WITH_TOUR = ["overview", "whatsapp", "agent", "inbox", "products", "broadcasts", "orders", "appointments", "billing", "settings"];
+const SEEN_GUIDES = ["overview", "whatsapp", "agent", "inbox", "products", "broadcasts", "nouveautes"];
 const ANNOUNCEMENT = "Bonjour ! La nouvelle collection de robes wax est arrivée en boutique. Livraison offerte à Douala jusqu'à samedi.";
 
 async function save(page, name) {
@@ -54,7 +54,7 @@ const show = async (page, view) => {
       localStorage.setItem("brayano_session", JSON.stringify({ email: session.user.email, token: session.token, organizationId: session.organizationId, role: "ADMIN" }));
       for (const view of views) localStorage.setItem(`brayano_tour_seen:${view}`, "1");
     } catch { /* cadre tiers (carte) : pas de stockage */ }
-  }, { session, views: VIEWS_WITH_TOUR });
+  }, { session, views: SEEN_GUIDES });
 
   const page = await context.newPage();
   // Compte dont le numéro est relié : même état pour la page WhatsApp et pour le guide de démarrage.

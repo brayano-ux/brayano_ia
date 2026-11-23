@@ -24,7 +24,7 @@ const VIEWS = {
 };
 
 /** Les guides pas à pas (un par page, à la première visite) couvrent l'écran : on les marque « déjà vus » avant de charger. */
-const TOUR_VIEWS = ["overview", "whatsapp", "agent", "inbox", "products", "broadcasts"];
+const TOUR_VIEWS = ["overview", "whatsapp", "agent", "inbox", "products", "broadcasts", "nouveautes"];
 async function skipTours(context) {
   await context.addInitScript((views) => {
     try { for (const view of views) localStorage.setItem(`brayano_tour_seen:${view}`, "1"); } catch { /* stockage indisponible */ }
