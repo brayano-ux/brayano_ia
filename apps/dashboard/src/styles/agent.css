@@ -148,7 +148,7 @@ input[type="file"]::file-selector-button { margin-right: 12px; padding: 6px 12px
 
 /* Grand écran : le testeur est une colonne fixe, toujours sous les yeux. */
 @media (min-width: 1180px) {
-  .agent-tester.drawer { position: sticky; top: calc(var(--topbar-height) + var(--agent-tabs-height) + var(--space-3)); right: auto; bottom: auto; z-index: auto; width: auto; height: calc(100dvh - var(--topbar-height) - var(--agent-tabs-height) - var(--space-3) - var(--space-5)); max-height: 720px; transform: none; visibility: visible; border: 1px solid var(--border); border-radius: var(--radius-xl); box-shadow: var(--shadow-sm); overflow: hidden; transition: none; background: var(--surface); }
+  .agent-tester.drawer { position: sticky; top: calc(var(--topbar-height) + var(--agent-tabs-height) + var(--space-3)); right: auto; bottom: auto; z-index: auto; width: auto; height: calc(var(--vh-full) - var(--topbar-height) - var(--agent-tabs-height) - var(--space-3) - var(--space-5)); max-height: 720px; transform: none; visibility: visible; border: 1px solid var(--border); border-radius: var(--radius-xl); box-shadow: var(--shadow-sm); overflow: hidden; transition: none; background: var(--surface); }
   .tester-close, .agent-test-open { display: none; }
 }
 @media (max-width: 1179px) {
@@ -179,7 +179,7 @@ input[type="file"]::file-selector-button { margin-right: 12px; padding: 6px 12px
   .custom-field-creator { flex-direction: column; }
   .learning-foot { padding-left: var(--space-4); }
   .learning-body { padding: var(--space-4); }
-  .agent-tester.drawer { max-height: 92dvh; height: 92dvh; }
+  .agent-tester.drawer { max-height: calc(var(--vh-full) * 0.92); height: calc(var(--vh-full) * 0.92); }
   .agent-feature { flex-wrap: wrap; }
   .agent-feature .list-main { flex-basis: calc(100% - 52px); }
   .agent-feature .agent-feature-state { margin-left: 48px; }

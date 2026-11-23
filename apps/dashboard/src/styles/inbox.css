@@ -5,7 +5,7 @@
 ============================================================ */
 
 /* La page Conversations remplit exactement l'écran sous la barre du haut (et sous les bandeaux éventuels). */
-body[data-current-view="inbox"] .main { height: 100dvh; min-height: 0; }
+body[data-current-view="inbox"] .main { height: var(--vh-full); min-height: 0; }
 body[data-current-view="inbox"] .views-root { flex: 1 1 auto; min-height: 0; }
 .view.view-full { max-width: none; padding: 0; height: 100%; display: block; animation: none; }
 .view.view-full.hidden { display: none; }
@@ -136,7 +136,7 @@ body[data-current-view="inbox"] .views-root { flex: 1 1 auto; min-height: 0; }
 
 /* ---------- Photo en grand ---------- */
 .lightbox { position: fixed; inset: 0; z-index: var(--z-modal); display: grid; place-items: center; padding: var(--space-6); background: rgba(4, 8, 16, 0.86); cursor: zoom-out; animation: fade-in var(--normal) var(--ease); }
-.lightbox img { max-width: 100%; max-height: calc(100dvh - 2 * var(--space-6)); border-radius: var(--radius-lg); box-shadow: var(--shadow-xl); }
+.lightbox img { max-width: 100%; max-height: calc(var(--vh-full) - 2 * var(--space-6)); border-radius: var(--radius-lg); box-shadow: var(--shadow-xl); }
 .lightbox-close { position: absolute; top: 16px; right: 16px; background: rgba(255, 255, 255, 0.14); color: #fff; border-radius: 50%; }
 .lightbox-close:hover { background: rgba(255, 255, 255, 0.24); }
 

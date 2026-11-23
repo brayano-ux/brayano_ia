@@ -2,7 +2,7 @@
    CONNEXION ET INSCRIPTION : présentation à gauche (grand écran),
    formulaire à droite. Sur téléphone, le formulaire seul.
 ============================================================ */
-.auth-screen { min-height: 100dvh; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); background: var(--surface); }
+.auth-screen { min-height: var(--vh-full); display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); background: var(--surface); }
 .auth-screen.hidden { display: none; }
 
 .auth-aside { position: relative; display: flex; flex-direction: column; gap: var(--space-8); padding: var(--space-10) clamp(32px, 5vw, 72px); color: #fff; background: radial-gradient(900px 520px at 12% -10%, rgba(31, 107, 255, 0.55), transparent 60%), radial-gradient(700px 480px at 108% 108%, rgba(25, 211, 255, 0.28), transparent 62%), linear-gradient(160deg, #0a1c4d, #061029 68%); overflow: hidden; }

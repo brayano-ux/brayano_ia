@@ -10,6 +10,8 @@
    le thème ; les teintes brutes (--brand-500…) ne changent jamais.
 ============================================================ */
 :root {
+  /* Hauteur de l'écran : 100dvh suit la barre d'adresse des téléphones ; 100vh pour les navigateurs qui ne connaissent pas cette unité. */
+  --vh-full: 100vh;
   color-scheme: light;
 
   /* ----- Teintes de la marque ----- */
@@ -242,4 +244,8 @@
   --chart-1-soft: rgba(77, 139, 255, 0.14);
   --chart-grid: #1c2536;
   --chart-axis: #2a3449;
+}
+
+@supports (height: 100dvh) {
+  :root { --vh-full: 100dvh; }
 }
