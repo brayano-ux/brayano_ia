@@ -182,6 +182,8 @@ export async function loadInbox({ silent = false } = {}) {
     const signature = signatureOf(conversations);
     const changed = signature !== listSignature;
     listSignature = signature;
+    // L'accueil (« À traiter », « Dernières conversations ») se remet à jour quand la liste a changé.
+    if (changed) document.dispatchEvent(new CustomEvent("brayano:conversations-updated"));
     if (isInboxVisible() && (changed || !silent)) renderInbox();
 
     if (!silent && isInboxVisible()) {

@@ -1,4 +1,5 @@
 import { $ } from "../../utils/dom.js";
+import { isAgentRole } from "./roles.js";
 
 /**
  * Pastille d'état de l'en-tête. Elle reflète la connexion WhatsApp réelle (la seule chose qui compte pour le
@@ -18,7 +19,8 @@ export function setSystemStatus(status) {
   if (entry.tone) pill.classList.add(entry.tone);
   const text = pill.querySelector(".system-status-text");
   if (text) text.textContent = entry.text;
-  pill.title = `${entry.text} — cliquer pour ouvrir la page WhatsApp`;
+  // Seul le propriétaire peut ouvrir la page WhatsApp : pour un employé, la pastille n'est qu'une information.
+  pill.title = isAgentRole() ? entry.text : `${entry.text} — cliquer pour ouvrir la page WhatsApp`;
   // Le même état est rappelé par un point dans le menu, à côté de « WhatsApp ».
   const dot = $("#nav-wa-dot");
   if (dot) dot.className = `dot${status === "CONNECTED" ? " success" : status === "QR_PENDING" ? " warning" : status === "DISCONNECTED" ? " danger" : ""}`;

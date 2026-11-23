@@ -161,6 +161,14 @@ function markClean() {
   $("#agent-dirty").classList.add("hidden");
 }
 
+/**
+ * L'utilisateur quitte la page sans enregistrer (ou sa session se termine) : il n'y a plus de modification en
+ * attente. Les réglages enregistrés sont rechargés à la prochaine ouverture de la page.
+ */
+export function discardAgentChanges() {
+  markClean();
+}
+
 function setActiveTab(tab) {
   $$(".agent-tab").forEach((button) => {
     const active = button.dataset.agentTab === tab;
@@ -291,6 +299,7 @@ async function applyTemplate() {
 }
 
 function initAgentChrome() {
+  document.addEventListener("brayano:session-ended", discardAgentChanges);
   $("#agent-form").noValidate = true;
   $$(".agent-tab").forEach((button) => {
     button.onclick = () => setActiveTab(button.dataset.agentTab);

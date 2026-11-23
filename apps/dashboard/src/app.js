@@ -5,13 +5,14 @@ import { loadOrganizations } from "./features/organizations/organizations.js";
 import { currentView, initNavigation, navigate, registerLeaveGuard, routeView, setView, updateRealtimeHeader, VIEWS } from "./features/navigation/navigation.js";
 import { exportProspects, initOverview, refreshOverview } from "./features/overview/overview.js";
 import { initInbox, loadInbox, openConversation, bindInboxRefresh, setInboxFilter } from "./features/inbox/inbox.js";
-import { hasUnsavedAgentChanges, initAgent, loadSettings, openAgentSection } from "./features/agent/agent.js";
+import { contactName } from "./features/inbox/conversation-item.js";
+import { discardAgentChanges, hasUnsavedAgentChanges, initAgent, loadSettings, openAgentSection } from "./features/agent/agent.js";
 import { initDelaySettings, loadDelaySettings } from "./features/settings/delay-settings.js";
 import { initRoutingSettings, loadRoutingConfig } from "./features/settings/routing-settings.js";
 import { loadPlatformSuspension } from "./features/suspension/suspension.js";
 import { initWhatsapp, loadWhatsApp } from "./features/whatsapp/whatsapp.js";
 import { initProducts, loadProducts, openProductForm } from "./features/products/products.js";
-import { hasUnsavedAgendaChanges, initAppointments, loadAppointments } from "./features/appointments/appointments.js";
+import { discardAgendaChanges, hasUnsavedAgendaChanges, initAppointments, loadAppointments } from "./features/appointments/appointments.js";
 import { initOrders, loadOrders, setOrdersFilter } from "./features/orders/orders.js";
 import { initBroadcasts, loadBroadcastsView } from "./features/broadcasts/broadcasts.js";
 import { initHelp } from "./features/help/help.js";
@@ -207,10 +208,12 @@ function initPalette() {
       { label: "Se déconnecter", icon: "logout", keywords: "quitter sortir", run: () => $("#logout-button")?.click() },
     ].filter((action) => !(action.admin && isAgentRole())),
     conversations: () => (getState().conversations || []).map((conversation) => {
-      const phone = String(conversation.contact?.whatsappJid || "").split("@")[0];
+      // Seul un identifiant « @s.whatsapp.net » est un numéro de téléphone (WhatsApp masque parfois le numéro).
+      const jid = String(conversation.contact?.whatsappJid || "");
+      const phone = jid.endsWith("@s.whatsapp.net") ? jid.split("@")[0] : "";
       return {
-        label: conversation.contact?.displayName || `+${phone}`,
-        hint: conversation.contact?.displayName ? `+${phone}` : "Conversation WhatsApp",
+        label: contactName(conversation.contact),
+        hint: conversation.contact?.displayName && phone ? `+${phone}` : "Conversation WhatsApp",
         phone,
         avatar: true,
         run: () => void openConversationInInbox(conversation.id),
@@ -229,8 +232,8 @@ function bootstrap() {
   // Le rôle mémorisé évite d'afficher un instant le menu complet à un employé (le serveur reste seul juge des droits).
   applyRole(readSession()?.role === "AGENT" ? "AGENT" : "ADMIN");
   bindInboxRefresh(refreshAll);
-  registerLeaveGuard("agent", hasUnsavedAgentChanges);
-  registerLeaveGuard("appointments", hasUnsavedAgendaChanges);
+  registerLeaveGuard("agent", hasUnsavedAgentChanges, discardAgentChanges);
+  registerLeaveGuard("appointments", hasUnsavedAgendaChanges, discardAgendaChanges);
   initNavigation(viewLoaders);
   initOverview();
   initOnboarding(async (action) => {

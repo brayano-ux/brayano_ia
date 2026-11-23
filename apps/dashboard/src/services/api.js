@@ -47,7 +47,7 @@ export async function api(path, options = {}) {
     : await response.text().catch(() => "");
 
   if (!response.ok) {
-    const error = new Error((typeof payload === "string" ? payload : payload.message) || "La requête a échoué.");
+    const error = new Error((typeof payload === "string" ? plainMessage(payload, response.status) : payload.message) || "La requête a échoué.");
     error.status = response.status;
     // Une réponse tardive d’une ancienne session ne doit pas déconnecter la nouvelle.
     if (response.status === 401 && protectedRequest && session?.token && readSession()?.token === session.token) {
@@ -59,6 +59,18 @@ export async function api(path, options = {}) {
 
   if (response.status === 204) return null;
   return payload;
+}
+
+/**
+ * Réponse d'erreur qui n'est pas du JSON : souvent la page HTML d'un serveur intermédiaire pendant un redémarrage.
+ * On n'affiche jamais ce code à l'utilisateur.
+ */
+function plainMessage(text, status) {
+  const trimmed = String(text).trim();
+  if (!trimmed || trimmed.startsWith("<") || trimmed.length > 200) {
+    return status >= 500 ? "Le serveur est momentanément indisponible. Réessayez dans un instant." : "";
+  }
+  return trimmed;
 }
 
 export function isNetworkError(error) {

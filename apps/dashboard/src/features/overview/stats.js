@@ -246,17 +246,23 @@ function render(stats) {
 /**
  * @param {{ onLoaded?: () => void, openConversation?: (id: string) => void, openAgentSection?: (tab: string, focus: string) => void }} [nextCallbacks]
  */
+let statsRequest = 0;
+
 export async function loadStats(nextCallbacks) {
   if (nextCallbacks) callbacks = { ...callbacks, ...nextCallbacks };
   const body = $("#stats-body");
   if (!body || !getState().organizationId) return;
   // Pendant le rechargement, on garde l'affichage précédent (légèrement estompé) : pas de saut de mise en page.
   if (latest) body.classList.add("is-refreshing");
+  // Deux périodes demandées coup sur coup : seule la dernière s'affiche, quel que soit l'ordre des réponses.
+  const request = ++statsRequest;
   try {
     const { stats } = await api(`/organizations/${getState().organizationId}/stats?days=${days}`);
+    if (request !== statsRequest) return;
     latest = stats;
     render(stats);
   } catch (error) {
+    if (request !== statsRequest) return;
     latest = null;
     body.classList.remove("is-refreshing");
     body.innerHTML = `<div class="card"><div class="empty"><span class="empty-icon">${icon("alert")}</span><p class="empty-title">Chiffres indisponibles</p><p class="empty-text">${escapeHtml(error.message || "Impossible de charger les chiffres.")}</p><button type="button" class="btn btn-secondary" id="stats-retry">${icon("refresh")}Réessayer</button></div></div>`;

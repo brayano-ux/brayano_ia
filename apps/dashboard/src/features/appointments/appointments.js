@@ -94,6 +94,13 @@ function agendaSnapshot() {
   ]);
 }
 
+/** L'utilisateur quitte la page sans enregistrer : les réglages reviennent à leur dernier état enregistré. */
+export function discardAgendaChanges() {
+  if (settings) fillSettingsForm();
+  else cleanAgendaSnapshot = "";
+  refreshDirty();
+}
+
 /** Vrai si les réglages de l'agenda ont été modifiés sans être enregistrés. */
 export function hasUnsavedAgendaChanges() {
   return Boolean(cleanAgendaSnapshot) && agendaSnapshot() !== cleanAgendaSnapshot;
@@ -291,7 +298,9 @@ export async function loadAppointments() {
     ]);
     settings = settingsResult.settings;
     appointments = listResult.appointments;
-    fillSettingsForm();
+    // Des réglages en cours de modification ne sont pas remis à zéro par une simple mise à jour de la liste
+    // (rendez-vous marqué « Terminé », rendez-vous ajouté…).
+    if (!hasUnsavedAgendaChanges()) fillSettingsForm();
     renderAppointments();
   } catch (error) {
     $("#appointments-list").innerHTML = `<div class="card"><div class="empty"><span class="empty-icon">${icon("alert")}</span><p class="empty-title">Agenda indisponible</p><p class="empty-text">${escapeHtml(error.message || "Impossible de charger l’agenda.")}</p></div></div>`;
@@ -299,6 +308,11 @@ export async function loadAppointments() {
 }
 
 export function initAppointments() {
+  // Fin de session : il n'y a plus rien « à enregistrer » pour ce compte.
+  document.addEventListener("brayano:session-ended", () => {
+    cleanAgendaSnapshot = "";
+    refreshDirty();
+  });
   window.addEventListener("beforeunload", (event) => {
     if (hasUnsavedAgendaChanges()) {
       event.preventDefault();

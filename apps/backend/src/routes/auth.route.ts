@@ -268,7 +268,7 @@ export async function authRoute(app: FastifyInstance) {
     try {
       const organizationId = await ensureDefaultAdminOrganization(email);
       const configuredAdmin = getConfiguredAdminCredentials();
-      const dbUser = await prisma.user.findUnique({ where: { email }, select: { id: true, organizationId: true, passwordHash: true, active: true } });
+      const dbUser = await prisma.user.findUnique({ where: { email }, select: { id: true, organizationId: true, passwordHash: true, active: true, role: true } });
 
       let isValidPassword = false;
       if (dbUser) isValidPassword = await verifyPassword(password, dbUser.passwordHash);
@@ -303,7 +303,8 @@ export async function authRoute(app: FastifyInstance) {
 
       clearRateLimit(failureKey);
       const token = await issueToken(email, issuedOrganizationId);
-      return { token, organizationId: issuedOrganizationId, user: { email } };
+      // Le rôle accompagne la connexion : le tableau de bord masque tout de suite ce qu'un employé n'a pas à voir.
+      return { token, organizationId: issuedOrganizationId, user: { email, role: dbUser?.role === "AGENT" ? "AGENT" : "ADMIN" } };
     } catch (error) {
       app.log.error(error, "Login failed");
       reply.code(error instanceof AppError ? error.statusCode : 500);

@@ -1,3 +1,4 @@
+import { interruptTour } from "../tour/tour.js";
 import { api } from "../../services/api.js";
 import { icon } from "../../ui/icons.js";
 import { $, escapeHtml, showToast } from "../../utils/dom.js";
@@ -240,6 +241,8 @@ export async function checkFirstLoginPersona() {
     $("#persona-business-missing").classList.add("hidden");
     renderPersonaCards();
     renderStep();
+    // Le guide de la page a pu démarrer pendant la vérification : il ne doit pas recouvrir cette fenêtre.
+    interruptTour();
     $("#persona-modal").classList.remove("hidden");
   } catch {
     // Si la vérification échoue, on ne bloque jamais l'accès au tableau de bord.

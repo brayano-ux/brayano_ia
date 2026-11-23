@@ -1,3 +1,4 @@
+import { applyRole } from "../navigation/roles.js";
 import { api, isNetworkError, isAuthenticationError, setUnauthorizedHandler } from "../../services/api.js";
 import { clearSession, isAuthenticated, readSession, writeOrganizationId, writeSession } from "../../services/storage.js";
 import { askFields } from "../../utils/ask.js";
@@ -62,8 +63,9 @@ export function logoutUser(mode = "login") {
   if (isAuthenticated()) void api("/logout", { method: "POST" }).catch(() => undefined);
   clearSession();
   // Panneaux, fenêtres et recherche rapide appartiennent à la session qui se termine : aucun voile ne doit
-  // recouvrir l'écran de connexion.
+  // recouvrir l'écran de connexion. Les modifications non enregistrées sont abandonnées avec elle.
   document.dispatchEvent(new CustomEvent("brayano:close-overlays"));
+  document.dispatchEvent(new CustomEvent("brayano:session-ended"));
   $(".app-shell").classList.add("hidden");
   $("#login-screen").classList.remove("hidden");
   document.body.classList.remove("is-authenticated", "in-thread");
@@ -85,11 +87,15 @@ async function authenticateUser(email, password) {
     body: JSON.stringify({ email: normalizedEmail, password }),
   });
 
+  // Le rôle arrive avec la connexion : un employé ne voit pas le menu du propriétaire, même un instant.
+  const role = response.user.role === "AGENT" ? "AGENT" : response.user.role === "ADMIN" ? "ADMIN" : null;
   writeSession({
     email: response.user.email,
     token: response.token,
     organizationId: response.organizationId || null,
+    ...(role ? { role } : {}),
   });
+  if (role) applyRole(role);
 
   if (response.organizationId) {
     writeOrganizationId(response.organizationId);

@@ -264,6 +264,17 @@ function next() {
   else finish();
 }
 
+/**
+ * Une fenêtre prioritaire s'ouvre (première connexion) : le guide en cours lui laisse la place et se rejouera à
+ * la prochaine visite de la page, comme s'il n'avait pas commencé.
+ */
+export function interruptTour() {
+  if (!active) return;
+  const { key } = active;
+  cleanup();
+  try { localStorage.removeItem(seenKey(key)); } catch { /* stockage indisponible */ }
+}
+
 /** Lance le guide d'un onglet manuellement (utilisable depuis l'aide, même si déjà vu). */
 function blockingModalOpen() {
   // Le guide ne doit jamais s'afficher par-dessus une fenêtre qui attend une décision de l'utilisateur
@@ -282,7 +293,7 @@ function start(key, view, config) {
   const layout = window.matchMedia("(max-width: 1023px)").matches ? "mobile" : "desktop";
   const steps = config.steps.filter((step) => !step.when || step.when === layout);
   const els = buildOverlay();
-  active = { view, steps, label: config.label, els, index: 0 };
+  active = { key, view, steps, label: config.label, els, index: 0 };
   els.next.onclick = next;
   els.skip.onclick = skip;
   document.addEventListener("keydown", onKeydown);

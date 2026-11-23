@@ -22,7 +22,13 @@ export function conversationStatusTone(item) {
 }
 
 export function contactName(contact) {
-  return contact?.displayName || formatPhone(contact?.whatsappJid) || "Contact";
+  if (contact?.displayName) return contact.displayName;
+  const jid = contact?.whatsappJid || "";
+  if (jid.endsWith("@s.whatsapp.net")) return formatPhone(jid) || "Client WhatsApp";
+  // WhatsApp masque parfois le numéro (identifiant « @lid ») : ce n'est pas un téléphone, on ne l'affiche pas
+  // comme tel. Les derniers chiffres distinguent deux clients sans nom.
+  const tail = jid.split("@")[0].replace(/\D/g, "").slice(-4);
+  return tail ? `Client WhatsApp · ${tail}` : "Client WhatsApp";
 }
 
 /** Dernier message : la liste légère renvoie `lastMessage` ; l'ancien format renvoyait tout le fil. */

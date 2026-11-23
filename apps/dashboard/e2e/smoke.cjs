@@ -147,6 +147,19 @@ async function desktopJourney(browser, failures) {
   await page.waitForTimeout(700);
   if (!(await page.isVisible("#products-view"))) failures.push("La recherche rapide n'ouvre pas la page « Produits ».");
 
+  // ---- Bouton « Précédent » avec un panneau ouvert : la page change et rien ne reste ouvert par-dessus
+  await page.click("#add-product");
+  await page.waitForSelector("#product-drawer.open", { timeout: 5_000 }).catch(() => undefined);
+  await page.goBack();
+  await page.waitForTimeout(700);
+  if (await page.isVisible("#products-view")) failures.push("« Précédent » avec un panneau ouvert ne change pas de page.");
+  if ((await page.locator(".drawer.open, .drawer-backdrop.open, .confirm-dialog").count()) > 0) failures.push("« Précédent » laisse un panneau ou son voile ouvert par-dessus la page suivante.");
+  await clickNav(page, '.nav-item[data-view="products"]');
+
+  // ---- « Aller au contenu » (clavier) : reste sur la page
+  await page.evaluate(() => document.querySelector(".skip-link")?.click());
+  if (!(await page.isVisible("#products-view")) || new URL(page.url()).hash !== `#/${VIEWS.products}`) failures.push("Le lien « Aller au contenu » fait quitter la page en cours.");
+
   // ---- Produits : ajout puis suppression (panneau latéral, menu d'actions, fenêtre de confirmation)
   const productName = `Produit de test ${Date.now()}`;
   await page.click("#add-product");

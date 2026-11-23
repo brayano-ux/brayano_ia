@@ -309,6 +309,12 @@ export async function refreshOverview(nextHandlers) {
 }
 
 export function initOverview() {
+  // Les messages arrivent pendant que l'accueil est affiché : ses deux listes suivent, sans attendre une navigation.
+  document.addEventListener("brayano:conversations-updated", () => {
+    if ($("#overview-view")?.classList.contains("hidden")) return;
+    renderTodo();
+    renderRecent();
+  });
   $("#commercial-period")?.addEventListener("change", renderCommercialMetrics);
   $("#export-prospects")?.addEventListener("click", exportProspects);
   $(".quick-panel")?.addEventListener("click", (event) => {

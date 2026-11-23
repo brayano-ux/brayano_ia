@@ -43,6 +43,11 @@ export function shopLocationSnapshot() {
   return JSON.stringify(readShopLocation());
 }
 
+/** La position n'est pas un champ de saisie : on signale le changement au formulaire, qui affiche alors la barre « Enregistrer ». */
+function announceChange() {
+  $("#shop-location-capture").dispatchEvent(new Event("change", { bubbles: true }));
+}
+
 function captureCurrentPosition() {
   if (!navigator.geolocation) {
     showToast("Votre navigateur ne permet pas d'accéder à la position.", "error");
@@ -56,6 +61,7 @@ function captureCurrentPosition() {
       latitude = position.coords.latitude;
       longitude = position.coords.longitude;
       render();
+      announceChange();
       showToast("Position capturée. Vérifiez la carte puis cliquez sur Enregistrer.", "success");
       button.disabled = false;
       button.classList.remove("is-loading");
@@ -80,5 +86,6 @@ export function initShopLocation() {
     latitude = null;
     longitude = null;
     render();
+    announceChange();
   };
 }

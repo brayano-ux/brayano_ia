@@ -94,6 +94,9 @@ describe.skipIf(!integrationEnabled)("API complète (HTTP, base réelle)", () =>
 
       const { token: agentToken, response } = await login("fatou@example.com");
       expect(response.statusCode).toBe(200);
+      // Le rôle accompagne la connexion : le tableau de bord masque tout de suite ce qu'un employé n'a pas à voir.
+      expect(response.json().user).toEqual({ email: "fatou@example.com", role: "AGENT" });
+      expect((await login("owner@example.com")).response.json().user).toEqual({ email: "owner@example.com", role: "ADMIN" });
       const me = await app.inject({ method: "GET", url: "/me", headers: authed(agentToken) });
       expect(me.json().user).toMatchObject({ email: "fatou@example.com", name: "Fatou", role: "AGENT" });
 

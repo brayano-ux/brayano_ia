@@ -21,6 +21,8 @@ let progressTimer = null;
 let previewState = null;
 /** Un envoi est en cours : le suivant doit attendre (un seul à la fois, pour protéger le numéro). */
 let sending = false;
+/** Une demande d'envoi est en cours de confirmation ou de départ (évite un double envoi). */
+let submitting = false;
 
 const base = () => `/organizations/${getState().organizationId}/broadcasts`;
 
@@ -49,11 +51,16 @@ function describePreview(preview) {
   return lines.join("<br />");
 }
 
+/** Numéro du dernier aperçu demandé : une réponse plus ancienne arrivée en retard est ignorée. */
+let previewRequest = 0;
+
 async function refreshPreview() {
   const box = $("#bc-preview");
   const button = $("#bc-send");
+  const request = ++previewRequest;
   try {
     const { preview } = await api(`${base()}/preview`, { method: "POST", body: JSON.stringify(audienceBody()) });
+    if (request !== previewRequest) return;
     previewState = preview;
     $("#bc-max-per").textContent = preview.limits.maxRecipientsPerBroadcast;
     $("#bc-max-day").textContent = preview.limits.maxPerDay;
@@ -62,6 +69,7 @@ async function refreshPreview() {
     button.disabled = !preview.ok || sending;
     button.textContent = preview.ok ? `Envoyer à ${plural(preview.recipients, "client")}` : "Envoyer";
   } catch (error) {
+    if (request !== previewRequest) return;
     previewState = null;
     box.className = "broadcast-preview alert warning";
     box.innerHTML = `${icon("alert")}<div class="alert-body"></div>`;
@@ -139,21 +147,46 @@ async function send(event) {
   event.preventDefault();
   const text = $("#bc-text").value.trim();
   if (!text) return showToast("Écrivez le message à envoyer.", "error");
-  const count = previewState?.recipients ?? 0;
-  if (!count) return showToast(previewState?.reason || "Aucun destinataire pour ces critères.", "error");
-  const rest = previewState.remaining > 0 ? `Il restera ${previewState.remaining} client${previewState.remaining > 1 ? "s" : ""} : vous pourrez renvoyer le même message ensuite.\n\n` : "";
+  if (submitting) return;
+  submitting = true;
+  try {
+    await confirmAndSend({ ...audienceBody(), text });
+  } finally {
+    submitting = false;
+  }
+}
+
+/**
+ * Le nombre annoncé dans la confirmation est recalculé pour l'envoi exact qui va partir (mêmes clients, même
+ * texte) : un aperçu affiché plus tôt, pour d'autres critères, ne peut pas servir de référence à un envoi
+ * qu'on ne peut pas rappeler.
+ */
+async function confirmAndSend(payload) {
+  let preview;
+  try {
+    ({ preview } = await api(`${base()}/preview`, { method: "POST", body: JSON.stringify(payload) }));
+  } catch (error) {
+    return showToast(error.message, "error");
+  }
+  previewRequest += 1; // les aperçus encore en route sont périmés
+  previewState = preview;
+  const count = preview.ok ? preview.recipients : 0;
+  if (!count) {
+    void refreshPreview();
+    return showToast(preview.reason || "Aucun destinataire pour ces critères.", "error");
+  }
+  const rest = preview.remaining > 0 ? `Il restera ${preview.remaining} client${preview.remaining > 1 ? "s" : ""} : vous pourrez renvoyer le même message ensuite.\n\n` : "";
   const confirmed = await confirmDialog({
     title: `Envoyer à ${count} client${count > 1 ? "s" : ""} ?`,
     message: `${rest}L'envoi se fait lentement (quelques secondes entre chaque message) et ne peut pas être rappelé.`,
     confirmLabel: "Envoyer maintenant",
     iconName: "megaphone",
   });
-  if (!confirmed) return;
+  if (!confirmed) return void refreshPreview();
   const button = $("#bc-send");
   button.disabled = true;
   try {
-    const stages = selectedStages();
-    await api(base(), { method: "POST", body: JSON.stringify({ text, windowDays: Number($("#bc-window").value), ...(stages.length ? { stages } : {}) }) });
+    await api(base(), { method: "POST", body: JSON.stringify(payload) });
     // Le texte est gardé : pour un grand groupe, il suffit de renvoyer le même message pour le lot suivant.
     showToast(previewState?.remaining ? "Envoi lancé. Quand il est terminé, renvoyez le même message pour les clients restants." : "Envoi lancé. Suivez sa progression dans « Derniers envois ».", "success");
     await loadBroadcasts();

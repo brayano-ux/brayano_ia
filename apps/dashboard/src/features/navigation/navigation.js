@@ -28,10 +28,19 @@ const VIEW_BY_SLUG = Object.fromEntries(Object.entries(VIEWS).map(([view, { slug
 
 /** Garde-fous « modifications non enregistrées » : vue → () => true s'il reste des modifications à enregistrer. */
 const leaveGuards = new Map();
+/** Vue → ce qu'il faut faire quand l'utilisateur confirme qu'il quitte la page sans enregistrer. */
+const leaveDiscards = new Map();
 let loaders = {};
 
-export function registerLeaveGuard(view, hasUnsavedChanges) {
+/**
+ * @param {string} view
+ * @param {() => boolean} hasUnsavedChanges
+ * @param {() => void} [discard] abandonne les modifications (sinon elles resteraient « à enregistrer » dans une
+ *   page que l'utilisateur a quittée, et le navigateur le signalerait encore à la fermeture de l'onglet)
+ */
+export function registerLeaveGuard(view, hasUnsavedChanges, discard) {
   leaveGuards.set(view, hasUnsavedChanges);
+  if (discard) leaveDiscards.set(view, discard);
 }
 
 export const UNSAVED_CHANGES_MESSAGE = "Vous avez des modifications non enregistrées sur cette page. Si vous continuez, elles seront perdues.";
@@ -163,7 +172,10 @@ export function setView(view, onViewShown, options = {}) {
 export async function navigate(view, onViewShown = loaders, options = {}) {
   if (!VIEWS[view] || isForbidden(view)) return false;
   const current = currentView();
-  if (current && leaveGuards.get(current)?.() && !(await confirmLeave())) return false;
+  if (current && leaveGuards.get(current)?.()) {
+    if (!(await confirmLeave())) return false;
+    leaveDiscards.get(current)?.();
+  }
   showView(view, onViewShown, options);
   return true;
 }
@@ -223,9 +235,12 @@ export function initNavigation(onViewShown) {
     const view = routeView();
     const current = currentView();
     if (view !== current) {
-      if (current && leaveGuards.get(current)?.() && !(await confirmLeave())) {
-        writeRoute(current, null);
-        return;
+      if (current && leaveGuards.get(current)?.()) {
+        if (!(await confirmLeave())) {
+          writeRoute(current, null);
+          return;
+        }
+        leaveDiscards.get(current)?.();
       }
       showView(view, loaders, { fromHistory: true });
     }

@@ -1,16 +1,16 @@
 import { splitWhatsAppNumber } from "./francophone-countries.js";
 
+/**
+ * Initiales d'un nom : la première lettre (ou le premier chiffre) de chacun des deux premiers mots. Un émoji ou
+ * un symbole en tête de mot est ignoré — les noms WhatsApp en commencent souvent, et un demi-émoji s'afficherait mal.
+ */
 export function initials(name = "?") {
-  return (
-    String(name)
-      .trim()
-      .split(/\s+/)
-      .filter(Boolean)
-      .map((part) => part[0])
-      .join("")
-      .slice(0, 2)
-      .toUpperCase() || "?"
-  );
+  const letters = String(name)
+    .trim()
+    .split(/\s+/)
+    .map((part) => part.match(/[\p{L}\p{N}]/u)?.[0])
+    .filter(Boolean);
+  return letters.slice(0, 2).join("").toUpperCase() || "?";
 }
 
 export function formatTime(dateValue) {
