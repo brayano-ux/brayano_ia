@@ -135,6 +135,9 @@
 .quick-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .quick-action { display: flex; align-items: center; gap: var(--space-3); padding: 14px; text-align: left; transition: var(--transition); }
 .quick-action:hover { border-color: var(--border-strong); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+/* L'export : dans l'en-tête sur ordinateur, ici sur téléphone (voir .only-desktop sur le bouton de l'en-tête). */
+.quick-action.quick-export { display: none; }
+@media (max-width: 767px) { .quick-action.quick-export { display: flex; } }
 .quick-text { flex: 1 1 auto; min-width: 0; display: grid; gap: 1px; }
 .quick-text strong { font-size: var(--text-sm); font-weight: 600; color: var(--text); }
 .quick-text small { color: var(--text-3); font-size: var(--text-xs); line-height: 1.4; }

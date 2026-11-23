@@ -50,7 +50,8 @@ body[data-current-view="inbox"] .views-root { flex: 1 1 auto; min-height: 0; }
 
 .thread-scroll { position: relative; flex: 1 1 auto; min-height: 0; display: flex; }
 .conversation-thread { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 3px; padding: var(--space-4) var(--space-5) var(--space-5); outline: none; }
-.thread-day { display: flex; justify-content: center; margin: var(--space-4) 0 var(--space-2); position: sticky; top: 4px; z-index: 1; pointer-events: none; }
+/* Le jour défile avec les messages : collé en haut du fil, il recouvrait le texte du premier message visible. */
+.thread-day { display: flex; justify-content: center; margin: var(--space-4) 0 var(--space-2); }
 .thread-day:first-child { margin-top: 0; }
 .thread-day span { padding: 4px 12px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); color: var(--text-3); font-size: var(--text-xs); font-weight: 600; box-shadow: var(--shadow-xs); }
 .thread-new { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px; border-radius: 999px; background: var(--primary); color: #fff; font-size: var(--text-sm); font-weight: 600; box-shadow: var(--shadow-lg); animation: toast-in var(--slow) var(--ease-out); }

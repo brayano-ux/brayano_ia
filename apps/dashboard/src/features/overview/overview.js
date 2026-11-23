@@ -315,6 +315,7 @@ export function initOverview() {
     const quick = event.target.closest("[data-quick]")?.dataset.quick;
     if (quick === "product") handlers.openView("products", { addProduct: true });
     else if (quick === "test") handlers.openAgentSection("knowledge", "#agent-test-input");
+    else if (quick === "export") void exportProspects();
   });
   initStats();
 }

@@ -30,6 +30,7 @@ import { initials } from "./utils/format.js";
 import { avatarHue } from "./ui/avatar.js";
 import { confirmDialog } from "./ui/confirm.js";
 import { initCommandPalette } from "./ui/command-palette.js";
+import { initScrollRows } from "./ui/scroll-row.js";
 import { initTheme, toggleTheme } from "./ui/theme.js";
 import "./ui/menu.js";
 
@@ -235,6 +236,7 @@ function bootstrap() {
   initWhatsapp();
   initAccountMenu();
   initPalette();
+  initScrollRows();
   // Une session déjà ouverte : on prépare directement la vue demandée par l'adresse (pas de passage par l'accueil).
   setView(isAuthenticated() ? routeView() : "overview", viewLoaders);
   initAuthFlow(onAuthenticated);

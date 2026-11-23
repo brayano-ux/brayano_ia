@@ -14,6 +14,7 @@ apps/dashboard/
 │   └── screens/                   # Captures du tableau de bord montrées sur la page d'accueil
 ├── app/index.html                 # Document du tableau de bord : écran d'attente + feuilles de style
 ├── e2e/smoke.cjs                  # Test de parcours (Playwright), lancé par la CI
+├── e2e/capture-landing.cjs        # Refait les captures de la page d'accueil
 └── src/
     ├── bootstrap.js               # Charge les icônes et les gabarits, puis démarre app.js
     ├── theme-init.js              # Applique le thème clair/sombre avant le premier affichage
@@ -67,6 +68,7 @@ Règles à suivre pour que l'ensemble reste cohérent :
 | `command-palette.js` | Recherche rapide (Ctrl/⌘ + K) : pages, actions, conversations. |
 | `charts.js` | Graphique en colonnes et courbes miniatures, avec infobulle et tableau pour lecteurs d'écran. |
 | `theme.js` | Thème clair, sombre ou automatique (`localStorage.brayano_theme`). |
+| `scroll-row.js` | Rangées d'onglets ou de filtres plus larges que l'écran : fondu sur le bord, défilement à la molette. |
 | `avatar.js`, `icons.js`, `overlay.js`, `page-title.js` | Pastilles d'initiales, icônes, gestion du focus, titre de l'onglet. |
 
 Les notifications passent par `showToast(message, type)` (`utils/dom.js`).
@@ -126,7 +128,7 @@ Le dossier `apps/dashboard` est publié tel quel sur Render (Static Site, dossie
 - `/` : page d'accueil. Un visiteur connecté (jeton dans `localStorage`, clé `brayano_session`) est renvoyé tout de suite vers `/app/`. Ajouter `?accueil` à l'adresse permet de voir la page d'accueil même connecté.
 - `/app/` : tableau de bord (connexion). `/app/?inscription` ouvre directement le formulaire de création de compte.
 - Dans le backend, mettre `CLIENT_DASHBOARD_URL` sur l'adresse `/app/` (ex. `https://brayanoia.onrender.com/app/`) pour que les liens des emails mènent directement au tableau de bord. Les balises de partage (`og:url`, `og:image`, `canonical`) de `index.html` contiennent l'adresse du site : à adapter si le domaine change.
-- Les captures de `assets/screens/` sont de vraies captures du tableau de bord, prises avec les données de démonstration : les refaire quand l'interface change.
+- Les captures de `assets/screens/` sont de vraies captures du tableau de bord, prises avec les données de démonstration. Quand l'interface change, `node e2e/capture-landing.cjs` les refait (serveur local et données de démonstration requis ; chaque capture existe en 1200 px pour les téléphones et en 2400 px pour les grands écrans).
 
 ## Sécurité du site statique
 

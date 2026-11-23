@@ -6,7 +6,8 @@
       <h1 class="page-title" id="company-greeting">Bonjour</h1>
       <p class="page-subtitle" id="overview-subtitle">Voici ce qui demande votre attention et ce que votre agent a accompli.</p>
     </div>
-    <div class="page-actions">
+    <!-- Sur téléphone, cette action secondaire est proposée dans les raccourcis, en bas de page. -->
+    <div class="page-actions only-desktop">
       <button type="button" class="btn btn-secondary" id="export-prospects">
         <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"/></svg>
         <span>Exporter les prospects</span>
@@ -14,12 +15,12 @@
     </div>
   </header>
 
-  <!-- État de l'agent : n'apparaît que s'il y a quelque chose à dire (pause, suspension, démarrage terminé). -->
-  <div class="status-banner alert hidden" role="status">
-    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sparkles"/></svg>
+  <!-- Agent en pause : rappelé ici tant que les réponses automatiques sont coupées (la suspension a son propre bandeau). -->
+  <div class="status-banner alert warning hidden" role="status">
+    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-pause"/></svg>
     <div class="alert-body status-text">
-      <p class="alert-title" id="overview-agent-status-title">Votre espace est prêt.</p>
-      <p id="overview-agent-status-description">Vérifiez la configuration de votre agent et la connexion WhatsApp.</p>
+      <p class="alert-title">Votre agent est en pause.</p>
+      <p>Il ne répond à aucun client pour le moment. Réactivez « Réponses automatiques » dans la page Agent IA.</p>
     </div>
     <div class="alert-actions admin-only"><button type="button" class="btn btn-sm btn-secondary" data-view-target="agent">Ouvrir l'agent</button></div>
   </div>
@@ -144,6 +145,11 @@
       <button type="button" class="card quick-action" data-view-target="inbox">
         <span class="icon-tile primary-tile" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><use href="#i-chats"/></svg></span>
         <span class="quick-text"><strong>Répondre à un client</strong><small>Ouvrir toutes les conversations</small></span>
+        <svg class="icon icon-sm quick-chevron" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron-right"/></svg>
+      </button>
+      <button type="button" class="card quick-action quick-export" data-quick="export">
+        <span class="icon-tile" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><use href="#i-download"/></svg></span>
+        <span class="quick-text"><strong>Exporter les prospects</strong><small>Un fichier de tous vos clients</small></span>
         <svg class="icon icon-sm quick-chevron" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron-right"/></svg>
       </button>
     </div>

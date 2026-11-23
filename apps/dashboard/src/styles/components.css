@@ -151,6 +151,10 @@
 /* ---------- Onglets ---------- */
 .tabs { display: flex; gap: var(--space-5); border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; }
 .tabs::-webkit-scrollbar { display: none; }
+/* Rangée plus large que sa place (ui/scroll-row.js) : un fondu signale le côté où il reste des éléments. */
+.fade-end { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent); }
+.fade-start { -webkit-mask-image: linear-gradient(to right, transparent, #000 40px); mask-image: linear-gradient(to right, transparent, #000 40px); }
+.fade-start.fade-end { -webkit-mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent); }
 .tab { position: relative; display: inline-flex; align-items: center; gap: 8px; padding: 10px 2px 12px; color: var(--text-3); font-size: var(--text-base); font-weight: 600; white-space: nowrap; transition: color var(--fast) var(--ease); flex: none; }
 .tab:hover { color: var(--text); }
 .tab::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; border-radius: 2px 2px 0 0; background: transparent; transition: background var(--fast) var(--ease); }

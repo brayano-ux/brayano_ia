@@ -129,6 +129,8 @@ async function desktopJourney(browser, failures) {
   }
   if ((await page.locator(".kpi-card").count()) !== 4) failures.push("Accueil : les quatre chiffres clés ne s'affichent pas.");
   if (!(await page.isVisible("#todo-list"))) failures.push("Accueil : le bloc « À traiter » ne s'affiche pas.");
+  // Tant que WhatsApp n'est pas relié, le guide de démarrage reste en tête de l'accueil (il disparaît une fois terminé).
+  if ((await page.locator("#system-status.status-off").count()) && !(await page.isVisible("#onboarding-guide"))) failures.push("Accueil : le guide de démarrage n'apparaît pas alors que WhatsApp n'est pas relié.");
   await page.click('#stats-period [data-period="30"]');
   await page.waitForFunction(() => !document.querySelector("#stats-body.is-refreshing"), null, { timeout: 10_000 }).catch(() => undefined);
   if (!(await page.isVisible("#activity-chart svg"))) failures.push("Accueil : le graphique d'activité ne s'affiche pas sur 30 jours.");
@@ -170,6 +172,8 @@ async function desktopJourney(browser, failures) {
   // ---- Agent : modifications non enregistrées signalées, confirmation avant de quitter la page
   await clickNav(page, '.nav-item[data-view="agent"]');
   await page.waitForTimeout(800);
+  const tabsOverflow = await page.$eval(".agent-tabs", (row) => row.scrollWidth - row.clientWidth);
+  if (tabsOverflow > 1) failures.push(`Agent : les onglets ne tiennent pas sur une ligne (${tabsOverflow} px de trop).`);
   await page.click('.agent-tab[data-agent-tab="rules"]');
   if (!(await page.isVisible('[data-agent-pane="rules"]'))) failures.push("Agent : l'onglet « Règles avancées » ne s'ouvre pas.");
   await page.click('.agent-tab[data-agent-tab="identity"]');
@@ -235,6 +239,10 @@ async function mobileJourney(browser, failures) {
   const mobileErrors = watchErrors(phone);
   await login(phone);
   await dismissOverlays(phone);
+
+  // Sur téléphone, l'export (action secondaire) laisse l'en-tête à « À traiter » et se retrouve dans les raccourcis.
+  if (await phone.isVisible("#export-prospects")) failures.push("Mobile : le bouton d'export occupe encore l'en-tête de l'accueil.");
+  if (!(await phone.isVisible('.quick-panel [data-quick="export"]'))) failures.push("Mobile : « Exporter les prospects » est absent des raccourcis.");
 
   await clickNav(phone, '.tab-item[data-view="inbox"]');
   await phone.waitForTimeout(400);

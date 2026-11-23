@@ -24,11 +24,12 @@
 .agent-checklist button:hover { background: var(--surface-3); color: var(--text); }
 
 /* ---------- Mise en page : réglages + testeur ---------- */
-.agent-layout { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: var(--space-5); align-items: start; }
+.agent-layout { --agent-tabs-height: 53px; display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: var(--space-5); align-items: start; }
 .agent-main { display: grid; gap: var(--space-5); min-width: 0; }
 .agent-form, .agent-pane, .agent-learning { display: grid; gap: var(--space-5); min-width: 0; }
 .agent-pane.hidden, .agent-form.hidden, .agent-learning.hidden { display: none; }
-.agent-tabs { position: sticky; top: var(--topbar-height); z-index: var(--z-sticky); background: var(--bg); margin-top: calc(-1 * var(--space-2)); padding-top: var(--space-2); }
+/* Les onglets occupent toute la largeur, au-dessus des réglages et du testeur : ils tiennent ainsi sur une ligne. */
+.agent-tabs { grid-column: 1 / -1; position: sticky; top: var(--topbar-height); z-index: var(--z-sticky); box-sizing: border-box; height: var(--agent-tabs-height); background: var(--bg); margin-top: calc(-1 * var(--space-2)); padding-top: var(--space-2); }
 
 .pane-head { display: grid; gap: 4px; padding: 0; }
 .pane-head h2 { font-size: var(--text-md); font-weight: 600; letter-spacing: -0.01em; }
@@ -147,7 +148,7 @@ input[type="file"]::file-selector-button { margin-right: 12px; padding: 6px 12px
 
 /* Grand écran : le testeur est une colonne fixe, toujours sous les yeux. */
 @media (min-width: 1180px) {
-  .agent-tester.drawer { position: sticky; top: calc(var(--topbar-height) + var(--space-5)); right: auto; bottom: auto; z-index: auto; width: auto; height: calc(100dvh - var(--topbar-height) - 2 * var(--space-5)); max-height: 720px; transform: none; visibility: visible; border: 1px solid var(--border); border-radius: var(--radius-xl); box-shadow: var(--shadow-sm); overflow: hidden; transition: none; background: var(--surface); }
+  .agent-tester.drawer { position: sticky; top: calc(var(--topbar-height) + var(--agent-tabs-height) + var(--space-3)); right: auto; bottom: auto; z-index: auto; width: auto; height: calc(100dvh - var(--topbar-height) - var(--agent-tabs-height) - var(--space-3) - var(--space-5)); max-height: 720px; transform: none; visibility: visible; border: 1px solid var(--border); border-radius: var(--radius-xl); box-shadow: var(--shadow-sm); overflow: hidden; transition: none; background: var(--surface); }
   .tester-close, .agent-test-open { display: none; }
 }
 @media (max-width: 1179px) {
@@ -190,6 +191,8 @@ input[type="file"]::file-selector-button { margin-right: 12px; padding: 6px 12px
 /* ---------- Ajustements ---------- */
 .card-pad > .setting-row { padding: 0; border-top: 0; }
 .agent-tabs { gap: var(--space-4); }
+/* Tablette en paysage : les sept onglets tiennent sur une ligne à 1024 px. */
+@media (min-width: 1024px) and (max-width: 1179px) { .agent-tabs { gap: 14px; } }
 .agent-tester.drawer { overflow: hidden; }
 @media (min-width: 1180px) {
   .agent-test-attach { flex-wrap: wrap; overflow: visible; }

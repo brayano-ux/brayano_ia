@@ -59,3 +59,7 @@
   .bc-item { padding: var(--space-4); }
   .bc-item-foot { flex-direction: column; align-items: stretch; gap: 6px; }
 }
+
+/* Quatre publics : deux par ligne (jamais trois et un), quatre de front sur un très grand écran. */
+.broadcast-stages { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (min-width: 1536px) { .broadcast-stages { grid-template-columns: repeat(4, minmax(0, 1fr)); } }

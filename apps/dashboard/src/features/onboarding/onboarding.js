@@ -10,18 +10,22 @@ let currentOrganization = null;
 const startsExpanded = () => !window.matchMedia("(max-width: 767px)").matches;
 let expanded = startsExpanded();
 let lastCompletion = false;
+/** Le guide a été affiché avec une étape restante depuis l'ouverture : s'il se termine, on le montre terminé. */
+let sawIncomplete = false;
 let latestStatus = null;
 let requestVersion = 0;
 
+const isComplete = (status) => onboardingSteps(status).every((step) => step.done);
+
+/**
+ * Un démarrage déjà terminé à l'ouverture n'a plus rien à dire : le guide laisse la place à « À traiter ».
+ * Il revient de lui-même si une étape se défait (WhatsApp déconnecté, par exemple).
+ */
+const guideHidden = (status) => isComplete(status) && !sawIncomplete;
+
+/** Seul rappel permanent : l'agent est en pause (une suspension a son propre bandeau, sur toutes les pages). */
 function updateBanner(status) {
-  const title = $("#overview-agent-status-title"), description = $("#overview-agent-status-description");
-  if (!title || !description) return;
-  const text = status.suspended ? ["Votre agent est suspendu.", "Consultez le motif dans les réglages ou contactez le support."]
-    : !status.aiEnabled ? ["Votre agent est en pause.", "Activez les réponses automatiques dans les réglages de l’agent."]
-    : !status.whatsappConnected ? ["Connectez WhatsApp pour démarrer.", "Votre agent pourra répondre dès que votre numéro sera relié."]
-    : !status.profileComplete ? ["Complétez les informations de votre entreprise.", "Donnez à votre agent les informations nécessaires avant vos premiers échanges."]
-    : ["Votre agent est prêt à échanger.", "Envoyez une première question depuis un autre numéro pour vérifier sa réponse."];
-  title.textContent = text[0]; description.textContent = status.firstReplySent && status.aiEnabled && status.whatsappConnected && !status.suspended ? "Votre assistant a déjà répondu automatiquement sur WhatsApp." : text[1];
+  $(".status-banner")?.classList.toggle("hidden", status.aiEnabled || status.suspended);
 }
 
 function render(status) {
@@ -29,6 +33,7 @@ function render(status) {
   const steps = onboardingSteps(status);
   const done = steps.filter(step => step.done).length;
   const complete = done === steps.length;
+  if (!complete) sawIncomplete = true;
   if (complete && !lastCompletion) expanded = false;
   if (complete) $("#onboarding-first-help").classList.add("hidden");
   lastCompletion = complete;
@@ -59,19 +64,17 @@ function render(status) {
     : !status.aiEnabled ? "Votre agent est en pause. Activez ses réponses automatiques pour recevoir une première réponse."
     : "Les étapes se valident automatiquement à partir de votre configuration et de vos échanges réels.";
   $("#onboarding-error").classList.add("hidden");
-  panel.classList.remove("hidden");
+  panel.classList.toggle("hidden", guideHidden(status));
   updateBanner(status);
-  // Tant que le guide est affiché et incomplet, la bannière répéterait l'étape en cours (« Connectez WhatsApp… ») :
-  // on ne la montre que si elle dit quelque chose de plus (agent en pause ou suspendu), ou une fois le démarrage terminé.
-  $(".status-banner")?.classList.toggle("hidden", !(complete || status.suspended || !status.aiEnabled));
 }
 
 export async function refreshOnboarding() {
   const panel = $("#onboarding-guide");
   const organizationId = getState().organizationId;
-  if (!panel || !organizationId || document.body.classList.contains("role-agent")) { panel?.classList.add("hidden"); return; }
+  // Un employé ne règle pas l'agent : ni guide, ni rappel de pause (y compris après un changement de compte).
+  if (!panel || !organizationId || document.body.classList.contains("role-agent")) { panel?.classList.add("hidden"); $(".status-banner")?.classList.add("hidden"); return; }
   if (currentOrganization !== organizationId) {
-    currentOrganization = organizationId; latestStatus = null; expanded = startsExpanded(); lastCompletion = false;
+    currentOrganization = organizationId; latestStatus = null; expanded = startsExpanded(); lastCompletion = false; sawIncomplete = false;
     panel.classList.add("hidden");
     $("#onboarding-first-help").classList.add("hidden");
   }
@@ -83,10 +86,12 @@ export async function refreshOnboarding() {
     const unchanged = latestStatus && Object.keys(onboarding).every(key => latestStatus[key] === onboarding[key]);
     latestStatus = onboarding;
     if (!unchanged) render(onboarding);
-    else { $("#onboarding-error").classList.add("hidden"); panel.classList.remove("hidden"); }
+    else { $("#onboarding-error").classList.add("hidden"); panel.classList.toggle("hidden", guideHidden(onboarding)); }
   } catch (error) {
     if (version !== requestVersion || organizationId !== getState().organizationId) return;
     if (error.status === 401 || error.status === 403) { panel.classList.add("hidden"); return; }
+    // Guide déjà masqué (démarrage terminé) : une actualisation ratée ne le fait pas réapparaître avec une erreur.
+    if (latestStatus && guideHidden(latestStatus)) return;
     panel.classList.remove("hidden");
     const errorBox = $("#onboarding-error");
     errorBox.textContent = "Impossible d’actualiser la progression. Vos informations restent enregistrées. Réessayez dans un instant.";
