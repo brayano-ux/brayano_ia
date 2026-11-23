@@ -19,7 +19,7 @@ describe("base de connaissances de l'assistant d'aide", () => {
   });
 
   it("explique les grandes étapes de configuration", () => {
-    for (const phrase of ["Appareils liés", "Informations sur votre activité", "Tester l'agent", "Réactiver l'IA", "STOP", "Orange Money"]) {
+    for (const phrase of ["Appareils connectés", "Connecter un appareil", "Afficher le QR code", "Informations sur votre activité", "Tester l'agent", "interrupteur « Agent IA »", "Règles avancées", "STOP", "Orange Money"]) {
       expect(SUPPORT_KNOWLEDGE).toContain(phrase);
     }
   });

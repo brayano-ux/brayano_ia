@@ -90,7 +90,7 @@ export async function loadWhatsApp({ silent = false } = {}) {
         const current = $("#pairing-code-value");
         if (!current || current.textContent !== pairingCode) {
           $("#qr-container").className = "qr-placeholder pairing-code-placeholder";
-          $("#qr-container").innerHTML = '<div class="pairing-code"><p>Sur votre téléphone, choisissez « Lier avec un numéro de téléphone » puis saisissez ce code :</p><strong id="pairing-code-value"></strong></div>';
+          $("#qr-container").innerHTML = '<div class="pairing-code"><p>Sur votre téléphone, dans « Connecter un appareil », touchez « Lier avec le numéro de téléphone » sous le scanner, puis saisissez ce code :</p><strong id="pairing-code-value"></strong></div>';
           $("#pairing-code-value").textContent = pairingCode;
         }
       } else {

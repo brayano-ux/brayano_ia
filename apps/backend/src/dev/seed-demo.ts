@@ -24,6 +24,7 @@ const NOW = Date.now();
 const ago = (ms: number) => new Date(NOW - ms);
 
 function assertLocalDatabase() {
+  if (process.env.NODE_ENV === "production") throw new Error("Refusé : ce script vide la base, il ne tourne jamais en production.");
   const url = new URL(process.env.DATABASE_URL ?? "postgresql://invalid");
   if (!["localhost", "127.0.0.1", "::1"].includes(url.hostname)) {
     throw new Error(`Refusé : ce script vide la base et ne tourne que sur une base locale (hôte reçu : ${url.hostname}).`);

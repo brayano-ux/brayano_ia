@@ -44,7 +44,8 @@ describe("buildWhatsAppConnectReminderEmail", () => {
     expect(new Set(emails.map((email) => email.subject)).size).toBe(3);
     for (const email of emails) {
       expect(email.text).toContain("Boutique Awa");
-      expect(email.text).toContain("Appareils liés");
+      expect(email.text).toContain("Appareils connectés → Connecter un appareil");
+      expect(email.text).toContain("« Afficher le QR code »");
       expect(email.text).toContain("+237 683 26 05 20");
     }
     expect(emails[2]!.text).toContain("dernier rappel");

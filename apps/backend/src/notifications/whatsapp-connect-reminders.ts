@@ -45,8 +45,8 @@ export function buildWhatsAppConnectReminderEmail(input: { organizationName: str
   const url = env.CLIENT_DASHBOARD_URL ? env.CLIENT_DASHBOARD_URL.replace(/\/+$/, "") : null;
   const howTo = [
     "Comment faire (2 minutes) :",
-    "1. Ouvrez votre tableau de bord, page « WhatsApp ».",
-    "2. Sur le téléphone de l'entreprise : WhatsApp → Appareils liés → Lier un appareil.",
+    "1. Ouvrez votre tableau de bord, page « WhatsApp », puis cliquez sur « Afficher le QR code ».",
+    "2. Sur le téléphone de l'entreprise : WhatsApp → menu → Appareils connectés → Connecter un appareil.",
     "3. Scannez le QR code affiché. Vous n'avez qu'un téléphone ? Choisissez « Utiliser un code d'association ».",
     "",
     "Vous gardez votre numéro et votre téléphone, comme avec WhatsApp Web.",

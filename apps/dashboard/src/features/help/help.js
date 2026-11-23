@@ -21,7 +21,7 @@ const SUGGESTIONS = [
   "Quels sont les forfaits et les prix ?",
 ];
 const VIEW_LABELS = {
-  overview: "Vue d'ensemble", inbox: "Conversations", agent: "Agent IA", products: "Produits", appointments: "Rendez-vous",
+  overview: "Accueil", inbox: "Conversations", agent: "Agent IA", products: "Produits", appointments: "Rendez-vous",
   orders: "Commandes", broadcasts: "Messages groupés", whatsapp: "WhatsApp", billing: "Mon forfait", settings: "Paramètres",
 };
 const MAX_STORED = 20;

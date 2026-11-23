@@ -461,7 +461,7 @@ describe.skipIf(!integrationEnabled)("API complète (HTTP, base réelle)", () =>
       const response = await chat(organization.id, token, { messages: [{ role: "user", content: "Comment connecter mon WhatsApp ?" }] });
       expect(response.statusCode).toBe(200);
       expect(response.json()).toEqual({ reply: "Allez dans la page « WhatsApp ».", openView: "whatsapp" });
-      expect(prompts[0]).toContain("Appareils liés");
+      expect(prompts[0]).toContain("Appareils connectés");
       expect(prompts[0]).toContain("WhatsApp : NON connecté");
       expect(prompts[0]).toContain("Produits : 1 (dont 1 disponibles)");
       expect(prompts[0]).toContain("Entreprise : Salon Éclat");

@@ -1,0 +1,25 @@
+/*
+ * Feuille de transition. Avant la refonte, la page d'entrée chargeait cette feuille unique. Un navigateur qui
+ * garde encore cette ancienne page en mémoire reçoit ainsi tous les styles actuels, au lieu d'afficher un
+ * tableau de bord sans mise en forme. La page actuelle (app/index.html) charge directement les feuilles
+ * ci-dessous : ce fichier peut être supprimé quelques semaines après la mise en ligne de la refonte.
+ */
+@import "./tokens.css";
+@import "./base.css";
+@import "./components.css";
+@import "./layout.css";
+@import "./auth.css";
+@import "./overview.css";
+@import "./inbox.css";
+@import "./agent.css";
+@import "./products.css";
+@import "./orders.css";
+@import "./appointments.css";
+@import "./broadcasts.css";
+@import "./whatsapp.css";
+@import "./billing.css";
+@import "./settings.css";
+@import "./help.css";
+@import "./persona.css";
+@import "./onboarding.css";
+@import "./tour.css";

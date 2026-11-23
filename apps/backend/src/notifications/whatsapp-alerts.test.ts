@@ -61,7 +61,7 @@ describe("WhatsApp disconnection alert", () => {
     const mail = mocks.sendEmail.mock.calls[0]![0];
     expect(mail.to).toBe("owner@example.com");
     expect(mail.subject).toBe("WhatsApp déconnecté : Boutique Zoé");
-    for (const expected of ["depuis 12 minutes", "Boutique Zoé", "org-1", "+237600000000", "Zoé Mballa <zoe@example.com>", "Appareils liés", "Dernier message échangé", "IA suspendue par la plateforme : non", "onglet WhatsApp"]) {
+    for (const expected of ["depuis 12 minutes", "Boutique Zoé", "org-1", "+237600000000", "Zoé Mballa <zoe@example.com>", "Appareils connectés", "Dernier message échangé", "IA suspendue par la plateforme : non", "page « WhatsApp »", "« Afficher le QR code »"]) {
       expect(mail.text).toContain(expected);
     }
   });
@@ -142,7 +142,7 @@ describe("email envoyé au client", () => {
     expect(mocks.sendEmail.mock.calls.map((call) => call[0].to)).toEqual(["zoe@example.com", "paul@example.com"]);
     const mail = mocks.sendEmail.mock.calls[0]![0];
     expect(mail.subject).toBe("Votre WhatsApp est déconnecté : votre assistant IA ne répond plus");
-    for (const expected of ["Boutique Zoé", "depuis 5 minutes", "Appareils liés", "onglet WhatsApp", "« Connexion par QR code »", "https://app.example.com", "support@example.com"]) {
+    for (const expected of ["Boutique Zoé", "depuis 5 minutes", "Appareils connectés", "« Connecter un appareil »", "page « WhatsApp »", "« Afficher le QR code »", "https://app.example.com", "support@example.com"]) {
       expect(mail.text).toContain(expected);
     }
   });

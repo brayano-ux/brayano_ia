@@ -3,7 +3,7 @@ import { buildAccountHistoryUpdate, describeCloseCode } from "./disconnect-reaso
 
 describe("describeCloseCode", () => {
   it("explains the WhatsApp close codes in French, keeping the code", () => {
-    expect(describeCloseCode(401)).toBe("Déconnecté depuis le téléphone (Appareils liés) ou session fermée par WhatsApp (code 401)");
+    expect(describeCloseCode(401)).toBe("Déconnecté depuis le téléphone (Appareils connectés) ou session fermée par WhatsApp (code 401)");
     expect(describeCloseCode(440)).toContain("un autre serveur utilise le même numéro");
     expect(describeCloseCode(403)).toContain("banni");
     expect(describeCloseCode(500)).toBe("Session corrompue (code 500)");

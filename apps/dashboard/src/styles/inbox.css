@@ -10,7 +10,7 @@ body[data-current-view="inbox"] .views-root { flex: 1 1 auto; min-height: 0; }
 .view.view-full { max-width: none; padding: 0; height: 100%; display: block; animation: none; }
 .view.view-full.hidden { display: none; }
 
-.inbox { display: grid; grid-template-columns: 372px minmax(0, 1fr); height: 100%; min-height: 0; }
+.inbox { display: grid; grid-template-columns: 340px minmax(0, 1fr); height: 100%; min-height: 0; }
 
 /* ---------- Liste ---------- */
 .inbox-list { display: flex; flex-direction: column; min-height: 0; min-width: 0; background: var(--surface); border-right: 1px solid var(--border); }
@@ -140,15 +140,18 @@ body[data-current-view="inbox"] .views-root { flex: 1 1 auto; min-height: 0; }
 .lightbox-close:hover { background: rgba(255, 255, 255, 0.24); }
 
 /* ---------- Grand écran : la fiche est une colonne ; sinon elle glisse par-dessus le fil ---------- */
-@media (min-width: 1280px) {
-  .inbox-thread.info-open { grid-template-columns: minmax(0, 1fr) 320px; }
+@media (min-width: 1360px) {
+  .inbox-thread.info-open { grid-template-columns: minmax(0, 1fr) 304px; }
   .inbox-thread.info-open .thread-info { display: flex; }
   #close-info { display: none; }
 }
-@media (max-width: 1279px) {
+@media (min-width: 1536px) {
+  .inbox { grid-template-columns: 372px minmax(0, 1fr); }
+  .inbox-thread.info-open { grid-template-columns: minmax(0, 1fr) 320px; }
+}
+@media (max-width: 1359px) {
   .thread-info { display: flex; position: absolute; z-index: 5; top: 0; right: 0; bottom: 0; width: min(340px, 100%); box-shadow: var(--shadow-xl); transform: translateX(104%); visibility: hidden; transition: transform var(--slow) var(--ease-out), visibility 0s linear var(--slow); }
   .inbox-thread.info-open .thread-info { transform: none; visibility: visible; transition: transform var(--slow) var(--ease-out), visibility 0s; }
-  .inbox { grid-template-columns: 340px minmax(0, 1fr); }
 }
 
 /* ---------- Téléphone et tablette : la liste, puis le fil en plein écran ---------- */

@@ -59,7 +59,7 @@ export async function broadcastsRoute(app: FastifyInstance) {
     await assertFeature(orgId, "broadcasts");
     const parsed = createSchema.safeParse(request.body);
     if (!parsed.success) throw new ValidationError(parsed.error.issues[0]?.message);
-    if (!whatsappBroadcastDeps.isConnected(orgId)) throw new ValidationError("Connectez d'abord votre WhatsApp (onglet WhatsApp) avant d'envoyer des messages.");
+    if (!whatsappBroadcastDeps.isConnected(orgId)) throw new ValidationError("Connectez d'abord votre WhatsApp (page « WhatsApp ») avant d'envoyer des messages.");
     const broadcast = await createBroadcast(orgId, { text: parsed.data.text, stages: parsed.data.stages, windowDays: parsed.data.windowDays });
     void runBroadcast(broadcast.id, whatsappBroadcastDeps);
     return { broadcast };

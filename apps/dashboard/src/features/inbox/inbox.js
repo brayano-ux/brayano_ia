@@ -40,7 +40,8 @@ let refreshCallback = async () => {};
 
 const orgBase = () => `/organizations/${getState().organizationId}`;
 const isCompact = () => window.matchMedia("(max-width: 1023px)").matches;
-const isWide = () => window.matchMedia("(min-width: 1280px)").matches;
+/** Assez large pour afficher la fiche du client à côté du fil (sinon elle glisse par-dessus). Même seuil que inbox.css. */
+const isWide = () => window.matchMedia("(min-width: 1360px)").matches;
 
 function isInboxVisible() {
   const view = $("#inbox-view");
