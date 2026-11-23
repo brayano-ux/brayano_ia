@@ -111,7 +111,20 @@ function renderUserCard() {
   if (greeting) greeting.textContent = firstName ? `Bonjour, ${firstName}` : "Bonjour";
 }
 
+/** Entreprise avec laquelle la vue de départ a déjà été chargée au démarrage (null : elle ne l'a pas été). */
+let organizationLoadedAtBoot = null;
+/** Sessions ouvertes depuis le chargement de la page. */
+let sessionsOpened = 0;
+
 async function onAuthenticated() {
+  sessionsOpened += 1;
+  if (sessionsOpened > 1) {
+    // Nouvelle connexion dans le même onglet, après une déconnexion : on repart d'une page neuve, pour que rien du
+    // compte précédent ne reste affiché ni en mémoire. La session vient d'être enregistrée : elle est reprise.
+    $(".app-shell").classList.add("hidden");
+    window.location.reload();
+    return;
+  }
   renderUserCard();
   await loadRole();
   renderUserCard();
@@ -130,7 +143,12 @@ async function onAuthenticated() {
     // L'adresse désigne peut-être une autre vue que celle préparée avant la connexion (lien direct vers une page).
     // Dans tous les cas on repasse par setView : l'écran est maintenant visible, le titre, l'adresse et le guide se mettent à jour.
     const wanted = routeView();
-    setView(wanted, wanted === currentView() ? undefined : viewLoaders, { replace: true });
+    // La vue affichée a déjà ses données si c'est l'accueil (loadOrganizations vient de le charger) ou si elle a
+    // été chargée au démarrage avec la bonne entreprise. Sinon (première connexion, entreprise inconnue ou
+    // périmée dans le navigateur), on la charge maintenant.
+    const upToDate = wanted === currentView() && (wanted === "overview" || organizationLoadedAtBoot === getState().organizationId);
+    organizationLoadedAtBoot = null;
+    setView(wanted, upToDate ? undefined : viewLoaders, { replace: true });
   } catch (error) {
     showToast(isNetworkError(error) ? "API inaccessible. Réessayez plus tard." : error.message, "error");
   }
@@ -238,7 +256,9 @@ function bootstrap() {
   initPalette();
   initScrollRows();
   // Une session déjà ouverte : on prépare directement la vue demandée par l'adresse (pas de passage par l'accueil).
-  setView(isAuthenticated() ? routeView() : "overview", viewLoaders);
+  // Ses données ne sont demandées tout de suite que si l'entreprise est connue ; sinon onAuthenticated s'en charge.
+  organizationLoadedAtBoot = isAuthenticated() ? getState().organizationId : null;
+  setView(isAuthenticated() ? routeView() : "overview", organizationLoadedAtBoot ? viewLoaders : undefined);
   initAuthFlow(onAuthenticated);
   document.getElementById("boot-splash")?.remove();
 }

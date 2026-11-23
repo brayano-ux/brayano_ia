@@ -212,6 +212,23 @@ async function desktopJourney(browser, failures) {
   if (!(await page.isVisible("#help-panel"))) failures.push("Le panneau d'aide ne s'ouvre pas.");
   await page.click("#help-close");
 
+  // ---- Déconnexion, puis nouvelle connexion dans le même onglet : elle repart d'une page neuve
+  await clickNav(page, '.nav-item[data-view="orders"]');
+  await page.click("#user-menu-trigger");
+  await page.click("#logout-button");
+  await page.waitForSelector(".confirm-dialog", { timeout: 5_000 }).catch(() => failures.push("Déconnexion : aucune confirmation n'est demandée."));
+  await page.click('.confirm-dialog [data-confirm="ok"]');
+  await page.waitForSelector("#login-form", { state: "visible", timeout: 10_000 }).catch(() => failures.push("Déconnexion : l'écran de connexion ne s'affiche pas."));
+  if (await page.isVisible(".app-shell")) failures.push("Déconnexion : le tableau de bord reste affiché.");
+  if (new URL(page.url()).hash) failures.push("Déconnexion : l'adresse garde la page de la session précédente.");
+  await page.evaluate(() => { window.__samePage = true; });
+  await page.fill("#login-email", EMAIL);
+  await page.fill("#login-password", PASSWORD);
+  await page.click("#login-form button[type=submit]");
+  await page.waitForFunction(() => !window.__samePage && document.querySelector(".app-shell:not(.hidden)") && document.querySelector("#todo-list") && !document.querySelector("#todo-list .skeleton"), null, { timeout: 20_000 })
+    .catch(() => failures.push("Reconnexion : le tableau de bord ne repart pas d'une page neuve (des données du compte précédent pourraient rester affichées)."));
+  if (!(await page.isVisible("#overview-view"))) failures.push("Reconnexion : on n'arrive pas sur l'accueil.");
+
   if (errors.length) failures.push(`Erreurs JavaScript sur ordinateur :\n  - ${errors.join("\n  - ")}`);
   await desktop.close();
 }
