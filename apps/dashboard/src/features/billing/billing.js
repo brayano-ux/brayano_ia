@@ -219,13 +219,16 @@ async function submitPayment(event) {
 export async function handleChariowReturn() {
   showToast("Paiement reçu, confirmation de votre forfait en cours…", "info");
   const startedAt = Date.now();
-  const planBefore = (await getBillingStatus())?.plan ?? null;
+  const before = await getBillingStatus().catch(() => null);
+  const planBefore = before?.plan ?? null;
+  const expiresBefore = before?.expiresAt ?? null;
   const tick = async () => {
     statusCache = { at: 0, value: null };
     const status = await getBillingStatus({ fresh: true }).catch(() => null);
     await loadBilling().catch(() => undefined);
     void refreshBillingBanner();
-    if (status && status.status === "ACTIVE" && status.plan !== planBefore) {
+    // Nouveau forfait, ou même forfait prolongé (renouvellement) : dans les deux cas le paiement est pris en compte.
+    if (status && status.status === "ACTIVE" && (status.plan !== planBefore || status.expiresAt !== expiresBefore)) {
       showToast("Paiement confirmé : votre forfait est activé. Merci !", "success");
       return;
     }
