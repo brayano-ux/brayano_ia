@@ -148,7 +148,9 @@ async function onAuthenticated() {
     // périmée dans le navigateur), on la charge maintenant.
     const upToDate = wanted === currentView() && (wanted === "overview" || organizationLoadedAtBoot === getState().organizationId);
     organizationLoadedAtBoot = null;
-    setView(wanted, upToDate ? undefined : viewLoaders, { replace: true });
+    // keepDetail : une conversation désignée par l'adresse (« #/conversations/<id> ») reste ouverte et reste dans
+    // l'adresse ; sinon ce second passage la refermait et le lien direct ne menait qu'à la liste.
+    setView(wanted, upToDate ? undefined : viewLoaders, { replace: true, keepDetail: true });
   } catch (error) {
     showToast(isNetworkError(error) ? "API inaccessible. Réessayez plus tard." : error.message, "error");
   }

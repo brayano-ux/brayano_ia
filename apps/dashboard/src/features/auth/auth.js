@@ -61,6 +61,9 @@ export function logoutUser(mode = "login") {
   // On prévient le serveur pour qu'il supprime la session : le jeton ne doit plus servir après la déconnexion.
   if (isAuthenticated()) void api("/logout", { method: "POST" }).catch(() => undefined);
   clearSession();
+  // Panneaux, fenêtres et recherche rapide appartiennent à la session qui se termine : aucun voile ne doit
+  // recouvrir l'écran de connexion.
+  document.dispatchEvent(new CustomEvent("brayano:close-overlays"));
   $(".app-shell").classList.add("hidden");
   $("#login-screen").classList.remove("hidden");
   document.body.classList.remove("is-authenticated", "in-thread");

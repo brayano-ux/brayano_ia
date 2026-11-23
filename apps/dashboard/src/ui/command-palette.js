@@ -111,6 +111,9 @@ export function closePalette({ restoreFocus = true } = {}) {
   if (restoreFocus && previousFocus instanceof HTMLElement && document.contains(previousFocus)) previousFocus.focus({ preventScroll: true });
 }
 
+// Changement de page ou déconnexion : la recherche rapide ne reste pas ouverte par-dessus.
+document.addEventListener("brayano:close-overlays", () => closePalette({ restoreFocus: false }));
+
 /**
  * @param {{ pages: () => Array, actions: () => Array, conversations: () => Array, isAvailable?: () => boolean }} options
  * Chaque élément : { label, hint?, icon?, keywords?, avatar?, phone?, run }.

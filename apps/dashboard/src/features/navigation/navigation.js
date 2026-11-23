@@ -59,7 +59,16 @@ function isShellVisible() {
 export function readRoute() {
   const parts = window.location.hash.replace("#", "").split("/").filter(Boolean);
   const view = VIEW_BY_SLUG[parts[0]] || null;
-  return { view, detail: view && parts[1] ? decodeURIComponent(parts[1]) : null };
+  return { view, detail: view && parts[1] ? safeDecode(parts[1]) : null };
+}
+
+/** Un fragment d'adresse tronqué ou mal encodé (lien abîmé) vaut « pas d'élément ouvert », pas une panne. */
+function safeDecode(value) {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return null;
+  }
 }
 
 /** Vue à afficher pour l'adresse en cours, en tenant compte du rôle (un employé n'ouvre pas les réglages). */
@@ -92,7 +101,16 @@ function closeMobileMenu() {
   $("#tab-more")?.setAttribute("aria-expanded", "false");
 }
 
-function showView(view, onViewShown, { fromHistory = false, replace = false } = {}) {
+/**
+ * `keepDetail` : la vue est (ré)affichée pour l'adresse en cours, sans rien défaire — l'élément ouvert désigné par
+ * l'adresse (une conversation) reste ouvert et reste dans l'adresse. Sert à la reprise d'une session.
+ */
+function showView(view, onViewShown, { fromHistory = false, replace = false, keepDetail = false } = {}) {
+  // Un panneau, une fenêtre de confirmation ou de paiement appartient à la page qu'on quitte : rien ne doit
+  // rester ouvert (ni son voile, ni le blocage du défilement) par-dessus la page suivante.
+  document.dispatchEvent(new CustomEvent("brayano:close-overlays"));
+  const route = readRoute();
+  const detail = keepDetail && route.view === view ? route.detail : null;
   $$(".view").forEach((section) => section.classList.toggle("hidden", section.id !== `${view}-view`));
   $$(".nav-item[data-view], .tab-item[data-view]").forEach((item) => {
     const active = item.dataset.view === view;
@@ -103,18 +121,23 @@ function showView(view, onViewShown, { fromHistory = false, replace = false } = 
   // Les vues secondaires (produits, rendez-vous…) activent « Plus » sur mobile.
   $("#tab-more")?.classList.toggle("active", !$$(".tab-item[data-view].active").some((item) => item.offsetParent !== null));
   document.body.dataset.currentView = view;
-  document.body.classList.remove("in-thread");
+  if (!detail) document.body.classList.remove("in-thread");
   const title = VIEWS[view]?.title || "Tableau de bord";
   const label = $("#topbar-view");
   if (label) label.textContent = title;
   if (isShellVisible()) setPageTitle(title);
   closeMenu();
   closeMobileMenu();
-  if (!fromHistory) writeRoute(view, null, { replace });
+  if (!fromHistory) writeRoute(view, detail, { replace });
   window.scrollTo({ top: 0 });
   onViewShown?.[view]?.();
   // Pas de guide avant la connexion : la première vue est préparée alors que l'écran de connexion est encore affiché.
   if (isShellVisible()) maybeStartViewTour(view);
+}
+
+/** Un employé n'a accès qu'à l'accueil, aux conversations, aux commandes et aux rendez-vous (le serveur applique la même règle). */
+function isForbidden(view) {
+  return isAgentRole() && ADMIN_ONLY_VIEWS.includes(view);
 }
 
 /**
@@ -126,7 +149,7 @@ function showView(view, onViewShown, { fromHistory = false, replace = false } = 
  * @returns {boolean} false si la navigation n'a pas eu lieu immédiatement
  */
 export function setView(view, onViewShown, options = {}) {
-  if (!VIEWS[view]) return false;
+  if (!VIEWS[view] || isForbidden(view)) return false;
   const current = currentView();
   if (current && leaveGuards.get(current)?.()) {
     void navigate(view, onViewShown, options);
@@ -138,7 +161,7 @@ export function setView(view, onViewShown, options = {}) {
 
 /** Variante asynchrone de `setView` : attend la confirmation éventuelle, puis indique si la vue est affichée. */
 export async function navigate(view, onViewShown = loaders, options = {}) {
-  if (!VIEWS[view]) return false;
+  if (!VIEWS[view] || isForbidden(view)) return false;
   const current = currentView();
   if (current && leaveGuards.get(current)?.() && !(await confirmLeave())) return false;
   showView(view, onViewShown, options);
@@ -194,6 +217,8 @@ export function initNavigation(onViewShown) {
   // Bouton « retour » : on revient à la vue précédente (ou à la liste, depuis une conversation ouverte).
   window.addEventListener("popstate", async () => {
     if (!isShellVisible()) return;
+    // Une ancre (« #quelque-chose ») n'est pas une adresse de page : on ne change pas de vue.
+    if (window.location.hash && !window.location.hash.startsWith("#/")) return;
     const { detail } = readRoute();
     const view = routeView();
     const current = currentView();
@@ -205,6 +230,12 @@ export function initNavigation(onViewShown) {
       showView(view, loaders, { fromHistory: true });
     }
     document.dispatchEvent(new CustomEvent("brayano:route", { detail: { view, detail } }));
+  });
+
+  // « Aller au contenu » (navigation au clavier) : on déplace le focus, sans toucher à l'adresse de la page.
+  $(".skip-link")?.addEventListener("click", (event) => {
+    event.preventDefault();
+    $("#views-root")?.focus();
   });
 
   updateRealtimeHeader();

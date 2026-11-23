@@ -60,12 +60,16 @@ export function confirmDialog({ title, message = "", confirmLabel = "Confirmer",
     const releaseFocus = trapFocus(card);
     const close = (value) => {
       document.removeEventListener("keydown", onKey, true);
+      document.removeEventListener("brayano:close-overlays", dismiss);
       releaseFocus();
       unlockScroll();
       overlay.remove();
       if (previousFocus instanceof HTMLElement && document.contains(previousFocus)) previousFocus.focus({ preventScroll: true });
       resolve(value);
     };
+    // La page change ou la session se termine : la question n'a plus d'objet, elle vaut « non ».
+    const dismiss = () => close(false);
+    document.addEventListener("brayano:close-overlays", dismiss);
     const onKey = (event) => {
       if (event.key === "Escape") {
         event.stopPropagation();

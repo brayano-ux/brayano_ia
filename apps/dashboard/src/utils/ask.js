@@ -64,12 +64,16 @@ export function askFields({ title, intro = "", confirmLabel = "Valider", fields 
     const releaseFocus = trapFocus(card);
     const close = (value) => {
       document.removeEventListener("keydown", onKey, true);
+      document.removeEventListener("brayano:close-overlays", dismiss);
       releaseFocus();
       unlockScroll();
       overlay.remove();
       if (previousFocus instanceof HTMLElement && document.contains(previousFocus)) previousFocus.focus({ preventScroll: true });
       resolve(value);
     };
+    // La page change ou la session se termine : la saisie est abandonnée.
+    const dismiss = () => close(null);
+    document.addEventListener("brayano:close-overlays", dismiss);
     const onKey = (event) => {
       if (event.key === "Escape") {
         event.stopPropagation();

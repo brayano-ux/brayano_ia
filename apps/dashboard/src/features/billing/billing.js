@@ -238,6 +238,8 @@ export async function handleChariowReturn() {
 export function initBilling() {
   $("#billing-pay-form").onsubmit = submitPayment;
   $("#billing-pay-close").onclick = closePayment;
+  // Changement de page ou déconnexion : la fenêtre de paiement ne reste pas ouverte par-dessus autre chose.
+  document.addEventListener("brayano:close-overlays", closePayment);
   $("#billing-pay-cancel").onclick = closePayment;
   $("#billing-pay").addEventListener("click", (event) => {
     if (event.target.id === "billing-pay") closePayment();

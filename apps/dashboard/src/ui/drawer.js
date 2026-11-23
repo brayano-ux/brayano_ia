@@ -58,6 +58,9 @@ export function closeAllDrawers() {
   for (const element of [...open.keys()]) void closeDrawer(element, { force: true });
 }
 
+// Changement de page ou déconnexion : aucun panneau ne reste ouvert par-dessus (voir navigation.js).
+document.addEventListener("brayano:close-overlays", closeAllDrawers);
+
 document.addEventListener("click", (event) => {
   const button = event.target.closest?.("[data-drawer-close]");
   if (!button) return;

@@ -40,6 +40,10 @@ let refreshCallback = async () => {};
 
 const orgBase = () => `/organizations/${getState().organizationId}`;
 const isCompact = () => window.matchMedia("(max-width: 1023px)").matches;
+/** Numéro de la dernière ouverture de conversation demandée par l'utilisateur (voir openConversation). */
+let openRequest = 0;
+/** Une réponse manuelle est en cours d'envoi. */
+let sendingReply = false;
 /** Assez large pour afficher la fiche du client à côté du fil (sinon elle glisse par-dessus). Même seuil que inbox.css. */
 const isWide = () => window.matchMedia("(min-width: 1360px)").matches;
 
@@ -500,8 +504,12 @@ function autoGrow(textarea) {
  * train d'écrire et sa position dans le fil.
  */
 export async function openConversation(id, { refresh = false, fromRoute = false } = {}) {
+  // Une ouverture demandée par l'utilisateur périme les demandes précédentes ; un rafraîchissement automatique
+  // ne périme rien, et s'efface si l'utilisateur a demandé autre chose entre-temps.
+  const request = refresh ? openRequest : ++openRequest;
   try {
     const data = await api(`${orgBase()}/conversations/${id}`);
+    if (request !== openRequest || (refresh && selectedId !== id)) return;
     const conversation = data.conversation;
     const detailPanel = $("#conversation-detail");
     const wasSelected = selectedId;
@@ -522,9 +530,14 @@ export async function openConversation(id, { refresh = false, fromRoute = false 
       const previousScroll = existingThread.scrollTop;
       $("#detail-head").innerHTML = headMarkup(conversation);
       $("#detail-notices").innerHTML = noticesMarkup(conversation);
-      existingThread.innerHTML = threadMarkup(conversation.messages);
-      existingThread.scrollTop = stick ? existingThread.scrollHeight : previousScroll;
-      if (!stick && messageCount > openedMessageCount) $("#thread-new")?.classList.remove("hidden");
+      // Une correction en cours de saisie vit dans le fil : on ne le redessine pas tant qu'elle est ouverte (les
+      // nouveaux messages apparaîtront dès qu'elle sera enregistrée ou annulée).
+      const correcting = Boolean(existingThread.querySelector(".correction-form"));
+      if (!correcting) {
+        existingThread.innerHTML = threadMarkup(conversation.messages);
+        existingThread.scrollTop = stick ? existingThread.scrollHeight : previousScroll;
+      }
+      if ((!stick || correcting) && messageCount > openedMessageCount) $("#thread-new")?.classList.remove("hidden");
       // La fiche n'est redessinée que si l'utilisateur n'est pas en train d'y choisir quelque chose.
       if (!$("#detail-info").contains(document.activeElement)) $("#detail-info").innerHTML = infoMarkup(conversation);
     } else {
@@ -648,7 +661,10 @@ async function sendReply(event, id) {
   const input = event.target.querySelector("textarea");
   const button = event.target.querySelector('button[type="submit"]');
   const text = input.value.trim();
-  if (!text) return;
+  // Un envoi est déjà en route (Entrée appuyée deux fois, double clic) : le client ne doit pas recevoir le
+  // message en double. La touche Entrée ne passe pas par le bouton, d'où ce garde-fou en plus du bouton grisé.
+  if (!text || sendingReply) return;
+  sendingReply = true;
   button.disabled = true;
   button.classList.add("is-loading");
 
@@ -664,6 +680,7 @@ async function sendReply(event, id) {
   } catch (error) {
     showToast(error.message, "error");
   } finally {
+    sendingReply = false;
     button.disabled = false;
     button.classList.remove("is-loading");
   }
@@ -724,10 +741,12 @@ function openLightbox(url) {
   };
   const close = () => {
     document.removeEventListener("keydown", onKey);
+    document.removeEventListener("brayano:close-overlays", close);
     overlay.remove();
   };
   overlay.onclick = close;
   document.addEventListener("keydown", onKey);
+  document.addEventListener("brayano:close-overlays", close);
   document.body.appendChild(overlay);
   overlay.querySelector("button").focus();
 }
