@@ -54,11 +54,6 @@ Un « message » est une réponse envoyée par l'assistant à un client. Ce que 
 ## Pages utiles
 
 - [Accueil](https://brayanoia.onrender.com/) : présentation, exemples de conversations, tarifs et questions fréquentes
-- [Brayano IA pour une boutique](https://brayanoia.onrender.com/assistant-whatsapp/boutique.html) : prix, photos, commandes et marchandage
-- [Brayano IA pour un salon de coiffure](https://brayanoia.onrender.com/assistant-whatsapp/salon-de-coiffure.html) : tarifs et rendez-vous sur les créneaux libres
-- [Brayano IA pour un restaurant](https://brayanoia.onrender.com/assistant-whatsapp/restaurant.html) : carte, livraison et commandes
-- [Brayano IA pour une clinique ou un cabinet](https://brayanoia.onrender.com/assistant-whatsapp/clinique.html) : informations pratiques et rendez-vous, sans conseil médical
-- [Brayano IA pour une école ou un centre de formation](https://brayanoia.onrender.com/assistant-whatsapp/ecole.html) : questions d'inscription et suivi des demandes
 - [Négociation de prix](https://brayanoia.onrender.com/fonctionnalites/negociation-de-prix.html) : l'assistant négocie dans la limite fixée par le vendeur
 - [Localisation GPS](https://brayanoia.onrender.com/fonctionnalites/localisation-gps.html) : l'assistant envoie la position de la boutique
 - [Suivi des publicités](https://brayanoia.onrender.com/fonctionnalites/suivi-publicite.html) : savoir quelle publicité amène des clients

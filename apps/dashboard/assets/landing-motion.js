@@ -173,11 +173,7 @@
     function append(hidden) {
       originals.forEach(function (item) {
         var clone = item.cloneNode(true);
-        if (hidden) {
-          // Les copies ne servent qu'au défilement : ni lues par un lecteur d'écran, ni atteintes au clavier.
-          clone.setAttribute("aria-hidden", "true");
-          if (clone.tagName === "A") clone.setAttribute("tabindex", "-1");
-        }
+        if (hidden) clone.setAttribute("aria-hidden", "true");
         track.appendChild(clone);
       });
     }

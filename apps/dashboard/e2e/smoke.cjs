@@ -280,18 +280,7 @@ async function landingJourney(browser, failures) {
     if (!response.ok() || !(await response.text()).trim()) failures.push(`Le fichier ${file} n'est pas servi à la racine du site.`);
   }
 
-  // Pages par activité : le lien de la page d'accueil mène à une page complète (titre, limites, questions).
-  const sectorLink = await landing.getAttribute(".demo-copy .demo-link", "href");
-  if (!sectorLink) failures.push("Page d'accueil : le lien vers une page par activité a disparu.");
-  else {
-    await landing.goto(`${BASE}/${sectorLink}`, { waitUntil: "load" });
-    await landing.waitForTimeout(500);
-    if (!(await landing.isVisible("main h1"))) failures.push(`Page par activité (${sectorLink}) : le titre ne s'affiche pas.`);
-    if ((await landing.locator(".limits li").count()) < 3) failures.push(`Page par activité (${sectorLink}) : la liste « Ce qu'il ne fait pas » est incomplète.`);
-    if ((await landing.locator(".faq details").count()) < 3) failures.push(`Page par activité (${sectorLink}) : les questions ont disparu.`);
-  }
-
-  if (landingErrors.length) failures.push(`Erreurs JavaScript sur le site public :\n  - ${landingErrors.join("\n  - ")}`);
+  if (landingErrors.length) failures.push(`Erreurs JavaScript sur la page d'accueil :\n  - ${landingErrors.join("\n  - ")}`);
   await visitor.close();
 }
 
