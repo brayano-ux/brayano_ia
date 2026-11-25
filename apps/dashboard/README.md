@@ -138,6 +138,7 @@ Le site doit pouvoir être trouvé, lu et cité correctement. Tout repose sur de
 | --- | --- |
 | `<head>` de chaque page | Titre, description, adresse canonique, balises de partage. Un titre et une description par page, jamais deux fois les mêmes. |
 | Bloc `application/ld+json` de `index.html` | Données structurées schema.org : l'éditeur (nom, ville, numéro), le site, le logiciel et ses trois forfaits, la FAQ. |
+| `assistant-whatsapp/*.html` | Une page par activité (boutique, salon de coiffure, restaurant, clinique, école) : ce que l'assistant fait dans ce métier, la mise en place, ce qu'il ne fait pas, les questions. Chacune balise sa propre FAQ. |
 | `llms.txt` | Résumé en texte clair pour les assistants IA : ce que fait le service, prix, limites, contact, pages utiles. |
 | `robots.txt`, `sitemap.xml` | Tous les robots sont autorisés ; le plan du site liste les pages publiques. |
 | `googlea477c0da0cb60156.html` | Preuve de propriété pour Google Search Console. **Ne pas supprimer.** |
@@ -149,6 +150,8 @@ Deux règles :
 2. **Un fait n'a qu'une valeur.** Prix, quantités de messages, questions de la FAQ, numéro WhatsApp et adresse du site sont répétés à plusieurs endroits ; `apps/backend/src/public-site/public-site.test.ts` les compare entre eux et aux forfaits du code (`billing-plans.ts`), et la CI échoue au moindre écart.
 
 Ajouter une page publique : un seul `<h1>`, un titre et une description propres, `canonical` et `og:url` à son adresse, puis l'ajouter à `sitemap.xml` et à la rubrique « Pages utiles » de `llms.txt` (le test le réclame).
+
+Pages par activité : ce sont des fichiers HTML ordinaires, à modifier à la main comme les pages de fonctionnalités. Elles ne décrivent que ce que le service fait réellement (les chiffres cités — prix, messages, employés, taille des lots, catalogue, photos — sont comparés à ceux du code par le test), disent clairement ce qu'il ne fait pas, et signalent leur exemple de conversation comme fictif. Une question modifiée dans la page doit l'être aussi dans son bloc `application/ld+json`.
 
 Changer de nom de domaine : remplacer `https://brayanoia.onrender.com` dans tout ce dossier (`grep -rl "brayanoia.onrender.com" apps/dashboard`), relancer les tests, puis mettre à jour côté serveur `CLIENT_DASHBOARD_URL` et `CORS_ALLOWED_ORIGINS`, et côté Google l'origine autorisée du bouton « Continuer avec Google ». Garder l'ancienne adresse en redirection vers la nouvelle, et déclarer la nouvelle dans Google Search Console et Bing Webmaster Tools.
 

@@ -2,9 +2,12 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { BILLING_PLANS, TRIAL } from "../billing/billing-plans.js";
+import { BROADCAST_LIMITS } from "../broadcasts/broadcast-rules.js";
+import { CATALOG_MAX_PRODUCTS } from "../products/catalog-search.js";
+import { MAX_PRODUCT_PHOTOS_PER_REPLY } from "../products/product-image-selection.js";
 
 /**
- * Le site public (apps/dashboard : page d'accueil, pages de fonctionnalités, llms.txt, plan du site) répète les mêmes
+ * Le site public (apps/dashboard : page d'accueil, pages de fonctionnalités, pages par activité, llms.txt, plan du site) répète les mêmes
  * faits à plusieurs endroits : le texte que lit le visiteur, les données structurées que lisent les moteurs de recherche,
  * et llms.txt que lisent les assistants IA. Ces tests garantissent que tous disent la même chose que les forfaits du code :
  * un prix, une question ou un numéro modifié à un seul endroit fait échouer la CI au lieu de partir en ligne.
@@ -19,7 +22,8 @@ const pagesIn = (directory: string) =>
     .map((file) => `${directory}/${file}`);
 
 /** Pages proposées aux moteurs de recherche. Le tableau de bord (/app/) porte « noindex » et n'en fait pas partie. */
-const PUBLIC_PAGES = ["index.html", ...pagesIn("fonctionnalites")];
+const SECTOR_PAGES = pagesIn("assistant-whatsapp");
+const PUBLIC_PAGES = ["index.html", ...pagesIn("fonctionnalites"), ...SECTOR_PAGES];
 const LEGAL_PAGES = ["conditions.html", "confidentialite.html"];
 
 const home = read("index.html");
@@ -71,8 +75,9 @@ describe("site public : ce que lisent les moteurs de recherche", () => {
     const descriptions = new Set<string>();
     for (const page of PUBLIC_PAGES) {
       const html = read(page);
-      const title = /<title>([^<]+)<\/title>/.exec(html)?.[1] ?? "";
-      const description = /<meta name="description" content="([^"]+)"/.exec(html)?.[1] ?? "";
+      // Longueurs mesurées sur le texte lu par Google (entités décodées), pas sur le code source.
+      const title = visibleText(/<title>([^<]+)<\/title>/.exec(html)?.[1] ?? "");
+      const description = visibleText(/<meta name="description" content="([^"]+)"/.exec(html)?.[1] ?? "");
 
       expect(html, `${page} : langue`).toMatch(/<html lang="fr">/);
       expect(title.length, `${page} : titre absent`).toBeGreaterThan(10);
@@ -116,6 +121,18 @@ describe("site public : ce que lisent les moteurs de recherche", () => {
     expect(everyRobot, "robots.txt interdit tout le site à tous les robots").not.toMatch(/^Disallow:\s*\/\s*$/m);
   });
 
+  it("chaque page publique garde la politique de contenu stricte : ni script ni gestionnaire d'événement en ligne", () => {
+    for (const page of PUBLIC_PAGES) {
+      const html = read(page);
+      const policy = /http-equiv="Content-Security-Policy" content="([^"]+)"/.exec(html)?.[1] ?? "";
+      expect(policy, page).toContain("script-src 'self'");
+      expect(policy, page).not.toMatch(/script-src[^;]*'unsafe-(inline|eval)'/);
+      // Les blocs de données JSON-LD ne s'exécutent pas : ce sont les seuls <script> sans fichier autorisés.
+      expect(html.match(/<script(?![^>]*\bsrc=)(?![^>]*application\/ld\+json)[^>]*>/gi) ?? [], page).toEqual([]);
+      expect(html, `${page} : gestionnaire d'événement en ligne`).not.toMatch(/\son(click|error|load|submit|change)\s*=\s*["']/i);
+    }
+  });
+
   it("le tableau de bord, lui, reste hors de Google", () => {
     expect(read("app/index.html")).toMatch(/<meta name="robots" content="noindex" \/>/);
   });
@@ -145,17 +162,23 @@ describe("site public : les mêmes faits partout (une seule vérité)", () => {
     });
   });
 
-  it("la FAQ des données structurées reprend mot pour mot les questions et les réponses affichées", () => {
-    const visible = [...section(home, "questions").matchAll(/<details><summary>([\s\S]*?)<\/summary><p>([\s\S]*?)<\/p><\/details>/g)].map((match) => [
-      visibleText(match[1] ?? ""),
-      visibleText(match[2] ?? ""),
-    ]);
-    const marked = ((ofType(homeData, "FAQPage").mainEntity ?? []) as Array<{ name: string; acceptedAnswer: { text: string } }>).map((question) => [
-      normalize(question.name),
-      normalize(question.acceptedAnswer.text),
-    ]);
-    expect(visible.length).toBeGreaterThan(0);
-    expect(marked).toEqual(visible);
+  it("chaque FAQ balisée reprend mot pour mot les questions et les réponses affichées sur sa page", () => {
+    const withFaq = PUBLIC_PAGES.filter((page) => ofType(structuredData(read(page)), "FAQPage").mainEntity);
+    expect(withFaq).toEqual(["index.html", ...SECTOR_PAGES]);
+    for (const page of withFaq) {
+      const html = read(page);
+      const block = /<div class="faq">[\s\S]*?<\/div>/.exec(html)?.[0] ?? "";
+      const visible = [...block.matchAll(/<details><summary>([\s\S]*?)<\/summary><p>([\s\S]*?)<\/p><\/details>/g)].map((match) => [
+        visibleText(match[1] ?? ""),
+        visibleText(match[2] ?? ""),
+      ]);
+      const marked = (ofType(structuredData(html), "FAQPage").mainEntity as Array<{ name: string; acceptedAnswer: { text: string } }>).map((question) => [
+        normalize(question.name),
+        normalize(question.acceptedAnswer.text),
+      ]);
+      expect(visible.length, `${page} : aucune question affichée`).toBeGreaterThan(0);
+      expect(marked, `${page} : la FAQ balisée diffère de la FAQ affichée`).toEqual(visible);
+    }
   });
 
   it("l'éditeur, la ville et le numéro des données structurées sont écrits sur la page", () => {
@@ -173,6 +196,46 @@ describe("site public : les mêmes faits partout (une seule vérité)", () => {
     for (const page of [...PUBLIC_PAGES, ...LEGAL_PAGES]) {
       const numbers = new Set([...read(page).matchAll(/wa\.me\/(\d+)/g)].map((match) => match[1]));
       expect([...numbers], `${page} : numéro WhatsApp`).toEqual([phone.slice(1)]);
+    }
+  });
+});
+
+describe("site public : pages par activité (assistant-whatsapp/)", () => {
+  const numbers = (text: string, pattern: RegExp) => [...text.matchAll(pattern)].map((match) => Number((match[1] ?? "").replace(/\s/g, "")));
+
+  it("existent pour les cinq activités annoncées et sont reliées depuis la page d'accueil et entre elles", () => {
+    expect(SECTOR_PAGES).toHaveLength(5);
+    for (const page of SECTOR_PAGES) {
+      expect(home, `la page d'accueil ne mène pas à ${page}`).toContain(`href="${page}"`);
+      const html = read(page);
+      for (const other of SECTOR_PAGES) expect(html, `${page} ne mène pas à ${other}`).toContain(`href="${path.basename(other)}"`);
+      expect(html, `${page} : exemple de conversation non signalé comme fictif`).toContain("Exemple illustratif, avec un nom et des prix fictifs.");
+    }
+  });
+
+  it("citent les prix, les quantités de messages, les employés et l'essai des forfaits du code", () => {
+    const byName = new Map(plans.map((plan) => [plan.name, plan]));
+    for (const page of SECTOR_PAGES) {
+      const html = read(page);
+      const text = visibleText(html.slice(html.indexOf("<main"), html.indexOf("</main>")));
+      const prices = [...text.matchAll(/forfait (Essentiel|Pro|Business)\D{0,12}?(\d[\d ]*) FCFA par mois/g)];
+      expect(prices.length, `${page} : aucun prix de forfait`).toBeGreaterThan(0);
+      for (const [, name, value] of prices) expect(Number((value ?? "").replace(/\s/g, "")), `${page} : prix du forfait ${name}`).toBe(byName.get(name ?? "")?.amount);
+      for (const value of numbers(text, /(\d[\d ]*) messages de l'assistant/g)) expect(plans.map((plan) => plan.messages), `${page} : ${value} messages`).toContain(value);
+      for (const value of numbers(text, /(\d+) employés/g)) expect(plans.map((plan) => plan.features.teamMembers), `${page} : ${value} employés`).toContain(value);
+      for (const value of numbers(text, /(\d+) (?:messages offerts|réponses offertes)/g)) expect(value, `${page} : essai gratuit`).toBe(TRIAL.messages);
+    }
+  });
+
+  it("citent les limites réellement appliquées par le serveur (messages groupés, catalogue, photos)", () => {
+    for (const page of SECTOR_PAGES) {
+      const html = read(page);
+      const text = visibleText(html.slice(html.indexOf("<main"), html.indexOf("</main>")));
+      for (const value of numbers(text, /lots de (\d+)/g)) expect(value, `${page} : taille d'un lot`).toBe(BROADCAST_LIMITS.maxRecipientsPerBroadcast);
+      for (const value of numbers(text, /(\d+) messages par 24 h/g)) expect(value, `${page} : messages groupés par 24 h`).toBe(BROADCAST_LIMITS.maxPerDay);
+      for (const value of numbers(text, /à (\d+) derniers jours/g)) expect(value, `${page} : ancienneté maximale d'un destinataire`).toBe(BROADCAST_LIMITS.maxWindowDays);
+      for (const value of numbers(text, /jusqu'à (\d+) articles actifs/g)) expect(value, `${page} : taille du catalogue`).toBe(CATALOG_MAX_PRODUCTS);
+      for (const value of numbers(text, /jusqu'à (\d+) photos/g)) expect(value, `${page} : photos par réponse`).toBe(MAX_PRODUCT_PHOTOS_PER_REPLY);
     }
   });
 });
