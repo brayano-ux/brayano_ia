@@ -130,6 +130,28 @@ Le dossier `apps/dashboard` est publié tel quel sur Render (Static Site, dossie
 - Dans le backend, mettre `CLIENT_DASHBOARD_URL` sur l'adresse `/app/` (ex. `https://brayanoia.onrender.com/app/`) pour que les liens des emails mènent directement au tableau de bord. Les balises de partage (`og:url`, `og:image`, `canonical`) de `index.html` contiennent l'adresse du site : à adapter si le domaine change.
 - Les captures de `assets/screens/` sont de vraies captures du tableau de bord, prises avec les données de démonstration. Quand l'interface change, `node e2e/capture-landing.cjs` les refait (serveur local et données de démonstration requis ; chaque capture existe en 1200 px pour les téléphones et en 2400 px pour les grands écrans).
 
+## Référencement (Google, Bing, assistants IA)
+
+Le site doit pouvoir être trouvé, lu et cité correctement. Tout repose sur des fichiers de ce dossier :
+
+| Fichier | Rôle |
+| --- | --- |
+| `<head>` de chaque page | Titre, description, adresse canonique, balises de partage. Un titre et une description par page, jamais deux fois les mêmes. |
+| Bloc `application/ld+json` de `index.html` | Données structurées schema.org : l'éditeur (nom, ville, numéro), le site, le logiciel et ses trois forfaits, la FAQ. |
+| `llms.txt` | Résumé en texte clair pour les assistants IA : ce que fait le service, prix, limites, contact, pages utiles. |
+| `robots.txt`, `sitemap.xml` | Tous les robots sont autorisés ; le plan du site liste les pages publiques. |
+| `googlea477c0da0cb60156.html` | Preuve de propriété pour Google Search Console. **Ne pas supprimer.** |
+| `app/index.html` | Porte `noindex` : le tableau de bord n'a rien à faire dans Google. |
+
+Deux règles :
+
+1. **Les données structurées et `llms.txt` ne disent que ce qui est écrit sur les pages.** Pas de note, d'avis ou de chiffre inventé : c'est ce que les moteurs sanctionnent.
+2. **Un fait n'a qu'une valeur.** Prix, quantités de messages, questions de la FAQ, numéro WhatsApp et adresse du site sont répétés à plusieurs endroits ; `apps/backend/src/public-site/public-site.test.ts` les compare entre eux et aux forfaits du code (`billing-plans.ts`), et la CI échoue au moindre écart.
+
+Ajouter une page publique : un seul `<h1>`, un titre et une description propres, `canonical` et `og:url` à son adresse, puis l'ajouter à `sitemap.xml` et à la rubrique « Pages utiles » de `llms.txt` (le test le réclame).
+
+Changer de nom de domaine : remplacer `https://brayanoia.onrender.com` dans tout ce dossier (`grep -rl "brayanoia.onrender.com" apps/dashboard`), relancer les tests, puis mettre à jour côté serveur `CLIENT_DASHBOARD_URL` et `CORS_ALLOWED_ORIGINS`, et côté Google l'origine autorisée du bouton « Continuer avec Google ». Garder l'ancienne adresse en redirection vers la nouvelle, et déclarer la nouvelle dans Google Search Console et Bing Webmaster Tools.
+
 ## Sécurité du site statique
 
 - Les pages portent une politique de contenu (CSP) dans une balise `<meta>` : scripts et polices uniquement depuis ce site, pas de script en ligne. `app/index.html` autorise les appels vers l'adresse du serveur définie dans `src/config.js` (`defaultApi`). **Si vous changez l'adresse du serveur, mettez aussi à jour `connect-src` dans `app/index.html`** (un test le vérifie).

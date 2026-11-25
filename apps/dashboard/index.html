@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://connect.facebook.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://www.facebook.com https://connect.facebook.net https://brayano-ia-5.onrender.com http://127.0.0.1:3000 http://localhost:3000; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
-  <title>Assistant WhatsApp IA pour entreprise | Brayano IA</title>
-  <meta name="description" content="Brayano IA est un assistant WhatsApp intelligent pour entreprise : réponses 24h/24, commandes et relances de prospects. Essayez gratuitement avec 100 réponses offertes." />
+  <title>Assistant WhatsApp IA pour commerces au Cameroun | Brayano IA</title>
+  <meta name="description" content="Brayano IA répond à vos clients WhatsApp 24h/24, prend les commandes et relance vos prospects. 100 réponses gratuites, paiement Orange Money ou MoMo." />
   <meta name="theme-color" content="#071330" />
   <link rel="canonical" href="https://brayanoia.onrender.com/" />
   <link rel="icon" type="image/png" href="assets/logo-mark.png" />
@@ -24,8 +24,74 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="landing.css" />
+  <!-- Données structurées (schema.org) : elles redisent, pour les moteurs de recherche et les assistants IA, ce qui est écrit
+       sur la page. Un prix, un forfait ou une question change sur la page ? Changez-le aussi ici : le test
+       apps/backend/src/public-site/public-site.test.ts signale tout écart. -->
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"WebSite","name":"Brayano IA","alternateName":"Brayano AI","url":"https://brayanoia.onrender.com/"}
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://brayanoia.onrender.com/#organization",
+        "name": "Brayano IA",
+        "alternateName": "Brayano AI",
+        "legalName": "Brayano Service",
+        "url": "https://brayanoia.onrender.com/",
+        "logo": "https://brayanoia.onrender.com/assets/logo-mark.png",
+        "telephone": "+237683260520",
+        "address": {"@type": "PostalAddress", "addressLocality": "Douala", "addressCountry": "CM"},
+        "contactPoint": {"@type": "ContactPoint", "contactType": "customer support", "telephone": "+237683260520", "url": "https://wa.me/237683260520"}
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://brayanoia.onrender.com/#website",
+        "name": "Brayano IA",
+        "alternateName": "Brayano AI",
+        "url": "https://brayanoia.onrender.com/",
+        "inLanguage": "fr",
+        "publisher": {"@id": "https://brayanoia.onrender.com/#organization"}
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://brayanoia.onrender.com/#software",
+        "name": "Brayano IA",
+        "alternateName": "Brayano AI",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web",
+        "url": "https://brayanoia.onrender.com/",
+        "image": "https://brayanoia.onrender.com/assets/og-image.png",
+        "screenshot": ["https://brayanoia.onrender.com/assets/screens/accueil-2400.webp", "https://brayanoia.onrender.com/assets/screens/conversations-2400.webp", "https://brayanoia.onrender.com/assets/screens/agent-2400.webp", "https://brayanoia.onrender.com/assets/screens/messages-groupes-2400.webp"],
+        "inLanguage": "fr",
+        "description": "Assistant WhatsApp IA pour entreprises : répond aux clients 24h/24 en français, anglais et pidgin, prend les commandes et les rendez-vous, relance les prospects. 100 messages offerts pour essayer, sans carte bancaire.",
+        "provider": {"@id": "https://brayanoia.onrender.com/#organization"},
+        "offers": [
+          {"@type": "Offer", "name": "Essentiel", "price": "10000", "priceCurrency": "XAF", "url": "https://brayanoia.onrender.com/#tarifs", "description": "Forfait de 30 jours, sans engagement. 1 000 messages de l'assistant par mois. Réponses automatiques 24h/24 sur WhatsApp. Produits, photos, commandes et rendez-vous. Suivi de vos clients et chiffres clairs."},
+          {"@type": "Offer", "name": "Pro", "price": "20000", "priceCurrency": "XAF", "url": "https://brayanoia.onrender.com/#tarifs", "description": "Forfait de 30 jours, sans engagement. 5 000 messages de l'assistant par mois. Tout l'Essentiel. Messages en masse en 1 clic. Relances automatiques des clients. 3 employés dans la même boîte."},
+          {"@type": "Offer", "name": "Business", "price": "50000", "priceCurrency": "XAF", "url": "https://brayanoia.onrender.com/#tarifs", "description": "Forfait de 30 jours, sans engagement. 15 000 messages de l'assistant par mois. Tout le Pro. 10 employés dans la même boîte. Aide à l'installation."}
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://brayanoia.onrender.com/#faq",
+        "url": "https://brayanoia.onrender.com/#questions",
+        "inLanguage": "fr",
+        "isPartOf": {"@id": "https://brayanoia.onrender.com/#website"},
+        "mainEntity": [
+          {"@type": "Question", "name": "Dois-je changer mon numéro WhatsApp ?", "acceptedAnswer": {"@type": "Answer", "text": "Non. Vous reliez votre numéro actuel en scannant un code, comme avec WhatsApp Web. Vos clients continuent d'écrire au même numéro."}},
+          {"@type": "Question", "name": "Puis-je répondre moi-même à un client ?", "acceptedAnswer": {"@type": "Answer", "text": "Oui, à tout moment, depuis le tableau de bord ou depuis votre téléphone. Quand vous reprenez la conversation, l'assistant se met en pause pour ce client."}},
+          {"@type": "Question", "name": "Et s'il ne sait pas répondre ?", "acceptedAnswer": {"@type": "Answer", "text": "Lorsqu’une demande nécessite votre intervention, il peut passer la main et vous prévenir par email. Comme toute IA, il peut se tromper : vous pouvez vérifier et corriger ses réponses depuis votre espace."}},
+          {"@type": "Question", "name": "En quelle langue répond-il ?", "acceptedAnswer": {"@type": "Answer", "text": "Dans la langue de votre client : français, anglais ou pidgin."}},
+          {"@type": "Question", "name": "Qui voit mes conversations ?", "acceptedAnswer": {"@type": "Answer", "text": "Vous et les employés autorisés disposez de vos conversations dans le tableau de bord. Le traitement des messages fait aussi intervenir les prestataires techniques nécessaires au service. Consultez notre notice de confidentialité pour les détails."}},
+          {"@type": "Question", "name": "Mon numéro risque-t-il d'être bloqué par WhatsApp ?", "acceptedAnswer": {"@type": "Answer", "text": "Brayano IA se relie à WhatsApp comme WhatsApp Web (ce n'est pas l'outil officiel de Meta). Nous réduisons les risques : réponses espacées de quelques secondes, messages en masse par petits lots et seulement aux clients qui vous ont déjà écrit, « STOP » toujours respecté. Aucun outil ne peut promettre un risque zéro : n'envoyez pas de messages à des inconnus."}},
+          {"@type": "Question", "name": "Que se passe-t-il quand mes 100 messages gratuits sont terminés ?", "acceptedAnswer": {"@type": "Answer", "text": "Vous choisissez un forfait pour continuer. Vos conversations restent dans votre tableau de bord et vous pouvez toujours répondre vous-même."}},
+          {"@type": "Question", "name": "Comment je paie ?", "acceptedAnswer": {"@type": "Answer", "text": "Par Orange Money ou MTN MoMo, depuis la page « Mon forfait » : vous validez la demande sur votre téléphone. Chaque forfait dure 30 jours, sans engagement."}},
+          {"@type": "Question", "name": "Et si je n'y arrive pas tout seul ?", "acceptedAnswer": {"@type": "Answer", "text": "L'assistant d'aide du tableau de bord répond à vos questions de configuration à toute heure. Et vous pouvez nous écrire sur WhatsApp : le forfait Business comprend même une aide à l'installation."}},
+          {"@type": "Question", "name": "Combien ça coûte ?", "acceptedAnswer": {"@type": "Answer", "text": "Essentiel : 10 000 FCFA par mois, Pro : 20 000 FCFA, Business : 50 000 FCFA (voir les tarifs). Vous commencez par 100 messages gratuits. Une question ? Écrivez-nous sur WhatsApp au +237 683 26 05 20."}}
+        ]
+      }
+    ]
+  }
   </script>
   <!-- Meta Pixel Code -->
   <script src="assets/meta-pixel.js"></script>
@@ -417,7 +483,7 @@
       </div>
     </div>
     <div class="wrap foot-legal">
-      <p>© Brayano IA · Fait au Cameroun</p>
+      <p>© Brayano IA · Fait à Douala, au Cameroun, par&nbsp;Brayano&nbsp;Service</p>
       <nav class="legal-links" aria-label="Informations sur le service"><a href="conditions.html">Conditions d’utilisation</a><a href="confidentialite.html">Confidentialité</a></nav>
       <p>Brayano IA est un service indépendant. WhatsApp est une marque de Meta : Brayano IA n'est ni affilié à WhatsApp ni approuvé par WhatsApp.</p>
     </div>
@@ -431,8 +497,5 @@
 
   <script src="assets/landing-menu.js" defer></script>
   <script src="assets/landing-motion.js" defer></script>
-  <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"SoftwareApplication","name":"Brayano IA","applicationCategory":"BusinessApplication","operatingSystem":"Web","description":"Assistant WhatsApp qui répond aux clients, note les commandes et les rendez-vous, et relance les clients qui ne répondent plus.","url":"https://brayanoia.onrender.com/","offers":[{"@type":"Offer","name":"Essentiel","price":"10000","priceCurrency":"XAF"},{"@type":"Offer","name":"Pro","price":"20000","priceCurrency":"XAF"},{"@type":"Offer","name":"Business","price":"50000","priceCurrency":"XAF"}],"alternateName":"Brayano AI"}
-  </script>
 </body>
 </html>

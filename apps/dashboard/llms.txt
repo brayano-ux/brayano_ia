@@ -1,0 +1,62 @@
+# Brayano IA
+
+> Brayano IA est un assistant WhatsApp à intelligence artificielle pour les commerces et les entreprises. Il répond aux clients 24h/24 à partir des produits, des prix et des horaires de l'entreprise, note les commandes et les rendez-vous, et relance les clients qui ne répondent plus. Le service est proposé par Brayano Service, à Douala, au Cameroun.
+
+## Ce que fait Brayano IA
+
+- Répond aux clients sur WhatsApp, jour et nuit, en français, en anglais ou en pidgin, y compris quand le client envoie un message vocal.
+- Note les commandes (produit, quantité, adresse de livraison) et prévient le propriétaire par e-mail à chaque commande.
+- Gère les rendez-vous : propose les créneaux libres de l'agenda, enregistre le rendez-vous et évite les doubles réservations.
+- Envoie les photos des produits avec leur prix, jusqu'à 5 à la fois.
+- Négocie les prix à la place du vendeur, sans jamais dépasser la remise maximale qu'il a fixée.
+- Envoie la position GPS de la boutique : le client reçoit l'itinéraire dans WhatsApp.
+- Repère les clients arrivés en cliquant sur une publicité Facebook ou Instagram.
+- Relance les clients intéressés qui ne répondent plus et envoie des messages groupés (à partir du forfait Pro).
+- Passe la main au propriétaire quand une demande nécessite une personne, et le prévient par e-mail. Le propriétaire peut reprendre une conversation à tout moment.
+- Classe les clients par étape : nouveau, intéressé, a commandé, à rappeler.
+- Retient les corrections du propriétaire pour les questions semblables.
+- Accepte des règles sur mesure : limiter l'assistant à un seul sujet, ou ne répondre qu'aux clients venus d'une publicité.
+- Plusieurs employés peuvent répondre depuis le même tableau de bord : 3 avec le forfait Pro, 10 avec le forfait Business.
+
+## Comment ça marche
+
+1. L'entreprise crée son compte. C'est gratuit.
+2. Elle relie son numéro WhatsApp actuel en scannant un code, comme pour WhatsApp Web. Elle garde son numéro.
+3. Elle indique ses produits, ses prix et ses horaires. L'assistant s'en sert pour répondre.
+
+Le tableau de bord s'utilise sur téléphone ou sur ordinateur.
+
+## Pour qui
+
+Boutiques, salons de coiffure, restaurants, cliniques, écoles et prestataires de services qui vendent sur WhatsApp.
+
+## Prix
+
+Essai gratuit : 100 messages offerts, sans carte bancaire. Ensuite, un forfait de 30 jours, sans engagement :
+
+- Essentiel : 10 000 FCFA par mois, 1 000 messages de l'assistant. Réponses automatiques 24h/24, produits, photos, commandes, rendez-vous, suivi des clients et chiffres.
+- Pro : 20 000 FCFA par mois, 5 000 messages de l'assistant. Tout le forfait Essentiel, plus les messages groupés, les relances automatiques et 3 employés.
+- Business : 50 000 FCFA par mois, 15 000 messages de l'assistant. Tout le forfait Pro, plus 10 employés et une aide à l'installation.
+
+Un « message » est une réponse envoyée par l'assistant à un client. Ce que le propriétaire écrit lui-même n'est jamais compté. Paiement par Orange Money ou MTN MoMo.
+
+## Limites à connaître
+
+- Brayano IA se relie à WhatsApp comme WhatsApp Web. Ce n'est pas l'outil officiel de Meta : Brayano IA n'est ni affilié à WhatsApp ni approuvé par WhatsApp.
+- Aucun outil ne peut promettre un risque zéro de blocage du numéro par WhatsApp. Pour réduire ce risque, les réponses sont espacées de quelques secondes, les messages groupés partent par petits lots et seulement aux clients qui ont déjà écrit, et une demande « STOP » est toujours respectée.
+- Comme toute IA, l'assistant peut se tromper. Le propriétaire peut vérifier et corriger ses réponses.
+
+## Contact
+
+- WhatsApp : +237 683 26 05 20 (réponse en général dans la journée)
+- Éditeur : Brayano Service, Douala, Cameroun
+
+## Pages utiles
+
+- [Accueil](https://brayanoia.onrender.com/) : présentation, exemples de conversations, tarifs et questions fréquentes
+- [Négociation de prix](https://brayanoia.onrender.com/fonctionnalites/negociation-de-prix.html) : l'assistant négocie dans la limite fixée par le vendeur
+- [Localisation GPS](https://brayanoia.onrender.com/fonctionnalites/localisation-gps.html) : l'assistant envoie la position de la boutique
+- [Suivi des publicités](https://brayanoia.onrender.com/fonctionnalites/suivi-publicite.html) : savoir quelle publicité amène des clients
+- [Règles sur mesure](https://brayanoia.onrender.com/fonctionnalites/regles-sur-mesure.html) : limiter l'assistant à un sujet ou aux clients venus d'une publicité
+- [Conditions d'utilisation](https://brayanoia.onrender.com/conditions.html)
+- [Confidentialité](https://brayanoia.onrender.com/confidentialite.html)
