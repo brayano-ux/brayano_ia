@@ -1,10 +1,16 @@
+import { BILLING_PLANS } from "../billing/billing-plans.js";
 import { assertCanAddTeamMember } from "../billing/subscription.service.js";
 import { prisma } from "../database/client.js";
 import { hashPassword } from "../routes/auth.route.js";
 import { NotFoundError, ValidationError } from "../shared/errors.js";
 
-/** Propriétaire + employés. */
-export const MAX_TEAM_MEMBERS = 10;
+/**
+ * Nombre maximal d'employés, quel que soit le forfait : celui du forfait le plus complet (10 avec Business).
+ * Le propriétaire ne compte pas : le forfait promet des employés « en plus du propriétaire ».
+ */
+export const MAX_EMPLOYEES = Math.max(...Object.values(BILLING_PLANS).map((plan) => plan.features.teamMembers));
+/** Taille maximale de l'équipe affichée par le tableau de bord : le propriétaire et ses employés. */
+export const MAX_TEAM_MEMBERS = MAX_EMPLOYEES + 1;
 
 const memberSelect = { id: true, name: true, email: true, role: true, active: true, createdAt: true } as const;
 
@@ -14,9 +20,9 @@ export async function listTeam(organizationId: string) {
 
 export async function addAgent(organizationId: string, input: { name: string; email: string; password: string }) {
   const email = input.email.trim().toLowerCase();
-  const count = await prisma.user.count({ where: { organizationId } });
-  await assertCanAddTeamMember(organizationId, await prisma.user.count({ where: { organizationId, role: "AGENT" } }));
-  if (count >= MAX_TEAM_MEMBERS) throw new ValidationError(`Votre équipe est limitée à ${MAX_TEAM_MEMBERS} personnes.`);
+  const employees = await prisma.user.count({ where: { organizationId, role: "AGENT" } });
+  await assertCanAddTeamMember(organizationId, employees);
+  if (employees >= MAX_EMPLOYEES) throw new ValidationError(`Votre équipe est limitée à ${MAX_EMPLOYEES} employés.`);
   const existing = await prisma.user.findUnique({ where: { email }, select: { id: true } });
   if (existing) throw new ValidationError("Cette adresse email est déjà utilisée par un autre compte.");
   return prisma.user.create({

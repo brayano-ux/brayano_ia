@@ -9,7 +9,7 @@ import { icon } from "../../ui/icons.js";
 /** Équipe : le propriétaire ajoute, met en pause ou retire des employés qui partagent la boîte de réception. */
 
 let members = [];
-let maxMembers = 10;
+let maxMembers = 11; // le propriétaire et 10 employés ; la vraie valeur vient du serveur
 
 const base = () => `/organizations/${getState().organizationId}/team`;
 
@@ -82,7 +82,7 @@ async function act(member, action) {
 
 async function addMember(event) {
   event.preventDefault();
-  if (members.length >= maxMembers) return showToast(`Votre équipe est limitée à ${maxMembers} personnes.`, "error");
+  if (members.length >= maxMembers) return showToast(`Votre équipe est limitée à ${maxMembers - 1} employés.`, "error");
   const button = event.target.querySelector('button[type="submit"]');
   button.disabled = true;
   try {
