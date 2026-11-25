@@ -266,6 +266,7 @@ h2 { margin-top: 10px; font-size: clamp(1.75rem, 5.2vw, 2.75rem); line-height: 1
 .card p { margin-top: 6px; color: var(--muted); font-size: .9375rem; font-weight: 500; }
 .card .tag { position: absolute; top: 20px; right: 20px; background: linear-gradient(135deg, var(--cyan), var(--blue)); color: #fff; font-weight: 800; font-size: .625rem; letter-spacing: .08em; border-radius: 999px; padding: 4px 10px; }
 .card .demo-link { margin-top: 12px; }
+.demo-copy .demo-link { margin-top: 20px; width: 100%; justify-content: center; }
 .benefit-cards .card { padding: 28px; background: #fff; box-shadow: var(--shadow-sm); }
 .benefit-cards .card .ico { width: 54px; height: 54px; border: 0; border-radius: 16px; background: linear-gradient(135deg, var(--cyan), var(--blue)); color: #fff; box-shadow: 0 12px 24px -10px rgba(31, 107, 255, .8); }
 .benefit-cards .card h3 { font-size: 1.1875rem; }
@@ -312,10 +313,12 @@ details.feature-details, details.feature-details[open] { margin-top: 28px; paddi
 /* ----- Pour qui : bandeau défilant ----- */
 .marquee { margin-top: 32px; overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
 .who { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; padding: 6px 16px; }
-.who span { display: inline-flex; align-items: center; gap: 10px; background: var(--bg); border: 1px solid var(--line); border-radius: 999px; padding: 12px 22px; font-weight: 700; font-size: 1.0625rem; white-space: nowrap; }
-.who span .i { width: 20px; height: 20px; color: var(--blue); }
+.who span, .who a { display: inline-flex; align-items: center; gap: 10px; background: var(--bg); border: 1px solid var(--line); border-radius: 999px; padding: 12px 22px; font-weight: 700; font-size: 1.0625rem; white-space: nowrap; }
+.who span .i, .who a .i { width: 20px; height: 20px; color: var(--blue); }
+.who a { text-decoration: none; transition: border-color .2s, color .2s, box-shadow .2s; }
+.who a:hover, .who a:focus-visible { border-color: var(--blue); color: var(--blue-dark); box-shadow: var(--shadow-sm); }
 .marquee.is-running .who { flex-wrap: nowrap; justify-content: flex-start; gap: 0; width: max-content; padding: 6px 0; animation: marquee var(--marquee-time, 36s) linear infinite; }
-.marquee.is-running .who span { margin-right: 12px; }
+.marquee.is-running .who span, .marquee.is-running .who a { margin-right: 12px; }
 .marquee.is-running:hover .who { animation-play-state: paused; }
 @keyframes marquee { to { transform: translateX(-50%); } }
 
@@ -425,6 +428,18 @@ body { padding-bottom: 72px; }
 .legal-page .contact-box { background: #fff; border: 1px solid var(--line); padding: 20px; border-radius: 18px; margin-top: 30px; box-shadow: var(--shadow-sm); }
 .legal-page .contact-box p { margin-top: 0; }
 
+/* ----- Pages par activité (assistant-whatsapp/) ----- */
+.crumb { padding-top: 20px; }
+.nb { white-space: nowrap; }
+.crumb a { font-weight: 700; color: var(--blue-dark); text-decoration: none; }
+.crumb a:hover { text-decoration: underline; text-underline-offset: 4px; }
+.example-note { margin-top: 16px; text-align: center; font-size: .8125rem; color: var(--muted); font-weight: 500; }
+.limits { list-style: none; padding: 0; margin: 32px 0 0; display: grid; gap: 12px; max-width: 820px; }
+.limits li { position: relative; padding: 16px 20px 16px 58px; background: #fff; border: 1px solid var(--line); border-radius: 16px; color: var(--muted); font-weight: 500; box-shadow: var(--shadow-sm); }
+.limits li::before { content: "!"; position: absolute; left: 18px; top: 16px; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; background: #fff4d6; color: #8a5a00; font-weight: 800; font-size: .875rem; }
+.limits strong { color: var(--ink); font-weight: 700; }
+.limits a, .help-note a { color: var(--blue-600); font-weight: 700; text-underline-offset: 3px; }
+
 /* ----- Écrans plus larges ----- */
 @media (min-width: 720px) {
   section { padding: 96px 0; }
@@ -458,6 +473,7 @@ body { padding-bottom: 72px; }
   .demo-tabs .tab-panel { grid-template-columns: minmax(0, 1fr) 340px; gap: 72px; max-width: 880px; margin-inline: auto; }
   .demo-copy { justify-self: stretch; }
   .tab-text { text-align: left; font-size: 1.25rem; }
+  .demo-copy .demo-link { width: auto; justify-content: flex-start; }
   .plans { grid-template-columns: repeat(3, 1fr); align-items: stretch; }
   .plan.popular { scale: 1.04; z-index: 1; }
   .faq-layout { grid-template-columns: .8fr 1.2fr; gap: 64px; align-items: start; }
@@ -471,7 +487,7 @@ section[id] { scroll-margin-top: 96px; }
   .logo { font-size: 1.0625rem; gap: 8px; } .logo img { height: 30px; }
   .top .wrap { padding-left: 12px; } .top .btn-ghost { padding: 0 10px; }
   .hero .cta-row .btn { width: 100%; }
-  .who span { font-size: .9375rem; padding: 10px 18px; }
+  .who span, .who a { font-size: .9375rem; padding: 10px 18px; }
   .trial-note { gap: 9px 12px; } .sticky-cta .btn-primary { font-size: .875rem; padding-inline: 12px; }
 }
 
