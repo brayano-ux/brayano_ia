@@ -258,6 +258,28 @@ async function landingJourney(browser, failures) {
   if (!(await landing.$("html.has-motion [data-chat-loop].chat-live"))) failures.push("Page d'accueil : la conversation animée ne démarre pas.");
   await landing.click('label[for="m2"]');
   if (!(await landing.isVisible(".demo-tabs .tab-panel.p2"))) failures.push("Page d'accueil : l'onglet d'exemple « Salon » ne s'ouvre pas.");
+
+  // Référencement : ce que lisent les moteurs de recherche et les assistants IA doit être servi tel quel par le site.
+  const structured = await landing.evaluate(() =>
+    [...document.querySelectorAll('script[type="application/ld+json"]')].map((node) => {
+      try {
+        const data = JSON.parse(node.textContent);
+        return (data["@graph"] || [data]).map((item) => item["@type"]);
+      } catch (error) {
+        return null;
+      }
+    })
+  );
+  const types = structured.flat();
+  if (!structured.length || structured.includes(null)) failures.push("Page d'accueil : les données structurées ne sont pas lisibles (JSON invalide).");
+  for (const type of ["Organization", "SoftwareApplication", "FAQPage"]) {
+    if (!types.includes(type)) failures.push(`Page d'accueil : les données structurées « ${type} » ont disparu.`);
+  }
+  for (const file of ["llms.txt", "robots.txt", "sitemap.xml"]) {
+    const response = await landing.request.get(`${BASE}/${file}`);
+    if (!response.ok() || !(await response.text()).trim()) failures.push(`Le fichier ${file} n'est pas servi à la racine du site.`);
+  }
+
   if (landingErrors.length) failures.push(`Erreurs JavaScript sur la page d'accueil :\n  - ${landingErrors.join("\n  - ")}`);
   await visitor.close();
 }
