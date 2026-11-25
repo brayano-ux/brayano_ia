@@ -4,7 +4,7 @@
 
 ## Ce que fait Brayano IA
 
-- Répond aux clients sur WhatsApp, jour et nuit, en français, en anglais ou en pidgin, y compris quand le client envoie un message vocal.
+- Répond aux clients sur WhatsApp, jour et nuit, en français ou en anglais, y compris quand le client envoie un message vocal. Il comprend aussi le pidgin et y répond en anglais simple.
 - Note les commandes (produit, quantité, adresse de livraison) et prévient le propriétaire par e-mail à chaque commande.
 - Gère les rendez-vous : propose les créneaux libres de l'agenda, enregistre le rendez-vous et évite les doubles réservations.
 - Envoie les photos des produits avec leur prix, jusqu'à 5 à la fois.
@@ -12,7 +12,7 @@
 - Envoie la position GPS de la boutique : le client reçoit l'itinéraire dans WhatsApp.
 - Repère les clients arrivés en cliquant sur une publicité Facebook ou Instagram.
 - Relance les clients intéressés qui ne répondent plus et envoie des messages groupés (à partir du forfait Pro).
-- Passe la main au propriétaire quand une demande nécessite une personne, et le prévient par e-mail. Le propriétaire peut reprendre une conversation à tout moment.
+- Peut passer la main au propriétaire quand une demande nécessite une personne, et le prévient alors par e-mail. Le propriétaire peut reprendre une conversation à tout moment.
 - Classe les clients par étape : nouveau, intéressé, a commandé, à rappeler.
 - Retient les corrections du propriétaire pour les questions semblables.
 - Accepte des règles sur mesure : limiter l'assistant à un seul sujet, ou ne répondre qu'aux clients venus d'une publicité.

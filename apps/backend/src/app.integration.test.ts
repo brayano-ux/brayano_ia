@@ -164,6 +164,21 @@ describe.skipIf(!integrationEnabled)("API complète (HTTP, base réelle)", () =>
       expect((await app.inject({ method: "GET", url: `/organizations/${organization.id}/team`, headers: authed(token) })).json().members).toHaveLength(1);
     });
 
+    it("accepte dix employés, comme le promet le forfait le plus complet, et refuse le onzième", async () => {
+      const { organization, token } = await setup();
+      for (let index = 1; index <= 10; index += 1) {
+        const added = await addAgent(token, organization.id, `employe${index}@example.com`);
+        expect(added.statusCode, `employé n° ${index}`).toBe(200);
+      }
+      const eleventh = await addAgent(token, organization.id, "employe11@example.com");
+      expect(eleventh.statusCode).toBe(400);
+      expect(eleventh.json().message).toContain("10 employés");
+      // Le tableau de bord compte le propriétaire : il reçoit « 11 » comme taille maximale de l'équipe.
+      const team = (await app.inject({ method: "GET", url: `/organizations/${organization.id}/team`, headers: authed(token) })).json();
+      expect(team.members).toHaveLength(11);
+      expect(team.maxMembers).toBe(11);
+    });
+
     it("un employé d'une entreprise ne peut pas être ajouté à l'équipe d'une autre", async () => {
       const mine = await setup();
       const other = await createTestOrganization("Autre", { email: "other@example.com", password: PASSWORD });

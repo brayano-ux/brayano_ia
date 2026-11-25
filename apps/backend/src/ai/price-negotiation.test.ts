@@ -27,6 +27,34 @@ describe("startNegotiation", () => {
   });
 });
 
+describe("remise maximale en pourcentage", () => {
+  it("n'accorde jamais plus que le pourcentage saisi, même avec un prix non rond", () => {
+    // 1 250 FCFA à 10 % : le plancher exact est 1 125. Arrondi au plus proche, il tombait à 1 100, soit 12 % de remise.
+    expect(floorPriceFor(1250, { mode: "percent", value: 10 })).toBe(1200);
+    for (const [price, percent] of [[1250, 10], [3450, 15], [12550, 10], [999, 20], [7777, 33], [150, 50], [50, 10]] as const) {
+      const floor = floorPriceFor(price, { mode: "percent", value: percent });
+      expect(price - floor, `${price} FCFA à ${percent} %`).toBeLessThanOrEqual((price * percent) / 100);
+      expect(floor, `${price} FCFA à ${percent} %`).toBeLessThanOrEqual(price);
+    }
+  });
+
+  it("garde les mêmes planchers pour les prix ronds", () => {
+    expect(floorPriceFor(25000, { mode: "percent", value: 10 })).toBe(22500);
+    expect(floorPriceFor(20000, { mode: "percent", value: 15 })).toBe(17000);
+    expect(floorPriceFor(10000, { mode: "percent", value: 30 })).toBe(7000);
+  });
+
+  it("aucune offre ne passe sous ce plancher, tour après tour", () => {
+    let state = startNegotiation("prod-1", 1250, 10);
+    for (let round = 0; round < 5; round += 1) {
+      const offer = nextNegotiationOffer(state);
+      expect(offer.price).toBeGreaterThanOrEqual(1200);
+      expect(offer.price).toBeLessThanOrEqual(1250);
+      state = offer.state;
+    }
+  });
+});
+
 describe("remise maximale en montant fixe", () => {
   it("fixe le plancher au prix moins le montant saisi par le marchand", () => {
     const state = startNegotiation("prod-1", 25000, { mode: "amount", value: 2000 });

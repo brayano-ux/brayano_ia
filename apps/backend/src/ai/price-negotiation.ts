@@ -55,8 +55,12 @@ export function floorPriceFor(basePrice: number, limit: DiscountLimit): number {
     const discount = Math.min(Math.max(limit.value, 0), basePrice * MAX_DISCOUNT_SHARE);
     return Math.min(basePrice, Math.max(Math.ceil((basePrice - discount) / 100) * 100, 0));
   }
+  // Comme pour un montant fixe : le plancher est arrondi à la centaine SUPÉRIEURE, pour ne jamais accorder plus que
+  // le pourcentage saisi (1 250 FCFA à 10 % : plancher 1 200, et non 1 100 qui ferait 12 %). Le calcul reste en
+  // nombres entiers tant que le pourcentage est entier, pour qu'une erreur d'arrondi ne décale pas la centaine.
   const clampedPercent = Math.min(Math.max(limit.value, 0), MAX_DISCOUNT_SHARE * 100);
-  return Math.max(Math.round((basePrice * (1 - clampedPercent / 100)) / 100) * 100, 0);
+  const exactFloor = (basePrice * (100 - clampedPercent)) / 100;
+  return Math.min(basePrice, Math.max(Math.ceil(exactFloor / 100) * 100, 0));
 }
 
 /**
