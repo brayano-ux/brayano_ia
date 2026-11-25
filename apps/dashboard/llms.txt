@@ -4,7 +4,7 @@
 
 ## Ce que fait Brayano IA
 
-- Répond aux clients sur WhatsApp, jour et nuit, en français ou en anglais, y compris quand le client envoie un message vocal. Il comprend aussi le pidgin et y répond en anglais simple.
+- Répond aux clients sur WhatsApp, jour et nuit, en français, en anglais ou en pidgin camerounais, dans la langue du client, y compris quand il envoie un message vocal.
 - Note les commandes (produit, quantité, adresse de livraison) et prévient le propriétaire par e-mail à chaque commande.
 - Gère les rendez-vous : propose les créneaux libres de l'agenda, enregistre le rendez-vous et évite les doubles réservations.
 - Envoie les photos des produits avec leur prix, jusqu'à 5 à la fois.
