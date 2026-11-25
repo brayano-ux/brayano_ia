@@ -31,9 +31,9 @@
       {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Brayano IA", "item": "https://brayanoia.onrender.com/"}, {"@type": "ListItem", "position": 2, "name": "Assistant WhatsApp pour boutique", "item": "https://brayanoia.onrender.com/assistant-whatsapp/boutique.html"}]},
       {"@type": "FAQPage", "@id": "https://brayanoia.onrender.com/assistant-whatsapp/boutique.html#faq", "inLanguage": "fr", "isPartOf": {"@id": "https://brayanoia.onrender.com/assistant-whatsapp/boutique.html#page"}, "mainEntity": [
         {"@type": "Question", "name": "Faut-il un site web ou un catalogue en ligne ?", "acceptedAnswer": {"@type": "Answer", "text": "Non. Vous ajoutez vos articles dans la page « Produits » du tableau de bord : photo, nom, description, prix. Si vous avez déjà un site ou un document de présentation, l'assistant de configuration peut en tirer un brouillon de vos informations (adresse, livraison, paiement), que vous relisez avant d'enregistrer."}},
-        {"@type": "Question", "name": "Que se passe-t-il quand un article est épuisé ?", "acceptedAnswer": {"@type": "Answer", "text": "Vous le désactivez dans « Produits ». L'assistant ne le propose plus et ne peut plus l'ajouter à une commande. Vous le réactivez à l'arrivage, sans rien ressaisir."}},
-        {"@type": "Question", "name": "Le client peut-il payer dans la conversation ?", "acceptedAnswer": {"@type": "Answer", "text": "L'assistant indique les moyens de paiement que vous avez écrits. Si le client envoie une capture de paiement, il vous la signale et ne confirme rien : vous vérifiez votre solde, puis vous cliquez sur « J'ai vérifié »."}},
-        {"@type": "Question", "name": "Puis-je annoncer mes nouveautés à mes clients ?", "acceptedAnswer": {"@type": "Answer", "text": "Oui, avec le forfait Pro. La page « Messages groupés » envoie votre annonce aux clients qui vous ont écrit dans les 7 à 60 derniers jours, par lots de 50 personnes et 100 messages par 24 h au maximum. Un client qui a écrit « STOP » n'est jamais recontacté."}}
+        {"@type": "Question", "name": "Que se passe-t-il quand un article est épuisé ?", "acceptedAnswer": {"@type": "Answer", "text": "Vous le désactivez dans « Produits ». Il ne peut plus être ajouté à une commande, et l'assistant a pour consigne de ne plus le proposer. Vous le réactivez à l'arrivage, sans rien ressaisir."}},
+        {"@type": "Question", "name": "Le client peut-il payer dans la conversation ?", "acceptedAnswer": {"@type": "Answer", "text": "L'assistant indique les moyens de paiement que vous avez écrits. Il a pour consigne de ne jamais confirmer un paiement : une capture reconnue comme preuve de paiement vous est signalée, vous vérifiez votre solde, puis vous cliquez sur « J'ai vérifié »."}},
+        {"@type": "Question", "name": "Puis-je annoncer mes nouveautés à mes clients ?", "acceptedAnswer": {"@type": "Answer", "text": "Oui, avec le forfait Pro. La page « Messages groupés » envoie votre annonce aux clients qui vous ont écrit au cours des 7, 14, 30 ou 60 derniers jours, selon votre choix, par lots de 50 personnes et 100 messages par 24 h au maximum. Un client qui a écrit « STOP » en est exclu."}}
       ]}
     ]
   }
@@ -93,9 +93,9 @@
             <div class="bar"><div class="av">BA</div><div><strong>Boutique Awa</strong><small>assistant en ligne</small></div></div>
             <div class="chat">
             <div class="b in">Bonsoir, vous avez des sandales en cuir en 42&nbsp;?<small>20:47</small></div>
-            <div class="b out">Bonsoir 😊 Oui, en 42 il reste le marron et le noir&nbsp;: 15&nbsp;000&nbsp;FCFA la paire. Je vous envoie les photos&nbsp;?<small>20:47 ✓✓</small></div>
-            <div class="b in">Oui. Le marron me plaît. Vous livrez à Akwa&nbsp;?<small>20:49</small></div>
-            <div class="b out">Oui, la livraison à Akwa est à 1&nbsp;000&nbsp;FCFA. Je note une paire marron en 42&nbsp;?<small>20:49 ✓✓</small></div>
+            <div class="b out">Bonsoir 😊 Oui, en 42 nous avons le marron et le noir&nbsp;: 15&nbsp;000&nbsp;FCFA la paire. Je vous envoie les photos&nbsp;?<small>20:47 ✓✓</small></div>
+            <div class="b in">Oui, montrez-moi les photos. Vous livrez à Akwa&nbsp;?<small>20:49</small></div>
+            <div class="b out">Les voici 📷 La livraison à Akwa est à 1&nbsp;000&nbsp;FCFA. Laquelle vous plaît&nbsp;?<small>20:49 ✓✓</small></div>
             <div class="done"><svg class="i" aria-hidden="true"><use href="#ic-check"/></svg> Photos envoyées avec le prix</div>
             </div>
           </div>
@@ -108,13 +108,13 @@
     <div class="wrap">
       <p class="kicker">Dans une boutique</p>
       <h2>Ce qu'il fait pendant que vous servez</h2>
-      <p class="sub">Il s'appuie sur votre catalogue et sur ce que vous avez écrit. Rien d'autre.</p>
+      <p class="sub">Il s'appuie sur votre catalogue et sur ce que vous avez écrit, avec la consigne de ne rien inventer.</p>
       <div class="cards">
-          <article class="card"><div class="ico" aria-hidden="true"><svg class="i"><use href="#ic-chat"/></svg></div><h3>Il répond aux questions qui reviennent</h3><p>«&nbsp;C'est combien&nbsp;?&nbsp;», «&nbsp;Vous avez en 42&nbsp;?&nbsp;», «&nbsp;Vous livrez à Akwa&nbsp;?&nbsp;»&nbsp;: il répond à partir de votre catalogue et de vos informations, en français, en anglais ou en pidgin, même à un message vocal.</p></article>
-          <article class="card"><div class="ico" aria-hidden="true"><svg class="i"><use href="#ic-camera"/></svg></div><h3>Il envoie la photo avec le prix</h3><p>Le client veut voir&nbsp;? Il reçoit la photo de l'article et son prix, jusqu'à 5 photos d'un coup. S'il répond directement à une photo, l'assistant sait de quel article il parle.</p></article>
-          <article class="card"><div class="ico" aria-hidden="true"><svg class="i"><use href="#ic-bag"/></svg></div><h3>Il note la commande</h3><p>Article, quantité, adresse de livraison&nbsp;: la commande arrive dans votre tableau de bord et vous êtes prévenu par email. Vous la confirmez, puis vous la marquez livrée et payée.</p></article>
-          <article class="card"><div class="ico" aria-hidden="true"><svg class="i"><use href="#ic-percent"/></svg></div><h3>Il marchande dans votre limite</h3><p>Vous fixez la remise maximale. Il baisse le prix par petits paliers et ne descend jamais sous votre minimum.</p><a class="demo-link" href="../fonctionnalites/negociation-de-prix.html">La négociation de prix <span aria-hidden="true">→</span></a></article>
-          <article class="card"><div class="ico" aria-hidden="true"><svg class="i"><use href="#ic-pin"/></svg></div><h3>Il envoie la position de la boutique</h3><p>«&nbsp;Vous êtes où&nbsp;?&nbsp;»&nbsp;: le client reçoit une vraie localisation WhatsApp, avec la carte et l'itinéraire.</p><a class="demo-link" href="../fonctionnalites/localisation-gps.html">La localisation GPS <span aria-hidden="true">→</span></a></article>
+          <article class="card"><div class="ico" aria-hidden="true"><svg class="i"><use href="#ic-chat"/></svg></div><h3>Il répond aux questions qui reviennent</h3><p>«&nbsp;C'est combien&nbsp;?&nbsp;», «&nbsp;Vous avez en 42&nbsp;?&nbsp;», «&nbsp;Vous livrez à Akwa&nbsp;?&nbsp;»&nbsp;: il répond à partir de votre catalogue et de vos informations, en français ou en anglais, même à un message vocal. Il comprend aussi le pidgin.</p></article>
+          <article class="card"><div class="ico" aria-hidden="true"><svg class="i"><use href="#ic-camera"/></svg></div><h3>Il envoie la photo avec le prix</h3><p>Le client demande à voir&nbsp;? Il reçoit la photo de l'article et son prix, jusqu'à 5 photos d'un coup. S'il répond directement à une photo, l'assistant sait de quel article il parle.</p></article>
+          <article class="card"><div class="ico" aria-hidden="true"><svg class="i"><use href="#ic-bag"/></svg></div><h3>Il note la commande</h3><p>Article, quantité, nom et adresse de livraison&nbsp;: la commande arrive dans votre tableau de bord et vous êtes prévenu par email. Vous la confirmez, puis vous la marquez livrée et payée.</p></article>
+          <article class="card"><div class="ico" aria-hidden="true"><svg class="i"><use href="#ic-percent"/></svg></div><h3>Il marchande dans votre limite</h3><p>Vous fixez la remise maximale. Chaque baisse est calculée par le serveur, par petits paliers, sans dépasser votre limite&nbsp;; l'assistant la propose au client.</p><a class="demo-link" href="../fonctionnalites/negociation-de-prix.html">La négociation de prix <span aria-hidden="true">→</span></a></article>
+          <article class="card"><div class="ico" aria-hidden="true"><svg class="i"><use href="#ic-pin"/></svg></div><h3>Il envoie la position de la boutique</h3><p>Une fois votre position enregistrée, le client qui demande où trouver votre boutique reçoit une vraie localisation WhatsApp, avec la carte et l'itinéraire.</p><a class="demo-link" href="../fonctionnalites/localisation-gps.html">La localisation GPS <span aria-hidden="true">→</span></a></article>
           <article class="card"><div class="ico" aria-hidden="true"><svg class="i"><use href="#ic-megaphone"/></svg></div><h3>Il repère les clients venus de vos publicités</h3><p>Un client arrivé par une publicité Facebook ou Instagram «&nbsp;Cliquer pour WhatsApp&nbsp;» reçoit un badge, et un filtre isole ces conversations.</p><a class="demo-link" href="../fonctionnalites/suivi-publicite.html">Le suivi des publicités <span aria-hidden="true">→</span></a></article>
       </div>
       <div class="help-note"><span class="help-ico" aria-hidden="true"><svg class="i" aria-hidden="true"><use href="#ic-tag"/></svg></span><p><strong>Combien ça coûte&nbsp;?</strong> Vous commencez par 100 messages offerts, sans carte bancaire. Ensuite, le forfait Essentiel (10&nbsp;000&nbsp;FCFA par mois, 1&nbsp;000 messages de l'assistant) comprend le catalogue, les photos, les commandes et la négociation. Pour relancer les clients qui ne répondent plus et annoncer vos nouveautés, il faut le forfait Pro, à 20&nbsp;000&nbsp;FCFA par mois. <a href="../index.html#tarifs">Voir les tarifs</a></p></div>
@@ -128,10 +128,10 @@
       <div class="steps">
           <div class="step"><h3>Reliez votre numéro WhatsApp</h3><p>Vous scannez un code, comme pour WhatsApp Web. Vous gardez votre numéro, qu'il soit sur WhatsApp ou sur WhatsApp Business.</p></div>
           <div class="step"><h3>Ajoutez vos articles</h3><p>Dans la page «&nbsp;Produits&nbsp;»&nbsp;: une photo, un nom clair, la description (matière, tailles, couleurs) et le prix. L'assistant connaît jusqu'à 500 articles actifs.</p></div>
-          <div class="step"><h3>Écrivez vos conditions</h3><p>Dans «&nbsp;Agent IA&nbsp;», onglet «&nbsp;Connaissances&nbsp;»&nbsp;: adresse, quartiers livrés et frais, moyens de paiement, conditions de retour. Il ne dit que ce qui est écrit.</p></div>
+          <div class="step"><h3>Écrivez vos conditions</h3><p>Dans «&nbsp;Agent IA&nbsp;», onglet «&nbsp;Connaissances&nbsp;»&nbsp;: adresse, quartiers livrés et frais, moyens de paiement, conditions de retour. Sa consigne est de ne dire que ce qui est écrit.</p></div>
           <div class="step"><h3>Autorisez la prise de commande</h3><p>Dans la page «&nbsp;Commandes&nbsp;», un interrupteur permet à l'assistant d'enregistrer les commandes des articles de votre catalogue.</p></div>
           <div class="step"><h3>Testez avant d'annoncer votre numéro</h3><p>Le testeur vous laisse jouer le client, sans WhatsApp. Rien n'est envoyé et rien n'est compté dans votre forfait.</p></div>
-          <div class="step"><h3>Suivez tout depuis votre téléphone</h3><p>Sur l'accueil du tableau de bord, «&nbsp;À traiter&nbsp;» liste ce qui attend une action de votre part. Quand vous répondez vous-même dans une conversation, l'assistant s'y met en pause.</p></div>
+          <div class="step"><h3>Suivez tout depuis votre téléphone</h3><p>Sur l'accueil du tableau de bord, «&nbsp;À traiter&nbsp;» liste ce qui attend une action de votre part. Quand vous répondez vous-même dans une conversation, l'assistant s'y met en pause&nbsp;; il reprend après 24&nbsp;h, ou dès que vous le réactivez.</p></div>
       </div>
     </div>
   </section>
@@ -141,10 +141,10 @@
       <h2>Ce qu'il ne fait pas</h2>
       <p class="sub">Mieux vaut le savoir avant de commencer.</p>
       <ul class="limits">
-          <li><strong>Il ne confirme jamais un paiement.</strong> Quand un client envoie une capture Orange Money ou MTN MoMo, il vous la signale&nbsp;: c'est vous qui vérifiez votre solde avant de livrer.</li>
-          <li><strong>Il ne compte pas votre stock.</strong> Un article épuisé se désactive d'un clic dans «&nbsp;Produits&nbsp;»&nbsp;: l'assistant cesse de le proposer et de le prendre en commande.</li>
-          <li><strong>Il ne négocie que les prix écrits en chiffres.</strong> Un prix «&nbsp;sur devis&nbsp;» n'est jamais négocié.</li>
-          <li><strong>Il ne dit que ce que vous avez écrit.</strong> Pour le reste, il le dit honnêtement au client et vous passe la main.</li>
+          <li><strong>Il ne confirme pas les paiements.</strong> Il en a la consigne et ne peut pas marquer une commande payée. Une capture reconnue comme preuve de paiement vous est signalée&nbsp;: vérifiez toujours votre solde avant de livrer.</li>
+          <li><strong>Il ne compte pas votre stock.</strong> Un article épuisé se désactive d'un clic dans «&nbsp;Produits&nbsp;»&nbsp;: il ne peut plus être pris en commande.</li>
+          <li><strong>Il ne négocie que les prix écrits simplement.</strong> Un prix «&nbsp;sur devis&nbsp;», une fourchette ou un prix par lot ne sont pas négociés. Et la commande est enregistrée au prix du catalogue&nbsp;: le prix convenu se lit dans la conversation.</li>
+          <li><strong>Il n'est pas fait pour deviner.</strong> Ce qui n'est pas écrit, il a pour consigne de le dire au client sans rien inventer&nbsp;; la question s'affiche dans «&nbsp;Questions restées sans réponse&nbsp;», sur l'accueil.</li>
           <li><strong>Il peut se tromper, comme toute IA.</strong> Vous pouvez relire et corriger ses réponses. Et Brayano IA se relie à WhatsApp comme WhatsApp Web&nbsp;: ce n'est pas l'outil officiel de Meta. <a href="../index.html#questions">Voir les questions fréquentes</a></li>
       </ul>
     </div>
@@ -155,9 +155,9 @@
       <h2>Les questions des commerçants</h2>
       <div class="faq">
           <details><summary>Faut-il un site web ou un catalogue en ligne&nbsp;?</summary><p>Non. Vous ajoutez vos articles dans la page «&nbsp;Produits&nbsp;» du tableau de bord&nbsp;: photo, nom, description, prix. Si vous avez déjà un site ou un document de présentation, l'assistant de configuration peut en tirer un brouillon de vos informations (adresse, livraison, paiement), que vous relisez avant d'enregistrer.</p></details>
-          <details><summary>Que se passe-t-il quand un article est épuisé&nbsp;?</summary><p>Vous le désactivez dans «&nbsp;Produits&nbsp;». L'assistant ne le propose plus et ne peut plus l'ajouter à une commande. Vous le réactivez à l'arrivage, sans rien ressaisir.</p></details>
-          <details><summary>Le client peut-il payer dans la conversation&nbsp;?</summary><p>L'assistant indique les moyens de paiement que vous avez écrits. Si le client envoie une capture de paiement, il vous la signale et ne confirme rien&nbsp;: vous vérifiez votre solde, puis vous cliquez sur «&nbsp;J'ai vérifié&nbsp;».</p></details>
-          <details><summary>Puis-je annoncer mes nouveautés à mes clients&nbsp;?</summary><p>Oui, avec le forfait Pro. La page «&nbsp;Messages groupés&nbsp;» envoie votre annonce aux clients qui vous ont écrit dans les 7 à 60 derniers jours, par lots de 50 personnes et 100 messages par 24&nbsp;h au maximum. Un client qui a écrit «&nbsp;STOP&nbsp;» n'est jamais recontacté.</p></details>
+          <details><summary>Que se passe-t-il quand un article est épuisé&nbsp;?</summary><p>Vous le désactivez dans «&nbsp;Produits&nbsp;». Il ne peut plus être ajouté à une commande, et l'assistant a pour consigne de ne plus le proposer. Vous le réactivez à l'arrivage, sans rien ressaisir.</p></details>
+          <details><summary>Le client peut-il payer dans la conversation&nbsp;?</summary><p>L'assistant indique les moyens de paiement que vous avez écrits. Il a pour consigne de ne jamais confirmer un paiement&nbsp;: une capture reconnue comme preuve de paiement vous est signalée, vous vérifiez votre solde, puis vous cliquez sur «&nbsp;J'ai vérifié&nbsp;».</p></details>
+          <details><summary>Puis-je annoncer mes nouveautés à mes clients&nbsp;?</summary><p>Oui, avec le forfait Pro. La page «&nbsp;Messages groupés&nbsp;» envoie votre annonce aux clients qui vous ont écrit au cours des 7, 14, 30 ou 60 derniers jours, selon votre choix, par lots de 50 personnes et 100 messages par 24&nbsp;h au maximum. Un client qui a écrit «&nbsp;STOP&nbsp;» en est exclu.</p></details>
       </div>
     </div>
   </section>
@@ -165,7 +165,7 @@
     <div class="wrap">
       <div class="final">
         <h2>Prêt à l'essayer dans votre boutique&nbsp;?</h2>
-        <p>Découvrez Brayano IA avec 100 réponses offertes, sans carte bancaire. Une question ? Écrivez-nous sur WhatsApp.</p>
+        <p>Découvrez Brayano IA avec 100 réponses offertes, sans carte bancaire. Une question&nbsp;? Écrivez-nous sur WhatsApp.</p>
         <div class="cta-row">
           <a class="btn btn-primary" href="../app/?inscription">Essayer gratuitement</a>
           <a class="btn btn-wa" href="https://wa.me/237683260520?text=Bonjour%2C%20je%20veux%20essayer%20Brayano%20IA" rel="noopener">Écrire sur WhatsApp</a>

@@ -30,10 +30,10 @@
       {"@type": "WebPage", "@id": "https://brayanoia.onrender.com/assistant-whatsapp/restaurant.html#page", "url": "https://brayanoia.onrender.com/assistant-whatsapp/restaurant.html", "name": "L'assistant WhatsApp qui prend les commandes de votre restaurant", "description": "Brayano IA répond aux clients de votre restaurant sur WhatsApp : carte et prix, frais de livraison, commandes notées avec l'adresse, même en plein service.", "inLanguage": "fr", "isPartOf": {"@type": "WebSite", "@id": "https://brayanoia.onrender.com/#website", "name": "Brayano IA", "url": "https://brayanoia.onrender.com/"}, "about": {"@id": "https://brayanoia.onrender.com/#software"}},
       {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Brayano IA", "item": "https://brayanoia.onrender.com/"}, {"@type": "ListItem", "position": 2, "name": "Assistant WhatsApp pour restaurant", "item": "https://brayanoia.onrender.com/assistant-whatsapp/restaurant.html"}]},
       {"@type": "FAQPage", "@id": "https://brayanoia.onrender.com/assistant-whatsapp/restaurant.html#faq", "inLanguage": "fr", "isPartOf": {"@id": "https://brayanoia.onrender.com/assistant-whatsapp/restaurant.html#page"}, "mainEntity": [
-        {"@type": "Question", "name": "Peut-il prendre des réservations de table ?", "acceptedAnswer": {"@type": "Answer", "text": "Oui, avec l'agenda de la page « Rendez-vous ». Vous indiquez la durée d'une réservation, le nombre de réservations possibles au même moment et vos horaires : il propose seulement les créneaux libres et enregistre la réservation."}},
+        {"@type": "Question", "name": "Peut-il prendre des réservations de table ?", "acceptedAnswer": {"@type": "Answer", "text": "Oui, avec l'agenda de la page « Rendez-vous », une fois la prise de rendez-vous autorisée. Vous indiquez la durée d'une réservation, le nombre de réservations possibles au même moment et vos horaires : il propose seulement les créneaux libres et enregistre la réservation."}},
         {"@type": "Question", "name": "Et si je ne peux pas confirmer une commande tout de suite ?", "acceptedAnswer": {"@type": "Answer", "text": "La commande est enregistrée comme nouvelle et vous recevez un email. Vous la confirmez dès que vous avez une minute, depuis votre téléphone. Avec le forfait Pro ou Business, vos employés peuvent le faire à votre place."}},
-        {"@type": "Question", "name": "Comment gérer un plat terminé ?", "acceptedAnswer": {"@type": "Answer", "text": "Désactivez sa fiche dans « Produits » : l'assistant cesse aussitôt de le proposer et de le prendre en commande. Vous la réactivez le lendemain, sans rien ressaisir."}},
-        {"@type": "Question", "name": "Peut-il annoncer le plat du jour à mes clients ?", "acceptedAnswer": {"@type": "Answer", "text": "Avec le forfait Pro, la page « Messages groupés » envoie votre annonce aux clients qui vous ont écrit récemment, par petits lots. Elle ne sert pas à écrire à des inconnus : c'est ce qui protège votre numéro."}}
+        {"@type": "Question", "name": "Comment gérer un plat terminé ?", "acceptedAnswer": {"@type": "Answer", "text": "Désactivez sa fiche dans « Produits » : il ne peut plus être pris en commande, et l'assistant a pour consigne de ne plus le proposer. Vous la réactivez le lendemain, sans rien ressaisir."}},
+        {"@type": "Question", "name": "Peut-il annoncer le plat du jour à mes clients ?", "acceptedAnswer": {"@type": "Answer", "text": "Avec le forfait Pro, la page « Messages groupés » envoie votre annonce aux clients qui vous ont écrit récemment, par petits lots. Elle ne sert pas à écrire à des inconnus : cela réduit le risque de blocage de votre numéro."}}
       ]}
     ]
   }
@@ -94,8 +94,8 @@
             <div class="chat">
             <div class="b in">Bonjour, vous avez quoi au menu&nbsp;? Vous livrez à Bali&nbsp;?<small>11:38</small></div>
             <div class="b out">Bonjour 😊 Ndolè 2&nbsp;500&nbsp;FCFA, poisson braisé 4&nbsp;000&nbsp;FCFA, poulet DG 3&nbsp;500&nbsp;FCFA. La livraison à Bali est à 500&nbsp;FCFA.<small>11:38 ✓✓</small></div>
-            <div class="b in">2 ndolè et 1 poisson braisé, à la pharmacie de Bali.<small>11:40</small></div>
-            <div class="b out">C'est noté&nbsp;: 2 ndolè et 1 poisson braisé, 9&nbsp;000&nbsp;FCFA + 500 de livraison. Commande enregistrée 🙏<small>11:40 ✓✓</small></div>
+            <div class="b in">2 ndolè et 1 poisson braisé, à la pharmacie de Bali. C'est Paul.<small>11:40</small></div>
+            <div class="b out">C'est noté, Paul&nbsp;: 2 ndolè et 1 poisson braisé, 9&nbsp;000&nbsp;FCFA + 500 de livraison. Commande enregistrée 🙏<small>11:40 ✓✓</small></div>
             <div class="done"><svg class="i" aria-hidden="true"><use href="#ic-check"/></svg> Commande notée pour vous</div>
             </div>
           </div>
@@ -108,13 +108,13 @@
     <div class="wrap">
       <p class="kicker">Dans un restaurant</p>
       <h2>Ce qu'il fait pendant le service</h2>
-      <p class="sub">Il répond avec votre carte et vos conditions de livraison. Il n'invente ni un plat ni un prix.</p>
+      <p class="sub">Il répond avec votre carte et vos conditions de livraison, avec la consigne de n'inventer ni un plat ni un prix.</p>
       <div class="cards">
-          <article class="card"><div class="ico" aria-hidden="true"><svg class="i"><use href="#ic-utensils"/></svg></div><h3>Il donne la carte et les prix</h3><p>Chaque plat est une fiche dans «&nbsp;Produits&nbsp;»&nbsp;: nom, description, prix, photo. Il ne propose que les plats disponibles.</p></article>
-          <article class="card"><div class="ico" aria-hidden="true"><svg class="i"><use href="#ic-pin"/></svg></div><h3>Il répond sur la livraison</h3><p>Quartiers livrés, frais, délais&nbsp;: il répond avec ce que vous avez écrit. Rien d'écrit sur un quartier&nbsp;? Il le dit au client et vous passe la main.</p></article>
-          <article class="card"><div class="ico" aria-hidden="true"><svg class="i"><use href="#ic-bag"/></svg></div><h3>Il note la commande</h3><p>Plats, quantités, adresse ou repère de livraison&nbsp;: la commande arrive dans «&nbsp;Commandes&nbsp;» et par email. Vous la confirmez, puis vous la marquez livrée et payée.</p></article>
-          <article class="card"><div class="ico" aria-hidden="true"><svg class="i"><use href="#ic-moon"/></svg></div><h3>Il répond aussi quand vous êtes fermé</h3><p>En dehors de vos horaires, il répond quand même, prévient que l'équipe sera disponible plus tard et note la demande.</p></article>
-          <article class="card"><div class="ico" aria-hidden="true"><svg class="i"><use href="#ic-camera"/></svg></div><h3>Il envoie la photo du plat</h3><p>Le client veut voir avant de commander&nbsp;? Il reçoit la photo du plat avec son prix, jusqu'à 5 photos d'un coup.</p></article>
+          <article class="card"><div class="ico" aria-hidden="true"><svg class="i"><use href="#ic-utensils"/></svg></div><h3>Il donne la carte et les prix</h3><p>Chaque plat est une fiche dans «&nbsp;Produits&nbsp;»&nbsp;: nom, description, prix, photo. Seuls les plats actifs peuvent être commandés.</p></article>
+          <article class="card"><div class="ico" aria-hidden="true"><svg class="i"><use href="#ic-pin"/></svg></div><h3>Il répond sur la livraison</h3><p>Quartiers livrés, frais, délais&nbsp;: il répond avec ce que vous avez écrit. Rien d'écrit sur un quartier&nbsp;? Il a pour consigne de le dire sans rien inventer, et la question s'affiche dans «&nbsp;Questions restées sans réponse&nbsp;».</p></article>
+          <article class="card"><div class="ico" aria-hidden="true"><svg class="i"><use href="#ic-bag"/></svg></div><h3>Il note la commande</h3><p>Plats, quantités, nom et adresse ou repère de livraison&nbsp;: la commande arrive dans «&nbsp;Commandes&nbsp;» et par email. Vous la confirmez, puis vous la marquez livrée et payée.</p></article>
+          <article class="card"><div class="ico" aria-hidden="true"><svg class="i"><use href="#ic-moon"/></svg></div><h3>Il répond aussi quand vous êtes fermé</h3><p>En dehors de vos horaires, il répond quand même, et a pour consigne de dire quand votre équipe sera de nouveau disponible.</p></article>
+          <article class="card"><div class="ico" aria-hidden="true"><svg class="i"><use href="#ic-camera"/></svg></div><h3>Il envoie la photo du plat</h3><p>Le client demande à voir avant de commander&nbsp;? Il reçoit la photo du plat avec son prix, jusqu'à 5 photos d'un coup.</p></article>
           <article class="card"><div class="ico" aria-hidden="true"><svg class="i"><use href="#ic-users"/></svg></div><h3>Votre équipe suit les commandes</h3><p>Avec le forfait Pro, 3 employés ont leur propre connexion&nbsp;: ils répondent aux clients et suivent les commandes, sans toucher à vos réglages.</p></article>
       </div>
       <div class="help-note"><span class="help-ico" aria-hidden="true"><svg class="i" aria-hidden="true"><use href="#ic-tag"/></svg></span><p><strong>Combien ça coûte&nbsp;?</strong> Vous commencez par 100 messages offerts, sans carte bancaire. Ensuite, le forfait Essentiel (10&nbsp;000&nbsp;FCFA par mois, 1&nbsp;000 messages de l'assistant) comprend la carte, les photos et la prise de commande. Avec le forfait Pro, à 20&nbsp;000&nbsp;FCFA par mois, vous passez à 5&nbsp;000 messages de l'assistant et vous ajoutez les annonces à vos clients, les relances et 3 employés. <a href="../index.html#tarifs">Voir les tarifs</a></p></div>
@@ -131,7 +131,7 @@
           <div class="step"><h3>Écrivez la livraison et les horaires</h3><p>Dans «&nbsp;Agent IA&nbsp;», onglet «&nbsp;Connaissances&nbsp;»&nbsp;: quartiers livrés, frais, moyens de paiement. L'onglet «&nbsp;Horaires&nbsp;» indique quand votre équipe est disponible.</p></div>
           <div class="step"><h3>Autorisez la prise de commande</h3><p>Dans la page «&nbsp;Commandes&nbsp;», un interrupteur permet à l'assistant d'enregistrer les commandes des plats de votre carte.</p></div>
           <div class="step"><h3>Testez avant d'annoncer votre numéro</h3><p>Le testeur vous laisse jouer le client, sans WhatsApp. Rien n'est envoyé et rien n'est compté dans votre forfait.</p></div>
-          <div class="step"><h3>Suivez tout depuis votre téléphone</h3><p>Sur l'accueil du tableau de bord, «&nbsp;À traiter&nbsp;» liste ce qui attend une action de votre part. Quand vous répondez vous-même dans une conversation, l'assistant s'y met en pause.</p></div>
+          <div class="step"><h3>Suivez tout depuis votre téléphone</h3><p>Sur l'accueil du tableau de bord, «&nbsp;À traiter&nbsp;» liste ce qui attend une action de votre part. Quand vous répondez vous-même dans une conversation, l'assistant s'y met en pause&nbsp;; il reprend après 24&nbsp;h, ou dès que vous le réactivez.</p></div>
       </div>
     </div>
   </section>
@@ -141,9 +141,9 @@
       <h2>Ce qu'il ne fait pas</h2>
       <p class="sub">Mieux vaut le savoir avant de commencer.</p>
       <ul class="limits">
-          <li><strong>Il n'encaisse pas.</strong> Le client paie comme d'habitude. S'il envoie une capture de paiement, l'assistant vous la signale et ne confirme rien&nbsp;: vous vérifiez votre solde.</li>
-          <li><strong>Il ne connaît que la carte saisie.</strong> Un plat sans fiche n'est ni proposé ni pris en commande. Pour un plat du jour, activez sa fiche le matin et désactivez-la quand il est terminé.</li>
-          <li><strong>Il ne suit pas le livreur.</strong> Il note la commande et l'adresse&nbsp;; c'est vous qui marquez la commande livrée.</li>
+          <li><strong>Il n'encaisse pas.</strong> Le client paie comme d'habitude. L'assistant a pour consigne de ne jamais confirmer un paiement&nbsp;: une capture reconnue comme preuve de paiement vous est signalée, et vous vérifiez votre solde.</li>
+          <li><strong>Il ne connaît que la carte saisie.</strong> Un plat sans fiche ne peut pas être pris en commande. Pour un plat du jour, activez sa fiche le matin et désactivez-la quand il est terminé.</li>
+          <li><strong>Il ne suit pas le livreur.</strong> Il note la commande et l'adresse&nbsp;; c'est vous qui marquez la commande livrée. Le total enregistré reprend les prix de la carte, sans les frais de livraison.</li>
           <li><strong>Il peut se tromper, comme toute IA.</strong> Vous pouvez relire et corriger ses réponses. Et Brayano IA se relie à WhatsApp comme WhatsApp Web&nbsp;: ce n'est pas l'outil officiel de Meta. <a href="../index.html#questions">Voir les questions fréquentes</a></li>
       </ul>
     </div>
@@ -153,10 +153,10 @@
       <p class="kicker">Questions</p>
       <h2>Les questions des restaurateurs</h2>
       <div class="faq">
-          <details><summary>Peut-il prendre des réservations de table&nbsp;?</summary><p>Oui, avec l'agenda de la page «&nbsp;Rendez-vous&nbsp;». Vous indiquez la durée d'une réservation, le nombre de réservations possibles au même moment et vos horaires&nbsp;: il propose seulement les créneaux libres et enregistre la réservation.</p></details>
+          <details><summary>Peut-il prendre des réservations de table&nbsp;?</summary><p>Oui, avec l'agenda de la page «&nbsp;Rendez-vous&nbsp;», une fois la prise de rendez-vous autorisée. Vous indiquez la durée d'une réservation, le nombre de réservations possibles au même moment et vos horaires&nbsp;: il propose seulement les créneaux libres et enregistre la réservation.</p></details>
           <details><summary>Et si je ne peux pas confirmer une commande tout de suite&nbsp;?</summary><p>La commande est enregistrée comme nouvelle et vous recevez un email. Vous la confirmez dès que vous avez une minute, depuis votre téléphone. Avec le forfait Pro ou Business, vos employés peuvent le faire à votre place.</p></details>
-          <details><summary>Comment gérer un plat terminé&nbsp;?</summary><p>Désactivez sa fiche dans «&nbsp;Produits&nbsp;»&nbsp;: l'assistant cesse aussitôt de le proposer et de le prendre en commande. Vous la réactivez le lendemain, sans rien ressaisir.</p></details>
-          <details><summary>Peut-il annoncer le plat du jour à mes clients&nbsp;?</summary><p>Avec le forfait Pro, la page «&nbsp;Messages groupés&nbsp;» envoie votre annonce aux clients qui vous ont écrit récemment, par petits lots. Elle ne sert pas à écrire à des inconnus&nbsp;: c'est ce qui protège votre numéro.</p></details>
+          <details><summary>Comment gérer un plat terminé&nbsp;?</summary><p>Désactivez sa fiche dans «&nbsp;Produits&nbsp;»&nbsp;: il ne peut plus être pris en commande, et l'assistant a pour consigne de ne plus le proposer. Vous la réactivez le lendemain, sans rien ressaisir.</p></details>
+          <details><summary>Peut-il annoncer le plat du jour à mes clients&nbsp;?</summary><p>Avec le forfait Pro, la page «&nbsp;Messages groupés&nbsp;» envoie votre annonce aux clients qui vous ont écrit récemment, par petits lots. Elle ne sert pas à écrire à des inconnus&nbsp;: cela réduit le risque de blocage de votre numéro.</p></details>
       </div>
     </div>
   </section>
@@ -164,7 +164,7 @@
     <div class="wrap">
       <div class="final">
         <h2>Prêt à l'essayer dans votre restaurant&nbsp;?</h2>
-        <p>Découvrez Brayano IA avec 100 réponses offertes, sans carte bancaire. Une question ? Écrivez-nous sur WhatsApp.</p>
+        <p>Découvrez Brayano IA avec 100 réponses offertes, sans carte bancaire. Une question&nbsp;? Écrivez-nous sur WhatsApp.</p>
         <div class="cta-row">
           <a class="btn btn-primary" href="../app/?inscription">Essayer gratuitement</a>
           <a class="btn btn-wa" href="https://wa.me/237683260520?text=Bonjour%2C%20je%20veux%20essayer%20Brayano%20IA" rel="noopener">Écrire sur WhatsApp</a>

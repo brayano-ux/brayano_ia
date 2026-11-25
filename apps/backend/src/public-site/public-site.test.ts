@@ -233,7 +233,7 @@ describe("site public : pages par activité (assistant-whatsapp/)", () => {
       const text = visibleText(html.slice(html.indexOf("<main"), html.indexOf("</main>")));
       for (const value of numbers(text, /lots de (\d+)/g)) expect(value, `${page} : taille d'un lot`).toBe(BROADCAST_LIMITS.maxRecipientsPerBroadcast);
       for (const value of numbers(text, /(\d+) messages par 24 h/g)) expect(value, `${page} : messages groupés par 24 h`).toBe(BROADCAST_LIMITS.maxPerDay);
-      for (const value of numbers(text, /à (\d+) derniers jours/g)) expect(value, `${page} : ancienneté maximale d'un destinataire`).toBe(BROADCAST_LIMITS.maxWindowDays);
+      for (const value of numbers(text, /ou (\d+) derniers jours/g)) expect(value, `${page} : ancienneté maximale d'un destinataire`).toBe(BROADCAST_LIMITS.maxWindowDays);
       for (const value of numbers(text, /jusqu'à (\d+) articles actifs/g)) expect(value, `${page} : taille du catalogue`).toBe(CATALOG_MAX_PRODUCTS);
       for (const value of numbers(text, /jusqu'à (\d+) photos/g)) expect(value, `${page} : photos par réponse`).toBe(MAX_PRODUCT_PHOTOS_PER_REPLY);
     }

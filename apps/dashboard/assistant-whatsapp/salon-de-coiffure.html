@@ -32,7 +32,7 @@
       {"@type": "FAQPage", "@id": "https://brayanoia.onrender.com/assistant-whatsapp/salon-de-coiffure.html#faq", "inLanguage": "fr", "isPartOf": {"@id": "https://brayanoia.onrender.com/assistant-whatsapp/salon-de-coiffure.html#page"}, "mainEntity": [
         {"@type": "Question", "name": "Et si deux clients veulent le même créneau ?", "acceptedAnswer": {"@type": "Answer", "text": "S'il ne reste qu'une place, le premier qui confirme l'obtient. L'autre reçoit les créneaux libres les plus proches de l'heure demandée. Le rendez-vous est enregistré par le serveur, pas par l'IA : il n'y a pas de double réservation."}},
         {"@type": "Question", "name": "Je note déjà mes rendez-vous dans un cahier : comment faire ?", "acceptedAnswer": {"@type": "Answer", "text": "Saisissez dans l'agenda les rendez-vous pris au salon ou par téléphone avec « Ajouter un rendez-vous ». Avant de proposer un créneau, l'assistant tient compte de tous les rendez-vous enregistrés, quelle que soit leur origine."}},
-        {"@type": "Question", "name": "Peut-il donner un rendez-vous en dehors de mes horaires ?", "acceptedAnswer": {"@type": "Answer", "text": "Non. Il répond à toute heure, mais ne propose que des créneaux situés dans vos horaires d'ouverture, après le préavis minimum que vous avez fixé et dans la limite de jours que vous avez choisie."}},
+        {"@type": "Question", "name": "Peut-il donner un rendez-vous en dehors de mes horaires ?", "acceptedAnswer": {"@type": "Answer", "text": "Non. Il répond à toute heure, mais ne propose que des créneaux situés dans vos horaires d'ouverture, après le préavis minimum que vous avez fixé, et sur les 14 prochains jours au plus."}},
         {"@type": "Question", "name": "Que faire quand un client ne vient pas ?", "acceptedAnswer": {"@type": "Answer", "text": "Dans l'onglet « Agenda », vous marquez le rendez-vous « Absent » (ou « Terminé » s'il a eu lieu). L'assistant n'envoie pas de rappel automatique avant le rendez-vous."}}
       ]}
     ]
@@ -108,14 +108,14 @@
     <div class="wrap">
       <p class="kicker">Dans un salon de coiffure</p>
       <h2>Ce qu'il fait pendant que vous coiffez</h2>
-      <p class="sub">Il lit votre agenda et vos tarifs. Il n'invente ni un prix, ni une durée, ni une disponibilité.</p>
+      <p class="sub">Il lit votre agenda et vos tarifs. Les créneaux sont vérifiés par le serveur&nbsp;; pour le reste, il a pour consigne de ne rien inventer.</p>
       <div class="cards">
           <article class="card"><div class="ico" aria-hidden="true"><svg class="i"><use href="#ic-calendar"/></svg></div><h3>Il propose seulement vos créneaux libres</h3><p>Horaires jour par jour, durée d'un rendez-vous, pause entre deux clients, jours fermés&nbsp;: il suit votre agenda. C'est le serveur, pas l'IA, qui vérifie qu'un créneau est libre.</p></article>
           <article class="card"><div class="ico" aria-hidden="true"><svg class="i"><use href="#ic-users"/></svg></div><h3>Il connaît le nombre de fauteuils</h3><p>Deux coiffeuses travaillent en même temps&nbsp;? Indiquez deux rendez-vous simultanés&nbsp;: il remplit les deux fauteuils, jamais un de plus.</p></article>
-          <article class="card"><div class="ico" aria-hidden="true"><svg class="i"><use href="#ic-repeat"/></svg></div><h3>Le client déplace ou annule en écrivant</h3><p>«&nbsp;Je ne peux plus samedi&nbsp;»&nbsp;: l'assistant annule le rendez-vous ou en propose un autre, et l'agenda se met à jour.</p></article>
-          <article class="card"><div class="ico" aria-hidden="true"><svg class="i"><use href="#ic-tag"/></svg></div><h3>Il donne vos tarifs</h3><p>Tresses, tissage, soin, manucure&nbsp;: il donne les prix que vous avez écrits. Ce qui n'est pas écrit, il le dit au client et vous passe la main.</p></article>
+          <article class="card"><div class="ico" aria-hidden="true"><svg class="i"><use href="#ic-repeat"/></svg></div><h3>Le client déplace ou annule en écrivant</h3><p>«&nbsp;Je ne peux plus samedi&nbsp;»&nbsp;: pour un rendez-vous pris avec lui, l'assistant l'annule ou en propose un autre, et l'agenda se met à jour. Un rendez-vous que vous avez saisi vous-même se modifie depuis l'agenda.</p></article>
+          <article class="card"><div class="ico" aria-hidden="true"><svg class="i"><use href="#ic-tag"/></svg></div><h3>Il donne vos tarifs</h3><p>Tresses, tissage, soin, manucure&nbsp;: il a pour consigne de donner les prix que vous avez écrits, sans en inventer. Une question à laquelle il n'a pas su répondre s'affiche dans «&nbsp;Questions restées sans réponse&nbsp;», sur l'accueil.</p></article>
           <article class="card"><div class="ico" aria-hidden="true"><svg class="i"><use href="#ic-camera"/></svg></div><h3>Il montre vos réalisations</h3><p>Ajoutez vos coiffures dans «&nbsp;Produits&nbsp;» avec une photo et un prix&nbsp;: il envoie la photo quand un client demande à voir.</p></article>
-          <article class="card"><div class="ico" aria-hidden="true"><svg class="i"><use href="#ic-pin"/></svg></div><h3>Il envoie la position du salon</h3><p>«&nbsp;Vous êtes où&nbsp;?&nbsp;»&nbsp;: le client reçoit une vraie localisation WhatsApp, avec la carte et l'itinéraire.</p><a class="demo-link" href="../fonctionnalites/localisation-gps.html">La localisation GPS <span aria-hidden="true">→</span></a></article>
+          <article class="card"><div class="ico" aria-hidden="true"><svg class="i"><use href="#ic-pin"/></svg></div><h3>Il envoie la position du salon</h3><p>Une fois votre position enregistrée, le client qui demande où trouver votre salon reçoit une vraie localisation WhatsApp, avec la carte et l'itinéraire.</p><a class="demo-link" href="../fonctionnalites/localisation-gps.html">La localisation GPS <span aria-hidden="true">→</span></a></article>
       </div>
       <div class="help-note"><span class="help-ico" aria-hidden="true"><svg class="i" aria-hidden="true"><use href="#ic-tag"/></svg></span><p><strong>Combien ça coûte&nbsp;?</strong> Vous commencez par 100 messages offerts, sans carte bancaire. Ensuite, le forfait Essentiel (10&nbsp;000&nbsp;FCFA par mois, 1&nbsp;000 messages de l'assistant) comprend la prise de rendez-vous. Pour relancer un client intéressé qui n'a pas répondu, annoncer une promotion ou donner un accès à 3 employés, il faut le forfait Pro, à 20&nbsp;000&nbsp;FCFA par mois. <a href="../index.html#tarifs">Voir les tarifs</a></p></div>
     </div>
@@ -129,9 +129,9 @@
           <div class="step"><h3>Reliez le numéro WhatsApp du salon</h3><p>Vous scannez un code, comme pour WhatsApp Web. Vous gardez votre numéro, qu'il soit sur WhatsApp ou sur WhatsApp Business.</p></div>
           <div class="step"><h3>Réglez votre agenda</h3><p>Page «&nbsp;Rendez-vous&nbsp;», onglet «&nbsp;Réglages de l'agenda&nbsp;»&nbsp;: autorisez la prise de rendez-vous, puis indiquez la durée d'un créneau, la pause entre deux rendez-vous, le nombre de rendez-vous simultanés, le préavis minimum et vos horaires jour par jour.</p></div>
           <div class="step"><h3>Écrivez vos prestations et vos tarifs</h3><p>Dans «&nbsp;Agent IA&nbsp;», onglet «&nbsp;Connaissances&nbsp;». Un modèle d'instructions «&nbsp;Salon de coiffure / beauté&nbsp;» est prêt&nbsp;: vous l'adaptez à votre salon.</p></div>
-          <div class="step"><h3>Saisissez les rendez-vous pris par téléphone</h3><p>Le bouton «&nbsp;Ajouter un rendez-vous&nbsp;» les inscrit dans l'agenda&nbsp;: l'assistant ne proposera plus ces créneaux.</p></div>
+          <div class="step"><h3>Saisissez les rendez-vous pris par téléphone</h3><p>Le bouton «&nbsp;Ajouter un rendez-vous&nbsp;» les inscrit dans l'agenda, sur un créneau libre de vos horaires&nbsp;: ils y occupent une place, comme ceux pris par l'assistant.</p></div>
           <div class="step"><h3>Testez avant d'annoncer votre numéro</h3><p>Le testeur vous laisse jouer le client, sans WhatsApp. Rien n'est envoyé et rien n'est compté dans votre forfait.</p></div>
-          <div class="step"><h3>Suivez tout depuis votre téléphone</h3><p>Sur l'accueil du tableau de bord, «&nbsp;À traiter&nbsp;» liste ce qui attend une action de votre part. Quand vous répondez vous-même dans une conversation, l'assistant s'y met en pause.</p></div>
+          <div class="step"><h3>Suivez tout depuis votre téléphone</h3><p>Sur l'accueil du tableau de bord, «&nbsp;À traiter&nbsp;» liste ce qui attend une action de votre part. Quand vous répondez vous-même dans une conversation, l'assistant s'y met en pause&nbsp;; il reprend après 24&nbsp;h, ou dès que vous le réactivez.</p></div>
       </div>
     </div>
   </section>
@@ -141,7 +141,7 @@
       <h2>Ce qu'il ne fait pas</h2>
       <p class="sub">Mieux vaut le savoir avant de commencer.</p>
       <ul class="limits">
-          <li><strong>Tous les rendez-vous ont la même durée.</strong> L'agenda fonctionne avec une seule durée de créneau. Pour une prestation plus longue, bloquez vous-même les créneaux suivants avec «&nbsp;Ajouter un rendez-vous&nbsp;».</li>
+          <li><strong>Tous les rendez-vous ont la même durée.</strong> L'agenda fonctionne avec une seule durée de créneau. Pour une prestation plus longue, réservez vous-même les créneaux suivants avec «&nbsp;Ajouter un rendez-vous&nbsp;».</li>
           <li><strong>Il n'envoie pas de rappel avant le rendez-vous.</strong> Les rendez-vous du jour s'affichent à l'ouverture du tableau de bord&nbsp;; le rappel au client reste à faire par vous.</li>
           <li><strong>Il réserve un créneau, pas une coiffeuse.</strong> Il ne sait pas attribuer un rendez-vous à une personne précise de votre équipe.</li>
           <li><strong>Il peut se tromper, comme toute IA.</strong> Vous pouvez relire et corriger ses réponses. Et Brayano IA se relie à WhatsApp comme WhatsApp Web&nbsp;: ce n'est pas l'outil officiel de Meta. <a href="../index.html#questions">Voir les questions fréquentes</a></li>
@@ -155,7 +155,7 @@
       <div class="faq">
           <details><summary>Et si deux clients veulent le même créneau&nbsp;?</summary><p>S'il ne reste qu'une place, le premier qui confirme l'obtient. L'autre reçoit les créneaux libres les plus proches de l'heure demandée. Le rendez-vous est enregistré par le serveur, pas par l'IA&nbsp;: il n'y a pas de double réservation.</p></details>
           <details><summary>Je note déjà mes rendez-vous dans un cahier&nbsp;: comment faire&nbsp;?</summary><p>Saisissez dans l'agenda les rendez-vous pris au salon ou par téléphone avec «&nbsp;Ajouter un rendez-vous&nbsp;». Avant de proposer un créneau, l'assistant tient compte de tous les rendez-vous enregistrés, quelle que soit leur origine.</p></details>
-          <details><summary>Peut-il donner un rendez-vous en dehors de mes horaires&nbsp;?</summary><p>Non. Il répond à toute heure, mais ne propose que des créneaux situés dans vos horaires d'ouverture, après le préavis minimum que vous avez fixé et dans la limite de jours que vous avez choisie.</p></details>
+          <details><summary>Peut-il donner un rendez-vous en dehors de mes horaires&nbsp;?</summary><p>Non. Il répond à toute heure, mais ne propose que des créneaux situés dans vos horaires d'ouverture, après le préavis minimum que vous avez fixé, et sur les 14 prochains jours au plus.</p></details>
           <details><summary>Que faire quand un client ne vient pas&nbsp;?</summary><p>Dans l'onglet «&nbsp;Agenda&nbsp;», vous marquez le rendez-vous «&nbsp;Absent&nbsp;» (ou «&nbsp;Terminé&nbsp;» s'il a eu lieu). L'assistant n'envoie pas de rappel automatique avant le rendez-vous.</p></details>
       </div>
     </div>
@@ -164,7 +164,7 @@
     <div class="wrap">
       <div class="final">
         <h2>Prêt à l'essayer dans votre salon&nbsp;?</h2>
-        <p>Découvrez Brayano IA avec 100 réponses offertes, sans carte bancaire. Une question ? Écrivez-nous sur WhatsApp.</p>
+        <p>Découvrez Brayano IA avec 100 réponses offertes, sans carte bancaire. Une question&nbsp;? Écrivez-nous sur WhatsApp.</p>
         <div class="cta-row">
           <a class="btn btn-primary" href="../app/?inscription">Essayer gratuitement</a>
           <a class="btn btn-wa" href="https://wa.me/237683260520?text=Bonjour%2C%20je%20veux%20essayer%20Brayano%20IA" rel="noopener">Écrire sur WhatsApp</a>
