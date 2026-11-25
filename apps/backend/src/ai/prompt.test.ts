@@ -116,6 +116,9 @@ describe("language handling in the assistant prompt", () => {
     expect(prompt).toMatch(/anglais/i);
     expect(prompt).toMatch(/pidgin/i);
     expect(prompt).toContain("abeg");
+    // Choix du propriétaire : un client qui écrit en pidgin reçoit une réponse en pidgin.
+    expect(prompt).toContain("en pidgin camerounais si le prospect écrit en pidgin");
+    expect(prompt).not.toContain("sans imiter le pidgin");
   });
 
   it("no longer forces French-only replies", () => {
