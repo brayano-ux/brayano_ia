@@ -28,6 +28,8 @@ export function applyPlatformAdmin(value) {
 /** La page est-elle interdite au compte connecté ? (employé sur une page de réglages, ou page réservée à la plateforme) */
 export function isViewForbidden(view) {
   if (PLATFORM_ONLY_VIEWS.includes(view)) return !isPlatformAdmin();
+  // Formule sur mesure sans messages groupés : la page n'existe pas pour ce client.
+  if (view === "broadcasts" && document.body.classList.contains("plan-no-broadcasts")) return true;
   return isAgentRole() && ADMIN_ONLY_VIEWS.includes(view);
 }
 

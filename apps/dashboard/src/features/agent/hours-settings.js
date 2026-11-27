@@ -74,7 +74,10 @@ export function fillHoursSettings(settings) {
   renderRows(hasHours ? stored : DEFAULT_HOURS);
   $("#bh-timezone").value = settings.businessTimezone || "Africa/Douala";
   $("#bh-closed-message").value = settings.closedMessage || "";
-  $("#fu-enabled").checked = Boolean(settings.followUpEnabled);
+  // Formule sur mesure sans relances : l'interrupteur reste coupé et verrouillé (voir billing.js, applyPlanFeatures).
+  const followUpsLocked = document.body.classList.contains("plan-no-followups");
+  $("#fu-enabled").checked = Boolean(settings.followUpEnabled) && !followUpsLocked;
+  $("#fu-enabled").disabled = followUpsLocked;
   ensureOption($("#fu-delay"), settings.followUpDelayHours || 24);
   $("#fu-max").value = String(settings.followUpMax || 1);
   $("#tg-enabled").checked = Boolean(settings.topicGateEnabled);

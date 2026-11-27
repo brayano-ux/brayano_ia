@@ -39,6 +39,34 @@ export async function getBillingStatus({ fresh = false } = {}) {
   return statusCache.value;
 }
 
+/* ------------------------------------------------ fonctions de la formule */
+
+/**
+ * Client sur mesure : les fonctions que sa formule n'inclut pas disparaissent du tableau de bord (le serveur les refuse
+ * de toute façon). Les forfaits payés en ligne gardent l'affichage habituel, qui invite à passer au forfait supérieur.
+ */
+export function applyPlanFeatures(status) {
+  const locked = (feature) => Boolean(status?.isCustom && status.enforced && !status.features?.[feature]);
+  document.body.classList.toggle("plan-no-broadcasts", locked("broadcasts"));
+  document.body.classList.toggle("plan-no-followups", locked("followUps"));
+  syncFollowUpLock();
+  // Arrivé directement sur l'adresse des messages groupés avant que la formule soit connue : retour à l'accueil.
+  if (locked("broadcasts") && document.body.dataset.currentView === "broadcasts") $('.nav-item[data-view="overview"]')?.click();
+}
+
+/** Interrupteur « Relances automatiques » : coupé et verrouillé quand la formule sur mesure ne les inclut pas. */
+export function syncFollowUpLock() {
+  const toggle = $("#fu-enabled");
+  if (!toggle) return;
+  const locked = document.body.classList.contains("plan-no-followups");
+  toggle.disabled = locked;
+  if (locked && toggle.checked) {
+    toggle.checked = false;
+    toggle.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+  $("#fu-locked")?.classList.toggle("hidden", !locked);
+}
+
 /* ---------------------------------------------- bandeau et jauge du menu */
 
 /** Jauge du menu latéral : forfait en cours et messages utilisés, toujours sous les yeux. */
@@ -67,6 +95,7 @@ export async function refreshBillingBanner() {
   if (!banner) return;
   const status = await getBillingStatus({ fresh: true });
   renderSidebarPlan(status);
+  applyPlanFeatures(status);
   const low = status && status.enforced && status.messageLimit > 0 && status.remainingMessages / status.messageLimit <= 0.2;
   if (!status || !status.enforced || (!status.blocked && !low)) {
     banner.classList.add("hidden");
@@ -187,6 +216,7 @@ export async function loadBilling() {
   if (plans) plansData = plans;
   const statusBox = $("#billing-status");
   renderSidebarPlan(status);
+  applyPlanFeatures(status);
   statusBox.innerHTML = status ? statusMarkup(status) : `<div class="empty"><span class="empty-icon">${icon("alert")}</span><p class="empty-title">Forfait indisponible</p><p class="empty-text">Impossible de charger votre forfait pour le moment. Réessayez dans un instant.</p></div>`;
   // Un client sur mesure ne choisit pas de forfait : la grille des forfaits et la mention du paiement en ligne disparaissent.
   const custom = Boolean(status?.isCustom);

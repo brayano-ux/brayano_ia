@@ -41,8 +41,10 @@ export type AiResponseEntitlement =
   | { allowed: true; source: "unlimited"; remaining: number }
   | { allowed: false; reason: DenyReason };
 
-function denyOrAllow(reason: DenyReason): AiResponseEntitlement {
-  return state.enforced ? { allowed: false, reason } : { allowed: true, source: "unlimited", remaining: Number.POSITIVE_INFINITY };
+function denyOrAllow(reason: DenyReason, custom = false): AiResponseEntitlement {
+  // Une formule sur mesure est un accord direct avec le client : sa limite s'applique toujours, même quand les forfaits
+  // de l'application ne sont pas encore appliqués (BILLING_ENFORCED).
+  return state.enforced || custom ? { allowed: false, reason } : { allowed: true, source: "unlimited", remaining: Number.POSITIVE_INFINITY };
 }
 
 /** Réserve un message de l'assistant (à appeler avant de répondre ; `releaseAiResponse` le rend si la réponse n'est pas partie). */
@@ -51,7 +53,7 @@ export async function reserveAiResponse(organizationId: string): Promise<AiRespo
   const now = new Date();
 
   if (subscription) {
-    if (subscription.status !== "ACTIVE" || subscription.expiresAt <= now) return denyOrAllow("subscription_expired");
+    if (subscription.status !== "ACTIVE" || subscription.expiresAt <= now) return denyOrAllow("subscription_expired", subscription.custom);
 
     let current = subscription;
     if (now.getTime() - current.periodStartedAt.getTime() >= BILLING_PERIOD_MS) {
@@ -76,10 +78,10 @@ export async function reserveAiResponse(organizationId: string): Promise<AiRespo
       const changed = fresh && (fresh.periodStartedAt.getTime() !== current.periodStartedAt.getTime() || fresh.messageLimit !== current.messageLimit || fresh.status !== current.status);
       if (!fresh || attempt === 1 || !changed) {
         const latest = fresh ?? current;
-        return denyOrAllow(latest.messagesUsed >= latest.messageLimit ? "message_quota_exhausted" : "subscription_expired");
+        return denyOrAllow(latest.messagesUsed >= latest.messageLimit ? "message_quota_exhausted" : "subscription_expired", latest.custom);
       }
       current = fresh;
-      if (current.status !== "ACTIVE" || current.expiresAt <= now) return denyOrAllow("subscription_expired");
+      if (current.status !== "ACTIVE" || current.expiresAt <= now) return denyOrAllow("subscription_expired", current.custom);
     }
     return { allowed: true, source: "subscription", remaining: Math.max(0, current.messageLimit - current.messagesUsed - 1), periodStartedAt: current.periodStartedAt };
   }
@@ -242,8 +244,8 @@ export async function getOrganizationBillingStatus(organizationId: string): Prom
       status: active ? "ACTIVE" : "EXPIRED",
       isTrial: false,
       isCustom: true,
-      enforced,
-      blocked: enforced && (!active || remaining <= 0),
+      enforced: true,
+      blocked: !active || remaining <= 0,
       messageLimit: subscription.messageLimit,
       messagesUsed: used,
       remainingMessages: remaining,
@@ -310,7 +312,10 @@ export async function getOrganizationBillingStatus(organizationId: string): Prom
 
 /** Fonctions ouvertes pour l'entreprise : tout, tant que les forfaits ne sont pas appliqués. */
 export async function getOrganizationFeatures(organizationId: string): Promise<PlanFeatures> {
-  if (!state.enforced) return ALL_FEATURES;
+  if (!state.enforced) {
+    // Forfaits pas encore appliqués : tout est ouvert, sauf pour une formule sur mesure, qui suit toujours les choix de l'administrateur.
+    if (!(await isCustomPlan(organizationId))) return ALL_FEATURES;
+  }
   return (await getOrganizationBillingStatus(organizationId)).features;
 }
 
