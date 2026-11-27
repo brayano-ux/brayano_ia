@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { env } from "../config/env.js";
 import { BILLING_PLANS, TRIAL, getBillingPlan } from "../billing/billing-plans.js";
-import { isBillingEnforced, isCustomPlan } from "../billing/subscription.service.js";
+import { isBillingEnforced, isCustomPlan, notifyCustomPlanPayment } from "../billing/subscription.service.js";
 import { getOrganizationBillingStatus } from "../billing/subscription.service.js";
 import { prisma } from "../database/client.js";
 import { normalizeWhatsAppNumber } from "../shared/phone.js";
@@ -45,6 +45,7 @@ async function reconcilePayment(payment: {
     }
 
     const plan = getBillingPlan(payment.plan);
+    let paidWhileCustom = false;
     await prisma.$transaction(async (transactionClient) => {
       const updated = await transactionClient.billingPayment.updateMany({
         where: { id: payment.id, status: "PENDING" },
@@ -57,7 +58,13 @@ async function reconcilePayment(payment: {
       const currentSubscription = await transactionClient.billingSubscription.findUnique({
         where: { organizationId: payment.organizationId },
       });
-      const isEarlyRenewal = currentSubscription?.status === "ACTIVE" && !currentSubscription.custom && currentSubscription.expiresAt > now;
+      if (currentSubscription?.custom) {
+        // Paiement commencé avant le passage en sur mesure : il est enregistré, la formule sur mesure reste en place,
+        // et l'administrateur est prévenu (remboursement ou geste à décider avec le client).
+        paidWhileCustom = true;
+        return;
+      }
+      const isEarlyRenewal = currentSubscription?.status === "ACTIVE" && currentSubscription.expiresAt > now;
       const startsFrom = isEarlyRenewal
         ? currentSubscription.expiresAt
         : now;
@@ -82,11 +89,10 @@ async function reconcilePayment(payment: {
           expiresAt,
           // Nouvelle échéance : l'avis « bientôt terminé » pourra être renvoyé pour ce prochain cycle.
           expiringNoticeSentAt: null,
-          // Un forfait payé remplace une éventuelle formule sur mesure.
-          custom: false,
         },
       });
     });
+    if (paidWhileCustom) notifyCustomPlanPayment(payment.organizationId, plan.name);
     return "SUCCESS" as const;
   }
 

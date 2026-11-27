@@ -1,6 +1,6 @@
 import { DEFAULT_RESPONSE_DELAY_SECONDS } from "../ai/ai-settings.service.js";
 import { hashPassword } from "../auth/password.js";
-import { setCustomPlan, type CustomPlanSettings } from "../billing/subscription.service.js";
+import { customPlanData, getOrganizationBillingStatus, type CustomPlanSettings } from "../billing/subscription.service.js";
 import { env } from "../config/env.js";
 import { prisma } from "../database/client.js";
 import { ValidationError } from "../shared/errors.js";
@@ -31,14 +31,23 @@ export async function createCustomClient(input: NewCustomClient) {
     if (!whatsappNumber) throw new ValidationError("Numéro WhatsApp invalide : indiquez-le avec l'indicatif du pays (ex. +237 6 90 00 00 00).");
   }
   const passwordHash = await hashPassword(input.password);
-  const organization = await prisma.$transaction(async (tx) => {
-    const created = await tx.organization.create({ data: { name: input.companyName.trim(), whatsappNumber, freeAiResponsesRemaining: 0 } });
-    await tx.user.create({ data: { organizationId: created.id, name: input.ownerName.trim(), email, passwordHash, role: "ADMIN" } });
-    await tx.aiSettings.create({
-      data: { organizationId: created.id, agentName: env.AI_AGENT_NAME, systemPrompt: env.AI_SYSTEM_PROMPT, responseDelaySeconds: DEFAULT_RESPONSE_DELAY_SECONDS },
+  let organization;
+  try {
+    organization = await prisma.$transaction(async (tx) => {
+      const created = await tx.organization.create({ data: { name: input.companyName.trim(), whatsappNumber, freeAiResponsesRemaining: 0 } });
+      await tx.user.create({ data: { organizationId: created.id, name: input.ownerName.trim(), email, passwordHash, role: "ADMIN" } });
+      await tx.aiSettings.create({
+        data: { organizationId: created.id, agentName: env.AI_AGENT_NAME, systemPrompt: env.AI_SYSTEM_PROMPT, responseDelaySeconds: DEFAULT_RESPONSE_DELAY_SECONDS },
+      });
+      const now = new Date();
+      await tx.billingSubscription.create({ data: { organizationId: created.id, ...customPlanData(input.plan), messagesUsed: 0, periodStartedAt: now, startedAt: now } });
+      return created;
     });
-    return created;
-  });
-  const billing = await setCustomPlan(organization.id, input.plan);
+  } catch (error) {
+    // Deux créations simultanées avec le même email : la seconde heurte la contrainte d'unicité.
+    if ((error as { code?: string }).code === "P2002") throw new ValidationError("Cette adresse email est déjà utilisée par un autre compte.");
+    throw error;
+  }
+  const billing = await getOrganizationBillingStatus(organization.id);
   return { organizationId: organization.id, name: organization.name, owner: { name: input.ownerName.trim(), email }, billing };
 }

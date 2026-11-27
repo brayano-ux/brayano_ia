@@ -81,7 +81,12 @@ export async function buildAccountContext(organizationId: string): Promise<strin
       `Forfaits appliqués (l'agent s'arrête quand les messages sont épuisés) : ${yesNo(billing.enforced)}`,
       `Messages en masse inclus : ${yesNo(billing.features.broadcasts)} ; relances incluses : ${yesNo(billing.features.followUps)} ; employés autorisés : ${billing.features.teamMembers}`,
     );
-    if (billing.blocked) lines.push("ATTENTION : l'agent est actuellement bloqué (messages épuisés ou forfait terminé).");
+    if (billing.isCustom) {
+      lines.push(
+        "FORMULE SUR MESURE : ce compte paie Brayano Service directement, hors de l'application. Ne propose JAMAIS de choisir ou payer un forfait en ligne. Pour changer la limite de messages ou ajouter une fonction, il faut contacter Brayano Service sur WhatsApp (bouton « Contacter Brayano Service » de la page « Mon forfait »).",
+      );
+      if (billing.blocked) lines.push("ATTENTION : l'agent est actuellement bloqué (limite mensuelle de la formule sur mesure atteinte, ou formule en pause) : seul Brayano Service peut le débloquer.");
+    } else if (billing.blocked) lines.push("ATTENTION : l'agent est actuellement bloqué (messages épuisés ou forfait terminé).");
   }
   return lines.join("\n");
 }

@@ -2,6 +2,7 @@ import { env } from "../config/env.js";
 import { prisma } from "../database/client.js";
 import { isEmailConfigured, sendEmail } from "./email.service.js";
 import { getPlatformAdminEmails } from "../organizations/platform-admins.js";
+import { SUPPORT_WHATSAPP_DISPLAY } from "../support-assistant/knowledge.js";
 
 export interface ProspectInfo {
   name?: string | null | undefined;
@@ -197,7 +198,7 @@ export function buildSubscriptionExpiringEmail(input: { organizationName: string
 export function buildCustomQuotaReachedEmail(input: { organizationName: string }) {
   return {
     subject: "⚠️ Limite mensuelle atteinte : l'assistant ne répond plus pour le moment",
-    text: `Bonjour,\n\nL'assistant de ${input.organizationName} a utilisé tous les messages prévus ce mois-ci dans votre formule sur mesure. Il ne répond donc plus automatiquement à vos clients jusqu'au début de la prochaine période.\n\nVos clients peuvent toujours vous écrire et vous pouvez leur répondre vous-même, depuis votre téléphone ou depuis votre tableau de bord.\n\nPour relever votre limite, contactez Brayano Service sur WhatsApp au +237 683 26 05 20.\n\nL'équipe Brayano IA`,
+    text: `Bonjour,\n\nL'assistant de ${input.organizationName} a utilisé tous les messages prévus ce mois-ci dans votre formule sur mesure. Il ne répond donc plus automatiquement à vos clients jusqu'au début de la prochaine période.\n\nVos clients peuvent toujours vous écrire et vous pouvez leur répondre vous-même, depuis votre téléphone ou depuis votre tableau de bord.\n\nPour relever votre limite, contactez Brayano Service sur WhatsApp au ${SUPPORT_WHATSAPP_DISPLAY}.\n\nL'équipe Brayano IA`,
   };
 }
 

@@ -66,12 +66,25 @@ describe.skipIf(!integrationEnabled)("formule sur mesure (base réelle)", () => 
     expect((error as Error).message).not.toContain("Mon forfait");
   });
 
-  it("limite atteinte : le client est invité à contacter Brayano Service, et l'administrateur est prévenu", async () => {
+  it("limite atteinte : le client est invité à contacter Brayano Service, l'administrateur est prévenu, une seule fois par période", async () => {
     const { organization } = await createTestOrganization();
     await setCustomPlan(organization.id, PLAN);
+    // Pas d'avis tant que la limite n'est pas vraiment atteinte (ex. formule modifiée pendant une réponse).
+    expect(await notifyQuotaReached(organization.id, "message_quota_exhausted")).toBe(false);
+    for (let index = 0; index < 3; index += 1) await reserveAiResponse(organization.id);
     expect(await notifyQuotaReached(organization.id, "message_quota_exhausted")).toBe(true);
     expect(emails.client).toEqual(["⚠️ Limite mensuelle atteinte : l'assistant ne répond plus pour le moment"]);
     expect(emails.platform).toEqual(["Client sur mesure : Salon Éclat a atteint sa limite"]);
+    // Le lendemain, toujours à la limite : pas de second email dans la même période.
+    expect(await notifyQuotaReached(organization.id, "message_quota_exhausted", new Date(Date.now() + 2 * DAY))).toBe(false);
+    expect(emails.client).toHaveLength(1);
+  });
+
+  it("une entreprise suspendue apparaît « en pause » : l'agent ne répond plus, aucune fonction ouverte", async () => {
+    const { organization } = await createTestOrganization();
+    await setCustomPlan(organization.id, PLAN);
+    await prisma.organization.update({ where: { id: organization.id }, data: { platformSuspended: true } });
+    expect(await getOrganizationBillingStatus(organization.id)).toMatchObject({ isCustom: true, status: "EXPIRED", blocked: true, features: { broadcasts: false, teamMembers: 0 } });
   });
 
   it("aucun rappel d'échéance ni email de paiement, même après des années", async () => {
@@ -101,7 +114,8 @@ describe.skipIf(!integrationEnabled)("formule sur mesure (base réelle)", () => 
     expect(status).toMatchObject({ isCustom: true, messagesUsed: 0, messageLimit: 3 });
     expect(await isCustomPlan(organization.id)).toBe(true);
     const back = await removeCustomPlan(organization.id);
-    expect(back).toMatchObject({ isCustom: false, isTrial: true });
+    // Rendu aux forfaits : forfait terminé à renouveler en ligne, sans essai gratuit fictif.
+    expect(back).toMatchObject({ isCustom: false, isTrial: false, status: "EXPIRED", blocked: true });
     expect(await isCustomPlan(organization.id)).toBe(false);
   });
 
