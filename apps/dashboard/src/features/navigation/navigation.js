@@ -6,7 +6,7 @@ import { maybeStartViewTour } from "../tour/tour.js";
 import { confirmDialog } from "../../ui/confirm.js";
 import { closeMenu } from "../../ui/menu.js";
 import { setPageTitle } from "../../ui/page-title.js";
-import { ADMIN_ONLY_VIEWS, isAgentRole } from "./roles.js";
+import { isViewForbidden } from "./roles.js";
 
 /**
  * Navigation entre les vues. Chaque vue a une adresse (« #/conversations », « #/commandes »…) : le bouton
@@ -23,6 +23,7 @@ export const VIEWS = {
   whatsapp: { slug: "whatsapp", title: "WhatsApp" },
   billing: { slug: "forfait", title: "Mon forfait" },
   settings: { slug: "parametres", title: "Paramètres" },
+  clients: { slug: "clients", title: "Clients" },
 };
 const VIEW_BY_SLUG = Object.fromEntries(Object.entries(VIEWS).map(([view, { slug }]) => [slug, view]));
 
@@ -83,7 +84,7 @@ function safeDecode(value) {
 /** Vue à afficher pour l'adresse en cours, en tenant compte du rôle (un employé n'ouvre pas les réglages). */
 export function routeView(fallback = "overview") {
   const { view } = readRoute();
-  if (!view || (isAgentRole() && ADMIN_ONLY_VIEWS.includes(view))) return fallback;
+  if (!view || isViewForbidden(view)) return fallback;
   return view;
 }
 
@@ -146,7 +147,7 @@ function showView(view, onViewShown, { fromHistory = false, replace = false, kee
 
 /** Un employé n'a accès qu'à l'accueil, aux conversations, aux commandes et aux rendez-vous (le serveur applique la même règle). */
 function isForbidden(view) {
-  return isAgentRole() && ADMIN_ONLY_VIEWS.includes(view);
+  return isViewForbidden(view);
 }
 
 /**

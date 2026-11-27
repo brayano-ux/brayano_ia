@@ -11,13 +11,32 @@ import { getPlatformAdminEmails } from "../organizations/platform-admins.js";
 import { EMPTY_USAGE, getAiResponseUsageByOrganization, getDailyAiResponses, sumUsage } from "../analytics/platform-usage.js";
 import { getLandingViewsSummary } from "../analytics/landing-views.service.js";
 import { getBillingPlan } from "../billing/billing-plans.js";
-import { getOrganizationBillingStatus } from "../billing/subscription.service.js";
+import { getOrganizationBillingStatus, removeCustomPlan, setCustomPlan } from "../billing/subscription.service.js";
+import { createCustomClient } from "../organizations/custom-clients.service.js";
+import { MAX_EMPLOYEES } from "../team/team.service.js";
 import { prisma } from "../database/client.js";
 import { NotFoundError, ValidationError } from "../shared/errors.js";
 import { getWhatsAppAccountStatus } from "../whatsapp/whatsapp.registry.js";
 import { requireAuth } from "./auth.route.js";
 
 const suspendSchema = z.object({ reason: z.string().trim().max(300).optional() });
+
+/** Réglages d'une formule sur mesure : limite mensuelle de messages et fonctions ouvertes. */
+const customPlanSchema = z.object({
+  messageLimit: z.number({ message: "Indiquez la limite de messages par mois." }).int("La limite doit être un nombre entier.").min(1, "La limite doit être d'au moins 1 message.").max(1_000_000, "Limite trop élevée."),
+  broadcasts: z.boolean().default(false),
+  followUps: z.boolean().default(false),
+  teamMembers: z.number().int().min(0).max(MAX_EMPLOYEES, `${MAX_EMPLOYEES} employés au maximum.`).default(0),
+});
+
+const newClientSchema = z.object({
+  companyName: z.string().trim().min(2, "Le nom de l'entreprise est requis.").max(120),
+  ownerName: z.string().trim().min(2, "Le nom du gérant est requis.").max(80),
+  email: z.string().trim().email("Adresse email invalide."),
+  password: z.string().min(8, "Le mot de passe provisoire doit faire au moins 8 caractères.").max(200),
+  whatsappNumber: z.string().trim().max(30).optional(),
+  plan: customPlanSchema,
+});
 
 function sha256(value: string) {
   return createHash("sha256").update(value).digest();
@@ -69,8 +88,8 @@ export async function adminRoute(app: FastifyInstance) {
         aiResponses: usageByOrganization.get(organization.id) ?? EMPTY_USAGE,
         // Forfait et messages utilisés (l'essai gratuit apparaît comme « Essai gratuit »).
         billing: billing && {
-          plan: billing.plan, planName: billing.planName, status: billing.status,
-          messagesUsed: billing.messagesUsed, messageLimit: billing.messageLimit, expiresAt: billing.expiresAt,
+          plan: billing.plan, planName: billing.planName, status: billing.status, isCustom: billing.isCustom,
+          messagesUsed: billing.messagesUsed, messageLimit: billing.messageLimit, expiresAt: billing.expiresAt, features: billing.features,
         },
         // État en direct du serveur (la base peut dater d'avant un redémarrage).
         whatsapp: {
@@ -125,10 +144,35 @@ export async function adminRoute(app: FastifyInstance) {
     await prisma.billingSubscription.upsert({
       where: { organizationId: orgId },
       create: { organizationId: orgId, plan: plan.key, messageLimit: plan.messages, messagesUsed: 0, periodStartedAt: now, status: "ACTIVE", startedAt: now, expiresAt },
-      update: { plan: plan.key, messageLimit: plan.messages, messagesUsed: 0, periodStartedAt: now, status: "ACTIVE", expiresAt },
+      update: { plan: plan.key, messageLimit: plan.messages, messagesUsed: 0, periodStartedAt: now, status: "ACTIVE", expiresAt, custom: false, expiringNoticeSentAt: null },
     });
     await prisma.organization.update({ where: { id: orgId }, data: { quotaNoticeAt: null } });
     return { organizationId: orgId, billing: await getOrganizationBillingStatus(orgId) };
+  });
+
+  // Client sur mesure : il paie Brayano Service en direct ; l'administrateur crée son compte et règle sa formule.
+  app.post("/admin/organizations", async (request) => {
+    const parsed = newClientSchema.safeParse(request.body ?? {});
+    if (!parsed.success) throw new ValidationError(parsed.error.issues[0]?.message);
+    return { client: await createCustomClient(parsed.data) };
+  });
+
+  // Passe une entreprise existante en formule sur mesure, ou modifie sa formule (limite et fonctions).
+  app.put("/admin/organizations/:orgId/custom-plan", async (request) => {
+    const { orgId } = request.params as { orgId: string };
+    const parsed = customPlanSchema.safeParse(request.body ?? {});
+    if (!parsed.success) throw new ValidationError(parsed.error.issues[0]?.message);
+    const organization = await prisma.organization.findUnique({ where: { id: orgId }, select: { id: true } });
+    if (!organization) throw new NotFoundError("Entreprise introuvable.");
+    return { organizationId: orgId, billing: await setCustomPlan(orgId, parsed.data) };
+  });
+
+  // Rend l'entreprise aux forfaits de l'application (elle devra choisir un forfait payant pour que l'assistant réponde).
+  app.delete("/admin/organizations/:orgId/custom-plan", async (request) => {
+    const { orgId } = request.params as { orgId: string };
+    const organization = await prisma.organization.findUnique({ where: { id: orgId }, select: { id: true } });
+    if (!organization) throw new NotFoundError("Entreprise introuvable.");
+    return { organizationId: orgId, billing: await removeCustomPlan(orgId) };
   });
 
   app.post("/admin/organizations/:orgId/suspend", async (request) => {

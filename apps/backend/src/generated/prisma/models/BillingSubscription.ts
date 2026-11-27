@@ -29,11 +29,13 @@ export type AggregateBillingSubscription = {
 export type BillingSubscriptionAvgAggregateOutputType = {
   messageLimit: number | null
   messagesUsed: number | null
+  customTeamMembers: number | null
 }
 
 export type BillingSubscriptionSumAggregateOutputType = {
   messageLimit: number | null
   messagesUsed: number | null
+  customTeamMembers: number | null
 }
 
 export type BillingSubscriptionMinAggregateOutputType = {
@@ -47,6 +49,10 @@ export type BillingSubscriptionMinAggregateOutputType = {
   startedAt: Date | null
   expiresAt: Date | null
   expiringNoticeSentAt: Date | null
+  custom: boolean | null
+  customBroadcasts: boolean | null
+  customFollowUps: boolean | null
+  customTeamMembers: number | null
   updatedAt: Date | null
 }
 
@@ -61,6 +67,10 @@ export type BillingSubscriptionMaxAggregateOutputType = {
   startedAt: Date | null
   expiresAt: Date | null
   expiringNoticeSentAt: Date | null
+  custom: boolean | null
+  customBroadcasts: boolean | null
+  customFollowUps: boolean | null
+  customTeamMembers: number | null
   updatedAt: Date | null
 }
 
@@ -75,6 +85,10 @@ export type BillingSubscriptionCountAggregateOutputType = {
   startedAt: number
   expiresAt: number
   expiringNoticeSentAt: number
+  custom: number
+  customBroadcasts: number
+  customFollowUps: number
+  customTeamMembers: number
   updatedAt: number
   _all: number
 }
@@ -83,11 +97,13 @@ export type BillingSubscriptionCountAggregateOutputType = {
 export type BillingSubscriptionAvgAggregateInputType = {
   messageLimit?: true
   messagesUsed?: true
+  customTeamMembers?: true
 }
 
 export type BillingSubscriptionSumAggregateInputType = {
   messageLimit?: true
   messagesUsed?: true
+  customTeamMembers?: true
 }
 
 export type BillingSubscriptionMinAggregateInputType = {
@@ -101,6 +117,10 @@ export type BillingSubscriptionMinAggregateInputType = {
   startedAt?: true
   expiresAt?: true
   expiringNoticeSentAt?: true
+  custom?: true
+  customBroadcasts?: true
+  customFollowUps?: true
+  customTeamMembers?: true
   updatedAt?: true
 }
 
@@ -115,6 +135,10 @@ export type BillingSubscriptionMaxAggregateInputType = {
   startedAt?: true
   expiresAt?: true
   expiringNoticeSentAt?: true
+  custom?: true
+  customBroadcasts?: true
+  customFollowUps?: true
+  customTeamMembers?: true
   updatedAt?: true
 }
 
@@ -129,6 +153,10 @@ export type BillingSubscriptionCountAggregateInputType = {
   startedAt?: true
   expiresAt?: true
   expiringNoticeSentAt?: true
+  custom?: true
+  customBroadcasts?: true
+  customFollowUps?: true
+  customTeamMembers?: true
   updatedAt?: true
   _all?: true
 }
@@ -230,6 +258,10 @@ export type BillingSubscriptionGroupByOutputType = {
   startedAt: Date
   expiresAt: Date
   expiringNoticeSentAt: Date | null
+  custom: boolean
+  customBroadcasts: boolean
+  customFollowUps: boolean
+  customTeamMembers: number
   updatedAt: Date
   _count: BillingSubscriptionCountAggregateOutputType | null
   _avg: BillingSubscriptionAvgAggregateOutputType | null
@@ -267,6 +299,10 @@ export type BillingSubscriptionWhereInput = {
   startedAt?: Prisma.DateTimeFilter<"BillingSubscription"> | Date | string
   expiresAt?: Prisma.DateTimeFilter<"BillingSubscription"> | Date | string
   expiringNoticeSentAt?: Prisma.DateTimeNullableFilter<"BillingSubscription"> | Date | string | null
+  custom?: Prisma.BoolFilter<"BillingSubscription"> | boolean
+  customBroadcasts?: Prisma.BoolFilter<"BillingSubscription"> | boolean
+  customFollowUps?: Prisma.BoolFilter<"BillingSubscription"> | boolean
+  customTeamMembers?: Prisma.IntFilter<"BillingSubscription"> | number
   updatedAt?: Prisma.DateTimeFilter<"BillingSubscription"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
 }
@@ -282,6 +318,10 @@ export type BillingSubscriptionOrderByWithRelationInput = {
   startedAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   expiringNoticeSentAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  custom?: Prisma.SortOrder
+  customBroadcasts?: Prisma.SortOrder
+  customFollowUps?: Prisma.SortOrder
+  customTeamMembers?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   organization?: Prisma.OrganizationOrderByWithRelationInput
 }
@@ -300,6 +340,10 @@ export type BillingSubscriptionWhereUniqueInput = Prisma.AtLeast<{
   startedAt?: Prisma.DateTimeFilter<"BillingSubscription"> | Date | string
   expiresAt?: Prisma.DateTimeFilter<"BillingSubscription"> | Date | string
   expiringNoticeSentAt?: Prisma.DateTimeNullableFilter<"BillingSubscription"> | Date | string | null
+  custom?: Prisma.BoolFilter<"BillingSubscription"> | boolean
+  customBroadcasts?: Prisma.BoolFilter<"BillingSubscription"> | boolean
+  customFollowUps?: Prisma.BoolFilter<"BillingSubscription"> | boolean
+  customTeamMembers?: Prisma.IntFilter<"BillingSubscription"> | number
   updatedAt?: Prisma.DateTimeFilter<"BillingSubscription"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
 }, "id" | "organizationId">
@@ -315,6 +359,10 @@ export type BillingSubscriptionOrderByWithAggregationInput = {
   startedAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   expiringNoticeSentAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  custom?: Prisma.SortOrder
+  customBroadcasts?: Prisma.SortOrder
+  customFollowUps?: Prisma.SortOrder
+  customTeamMembers?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.BillingSubscriptionCountOrderByAggregateInput
   _avg?: Prisma.BillingSubscriptionAvgOrderByAggregateInput
@@ -337,6 +385,10 @@ export type BillingSubscriptionScalarWhereWithAggregatesInput = {
   startedAt?: Prisma.DateTimeWithAggregatesFilter<"BillingSubscription"> | Date | string
   expiresAt?: Prisma.DateTimeWithAggregatesFilter<"BillingSubscription"> | Date | string
   expiringNoticeSentAt?: Prisma.DateTimeNullableWithAggregatesFilter<"BillingSubscription"> | Date | string | null
+  custom?: Prisma.BoolWithAggregatesFilter<"BillingSubscription"> | boolean
+  customBroadcasts?: Prisma.BoolWithAggregatesFilter<"BillingSubscription"> | boolean
+  customFollowUps?: Prisma.BoolWithAggregatesFilter<"BillingSubscription"> | boolean
+  customTeamMembers?: Prisma.IntWithAggregatesFilter<"BillingSubscription"> | number
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"BillingSubscription"> | Date | string
 }
 
@@ -350,6 +402,10 @@ export type BillingSubscriptionCreateInput = {
   startedAt?: Date | string
   expiresAt: Date | string
   expiringNoticeSentAt?: Date | string | null
+  custom?: boolean
+  customBroadcasts?: boolean
+  customFollowUps?: boolean
+  customTeamMembers?: number
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutBillingSubscriptionInput
 }
@@ -365,6 +421,10 @@ export type BillingSubscriptionUncheckedCreateInput = {
   startedAt?: Date | string
   expiresAt: Date | string
   expiringNoticeSentAt?: Date | string | null
+  custom?: boolean
+  customBroadcasts?: boolean
+  customFollowUps?: boolean
+  customTeamMembers?: number
   updatedAt?: Date | string
 }
 
@@ -378,6 +438,10 @@ export type BillingSubscriptionUpdateInput = {
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiringNoticeSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  custom?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  customBroadcasts?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  customFollowUps?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  customTeamMembers?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutBillingSubscriptionNestedInput
 }
@@ -393,6 +457,10 @@ export type BillingSubscriptionUncheckedUpdateInput = {
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiringNoticeSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  custom?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  customBroadcasts?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  customFollowUps?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  customTeamMembers?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -407,6 +475,10 @@ export type BillingSubscriptionCreateManyInput = {
   startedAt?: Date | string
   expiresAt: Date | string
   expiringNoticeSentAt?: Date | string | null
+  custom?: boolean
+  customBroadcasts?: boolean
+  customFollowUps?: boolean
+  customTeamMembers?: number
   updatedAt?: Date | string
 }
 
@@ -420,6 +492,10 @@ export type BillingSubscriptionUpdateManyMutationInput = {
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiringNoticeSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  custom?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  customBroadcasts?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  customFollowUps?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  customTeamMembers?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -434,6 +510,10 @@ export type BillingSubscriptionUncheckedUpdateManyInput = {
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiringNoticeSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  custom?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  customBroadcasts?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  customFollowUps?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  customTeamMembers?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -453,12 +533,17 @@ export type BillingSubscriptionCountOrderByAggregateInput = {
   startedAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   expiringNoticeSentAt?: Prisma.SortOrder
+  custom?: Prisma.SortOrder
+  customBroadcasts?: Prisma.SortOrder
+  customFollowUps?: Prisma.SortOrder
+  customTeamMembers?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type BillingSubscriptionAvgOrderByAggregateInput = {
   messageLimit?: Prisma.SortOrder
   messagesUsed?: Prisma.SortOrder
+  customTeamMembers?: Prisma.SortOrder
 }
 
 export type BillingSubscriptionMaxOrderByAggregateInput = {
@@ -472,6 +557,10 @@ export type BillingSubscriptionMaxOrderByAggregateInput = {
   startedAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   expiringNoticeSentAt?: Prisma.SortOrder
+  custom?: Prisma.SortOrder
+  customBroadcasts?: Prisma.SortOrder
+  customFollowUps?: Prisma.SortOrder
+  customTeamMembers?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
@@ -486,12 +575,17 @@ export type BillingSubscriptionMinOrderByAggregateInput = {
   startedAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   expiringNoticeSentAt?: Prisma.SortOrder
+  custom?: Prisma.SortOrder
+  customBroadcasts?: Prisma.SortOrder
+  customFollowUps?: Prisma.SortOrder
+  customTeamMembers?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type BillingSubscriptionSumOrderByAggregateInput = {
   messageLimit?: Prisma.SortOrder
   messagesUsed?: Prisma.SortOrder
+  customTeamMembers?: Prisma.SortOrder
 }
 
 export type BillingSubscriptionCreateNestedOneWithoutOrganizationInput = {
@@ -540,6 +634,10 @@ export type BillingSubscriptionCreateWithoutOrganizationInput = {
   startedAt?: Date | string
   expiresAt: Date | string
   expiringNoticeSentAt?: Date | string | null
+  custom?: boolean
+  customBroadcasts?: boolean
+  customFollowUps?: boolean
+  customTeamMembers?: number
   updatedAt?: Date | string
 }
 
@@ -553,6 +651,10 @@ export type BillingSubscriptionUncheckedCreateWithoutOrganizationInput = {
   startedAt?: Date | string
   expiresAt: Date | string
   expiringNoticeSentAt?: Date | string | null
+  custom?: boolean
+  customBroadcasts?: boolean
+  customFollowUps?: boolean
+  customTeamMembers?: number
   updatedAt?: Date | string
 }
 
@@ -582,6 +684,10 @@ export type BillingSubscriptionUpdateWithoutOrganizationInput = {
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiringNoticeSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  custom?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  customBroadcasts?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  customFollowUps?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  customTeamMembers?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -595,6 +701,10 @@ export type BillingSubscriptionUncheckedUpdateWithoutOrganizationInput = {
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiringNoticeSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  custom?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  customBroadcasts?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  customFollowUps?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  customTeamMembers?: Prisma.IntFieldUpdateOperationsInput | number
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -611,6 +721,10 @@ export type BillingSubscriptionSelect<ExtArgs extends runtime.Types.Extensions.I
   startedAt?: boolean
   expiresAt?: boolean
   expiringNoticeSentAt?: boolean
+  custom?: boolean
+  customBroadcasts?: boolean
+  customFollowUps?: boolean
+  customTeamMembers?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["billingSubscription"]>
@@ -626,6 +740,10 @@ export type BillingSubscriptionSelectCreateManyAndReturn<ExtArgs extends runtime
   startedAt?: boolean
   expiresAt?: boolean
   expiringNoticeSentAt?: boolean
+  custom?: boolean
+  customBroadcasts?: boolean
+  customFollowUps?: boolean
+  customTeamMembers?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["billingSubscription"]>
@@ -641,6 +759,10 @@ export type BillingSubscriptionSelectUpdateManyAndReturn<ExtArgs extends runtime
   startedAt?: boolean
   expiresAt?: boolean
   expiringNoticeSentAt?: boolean
+  custom?: boolean
+  customBroadcasts?: boolean
+  customFollowUps?: boolean
+  customTeamMembers?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["billingSubscription"]>
@@ -656,10 +778,14 @@ export type BillingSubscriptionSelectScalar = {
   startedAt?: boolean
   expiresAt?: boolean
   expiringNoticeSentAt?: boolean
+  custom?: boolean
+  customBroadcasts?: boolean
+  customFollowUps?: boolean
+  customTeamMembers?: boolean
   updatedAt?: boolean
 }
 
-export type BillingSubscriptionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "plan" | "messageLimit" | "messagesUsed" | "periodStartedAt" | "status" | "startedAt" | "expiresAt" | "expiringNoticeSentAt" | "updatedAt", ExtArgs["result"]["billingSubscription"]>
+export type BillingSubscriptionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "plan" | "messageLimit" | "messagesUsed" | "periodStartedAt" | "status" | "startedAt" | "expiresAt" | "expiringNoticeSentAt" | "custom" | "customBroadcasts" | "customFollowUps" | "customTeamMembers" | "updatedAt", ExtArgs["result"]["billingSubscription"]>
 export type BillingSubscriptionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
 }
@@ -689,6 +815,14 @@ export type $BillingSubscriptionPayload<ExtArgs extends runtime.Types.Extensions
      * * Email « votre abonnement se termine bientôt » déjà envoyé pour ce renouvellement (remis à zéro à chaque nouvelle échéance).
      */
     expiringNoticeSentAt: Date | null
+    /**
+     * Formule sur mesure : le client paie Brayano Service en direct, hors de l'application. Pas d'échéance ni d'email de
+     * paiement ; la limite mensuelle (messageLimit) et les fonctions ci-dessous sont réglées par l'administrateur de la plateforme.
+     */
+    custom: boolean
+    customBroadcasts: boolean
+    customFollowUps: boolean
+    customTeamMembers: number
     updatedAt: Date
   }, ExtArgs["result"]["billingSubscription"]>
   composites: {}
@@ -1124,6 +1258,10 @@ export interface BillingSubscriptionFieldRefs {
   readonly startedAt: Prisma.FieldRef<"BillingSubscription", 'DateTime'>
   readonly expiresAt: Prisma.FieldRef<"BillingSubscription", 'DateTime'>
   readonly expiringNoticeSentAt: Prisma.FieldRef<"BillingSubscription", 'DateTime'>
+  readonly custom: Prisma.FieldRef<"BillingSubscription", 'Boolean'>
+  readonly customBroadcasts: Prisma.FieldRef<"BillingSubscription", 'Boolean'>
+  readonly customFollowUps: Prisma.FieldRef<"BillingSubscription", 'Boolean'>
+  readonly customTeamMembers: Prisma.FieldRef<"BillingSubscription", 'Int'>
   readonly updatedAt: Prisma.FieldRef<"BillingSubscription", 'DateTime'>
 }
     

@@ -18,7 +18,7 @@ vi.mock("../database/client.js", () => ({
       update: vi.fn(async () => ({})),
       findFirst: vi.fn(),
     },
-    billingSubscription: { upsert: vi.fn(async () => ({})) },
+    billingSubscription: { upsert: vi.fn(async () => ({})), count: vi.fn(async () => 0) },
     $transaction: vi.fn(async (callback) => callback({
       billingPayment: { updateMany: transactionMock.paymentUpdateMany },
       billingSubscription: {
@@ -187,6 +187,23 @@ describe("chariow checkout route", () => {
   beforeEach(() => {
     fetchMock.mockReset();
     authMock.requireAuth.mockReset().mockResolvedValue({ email: "client@example.com", organizationId: "org-1", name: "Awa Fouda" });
+  });
+
+  it("refuse tout paiement en ligne à un client en formule sur mesure, sans appeler Chariow", async () => {
+    const app = Fastify();
+    const { billingRoute } = await import("./billing.route.js");
+    await app.register(billingRoute);
+    fetchMock.mockReset();
+    vi.stubGlobal("fetch", fetchMock);
+    prismaMock.billingSubscription.count.mockResolvedValueOnce(1).mockResolvedValueOnce(1);
+
+    for (const url of ["/billing/checkout/chariow", "/billing/create-checkout"]) {
+      const response = await app.inject({ method: "POST", url, payload: { plan: "starter", phone: "6 90 00 00 00" } });
+      expect(response.statusCode, url).toBe(409);
+      expect(JSON.parse(response.payload).message, url).toContain("formule sur mesure");
+    }
+    expect(fetchMock).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
   });
 
   it("démarre un paiement Chariow pour le forfait Essentiel avec la référence d'organisation en custom_metadata", async () => {

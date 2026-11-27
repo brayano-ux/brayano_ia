@@ -13,6 +13,8 @@ const mocks = vi.hoisted(() => ({
   subscriptionUpsert: vi.fn(),
 }));
 vi.mock("../config/env.js", () => ({ env: mocks.env }));
+const customNotice = vi.hoisted(() => vi.fn());
+vi.mock("../billing/subscription.service.js", () => ({ notifyCustomPlanPayment: customNotice }));
 vi.mock("../database/client.js", () => ({
   prisma: {
     chariowPulseDelivery: { create: mocks.deliveryCreate, findUnique: mocks.deliveryFindUnique, update: mocks.deliveryUpdate },
@@ -249,6 +251,27 @@ describe("POST /billing/chariow/pulse", () => {
         const call = mocks.subscriptionUpsert.mock.calls[0]![0];
         expect(call.update.expiresAt.getTime()).toBe(future.getTime() + 30 * 24 * 60 * 60 * 1000);
         expect(call.update.periodStartedAt).toBeUndefined();
+      } finally {
+        await app.close();
+      }
+    });
+
+    it("client sur mesure : le paiement est enregistré, sa formule n'est pas remplacée, l'administrateur est prévenu", async () => {
+      const body = successfulSaleBody();
+      mocks.deliveryCreate.mockResolvedValue({ id: "row-sale", processedAt: null });
+      mocks.orgFindUnique.mockResolvedValue({ id: "org-1" });
+      mocks.paymentCreate.mockResolvedValue({ id: "pay-1" });
+      mocks.subscriptionFindUnique.mockResolvedValue({ status: "ACTIVE", custom: true, expiresAt: new Date("9999-12-31T00:00:00.000Z") });
+      mocks.subscriptionUpsert.mockReset();
+      customNotice.mockReset();
+
+      const app = await createApp();
+      try {
+        const response = await post(app, body, { "x-chariow-signature": sign(body), ...SALE_HEADERS });
+        expect(response.statusCode).toBe(200);
+        expect(mocks.paymentCreate).toHaveBeenCalled();
+        expect(mocks.subscriptionUpsert).not.toHaveBeenCalled();
+        expect(customNotice).toHaveBeenCalledWith("org-1", "Essentiel");
       } finally {
         await app.close();
       }

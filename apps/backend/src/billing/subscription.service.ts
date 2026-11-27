@@ -1,6 +1,6 @@
 import { env } from "../config/env.js";
 import { prisma } from "../database/client.js";
-import { notifyOrganizationAdmins, buildQuotaReachedEmail, buildTrialLowCreditsEmail, buildSubscriptionExpiringEmail } from "../notifications/owner-notifications.js";
+import { notifyOrganizationAdmins, notifyPlatformAdmins, buildQuotaReachedEmail, buildTrialLowCreditsEmail, buildSubscriptionExpiringEmail, buildCustomQuotaReachedEmail, buildCustomQuotaReachedPlatformEmail } from "../notifications/owner-notifications.js";
 import { PlanLimitError } from "../shared/errors.js";
 import { BILLING_PLANS, TRIAL, cheapestPlanWith, getBillingPlan, type BillingPlan, type PlanFeatures } from "./billing-plans.js";
 
@@ -14,6 +14,11 @@ const SUBSCRIPTION_EXPIRING_WINDOW_DAYS = 3;
 const NO_FEATURES: PlanFeatures = { broadcasts: false, followUps: false, teamMembers: 0 };
 /** Quand les forfaits ne sont pas appliqués : tout est ouvert (limité seulement par MAX_TEAM_MEMBERS dans team.service). */
 const ALL_FEATURES: PlanFeatures = { broadcasts: true, followUps: true, teamMembers: Number.MAX_SAFE_INTEGER };
+
+/** Formule sur mesure : pas d'échéance. Une date très lointaine garde les requêtes existantes (« expiresAt > maintenant ») valables. */
+export const CUSTOM_PLAN_EXPIRES_AT = new Date("9999-12-31T00:00:00.000Z");
+export const CUSTOM_PLAN_KEY = "custom";
+export const CUSTOM_PLAN_NAME = "Sur mesure";
 
 /**
  * Les forfaits ne coupent personne tant que BILLING_ENFORCED n'est pas « true » : l'assistant répond comme avant, mais les
@@ -60,11 +65,22 @@ export async function reserveAiResponse(organizationId: string): Promise<AiRespo
     }
 
     // Un seul UPDATE conditionnel : jamais de dépassement, même avec 50 messages qui arrivent en même temps.
-    const consumed = await prisma.billingSubscription.updateMany({
-      where: { id: current.id, status: "ACTIVE", expiresAt: { gt: now }, periodStartedAt: current.periodStartedAt, messagesUsed: { lt: current.messageLimit } },
-      data: { messagesUsed: { increment: 1 } },
-    });
-    if (consumed.count === 0) return denyOrAllow(current.messagesUsed >= current.messageLimit ? "message_quota_exhausted" : "subscription_expired");
+    // Si la formule a été modifiée entre la lecture et l'écriture (passage en sur mesure, limite changée), on relit une fois.
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      const consumed = await prisma.billingSubscription.updateMany({
+        where: { id: current.id, status: "ACTIVE", expiresAt: { gt: now }, periodStartedAt: current.periodStartedAt, messagesUsed: { lt: current.messageLimit } },
+        data: { messagesUsed: { increment: 1 } },
+      });
+      if (consumed.count > 0) break;
+      const fresh = await prisma.billingSubscription.findUnique({ where: { organizationId } });
+      const changed = fresh && (fresh.periodStartedAt.getTime() !== current.periodStartedAt.getTime() || fresh.messageLimit !== current.messageLimit || fresh.status !== current.status);
+      if (!fresh || attempt === 1 || !changed) {
+        const latest = fresh ?? current;
+        return denyOrAllow(latest.messagesUsed >= latest.messageLimit ? "message_quota_exhausted" : "subscription_expired");
+      }
+      current = fresh;
+      if (current.status !== "ACTIVE" || current.expiresAt <= now) return denyOrAllow("subscription_expired");
+    }
     return { allowed: true, source: "subscription", remaining: Math.max(0, current.messageLimit - current.messagesUsed - 1), periodStartedAt: current.periodStartedAt };
   }
 
@@ -99,11 +115,21 @@ export async function releaseAiResponse(organizationId: string, reservation: Ext
  */
 export async function notifyQuotaReached(organizationId: string, reason: DenyReason, now = new Date()) {
   try {
+    const custom = await prisma.billingSubscription.findFirst({ where: { organizationId, custom: true }, select: { messageLimit: true, messagesUsed: true, periodStartedAt: true } });
+    // Formule sur mesure : un avis par période, et seulement si la limite est vraiment atteinte.
+    if (custom && custom.messagesUsed < custom.messageLimit) return false;
     const claimed = await prisma.organization.updateMany({
-      where: { id: organizationId, OR: [{ quotaNoticeAt: null }, { quotaNoticeAt: { lt: new Date(now.getTime() - QUOTA_NOTICE_EVERY_MS) } }] },
+      where: custom
+        ? { id: organizationId, OR: [{ quotaNoticeAt: null }, { quotaNoticeAt: { lt: custom.periodStartedAt } }] }
+        : { id: organizationId, OR: [{ quotaNoticeAt: null }, { quotaNoticeAt: { lt: new Date(now.getTime() - QUOTA_NOTICE_EVERY_MS) } }] },
       data: { quotaNoticeAt: now },
     });
     if (claimed.count === 0) return false;
+    if (custom) {
+      void notifyOrganizationAdmins(organizationId, (organizationName) => buildCustomQuotaReachedEmail({ organizationName }));
+      void notifyPlatformAdmins(organizationId, (organizationName) => buildCustomQuotaReachedPlatformEmail({ organizationName, messageLimit: custom.messageLimit }));
+      return true;
+    }
     void notifyOrganizationAdmins(organizationId, (organizationName) => buildQuotaReachedEmail({ organizationName, reason }));
     return true;
   } catch (error) {
@@ -141,7 +167,7 @@ export async function checkExpiringSubscriptions(now = new Date()): Promise<numb
   try {
     const windowEnd = new Date(now.getTime() + SUBSCRIPTION_EXPIRING_WINDOW_DAYS * 24 * 60 * 60 * 1000);
     const expiringSoon = await prisma.billingSubscription.findMany({
-      where: { status: "ACTIVE", expiresAt: { gt: now, lte: windowEnd }, expiringNoticeSentAt: null },
+      where: { status: "ACTIVE", custom: false, expiresAt: { gt: now, lte: windowEnd }, expiringNoticeSentAt: null },
       select: { id: true, organizationId: true, plan: true, expiresAt: true },
     });
     for (const subscription of expiringSoon) {
@@ -170,6 +196,8 @@ export interface OrganizationBillingStatus {
   planName: string;
   status: "ACTIVE" | "EXPIRED";
   isTrial: boolean;
+  /** Formule sur mesure : payée en direct à Brayano Service, réglée par l'administrateur de la plateforme. */
+  isCustom: boolean;
   /** Les forfaits sont-ils appliqués sur ce serveur ? Sinon rien n'est coupé. */
   enforced: boolean;
   /** L'assistant ne répond plus (uniquement quand les forfaits sont appliqués). */
@@ -197,10 +225,39 @@ function planOrNull(key: string): BillingPlan | null {
 export async function getOrganizationBillingStatus(organizationId: string): Promise<OrganizationBillingStatus> {
   const [subscription, organization] = await Promise.all([
     prisma.billingSubscription.findUnique({ where: { organizationId } }),
-    prisma.organization.findUnique({ where: { id: organizationId }, select: { freeAiResponsesRemaining: true } }),
+    prisma.organization.findUnique({ where: { id: organizationId }, select: { freeAiResponsesRemaining: true, platformSuspended: true } }),
   ]);
   const now = new Date();
   const enforced = state.enforced;
+
+  if (subscription?.custom) {
+    // Suspendre l'entreprise est la façon d'arrêter une formule sur mesure : elle apparaît alors « en pause ».
+    const active = subscription.status === "ACTIVE" && !organization?.platformSuspended;
+    const periodOver = now.getTime() - subscription.periodStartedAt.getTime() >= BILLING_PERIOD_MS;
+    const used = periodOver ? 0 : subscription.messagesUsed;
+    const remaining = Math.max(0, subscription.messageLimit - used);
+    return {
+      plan: CUSTOM_PLAN_KEY,
+      planName: CUSTOM_PLAN_NAME,
+      status: active ? "ACTIVE" : "EXPIRED",
+      isTrial: false,
+      isCustom: true,
+      enforced,
+      blocked: enforced && (!active || remaining <= 0),
+      messageLimit: subscription.messageLimit,
+      messagesUsed: used,
+      remainingMessages: remaining,
+      periodStartedAt: subscription.periodStartedAt,
+      expiresAt: null,
+      amount: null,
+      features: active
+        ? { broadcasts: subscription.customBroadcasts, followUps: subscription.customFollowUps, teamMembers: subscription.customTeamMembers }
+        : NO_FEATURES,
+      activeWhatsAppChannels: 1,
+      assistants: 1,
+      responsibleLimit: null,
+    };
+  }
 
   if (subscription) {
     const plan = planOrNull(subscription.plan);
@@ -213,6 +270,7 @@ export async function getOrganizationBillingStatus(organizationId: string): Prom
       planName: plan?.name ?? subscription.plan,
       status: active ? "ACTIVE" : "EXPIRED",
       isTrial: false,
+      isCustom: false,
       enforced,
       blocked: enforced && (!active || remaining <= 0),
       messageLimit: subscription.messageLimit,
@@ -234,6 +292,7 @@ export async function getOrganizationBillingStatus(organizationId: string): Prom
     planName: "Essai gratuit",
     status: remaining > 0 ? "ACTIVE" : "EXPIRED",
     isTrial: true,
+    isCustom: false,
     enforced,
     blocked: enforced && remaining <= 0,
     messageLimit: TRIAL.messages,
@@ -259,6 +318,9 @@ export async function getOrganizationFeatures(organizationId: string): Promise<P
 export async function assertFeature(organizationId: string, feature: "broadcasts" | "followUps") {
   const features = await getOrganizationFeatures(organizationId);
   if (features[feature]) return;
+  if (await isCustomPlan(organizationId)) {
+    throw new PlanLimitError(`${feature === "broadcasts" ? "Les messages en masse ne sont pas inclus" : "Les relances automatiques ne sont pas incluses"} dans votre formule sur mesure. Pour les ajouter, contactez Brayano Service.`);
+  }
   const required = cheapestPlanWith(feature);
   const text = feature === "broadcasts"
     ? "Les messages en masse ne sont pas inclus dans votre forfait actuel. Ils sont"
@@ -270,10 +332,95 @@ export async function assertFeature(organizationId: string, feature: "broadcasts
 export async function assertCanAddTeamMember(organizationId: string, currentEmployees: number) {
   const { teamMembers } = await getOrganizationFeatures(organizationId);
   if (currentEmployees < teamMembers) return;
+  if (await isCustomPlan(organizationId)) {
+    throw new PlanLimitError(
+      teamMembers === 0
+        ? "Les employés ne sont pas inclus dans votre formule sur mesure. Pour en ajouter, contactez Brayano Service."
+        : `Votre formule sur mesure permet ${teamMembers} employé${teamMembers > 1 ? "s" : ""}. Pour en ajouter, contactez Brayano Service.`,
+    );
+  }
   const next = Object.values(BILLING_PLANS).sort((a, b) => a.amount - b.amount).find((plan) => plan.features.teamMembers > currentEmployees);
   throw new PlanLimitError(
     teamMembers === 0
       ? `Les employés ne sont pas inclus dans votre forfait actuel.${next ? ` Ils sont disponibles à partir du forfait ${next.name} (page « Mon forfait »).` : ""}`
       : `Votre forfait permet ${teamMembers} employé${teamMembers > 1 ? "s" : ""}.${next ? ` Passez au forfait ${next.name} pour en ajouter.` : ""}`,
   );
+}
+
+/** L'entreprise a-t-elle une formule sur mesure (payée en direct, hors de l'application) ? */
+export async function isCustomPlan(organizationId: string): Promise<boolean> {
+  return (await prisma.billingSubscription.count({ where: { organizationId, custom: true } })) > 0;
+}
+
+export interface CustomPlanSettings {
+  /** Messages de l'assistant par période de 30 jours. */
+  messageLimit: number;
+  broadcasts: boolean;
+  followUps: boolean;
+  teamMembers: number;
+}
+
+/**
+ * Passe une entreprise en formule sur mesure, ou modifie sa formule. Le compteur de messages de la période en cours est
+ * conservé (changer la limite ne remet pas le compteur à zéro), sauf au passage depuis un forfait ou l'essai.
+ */
+/** Données d'une formule sur mesure (utilisées aussi à la création d'un client, dans sa transaction). */
+export function customPlanData(settings: CustomPlanSettings) {
+  return {
+    plan: CUSTOM_PLAN_KEY,
+    custom: true,
+    messageLimit: settings.messageLimit,
+    customBroadcasts: settings.broadcasts,
+    customFollowUps: settings.followUps,
+    customTeamMembers: settings.teamMembers,
+    status: "ACTIVE" as const,
+    expiresAt: CUSTOM_PLAN_EXPIRES_AT,
+    expiringNoticeSentAt: null,
+  };
+}
+
+export async function setCustomPlan(organizationId: string, settings: CustomPlanSettings, now = new Date()) {
+  const data = {
+    plan: CUSTOM_PLAN_KEY,
+    custom: true,
+    messageLimit: settings.messageLimit,
+    customBroadcasts: settings.broadcasts,
+    customFollowUps: settings.followUps,
+    customTeamMembers: settings.teamMembers,
+    status: "ACTIVE" as const,
+    expiresAt: CUSTOM_PLAN_EXPIRES_AT,
+    expiringNoticeSentAt: null,
+  };
+  const existing = await prisma.billingSubscription.findUnique({ where: { organizationId }, select: { custom: true } });
+  await prisma.billingSubscription.upsert({
+    where: { organizationId },
+    create: { organizationId, ...data, messagesUsed: 0, periodStartedAt: now, startedAt: now },
+    update: existing?.custom ? data : { ...data, messagesUsed: 0, periodStartedAt: now },
+  });
+  // Une limite relevée doit réveiller l'assistant tout de suite : l'avis « limite atteinte » pourra repartir plus tard.
+  await prisma.organization.update({ where: { id: organizationId }, data: { quotaNoticeAt: null } });
+  return getOrganizationBillingStatus(organizationId);
+}
+
+/**
+ * Rend l'entreprise aux forfaits de l'application : sa formule devient un forfait terminé (ni essai gratuit rendu, ni
+ * message offert). L'assistant ne répond plus tant qu'elle n'a pas payé un forfait depuis « Mon forfait ».
+ */
+export async function removeCustomPlan(organizationId: string, now = new Date()) {
+  await prisma.billingSubscription.updateMany({
+    where: { organizationId, custom: true },
+    data: {
+      custom: false, plan: BILLING_PLANS.starter.key, messageLimit: BILLING_PLANS.starter.messages, status: "INACTIVE", expiresAt: now,
+      customBroadcasts: false, customFollowUps: false, customTeamMembers: 0, expiringNoticeSentAt: now,
+    },
+  });
+  return getOrganizationBillingStatus(organizationId);
+}
+
+/** Un paiement en ligne a abouti pour un client sur mesure (commencé avant son passage) : l'administrateur décide quoi en faire. */
+export function notifyCustomPlanPayment(organizationId: string, planName: string) {
+  void notifyPlatformAdmins(organizationId, (organizationName) => ({
+    subject: `Paiement en ligne reçu pour un client sur mesure : ${organizationName}`,
+    text: `Bonjour,\n\n${organizationName} a payé en ligne le forfait ${planName}, alors qu'il a une formule sur mesure. Le paiement est enregistré, mais sa formule sur mesure n'a pas été modifiée.\n\nÀ vous de voir avec lui : remboursement, ou retour aux forfaits depuis le menu « Clients ».\n\nBrayano IA`,
+  }));
 }

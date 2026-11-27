@@ -1,4 +1,5 @@
 import type { FastifyInstance } from "fastify";
+import { notifyCustomPlanPayment } from "../billing/subscription.service.js";
 import { randomUUID } from "node:crypto";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { getBillingPlanByChariowProductId } from "../billing/billing-plans.js";
@@ -97,6 +98,12 @@ async function activateSubscriptionFromSuccessfulSale(payload: unknown, log: Min
 
   const now = new Date();
   const currentSubscription = await prisma.billingSubscription.findUnique({ where: { organizationId } });
+  if (currentSubscription?.custom) {
+    // Paiement commencé avant le passage en sur mesure : enregistré, mais la formule sur mesure reste en place.
+    log.warn({ saleId, organizationId }, "Paiement Chariow reçu pour un client sur mesure : formule conservée, administrateur prévenu.");
+    notifyCustomPlanPayment(organizationId, plan.name);
+    return;
+  }
   const isEarlyRenewal = Boolean(currentSubscription) && currentSubscription!.status === "ACTIVE" && currentSubscription!.expiresAt > now;
   const startsFrom = isEarlyRenewal ? currentSubscription!.expiresAt : now;
   const expiresAt = new Date(startsFrom.getTime() + 30 * 24 * 60 * 60 * 1000);
