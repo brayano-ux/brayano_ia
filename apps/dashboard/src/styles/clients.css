@@ -1,0 +1,28 @@
+/* ============================================================
+   Clients (administration de la plateforme)
+   ============================================================ */
+.clients-toolbar { margin-bottom: var(--space-4); }
+.clients-list { display: grid; gap: var(--space-3); grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr)); }
+.client-card { display: grid; gap: var(--space-3); padding: var(--space-4); }
+.client-card.is-suspended { border-color: var(--danger-border); }
+.client-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
+.client-card-name { min-width: 0; }
+.client-card-name h3 { font-size: var(--text-md, 1rem); font-weight: 650; overflow-wrap: anywhere; }
+.client-card-name .muted { font-size: var(--text-sm); overflow-wrap: anywhere; }
+.client-card-badges { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; flex: none; }
+.client-card-usage { display: grid; gap: 6px; }
+.client-card-usage .muted { display: flex; justify-content: space-between; gap: var(--space-2); flex-wrap: wrap; font-size: var(--text-sm); }
+.client-card-foot { display: flex; justify-content: space-between; gap: var(--space-2); flex-wrap: wrap; font-size: var(--text-sm); }
+.client-card-wa { display: inline-flex; align-items: center; gap: 6px; color: var(--text-3); }
+.client-card-wa.is-on { color: var(--success); }
+.client-card-actions { display: flex; gap: var(--space-2); flex-wrap: wrap; padding-top: var(--space-3); border-top: 1px solid var(--border-soft); }
+.form-section-title { font-size: var(--text-xs, .75rem); font-weight: 650; text-transform: uppercase; letter-spacing: .06em; color: var(--text-3); margin-top: var(--space-2); }
+.form-section-title:first-child { margin-top: 0; }
+.input-with-action { display: flex; gap: var(--space-2); }
+.input-with-action input { flex: 1 1 auto; min-width: 0; font-family: var(--font-mono, ui-monospace, monospace); }
+.client-plan-remove { display: grid; gap: var(--space-2); justify-items: start; padding-top: var(--space-4); border-top: 1px solid var(--border-soft); }
+.client-credentials { display: grid; gap: var(--space-2); margin-top: var(--space-4); padding: var(--space-4); border: 1px solid var(--border); border-radius: var(--radius-md, 12px); background: var(--surface-2, var(--surface)); }
+.client-credentials p { display: grid; gap: 2px; }
+.client-credentials b { font-family: var(--font-mono, ui-monospace, monospace); font-weight: 600; overflow-wrap: anywhere; }
+.client-created-actions { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-4); }
+#clients-view .drawer-body .switch { padding-block: 6px; }

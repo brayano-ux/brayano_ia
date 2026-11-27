@@ -1,6 +1,7 @@
 import { env } from "../config/env.js";
 import { prisma } from "../database/client.js";
 import { isEmailConfigured, sendEmail } from "./email.service.js";
+import { getPlatformAdminEmails } from "../organizations/platform-admins.js";
 
 export interface ProspectInfo {
   name?: string | null | undefined;
@@ -192,6 +193,45 @@ export function buildSubscriptionExpiringEmail(input: { organizationName: string
  * Envoie un email à tous les administrateurs de l'entreprise.
  * Ne lève jamais : une notification ne doit jamais perturber la conversation WhatsApp.
  */
+/** La limite mensuelle d'une formule sur mesure est atteinte : le client est invité à contacter Brayano Service, pas à payer en ligne. */
+export function buildCustomQuotaReachedEmail(input: { organizationName: string }) {
+  return {
+    subject: "⚠️ Limite mensuelle atteinte : l'assistant ne répond plus pour le moment",
+    text: `Bonjour,\n\nL'assistant de ${input.organizationName} a utilisé tous les messages prévus ce mois-ci dans votre formule sur mesure. Il ne répond donc plus automatiquement à vos clients jusqu'au début de la prochaine période.\n\nVos clients peuvent toujours vous écrire et vous pouvez leur répondre vous-même, depuis votre téléphone ou depuis votre tableau de bord.\n\nPour relever votre limite, contactez Brayano Service sur WhatsApp au +237 683 26 05 20.\n\nL'équipe Brayano IA`,
+  };
+}
+
+/** Pour l'administrateur de la plateforme : un client sur mesure a atteint sa limite. */
+export function buildCustomQuotaReachedPlatformEmail(input: { organizationName: string; messageLimit: number }) {
+  return {
+    subject: `Client sur mesure : ${input.organizationName} a atteint sa limite`,
+    text: `Bonjour,\n\n${input.organizationName} a utilisé ses ${input.messageLimit} messages de l'assistant pour la période en cours : l'assistant ne lui répond plus jusqu'à la prochaine période.\n\nPour relever sa limite : tableau de bord, menu « Clients ».\n\nBrayano IA`,
+  };
+}
+
+/** Envoie un email aux administrateurs de la plateforme (PLATFORM_ADMIN_EMAILS). Ne lève jamais. */
+export async function notifyPlatformAdmins(
+  organizationId: string,
+  build: (organizationName: string) => { subject: string; text: string },
+): Promise<void> {
+  try {
+    const recipients = getPlatformAdminEmails();
+    if (!isEmailConfigured() || recipients.length === 0) return;
+    const organization = await prisma.organization.findUnique({ where: { id: organizationId }, select: { name: true } });
+    if (!organization) return;
+    const { subject, text } = build(organization.name);
+    for (const to of recipients) {
+      try {
+        await sendEmail({ to, subject, text });
+      } catch (error) {
+        console.error(`[org:${organizationId}] Avis administrateur refusé par le serveur SMTP :`, error);
+      }
+    }
+  } catch (error) {
+    console.error(`[org:${organizationId}] Avis administrateur ignoré :`, error);
+  }
+}
+
 export async function notifyOrganizationAdmins(
   organizationId: string,
   build: (organizationName: string) => { subject: string; text: string },

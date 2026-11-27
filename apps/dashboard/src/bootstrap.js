@@ -19,6 +19,7 @@ const templatePaths = [
   "./templates/views/whatsapp.html",
   "./templates/views/billing.html",
   "./templates/views/settings.html",
+  "./templates/views/clients.html",
 ];
 
 async function loadTemplate(path) {

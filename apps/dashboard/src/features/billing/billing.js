@@ -14,6 +14,8 @@ import { lockScroll, trapFocus, unlockScroll } from "../../ui/overlay.js";
  */
 
 const POLL_MS = 4000;
+/** Contact de Brayano Service : un client sur mesure modifie sa formule en écrivant, pas en payant en ligne. */
+const CONTACT_URL = "https://wa.me/237683260520?text=" + encodeURIComponent("Bonjour, je souhaite modifier ma formule sur mesure Brayano IA.");
 const POLL_MAX_MS = 3 * 60_000;
 const CACHE_MS = 20_000;
 
@@ -49,14 +51,14 @@ function renderSidebarPlan(status) {
   }
   const percent = status.messageLimit ? Math.min(100, Math.round((status.messagesUsed / status.messageLimit) * 100)) : 0;
   const low = status.blocked || percent >= 80;
-  $("#sidebar-plan-name").textContent = status.isTrial ? "Essai gratuit" : `Forfait ${status.planName}`;
+  $("#sidebar-plan-name").textContent = status.isCustom ? "Formule sur mesure" : status.isTrial ? "Essai gratuit" : `Forfait ${status.planName}`;
   $("#sidebar-plan-badge").classList.toggle("hidden", !status.blocked);
   $("#sidebar-plan-badge").className = `badge danger${status.blocked ? "" : " hidden"}`;
   $("#sidebar-plan-badge").textContent = "Épuisé";
   $("#sidebar-plan-bar").style.width = `${percent}%`;
   $("#sidebar-plan-bar").parentElement.className = `progress${status.blocked ? " danger" : percent >= 80 ? " warning" : ""}`;
   $("#sidebar-plan-usage").textContent = `${count(status.messagesUsed)} / ${count(status.messageLimit)} messages`;
-  $("#sidebar-plan-cta").classList.toggle("hidden", !low);
+  $("#sidebar-plan-cta").classList.toggle("hidden", !low || status.isCustom);
   card.classList.remove("hidden");
 }
 
@@ -69,6 +71,17 @@ export async function refreshBillingBanner() {
   if (!status || !status.enforced || (!status.blocked && !low)) {
     banner.classList.add("hidden");
     banner.textContent = "";
+    return;
+  }
+  if (status.isCustom) {
+    // Formule sur mesure : pas de forfait à acheter. Le client contacte Brayano Service pour relever sa limite.
+    const customText = status.blocked
+      ? (status.status === "EXPIRED"
+        ? "Votre formule sur mesure est en pause : l'agent ne répond plus à vos clients. Contactez Brayano Service."
+        : "Vous avez utilisé tous les messages prévus ce mois-ci : l'agent ne répond plus à vos clients jusqu'au mois prochain. Contactez Brayano Service pour relever votre limite.")
+      : `Il vous reste ${count(status.remainingMessages)} messages de l'agent sur ${count(status.messageLimit)} ce mois-ci.`;
+    banner.className = `app-banner ${status.blocked ? "danger is-blocked" : "warning"}`;
+    banner.innerHTML = `${icon(status.blocked ? "alert" : "info")}<span class="banner-text">${escapeHtml(customText)}</span><a class="btn btn-sm btn-secondary" href="${CONTACT_URL}" target="_blank" rel="noopener">Contacter Brayano Service</a>`;
     return;
   }
   const noun = status.isTrial ? "messages d'essai" : "messages de l'agent";
@@ -86,7 +99,46 @@ export async function refreshBillingBanner() {
 
 /* --------------------------------------------------------------- page */
 
+const FEATURE_LINES = (features) => [
+  { on: true, text: "Réponses automatiques 24h/24, produits, photos, commandes et rendez-vous" },
+  { on: features.broadcasts, text: "Messages groupés" },
+  { on: features.followUps, text: "Relances automatiques des clients" },
+  { on: features.teamMembers > 0, text: features.teamMembers > 0 ? `${features.teamMembers} employé${features.teamMembers > 1 ? "s" : ""} dans la même boîte` : "Employés" },
+];
+
+function customStatusMarkup(status) {
+  const used = status.messagesUsed;
+  const percent = status.messageLimit ? Math.min(100, Math.round((used / status.messageLimit) * 100)) : 0;
+  const tone = status.blocked ? "danger" : percent >= 80 ? "warning" : "";
+  const paused = status.status === "EXPIRED";
+  const badge = paused ? '<span class="badge warning">En pause</span>' : '<span class="badge success">Active</span>';
+  const alert = status.blocked
+    ? `<div class="alert danger billing-alert">${icon("alert")}<div class="alert-body"><p class="alert-title">L'agent ne répond plus à vos clients</p><p>${paused ? "Votre formule est en pause." : "Tous les messages prévus ce mois-ci sont utilisés ; le compteur repart à zéro au début de la prochaine période."} Contactez Brayano Service pour ${paused ? "la réactiver" : "relever votre limite"}. Vous pouvez toujours répondre vous-même dans « Conversations ».</p></div></div>`
+    : "";
+  const lines = FEATURE_LINES(status.features).map((line) => `<li class="${line.on ? "" : "is-off"}">${icon(line.on ? "check" : "close", "icon-sm")}<span>${escapeHtml(line.text)}${line.on ? "" : " (non incluse)"}</span></li>`).join("");
+  return `
+    <div class="billing-status-main">
+      <div class="billing-status-plan">
+        <p class="eyebrow">Votre formule</p>
+        <h2>Formule sur mesure ${badge}</h2>
+        <p class="muted">${icon("shield", "icon-sm")} Gérée directement par Brayano Service : rien à payer dans l'application.</p>
+      </div>
+      <div class="billing-count"><strong>${count(status.remainingMessages)}</strong><span>message${status.remainingMessages > 1 ? "s" : ""} restant${status.remainingMessages > 1 ? "s" : ""}</span></div>
+    </div>
+    <div class="billing-usage">
+      <div class="progress progress-lg ${tone}" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percent}" aria-label="Messages utilisés"><span style="width:${percent}%"></span></div>
+      <p class="billing-meter-label"><span>${count(used)} utilisé${used > 1 ? "s" : ""} sur ${count(status.messageLimit)} ce mois-ci</span><b>${percent}&nbsp;%</b></p>
+    </div>
+    <ul class="billing-custom-features">${lines}</ul>
+    ${alert}
+    <div class="billing-custom-contact">
+      <p class="muted">Pour changer votre limite de messages ou ajouter une fonction, écrivez à Brayano Service.</p>
+      <a class="btn btn-secondary" href="${CONTACT_URL}" target="_blank" rel="noopener">${icon("whatsapp", "icon-sm")}Contacter Brayano Service</a>
+    </div>`;
+}
+
 function statusMarkup(status) {
+  if (status.isCustom) return customStatusMarkup(status);
   const used = status.messagesUsed;
   const percent = status.messageLimit ? Math.min(100, Math.round((used / status.messageLimit) * 100)) : 0;
   const tone = status.blocked ? "danger" : percent >= 80 ? "warning" : "";
@@ -136,8 +188,14 @@ export async function loadBilling() {
   const statusBox = $("#billing-status");
   renderSidebarPlan(status);
   statusBox.innerHTML = status ? statusMarkup(status) : `<div class="empty"><span class="empty-icon">${icon("alert")}</span><p class="empty-title">Forfait indisponible</p><p class="empty-text">Impossible de charger votre forfait pour le moment. Réessayez dans un instant.</p></div>`;
+  // Un client sur mesure ne choisit pas de forfait : la grille des forfaits et la mention du paiement en ligne disparaissent.
+  const custom = Boolean(status?.isCustom);
+  $(".billing-plans-section")?.classList.toggle("hidden", custom);
+  $("#billing-view .page-subtitle").textContent = custom
+    ? "Suivez la consommation de votre formule sur mesure, gérée directement par Brayano Service."
+    : "Suivez votre consommation et choisissez le forfait qui correspond à votre activité. Le paiement se fait en ligne, en toute sécurité.";
   const grid = $("#billing-plans");
-  grid.innerHTML = plansData ? plansData.plans.map((plan) => planCardMarkup(plan, status)).join("") : "";
+  grid.innerHTML = plansData && !custom ? plansData.plans.map((plan) => planCardMarkup(plan, status)).join("") : "";
   $$("[data-choose]", grid).forEach((button) => {
     button.onclick = () => openPayment(button.dataset.choose);
   });
@@ -173,7 +231,7 @@ async function prefillPaymentPhone() {
 
 function openPayment(planKey) {
   const plan = plansData?.plans.find((entry) => entry.key === planKey);
-  if (!plan) return;
+  if (!plan || statusCache.value?.isCustom) return;
   paying = { plan };
   populateCountrySelect($("#billing-pay-country"));
   void prefillPaymentPhone();

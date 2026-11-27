@@ -448,6 +448,51 @@ describe.skipIf(!integrationEnabled)("API complète (HTTP, base réelle)", () =>
       expect(list.json().organizations[0].billing).toMatchObject({ plan: "pro", messagesUsed: 0, messageLimit: 5000 });
       expect((await app.inject({ method: "GET", url: "/billing/account", headers: authed(token) })).json()).toMatchObject({ plan: "pro", amount: 20000 });
     });
+
+    it("client sur mesure : l'administrateur crée le compte et règle la formule ; le client se connecte, ne paie rien en ligne", async () => {
+      setBillingEnforcedForTests(true);
+      const plan = { messageLimit: 800, broadcasts: true, followUps: false, teamMembers: 1 };
+      const payload = { companyName: "Pharmacie du Port", ownerName: "Paul Ndzi", email: "paul@example.com", password: "provisoire123", whatsappNumber: "690112233", plan };
+
+      expect((await app.inject({ method: "POST", url: "/admin/organizations", payload })).statusCode).toBe(401);
+      expect((await app.inject({ method: "POST", url: "/admin/organizations", headers: ADMIN, payload: { ...payload, password: "court" } })).statusCode).toBe(400);
+      expect((await app.inject({ method: "POST", url: "/admin/organizations", headers: ADMIN, payload: { ...payload, plan: { ...plan, teamMembers: 11 } } })).statusCode).toBe(400);
+      const created = await app.inject({ method: "POST", url: "/admin/organizations", headers: ADMIN, payload });
+      expect(created.statusCode).toBe(200);
+      const organizationId = created.json().client.organizationId as string;
+      expect((await app.inject({ method: "POST", url: "/admin/organizations", headers: ADMIN, payload })).statusCode).toBe(400); // même email
+
+      // Le client se connecte avec le mot de passe provisoire.
+      const { token } = await login("paul@example.com", "provisoire123");
+      expect(token).toBeTruthy();
+      const me = (await app.inject({ method: "GET", url: "/me", headers: authed(token) })).json();
+      expect(me.user.platformAdmin).toBe(false);
+      expect((await app.inject({ method: "GET", url: "/billing/account", headers: authed(token) })).json())
+        .toMatchObject({ isCustom: true, planName: "Sur mesure", messageLimit: 800, expiresAt: null, amount: null, blocked: false, features: { broadcasts: true, followUps: false, teamMembers: 1 } });
+      const checkout = await app.inject({ method: "POST", url: "/billing/checkout/chariow", headers: authed(token), payload: { plan: "starter", phone: "690112233" } });
+      expect(checkout.statusCode).toBe(409);
+
+      // Fonctions : messages groupés oui, relances non, un seul employé.
+      expect((await app.inject({ method: "POST", url: `/organizations/${organizationId}/broadcasts/preview`, headers: authed(token), payload: { text: "Promo" } })).statusCode).toBe(200);
+      const team = (email: string) => app.inject({ method: "POST", url: `/organizations/${organizationId}/team`, headers: authed(token), payload: { name: "Fatou", email, password: PASSWORD } });
+      expect((await team("fatou@example.com")).statusCode).toBe(200);
+      const second = await team("ali@example.com");
+      expect(second.statusCode).toBe(402);
+      expect(second.json().message).toContain("Brayano Service");
+
+      // L'administrateur relève la formule, puis la liste la montre.
+      const updated = await app.inject({ method: "PUT", url: `/admin/organizations/${organizationId}/custom-plan`, headers: ADMIN, payload: { ...plan, teamMembers: 3 } });
+      expect(updated.json().billing).toMatchObject({ isCustom: true, features: { teamMembers: 3 } });
+      expect((await team("ali@example.com")).statusCode).toBe(200);
+      expect((await app.inject({ method: "PUT", url: "/admin/organizations/inconnue/custom-plan", headers: ADMIN, payload: plan })).statusCode).toBe(404);
+      const listed = (await app.inject({ method: "GET", url: "/admin/organizations", headers: ADMIN })).json().organizations.find((item: { id: string }) => item.id === organizationId);
+      expect(listed.billing).toMatchObject({ isCustom: true, planName: "Sur mesure", messageLimit: 800 });
+      expect(listed.owner).toMatchObject({ email: "paul@example.com" });
+
+      // Rendu aux forfaits : il retrouve la page de paiement.
+      const removed = await app.inject({ method: "DELETE", url: `/admin/organizations/${organizationId}/custom-plan`, headers: ADMIN });
+      expect(removed.json().billing).toMatchObject({ isCustom: false });
+    });
   });
   describe("assistant d'aide du tableau de bord", () => {
     const prompts: string[] = [];

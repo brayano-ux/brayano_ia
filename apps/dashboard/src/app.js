@@ -21,7 +21,8 @@ import { initTeamSettings, loadTeam } from "./features/settings/team-settings.js
 import { initIgnoredContacts, loadIgnoredContacts } from "./features/settings/ignored-contacts.js";
 import { initSettingsTabs } from "./features/settings/settings-tabs.js";
 import { checkFirstLoginPersona, initPersonaPicker } from "./features/persona/persona.js";
-import { ADMIN_ONLY_VIEWS, applyRole, isAgentRole, loadRole } from "./features/navigation/roles.js";
+import { applyPlatformAdmin, applyRole, isAgentRole, isViewForbidden, loadRole } from "./features/navigation/roles.js";
+import { initClients, loadClients } from "./features/clients/clients.js";
 import { initConfigAssistant } from "./features/config-assistant/config-assistant.js";
 import { isAuthenticated, readSession } from "./services/storage.js";
 import { isNetworkError } from "./services/api.js";
@@ -89,6 +90,7 @@ const viewLoaders = {
     loadIgnoredContacts();
   },
   whatsapp: loadWhatsApp,
+  clients: loadClients,
 };
 
 /** Nom affiché : celui du compte s'il est connu, sinon déduit de l'adresse email. */
@@ -173,8 +175,8 @@ function initAccountMenu() {
 
 /** Pages et actions proposées par la recherche rapide (Ctrl/⌘ + K). */
 function initPalette() {
-  const allowed = (view) => !(isAgentRole() && ADMIN_ONLY_VIEWS.includes(view));
-  const icons = { overview: "home", inbox: "chats", orders: "bag", appointments: "calendar", products: "package", agent: "sparkles", broadcasts: "megaphone", whatsapp: "whatsapp", billing: "card", settings: "settings" };
+  const allowed = (view) => !isViewForbidden(view);
+  const icons = { overview: "home", inbox: "chats", orders: "bag", appointments: "calendar", products: "package", agent: "sparkles", broadcasts: "megaphone", whatsapp: "whatsapp", billing: "card", settings: "settings", clients: "briefcase" };
   const keywords = {
     overview: "tableau de bord statistiques chiffres vue d'ensemble",
     inbox: "messages clients discussions boîte de réception prospects",
@@ -186,6 +188,7 @@ function initPalette() {
     whatsapp: "connexion numéro qr code",
     billing: "abonnement paiement plan tarifs",
     settings: "équipe employés délai numéros ignorés zones commerciaux",
+    clients: "administration entreprises sur mesure créer un client formule",
   };
   const go = (view) => () => setView(view, viewLoaders);
   const agentSection = (tab, focus) => async () => {
@@ -231,6 +234,7 @@ function bootstrap() {
   });
   // Le rôle mémorisé évite d'afficher un instant le menu complet à un employé (le serveur reste seul juge des droits).
   applyRole(readSession()?.role === "AGENT" ? "AGENT" : "ADMIN");
+  applyPlatformAdmin(readSession()?.platformAdmin === true);
   bindInboxRefresh(refreshAll);
   registerLeaveGuard("agent", hasUnsavedAgentChanges, discardAgentChanges);
   registerLeaveGuard("appointments", hasUnsavedAgendaChanges, discardAgendaChanges);
@@ -249,6 +253,7 @@ function bootstrap() {
   initOrders();
   initBroadcasts();
   initBilling();
+  initClients();
   initHelp();
   initTeamSettings();
   initIgnoredContacts();

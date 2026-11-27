@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { env } from "../config/env.js";
 import { BILLING_PLANS, TRIAL, getBillingPlan } from "../billing/billing-plans.js";
-import { isBillingEnforced } from "../billing/subscription.service.js";
+import { isBillingEnforced, isCustomPlan } from "../billing/subscription.service.js";
 import { getOrganizationBillingStatus } from "../billing/subscription.service.js";
 import { prisma } from "../database/client.js";
 import { normalizeWhatsAppNumber } from "../shared/phone.js";
@@ -57,7 +57,7 @@ async function reconcilePayment(payment: {
       const currentSubscription = await transactionClient.billingSubscription.findUnique({
         where: { organizationId: payment.organizationId },
       });
-      const isEarlyRenewal = currentSubscription?.status === "ACTIVE" && currentSubscription.expiresAt > now;
+      const isEarlyRenewal = currentSubscription?.status === "ACTIVE" && !currentSubscription.custom && currentSubscription.expiresAt > now;
       const startsFrom = isEarlyRenewal
         ? currentSubscription.expiresAt
         : now;
@@ -82,6 +82,8 @@ async function reconcilePayment(payment: {
           expiresAt,
           // Nouvelle échéance : l'avis « bientôt terminé » pourra être renvoyé pour ce prochain cycle.
           expiringNoticeSentAt: null,
+          // Un forfait payé remplace une éventuelle formule sur mesure.
+          custom: false,
         },
       });
     });
@@ -126,6 +128,11 @@ export async function billingRoute(app: FastifyInstance) {
     if (!session?.email || !session.organizationId) {
       reply.code(401);
       return { success: false, message: "Connectez-vous pour effectuer un paiement." };
+    }
+
+    if (await isCustomPlan(session.organizationId)) {
+      reply.code(409);
+      return { success: false, message: "Votre formule sur mesure est gérée directement par Brayano Service : aucun paiement n'est à faire ici. Pour la modifier, contactez Brayano Service." };
     }
 
     let plan;
@@ -200,6 +207,11 @@ export async function billingRoute(app: FastifyInstance) {
     if (!session?.email || !session.organizationId) {
       reply.code(401);
       return { success: false, message: "Connectez-vous pour effectuer un paiement." };
+    }
+
+    if (await isCustomPlan(session.organizationId)) {
+      reply.code(409);
+      return { success: false, message: "Votre formule sur mesure est gérée directement par Brayano Service : aucun paiement n'est à faire ici. Pour la modifier, contactez Brayano Service." };
     }
 
     let plan;

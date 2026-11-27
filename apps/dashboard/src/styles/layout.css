@@ -9,6 +9,8 @@
 
 /* Rôles : un employé ne voit pas les sections réservées au propriétaire (le serveur applique les mêmes limites). */
 body.role-agent .admin-only { display: none !important; }
+/* Réservé aux administrateurs de la plateforme : masqué pour tout autre compte. */
+body:not(.platform-admin) .platform-only { display: none !important; }
 body:not(.role-agent) .agent-only { display: none !important; }
 
 /* ---------- Menu latéral ---------- */

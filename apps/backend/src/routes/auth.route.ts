@@ -8,6 +8,7 @@ import { prisma } from "../database/client.js";
 import { env } from "../config/env.js";
 import { DEFAULT_RESPONSE_DELAY_SECONDS } from "../ai/ai-settings.service.js";
 import { AppError } from "../shared/errors.js";
+import { getPlatformAdminEmails } from "../organizations/platform-admins.js";
 import { burnPasswordCheck, hashPassword, needsRehash, safeEqualText, verifyPassword } from "../auth/password.js";
 import { clearRateLimit, evaluateRateLimit, isRateLimited, recordFailure } from "../auth/rate-limit.js";
 import { createGoogleSignupToken, GoogleAuthError, readGoogleSignupToken, verifyGoogleIdToken } from "../auth/google.js";
@@ -711,6 +712,7 @@ export async function authRoute(app: FastifyInstance) {
       return { message: "Non autorisé." };
     }
 
-    return { organizationId: session.organizationId, user: { email: session.email, name: session.name ?? null, role: session.role ?? "ADMIN" } };
+    const platformAdmin = getPlatformAdminEmails().includes(session.email.trim().toLowerCase());
+    return { organizationId: session.organizationId, user: { email: session.email, name: session.name ?? null, role: session.role ?? "ADMIN", platformAdmin } };
   });
 }

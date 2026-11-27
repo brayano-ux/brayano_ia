@@ -101,6 +101,21 @@ async function desktopJourney(browser, failures) {
   await login(page, failures);
   await dismissOverlays(page);
 
+  // ---- Administration de la plateforme : le compte de la CI (DEFAULT_ADMIN_EMAIL) administre la plateforme.
+  if (await page.isVisible('.nav-item[data-view="clients"]')) {
+    await clickNav(page, '.nav-item[data-view="clients"]');
+    await page.waitForSelector(".client-card", { timeout: 8000 }).catch(() => {});
+    if (!(await page.isVisible(".client-card"))) failures.push("Clients : la liste des entreprises ne s'affiche pas.");
+    if (!page.url().endsWith("#/clients")) failures.push(`Clients : adresse inattendue (${page.url()}).`);
+    await page.click("#clients-new");
+    if (!(await page.isVisible("#client-create-drawer.open"))) failures.push("Clients : le formulaire « Créer un client sur mesure » ne s'ouvre pas.");
+    if ((await page.inputValue("#client-password")).length < 8) failures.push("Clients : aucun mot de passe provisoire n'est proposé.");
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(400);
+  } else if (EMAIL === "demo@brayano.test") {
+    failures.push("Clients : le menu d'administration n'apparaît pas pour l'administrateur de la plateforme.");
+  }
+
   // ---- Chaque page s'ouvre, avec sa propre adresse
   for (const [view, slug] of Object.entries(VIEWS)) {
     await clickNav(page, `.nav-item[data-view="${view}"]`);

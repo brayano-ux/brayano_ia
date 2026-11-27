@@ -239,6 +239,10 @@ export const BillingSubscriptionScalarFieldEnum = {
   startedAt: 'startedAt',
   expiresAt: 'expiresAt',
   expiringNoticeSentAt: 'expiringNoticeSentAt',
+  custom: 'custom',
+  customBroadcasts: 'customBroadcasts',
+  customFollowUps: 'customFollowUps',
+  customTeamMembers: 'customTeamMembers',
   updatedAt: 'updatedAt'
 } as const
 

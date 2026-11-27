@@ -1,0 +1,107 @@
+<!-- VUE : CLIENTS — réservée aux administrateurs de la plateforme (PLATFORM_ADMIN_EMAILS). Clients sur mesure : comptes créés
+     par l'administrateur, payés en direct, formule (limite de messages et fonctions) réglée ici. -->
+<section id="clients-view" class="view hidden">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Clients</h1>
+      <p class="page-subtitle">Toutes les entreprises inscrites. Créez et réglez ici les clients sur mesure, qui vous paient en direct.</p>
+    </div>
+    <div class="page-actions">
+      <button type="button" class="btn btn-primary" id="clients-new"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-user-plus"/></svg>Créer un client sur mesure</button>
+    </div>
+  </header>
+
+  <div class="toolbar clients-toolbar">
+    <div class="input-group toolbar-search">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-search"/></svg>
+      <input id="clients-search" type="search" placeholder="Rechercher une entreprise ou un email" aria-label="Rechercher un client" autocomplete="off" />
+    </div>
+    <div class="chips scroll-x" role="group" aria-label="Filtrer les clients" id="clients-filter">
+      <button type="button" class="chip active" data-clients-filter="all">Tous</button>
+      <button type="button" class="chip" data-clients-filter="custom">Sur mesure</button>
+      <button type="button" class="chip" data-clients-filter="paid">Forfaits</button>
+      <button type="button" class="chip" data-clients-filter="trial">Essai</button>
+    </div>
+    <span id="clients-summary" class="toolbar-count" aria-live="polite"></span>
+  </div>
+
+  <div id="clients-list" class="clients-list">
+    <div class="card card-pad stack-sm"><span class="skeleton skeleton-title"></span><span class="skeleton skeleton-line"></span></div>
+  </div>
+
+  <!-- Créer un client sur mesure -->
+  <aside class="drawer" id="client-create-drawer" aria-labelledby="client-create-title" aria-hidden="true">
+    <header class="drawer-header">
+      <div>
+        <h2 id="client-create-title" class="drawer-title">Créer un client sur mesure</h2>
+        <p class="muted">Le compte est créé tout de suite, sans code par email ni essai gratuit. Remettez ses identifiants au client.</p>
+      </div>
+      <button type="button" class="btn-icon btn-ghost" data-drawer-close aria-label="Fermer"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-close"/></svg></button>
+    </header>
+    <form id="client-create-form" class="drawer-form" autocomplete="off">
+      <div class="drawer-body form-grid">
+        <p class="form-section-title">L'entreprise</p>
+        <label class="field">
+          <span class="field-label">Nom de l'entreprise</span>
+          <input id="client-company" type="text" maxlength="120" required placeholder="Ex. Pharmacie du Port" />
+        </label>
+        <label class="field">
+          <span class="field-label">Numéro WhatsApp de l'entreprise <span class="optional">facultatif</span></span>
+          <input id="client-whatsapp" type="tel" inputmode="tel" maxlength="30" placeholder="Ex. +237 6 90 00 00 00" />
+          <span class="hint">Avec l'indicatif du pays. Vous relierez WhatsApp ensuite, avec le client, depuis sa page « WhatsApp ».</span>
+        </label>
+
+        <p class="form-section-title">Le gérant (compte de connexion)</p>
+        <label class="field">
+          <span class="field-label">Nom du gérant</span>
+          <input id="client-owner" type="text" maxlength="80" required placeholder="Ex. Paul Ndzi" />
+        </label>
+        <label class="field">
+          <span class="field-label">Email de connexion</span>
+          <input id="client-email" type="email" maxlength="200" required placeholder="Ex. paul@pharmacie-du-port.cm" />
+        </label>
+        <label class="field">
+          <span class="field-label">Mot de passe provisoire</span>
+          <div class="input-with-action">
+            <input id="client-password" type="text" minlength="8" maxlength="200" required spellcheck="false" />
+            <button type="button" class="btn btn-secondary btn-sm" id="client-password-new">Générer</button>
+          </div>
+          <span class="hint">8 caractères minimum. Le client pourra le changer avec « Mot de passe oublié ? » sur la page de connexion.</span>
+        </label>
+
+        <p class="form-section-title">La formule</p>
+        <div data-plan-fields="create"></div>
+      </div>
+      <footer class="drawer-footer">
+        <button type="button" class="btn btn-secondary" data-drawer-close>Annuler</button>
+        <button type="submit" class="btn btn-primary" id="client-create-submit">Créer le client</button>
+      </footer>
+    </form>
+    <div id="client-created" class="drawer-body hidden" aria-live="polite"></div>
+  </aside>
+
+  <!-- Régler la formule d'une entreprise -->
+  <aside class="drawer" id="client-plan-drawer" aria-labelledby="client-plan-title" aria-hidden="true">
+    <header class="drawer-header">
+      <div>
+        <h2 id="client-plan-title" class="drawer-title">Formule sur mesure</h2>
+        <p class="muted" id="client-plan-subtitle"></p>
+      </div>
+      <button type="button" class="btn-icon btn-ghost" data-drawer-close aria-label="Fermer"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-close"/></svg></button>
+    </header>
+    <form id="client-plan-form" class="drawer-form">
+      <div class="drawer-body form-grid">
+        <div id="client-plan-notice"></div>
+        <div data-plan-fields="edit"></div>
+        <div id="client-plan-remove-box" class="client-plan-remove hidden">
+          <p class="muted">Rendre ce client aux forfaits de l'application : il devra alors payer un forfait en ligne pour que son agent réponde.</p>
+          <button type="button" class="btn btn-secondary btn-sm" id="client-plan-remove">Rendre aux forfaits</button>
+        </div>
+      </div>
+      <footer class="drawer-footer">
+        <button type="button" class="btn btn-secondary" data-drawer-close>Annuler</button>
+        <button type="submit" class="btn btn-primary" id="client-plan-submit">Enregistrer la formule</button>
+      </footer>
+    </form>
+  </aside>
+</section>

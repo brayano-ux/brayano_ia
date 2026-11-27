@@ -194,6 +194,12 @@ model BillingSubscription {
   expiresAt       DateTime                  @map("expires_at")
   /** Email « votre abonnement se termine bientôt » déjà envoyé pour ce renouvellement (remis à zéro à chaque nouvelle échéance). */
   expiringNoticeSentAt DateTime?            @map("expiring_notice_sent_at")
+  /// Formule sur mesure : le client paie Brayano Service en direct, hors de l'application. Pas d'échéance ni d'email de
+  /// paiement ; la limite mensuelle (messageLimit) et les fonctions ci-dessous sont réglées par l'administrateur de la plateforme.
+  custom           Boolean                   @default(false)
+  customBroadcasts Boolean                   @default(false) @map("custom_broadcasts")
+  customFollowUps  Boolean                   @default(false) @map("custom_follow_ups")
+  customTeamMembers Int                      @default(0) @map("custom_team_members")
   updatedAt       DateTime                  @updatedAt @map("updated_at")
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
