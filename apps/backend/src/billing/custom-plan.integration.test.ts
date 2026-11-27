@@ -80,6 +80,23 @@ describe.skipIf(!integrationEnabled)("formule sur mesure (base réelle)", () => 
     expect(emails.client).toHaveLength(1);
   });
 
+  it("la formule s'applique même quand les forfaits de l'application ne sont pas appliqués (BILLING_ENFORCED)", async () => {
+    setBillingEnforcedForTests(false);
+    const { organization } = await createTestOrganization();
+    await setCustomPlan(organization.id, PLAN);
+    // Fonctions : seulement celles choisies (les autres entreprises gardent tout).
+    await expect(assertFeature(organization.id, "broadcasts")).resolves.toBeUndefined();
+    await expect(assertFeature(organization.id, "followUps")).rejects.toThrow(/formule sur mesure/);
+    await expect(assertCanAddTeamMember(organization.id, 2)).rejects.toBeInstanceOf(PlanLimitError);
+    // Limite de messages : appliquée.
+    for (let index = 0; index < 3; index += 1) expect((await reserveAiResponse(organization.id)).allowed).toBe(true);
+    expect(await reserveAiResponse(organization.id)).toEqual({ allowed: false, reason: "message_quota_exhausted" });
+    expect(await getOrganizationBillingStatus(organization.id)).toMatchObject({ enforced: true, blocked: true });
+    // Une entreprise ordinaire, elle, garde tout tant que les forfaits ne sont pas appliqués.
+    const { organization: other } = await createTestOrganization("Autre", { email: "autre@example.com" });
+    await expect(assertFeature(other.id, "followUps")).resolves.toBeUndefined();
+  });
+
   it("une entreprise suspendue apparaît « en pause » : l'agent ne répond plus, aucune fonction ouverte", async () => {
     const { organization } = await createTestOrganization();
     await setCustomPlan(organization.id, PLAN);
